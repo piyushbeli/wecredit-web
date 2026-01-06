@@ -5,6 +5,9 @@ import ProductsSection from './products-section';
 import TrendingOffersSection from './trending-offers-section';
 import ToolsCalculatorsSection from './tools-calculators-section';
 import TestimonialsSection from './testimonials-section';
+import PartnersSection from './partners-section';
+import FaqSection from './faq-section';
+import BlogSection from './blog-section';
 
 /**
  * Main home page component that composes all sections
@@ -33,6 +36,15 @@ const HomePage = (): React.ReactNode => {
 
       {/* Testimonials Section */}
       <TestimonialsSection />
+
+      {/* Our Partners Section */}
+      <PartnersSection />
+
+      {/* FAQ Section */}
+      <FaqSection />
+
+      {/* Blog Section */}
+      <BlogSection />
     </div>
   );
 };

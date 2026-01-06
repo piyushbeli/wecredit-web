@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         hostname: '**.strapi.io',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: "blogs.wecredit.co.in",
+        pathname: '/uploads/**',
+      }
       // Add your production Strapi domain here
       // {
       //   protocol: 'https',
