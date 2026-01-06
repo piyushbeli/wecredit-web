@@ -21,6 +21,7 @@ const offers: Offer[] = [
   {
     id: 'creditsea',
     lenderName: 'CreditSea',
+    logoPath: '/assets/images/credit-sea-logo.png',
     badge: 'Fast Disbursal',
     amount: '1 Lakh Rupee',
     interestRate: '1.5%',
@@ -30,6 +31,7 @@ const offers: Offer[] = [
   {
     id: 'kreditbee',
     lenderName: 'KreditBee',
+    logoPath: '/assets/images/kredit-bee-logo.png',
     amount: '1 Lakh Rupee',
     interestRate: '1.5%',
     tenure: '48 m',
@@ -38,6 +40,7 @@ const offers: Offer[] = [
   {
     id: 'prefr',
     lenderName: 'Prefr',
+    logoPath: '/assets/images/prefr-logo.png',
     amount: '1 Lakh Rupee',
     interestRate: '1.5%',
     tenure: '48 m',

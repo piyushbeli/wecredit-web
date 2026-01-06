@@ -11,6 +11,7 @@ interface Product {
   label: string;
   href: string;
   icon: LucideIcon;
+  imagePath?: string;
 }
 
 /** Products data matching the design */
@@ -20,24 +21,28 @@ const products: Product[] = [
     label: 'Personal\nLoan',
     href: '/personal-loan',
     icon: ShoppingBag,
+    imagePath: '/assets/svgs/personal-loan.svg',
   },
   {
     id: 'business-loan',
     label: 'Business\nLoan',
     href: '/business-loan',
     icon: BriefcaseBusiness,
+    imagePath: '/assets/svgs/business-loan.svg',
   },
   {
     id: 'pl-by-ondc',
     label: 'PL By\nONDC',
     href: '/pl-by-ondc',
     icon: ShoppingCart,
+    imagePath: '/assets/svgs/pl-by-ondc.svg',
   },
   {
     id: 'credit-cards',
     label: 'Credit\nCards',
     href: '/credit-cards',
     icon: CreditCard,
+    imagePath: '/assets/svgs/credit-card.svg',
   },
 ];
 
@@ -67,6 +72,7 @@ const ProductsSection = (): React.ReactNode => {
             label={product.label.replace('\n', ' ')}
             href={product.href}
             icon={product.icon}
+            imagePath={product.imagePath}
             index={index}
           />
         ))}

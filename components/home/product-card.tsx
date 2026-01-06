@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 
@@ -9,14 +10,15 @@ interface ProductCardProps {
   id: string;
   label: string;
   href: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  imagePath?: string;
   index: number;
 }
 
 /**
- * Individual product card with icon and label
+ * Individual product card with icon/image and label
  */
-const ProductCard = ({ label, href, icon: Icon, index }: ProductCardProps): JSX.Element => {
+const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardProps): JSX.Element => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -33,12 +35,22 @@ const ProductCard = ({ label, href, icon: Icon, index }: ProductCardProps): JSX.
         href={href}
         className="wc-product-card flex flex-col items-center gap-3 p-2"
       >
-        {/* Icon Container - Large circular background */}
+        {/* Icon/Image Container - Large circular background */}
         <motion.div
-          className="w-16 h-16 rounded-full bg-wc-blue-100 flex items-center justify-center"
+          className="w-16 h-16 rounded-full bg-wc-blue-100 flex items-center justify-center overflow-hidden"
           whileTap={{ scale: 0.95 }}
         >
-          <Icon className="w-7 h-7 text-wc-blue-500" strokeWidth={2} />
+          {imagePath ? (
+            <Image
+              src={imagePath}
+              alt={label}
+              width={32}
+              height={32}
+              className="object-contain"
+            />
+          ) : Icon ? (
+            <Icon className="w-7 h-7 text-wc-blue-500" strokeWidth={2} />
+          ) : null}
         </motion.div>
         
         {/* Label */}
