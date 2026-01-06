@@ -16,7 +16,7 @@ interface Offer {
   href: string;
 }
 
-/** Static offers data */
+/** Static offers data - expanded for grid demo */
 const offers: Offer[] = [
   {
     id: 'creditsea',
@@ -46,11 +46,39 @@ const offers: Offer[] = [
     tenure: '48 m',
     href: '/offers/prefr',
   },
+  {
+    id: 'creditsea-2',
+    lenderName: 'CreditSea',
+    logoPath: '/assets/images/credit-sea-logo.png',
+    badge: 'Fast Disbursal',
+    amount: '1 Lakh Rupee',
+    interestRate: '1.5%',
+    tenure: '48 m',
+    href: '/offers/creditsea',
+  },
+  {
+    id: 'kreditbee-2',
+    lenderName: 'KreditBee',
+    logoPath: '/assets/images/kredit-bee-logo.png',
+    amount: '1 Lakh Rupee',
+    interestRate: '1.5%',
+    tenure: '48 m',
+    href: '/offers/kreditbee',
+  },
+  {
+    id: 'prefr-2',
+    lenderName: 'Prefr',
+    logoPath: '/assets/images/prefr-logo.png',
+    amount: '1 Lakh Rupee',
+    interestRate: '1.5%',
+    tenure: '48 m',
+    href: '/offers/prefr',
+  },
 ];
 
 /**
  * Trending Offers section component
- * Displays horizontally scrollable offer cards
+ * Displays a 3-row grid of offer cards with horizontal scrolling
  */
 const TrendingOffersSection = (): React.ReactNode => {
   return (
@@ -68,9 +96,12 @@ const TrendingOffersSection = (): React.ReactNode => {
         </motion.h2>
       </div>
 
-      {/* Horizontal Scroll Container */}
+      {/* Horizontal Scroll Container with 3-row Grid */}
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex gap-3 px-4 pb-2">
+        <div 
+          className="grid grid-flow-col grid-rows-3 gap-3 px-4 pb-2"
+          style={{ gridAutoColumns: '280px' }}
+        >
           {offers.map((offer, index) => (
             <TrendingOfferCard
               key={offer.id}

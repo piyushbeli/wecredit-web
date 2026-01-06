@@ -52,7 +52,7 @@ const TrendingOfferCard = ({
         damping: 15,
         delay: index * 0.1,
       }}
-      className="flex-shrink-0 w-[280px]"
+      className="shrink-0 w-[280px]"
     >
       <div
         className="rounded-2xl p-4 h-full"
@@ -67,9 +67,10 @@ const TrendingOfferCard = ({
               <Image
                 src={logoPath}
                 alt={lenderName}
-                width={24}
-                height={24}
-                className="rounded-md"
+                width={120}
+                height={80}
+                className="rounded-md object-contain"
+                priority
               />
             ) : (
               <div className="w-6 h-6 rounded-md bg-wc-blue-500 flex items-center justify-center">
@@ -78,9 +79,6 @@ const TrendingOfferCard = ({
                 </span>
               </div>
             )}
-            <span className="text-sm font-semibold text-wc-blue-600">
-              {lenderName}
-            </span>
           </div>
           {badge && (
             <span className="text-[10px] font-medium text-white bg-wc-dark px-2 py-1 rounded-full">

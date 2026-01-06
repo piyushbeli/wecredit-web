@@ -110,7 +110,7 @@ const HeroCarousel = (): JSX.Element => {
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <h1 className="text-3xl font-bold mb-1">{slide.titleWhite}</h1>
-                <p className="text-3xl font-bold text-blue-500">{slide.titleGradient}</p>
+                <p className="text-3xl font-bold wc-gradient-text">{slide.titleGradient}</p>
               </motion.div>
 
               {/* CTA Button */}

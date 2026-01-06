@@ -292,9 +292,9 @@
   pointer-events: none;
 }
 
-/* Gradient Text for "on Every Loan" - lighter blues for visibility against blue bg */
+/* Gradient Text for "on Every Loan" - blue gradient from Figma design */
 .wc-gradient-text {
-  background: linear-gradient(90deg, #93C5FD 0%, #60A5FA 50%, #3B82F6 100%);
+  background: linear-gradient(90deg, #0D9AF2 0%, #0358CD 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -357,7 +357,7 @@
 
 /* Scrolled state - solid white pill */
 .wc-header-pill-scrolled {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 1);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
