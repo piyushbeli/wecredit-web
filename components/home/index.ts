@@ -4,5 +4,9 @@ export { default as FloatingElements } from './floating-elements';
 export { default as StatsSection } from './stats-section';
 export { default as ProductCard } from './product-card';
 export { default as ProductsSection } from './products-section';
+export { default as TrendingOfferCard } from './trending-offer-card';
+export { default as TrendingOffersSection } from './trending-offers-section';
+export { default as ToolCard } from './tool-card';
+export { default as ToolsCalculatorsSection } from './tools-calculators-section';
 export { default as HomePage } from './home-page';
 

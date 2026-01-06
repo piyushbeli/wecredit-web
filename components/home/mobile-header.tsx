@@ -1,11 +1,16 @@
 'use client';
 
-import { JSX, useState } from 'react';
+import { JSX, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import type { GlobalLink, StrapiMedia } from '@/types/strapi';
+import { cn } from '@/lib/utils';
+
+/** Scroll threshold in pixels to trigger header style change */
+const SCROLL_THRESHOLD = 50;
 
 /** Props for MobileHeader component */
 interface MobileHeaderProps {
@@ -51,10 +56,34 @@ const drawerVariants: Variants = {
 };
 
 /**
- * Mobile-first header with transparent background and slide-out menu drawer
+ * Mobile-first sticky header with scroll-aware styling and slide-out menu drawer.
+ * Transitions from transparent to white background when user scrolls down.
  */
 const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.Element => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+
+  /** Only show transparent glass pill on home page */
+  const isHomePage = pathname === '/';
+
+  /** Show solid header variant when scrolled OR when not on home page */
+  const showSolidHeader = isScrolled || !isHomePage;
+
+  /** Handle scroll events to toggle header style */
+  const handleScroll = useCallback((): void => {
+    const scrollPosition = window.scrollY;
+    setIsScrolled(scrollPosition > SCROLL_THRESHOLD);
+  }, []);
+
+  useEffect(() => {
+    // Check initial scroll position on mount
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -66,29 +95,55 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
 
   return (
     <>
-      <header className="absolute top-0 left-0 right-0 z-50 px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
+      <header className="fixed top-0 left-0 right-0 z-50 p-4">
+        <div
+          className={cn(
+            'flex items-center justify-between px-4 py-2 rounded-md wc-header-pill-transition',
+            showSolidHeader ? 'wc-header-pill-scrolled' : 'wc-header-pill'
+          )}
+        >
+          {/* Logo - switches between light and dark variants based on header state */}
+          <Link href="/" className="flex items-center relative">
+            {/* Light logo (for transparent header on blue background) */}
             <Image
               src="/images/logo.png"
               alt={siteName || 'WeCredit'}
               width={120}
               height={32}
-              className="h-8 w-auto"
+              className={cn(
+                'h-8 w-auto transition-opacity duration-300',
+                showSolidHeader ? 'opacity-0 absolute' : 'opacity-100'
+              )}
+              priority
+            />
+            {/* Dark logo (for white solid header) */}
+            <Image
+              src="/images/logo-transparent.jpg"
+              alt={siteName || 'WeCredit'}
+              width={120}
+              height={32}
+              className={cn(
+                'h-8 w-auto transition-opacity duration-300',
+                showSolidHeader ? 'opacity-100' : 'opacity-0 absolute'
+              )}
               priority
             />
           </Link>
 
-          {/* Hamburger Menu Button */}
+          {/* Hamburger Menu Button - glass background with icon */}
           <motion.button
             type="button"
             onClick={toggleMenu}
-            className="p-2 text-white rounded-lg hover:bg-white/10 transition-colors"
+            className={cn(
+              'p-2.5 rounded-md transition-all duration-300',
+              showSolidHeader
+                ? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
+                : 'wc-menu-btn-glass text-wc-blue-600'
+            )}
             aria-label="Open menu"
             whileTap={{ scale: 0.95 }}
           >
-            <Menu className="w-6 h-6" />
+            <Menu className={cn("w-5 h-5", showSolidHeader ? 'text-wc-blue-600' : 'text-white')} />
           </motion.button>
         </div>
       </header>

@@ -59,7 +59,7 @@ const ProductsSection = (): React.ReactNode => {
       </motion.h2>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
+      <div className="grid grid-cols-4 gap-2 mx-auto">
         {products.map((product, index) => (
           <ProductCard
             key={product.id}

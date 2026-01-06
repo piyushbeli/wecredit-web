@@ -44,7 +44,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  
+
   /* WeCredit Brand Colors */
   --color-wc-blue-50: #EBF2FF;
   --color-wc-blue-100: #D6E4FF;
@@ -88,37 +88,37 @@
   @apply text-blue-400 hover:text-blue-300;
 }
 
-.markdown-content-strapi > button {
+.markdown-content-strapi>button {
   @apply bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-800 transition-colors text-sm;
 }
 
-.markdown-content-strapi > table {
+.markdown-content-strapi>table {
   @apply w-full border-collapse border border-gray-300 my-4;
 }
 
-.markdown-content-strapi > table th {
+.markdown-content-strapi>table th {
   @apply bg-gray-100 px-4 py-2 text-left;
 }
 
-.markdown-content-strapi > table td {
+.markdown-content-strapi>table td {
   @apply border border-gray-300 px-4 py-2;
 }
 
-.markdown-content-strapi > table tr:nth-child(even) {
+.markdown-content-strapi>table tr:nth-child(even) {
   @apply bg-gray-50;
 }
 
-.markdown-content-strapi > table tr:hover {
+.markdown-content-strapi>table tr:hover {
   @apply bg-gray-100;
 }
 
-.markdown-content-strapi > table th:first-child,
-.markdown-content-strapi > table td:first-child {
+.markdown-content-strapi>table th:first-child,
+.markdown-content-strapi>table td:first-child {
   @apply pl-4;
 }
 
-.markdown-content-strapi > table th:last-child,
-.markdown-content-strapi > table td:last-child {
+.markdown-content-strapi>table th:last-child,
+.markdown-content-strapi>table td:last-child {
   @apply pr-4;
 }
 
@@ -129,16 +129,19 @@
 
 /* Responsive Table - Card Layout on Mobile */
 @media (max-width: 767px) {
-  .markdown-content-strapi > table {
+  .markdown-content-strapi>table {
     @apply border-0;
   }
-  .markdown-content-strapi > table thead {
+
+  .markdown-content-strapi>table thead {
     @apply hidden;
   }
-  .markdown-content-strapi > table tbody tr {
+
+  .markdown-content-strapi>table tbody tr {
     @apply block mb-4 border border-gray-200 rounded-lg shadow-sm bg-white;
   }
-  .markdown-content-strapi > table td {
+
+  .markdown-content-strapi>table td {
     @apply block border-0 border-b border-gray-100 last:border-b-0;
   }
 }
@@ -216,6 +219,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -227,15 +231,13 @@
 
 /* Hero + Stats Gradient Wrapper - Smooth gradient from dark blue to white */
 .wc-hero-gradient-wrapper {
-  background: linear-gradient(
-    180deg, 
-    #1E5FE6 0%,
-    #3B7BF7 35%,
-    #5A9BFF 55%,
-    #89BFFF 70%,
-    #CDDEFF 85%,
-    #FFFFFF 100%
-  );
+  background: linear-gradient(180deg,
+      #1E5FE6 0%,
+      #3B7BF7 35%,
+      #5A9BFF 55%,
+      #89BFFF 70%,
+      #CDDEFF 85%,
+      #FFFFFF 100%);
 }
 
 /* Hero Section - Transparent to show wrapper gradient */
@@ -332,4 +334,52 @@
   background: rgba(10, 27, 61, 0.8);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+
+/* =============================================================================
+ * Sticky Header Styles - Scroll-aware transitions
+ * ============================================================================= */
+
+/* Base transition for smooth property changes */
+.wc-header-pill-transition {
+  transition: background-color 300ms ease,
+    box-shadow 300ms ease,
+    backdrop-filter 300ms ease;
+}
+
+/* Initial state - whitish frosted pill on blue background */
+.wc-header-pill {
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrolled state - solid white pill */
+.wc-header-pill-scrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Menu button glass effect */
+.wc-menu-btn-glass {
+  background-color: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* =============================================================================
+ * Utility Classes
+ * ============================================================================= */
+
+/* Hide scrollbar for horizontal scroll containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

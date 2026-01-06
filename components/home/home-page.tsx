@@ -2,6 +2,8 @@ import React from 'react';
 import HeroCarousel from './hero-carousel';
 import StatsSection from './stats-section';
 import ProductsSection from './products-section';
+import TrendingOffersSection from './trending-offers-section';
+import ToolsCalculatorsSection from './tools-calculators-section';
 
 /**
  * Main home page component that composes all sections
@@ -21,6 +23,12 @@ const HomePage = (): React.ReactNode => {
       
       {/* Products Section - on white background */}
       <ProductsSection />
+
+      {/* Tools & Calculators Section */}
+      <ToolsCalculatorsSection />
+
+      {/* Trending Offers Section */}
+      <TrendingOffersSection />
     </div>
   );
 };

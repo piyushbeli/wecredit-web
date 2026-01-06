@@ -6,12 +6,10 @@ import Link from 'next/link';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion } from 'framer-motion';
 
-/** Hero avatar image path */
-const HERO_AVATAR_IMAGE = '/images/carousel-one.png';
-
 /** Slide content configuration */
 interface SlideContent {
   id: string;
+  image: string;
   titleWhite: string;
   titleGradient: string;
   ctaText: string;
@@ -22,23 +20,26 @@ interface SlideContent {
 const slides: SlideContent[] = [
   {
     id: 'slide-1',
+    image: '/images/carousel-one.png',
     titleWhite: 'More Savings',
     titleGradient: 'on Every Loan',
-    ctaText: 'Check Eligibility',
+    ctaText: 'Apply For Loan',
     ctaLink: '#',
   },
   {
     id: 'slide-2',
-    titleWhite: 'Quick Approval',
-    titleGradient: 'Minimal Documents',
-    ctaText: 'Apply Now',
+    image: '/images/carousel-two.png',
+    titleWhite: 'More Savings',
+    titleGradient: 'on Every Loan',
+    ctaText: 'Get Your Card',
     ctaLink: '#',
   },
   {
     id: 'slide-3',
-    titleWhite: 'Best Rates',
-    titleGradient: 'Guaranteed',
-    ctaText: 'Compare Rates',
+    image: '/images/carousel-three.png',
+    titleWhite: 'More Savings',
+    titleGradient: 'on Every Loan',
+    ctaText: 'Check Eligibility',
     ctaLink: '#',
   },
 ];
@@ -93,7 +94,7 @@ const HeroCarousel = (): JSX.Element => {
                 transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 100 }}
               >
                 <Image
-                  src={HERO_AVATAR_IMAGE}
+                  src={slide.image}
                   alt="WeCredit Hero"
                   fill
                   className="object-contain"
@@ -120,7 +121,7 @@ const HeroCarousel = (): JSX.Element => {
               >
                 <Link
                   href={slide.ctaLink}
-                  className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white font-semibold rounded-full shadow-lg shadow-wc-blue-500/30 transition-all duration-300 active:scale-95"
+                  className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-wc-blue-500/30 transition-all duration-300 active:scale-95"
                 >
                   {slide.ctaText}
                 </Link>
