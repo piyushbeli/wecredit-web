@@ -4,6 +4,7 @@ import StatsSection from './stats-section';
 import ProductsSection from './products-section';
 import TrendingOffersSection from './trending-offers-section';
 import ToolsCalculatorsSection from './tools-calculators-section';
+import TestimonialsSection from './testimonials-section';
 
 /**
  * Main home page component that composes all sections
@@ -29,6 +30,9 @@ const HomePage = (): React.ReactNode => {
 
       {/* Trending Offers Section */}
       <TrendingOffersSection />
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
     </div>
   );
 };
