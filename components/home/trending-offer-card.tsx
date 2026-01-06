@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { PercentIcon, CalendarIcon } from '../icons';
+import ArrowBadge from '../ui/arrow-badge';
 
 /** Props for TrendingOfferCard component */
 interface TrendingOfferCardProps {
@@ -52,69 +54,87 @@ const TrendingOfferCard = ({
         damping: 15,
         delay: index * 0.1,
       }}
-      className="shrink-0 w-[280px]"
+      className="w-full h-full"
     >
+      {/* Outer white container */}
       <div
-        className="rounded-2xl p-4 h-full"
+        className="relative rounded-3xl h-full overflow-hidden bg-white border border-gray-200"
         style={{
-          background: 'linear-gradient(135deg, #CCDFFC 0%, #FAFCFF 100%)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
         }}
       >
-        {/* Header: Logo + Badge */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
+        {/* Gradient content area */}
+        <div
+          className="relative p-3 pb-4"
+          style={{
+            background: 'linear-gradient(145deg, #D4E4FC 0%, #EEF4FF 50%, #FAFCFF 100%)',
+          }}
+        >
+          {/* Ribbon Badge - Arrow style positioned at top right corner */}
+          {badge && (
+            <div className="absolute right-0 top-4">
+              <ArrowBadge text={badge} />
+            </div>
+          )}
+
+          {/* Header: Logo */}
+          <div className="flex items-center mb-1">
             {logoPath ? (
               <Image
                 src={logoPath}
                 alt={lenderName}
-                width={120}
-                height={80}
-                className="rounded-md object-contain"
+                width={100}
+                height={10}
+                className="-ml-2 object-contain h-8 w-auto"
                 priority
               />
             ) : (
-              <div className="w-6 h-6 rounded-md bg-wc-blue-500 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">
-                  {lenderName.charAt(0)}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-wc-blue-500 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">
+                    {lenderName.charAt(0)}
+                  </span>
+                </div>
+                <span className="text-lg font-semibold text-gray-800">
+                  {lenderName}
                 </span>
               </div>
             )}
           </div>
-          {badge && (
-            <span className="text-[10px] font-medium text-white bg-wc-dark px-2 py-1 rounded-full">
-              {badge}
-            </span>
-          )}
-        </div>
 
-        {/* Amount */}
-        <h3 className="text-base font-bold text-gray-900 mb-2">
-          Amount upto {amount}
-        </h3>
+          {/* Amount - Italic blue text */}
+          <h3 className="font-medium text-sm mb-1">
+            Amount upto {amount}
+          </h3>
 
-        {/* Rate & Tenure */}
-        <div className="flex items-center gap-3 text-xs text-gray-600 mb-4">
-          <div className="flex items-center gap-1">
-            <span className="text-wc-blue-500">%</span>
-            <span>Int. rate {interestRate}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-wc-blue-500">⏱</span>
-            <span>Upto {tenure}</span>
+          {/* Rate & Tenure - With proper icons */}
+          <div className="flex items-center gap-6 text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              <PercentIcon />
+              <span className="text-gray-600 text-xs">Int. rate {interestRate}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <CalendarIcon />
+              <span className="text-gray-600 text-xs">Upto {tenure}</span>
+            </div>
           </div>
         </div>
 
-        {/* CTA Button */}
-        <Link
-          href={href}
-          className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 text-white text-sm font-medium py-2.5 rounded-full transition-colors"
-        >
-          Check Eligibility
-        </Link>
+        {/* CTA Button - On white background outside gradient */}
+        <div className="p-2 bg-white">
+          <Link
+            href={href}
+            className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-base font-semibold py-1 rounded-full transition-all duration-200"
+            style={{
+              boxShadow: '0 4px 14px rgba(30, 95, 230, 0.25)',
+            }}
+          >
+            Check Eligibility
+          </Link>
+        </div>
       </div>
     </motion.div>
   );
 };
 
 export default TrendingOfferCard;
-

@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import useEmblaCarousel from 'embla-carousel-react';
 import TrendingOfferCard from './trending-offer-card';
 
 /** Offer configuration interface */
@@ -16,7 +17,7 @@ interface Offer {
   href: string;
 }
 
-/** Static offers data - expanded for grid demo */
+/** Static offers data */
 const offers: Offer[] = [
   {
     id: 'creditsea',
@@ -76,11 +77,54 @@ const offers: Offer[] = [
   },
 ];
 
+/** Group offers into columns of 3 for vertical stacking */
+const groupOffersIntoColumns = (items: Offer[], rowsPerColumn: number): Offer[][] => {
+  const columns: Offer[][] = [];
+  for (let i = 0; i < items.length; i += rowsPerColumn) {
+    columns.push(items.slice(i, i + rowsPerColumn));
+  }
+  return columns;
+};
+
 /**
  * Trending Offers section component
- * Displays a 3-row grid of offer cards with horizontal scrolling
+ * Displays a responsive carousel with 3-row columns
+ * Mobile: 2 columns visible, Tablet: 3 columns, Desktop: 4 columns
  */
 const TrendingOffersSection = (): React.ReactNode => {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: 'start',
+    slidesToScroll: 1,
+  });
+
+  const offerColumns = groupOffersIntoColumns(offers, 3);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    setScrollSnaps(emblaApi.scrollSnapList());
+    onSelect();
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (emblaApi) emblaApi.scrollTo(index);
+    },
+    [emblaApi]
+  );
+
   return (
     <section className="bg-white py-8">
       <div className="px-4">
@@ -96,28 +140,52 @@ const TrendingOffersSection = (): React.ReactNode => {
         </motion.h2>
       </div>
 
-      {/* Horizontal Scroll Container with 3-row Grid */}
-      <div className="overflow-x-auto scrollbar-hide">
-        <div 
-          className="grid grid-flow-col grid-rows-3 gap-3 px-4 pb-2"
-          style={{ gridAutoColumns: '280px' }}
-        >
-          {offers.map((offer, index) => (
-            <TrendingOfferCard
-              key={offer.id}
-              id={offer.id}
-              lenderName={offer.lenderName}
-              logoPath={offer.logoPath}
-              badge={offer.badge}
-              amount={offer.amount}
-              interestRate={offer.interestRate}
-              tenure={offer.tenure}
-              href={offer.href}
-              index={index}
-            />
+      {/* Embla Carousel Container */}
+      <div className="overflow-hidden px-4" ref={emblaRef}>
+        <div className="flex -ml-3">
+          {offerColumns.map((column, colIndex) => (
+            <div
+              key={colIndex}
+              className="flex-[0_0_80%] min-w-0 pl-3 md:flex-[0_0_33.333%] lg:flex-[0_0_25%]"
+            >
+              {/* 3-row vertical stack */}
+              <div className="flex flex-col gap-3">
+                {column.map((offer, rowIndex) => (
+                  <TrendingOfferCard
+                    key={offer.id}
+                    id={offer.id}
+                    lenderName={offer.lenderName}
+                    logoPath={offer.logoPath}
+                    badge={offer.badge}
+                    amount={offer.amount}
+                    interestRate={offer.interestRate}
+                    tenure={offer.tenure}
+                    href={offer.href}
+                    index={colIndex * 3 + rowIndex}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
+
+      {/* Dot Indicators */}
+      {scrollSnaps.length > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {scrollSnaps.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => scrollTo(index)}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                index === selectedIndex ? 'bg-wc-blue-500' : 'bg-gray-300'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 };
