@@ -44,6 +44,21 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  
+  /* WeCredit Brand Colors */
+  --color-wc-blue-50: #EBF2FF;
+  --color-wc-blue-100: #D6E4FF;
+  --color-wc-blue-200: #ADC8FF;
+  --color-wc-blue-300: #85ADFF;
+  --color-wc-blue-400: #5C91FF;
+  --color-wc-blue-500: #1E5FE6;
+  --color-wc-blue-600: #1850C7;
+  --color-wc-blue-700: #1240A8;
+  --color-wc-blue-800: #0C3189;
+  --color-wc-blue-900: #0A1B3D;
+  --color-wc-dark: #0A1B3D;
+  --color-wc-accent: #3B82F6;
+  --color-wc-green: #22C55E;
 }
 
 /* =============================================================================
@@ -204,4 +219,117 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* =============================================================================
+ * WeCredit Home Screen Styles
+ * ============================================================================= */
+
+/* Hero + Stats Gradient Wrapper - Smooth gradient from dark blue to white */
+.wc-hero-gradient-wrapper {
+  background: linear-gradient(
+    180deg, 
+    #1E5FE6 0%,
+    #3B7BF7 35%,
+    #5A9BFF 55%,
+    #89BFFF 70%,
+    #CDDEFF 85%,
+    #FFFFFF 100%
+  );
+}
+
+/* Hero Section - Transparent to show wrapper gradient */
+.wc-hero-bg {
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Concentric Circle Rings */
+.wc-circle-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wc-circle-ring-1 {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.wc-circle-ring-2 {
+  width: 280px;
+  height: 280px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.wc-circle-ring-3 {
+  width: 360px;
+  height: 360px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Radial Glow Effect */
+.wc-radial-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Gradient Text for "on Every Loan" - lighter blues for visibility against blue bg */
+.wc-gradient-text {
+  background: linear-gradient(90deg, #93C5FD 0%, #60A5FA 50%, #3B82F6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Product Card Hover Effect */
+.wc-product-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wc-product-card:active {
+  transform: scale(0.96);
+}
+
+/* Carousel Dot Indicators */
+.wc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(30, 95, 230, 0.3);
+  transition: all 0.3s ease;
+}
+
+.wc-dot-active {
+  width: 24px;
+  border-radius: 4px;
+  background-color: #1E5FE6;
+}
+
+/* Stats Number Animation */
+.wc-stat-number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mobile Menu Overlay */
+.wc-menu-overlay {
+  background: rgba(10, 27, 61, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }

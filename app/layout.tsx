@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import EnhancedHeader from '@/components/layout/EnhancedHeader';
+import MobileHeader from '@/components/home/mobile-header';
 import Footer from '@/components/layout/Footer';
 import { getGlobal } from '@/lib/strapi';
 
@@ -35,7 +35,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <EnhancedHeader
+        <MobileHeader
           headerLinks={globalData.headerLinks}
           logo={globalData.logo}
           siteName={globalData.siteName}
