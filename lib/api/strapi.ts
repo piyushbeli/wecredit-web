@@ -199,7 +199,7 @@ function flattenObject(
 export function getStrapiMediaUrl(url: string | undefined | null): string {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `${STRAPI_URL}${url}`;
+  return `${url}`;
 }
 
 /**

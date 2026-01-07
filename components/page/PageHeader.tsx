@@ -17,6 +17,7 @@ interface PageHeaderProps {
  */
 const PageHeader = ({ page }: PageHeaderProps) => {
   const hasMeta = page.author || page.publishedAt || page.readingTime;
+  const featuredImageUrl = getOptimizedImageUrl(page.featuredImage, 'large');
 
   return (
     <header className="mb-8">
@@ -64,11 +65,11 @@ const PageHeader = ({ page }: PageHeaderProps) => {
       )}
 
       {/* Featured Image */}
-      {page.featuredImage && (
+      {featuredImageUrl && (
         <div className="relative aspect-video rounded-xl overflow-hidden mb-8">
           <Image
-            src={getOptimizedImageUrl(page.featuredImage, 'large')}
-            alt={page.featuredImage.alternativeText || page.title}
+            src={featuredImageUrl}
+            alt={page.featuredImage?.alternativeText || page.title}
             fill
             className="object-cover"
             priority
