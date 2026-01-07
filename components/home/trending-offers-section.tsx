@@ -156,7 +156,8 @@ const TrendingOffersSection = (): React.ReactNode => {
                     id={offer.id}
                     lenderName={offer.lenderName}
                     logoPath={offer.logoPath}
-                    badge={offer.badge}
+                    // badge={offer.badge}
+                    badge={'Fast Disbursal'}
                     amount={offer.amount}
                     interestRate={offer.interestRate}
                     tenure={offer.tenure}

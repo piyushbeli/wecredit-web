@@ -158,16 +158,14 @@ const TestimonialsSection = (): React.ReactNode => {
 								className="flex-[0_0_70%] sm:flex-[0_0_60%] md:flex-[0_0_45%] lg:flex-[0_0_35%] min-w-0 px-1.5 sm:px-2"
 							>
 								<motion.div
-									className="relative overflow-hidden transition-all duration-500 ease-out"
-									style={{
-										borderRadius: '2rem',
-										transform: isActive ? 'scale(1)' : 'scale(0.88)',
+									className="relative overflow-hidden"
+									style={{ borderRadius: '2rem' }}
+									initial={{ opacity: 0, scale: 0.75 }}
+									animate={{
+										scale: isActive ? 1 : 0.75,
 										opacity: isActive ? 1 : isAdjacent ? 0.9 : 0.5,
 									}}
-									initial={{ opacity: 0, scale: 0.85 }}
-									whileInView={{ opacity: 1 }}
-									viewport={{ once: true }}
-									transition={{ duration: 0.5, delay: index * 0.08 }}
+									transition={{ duration: 0.5, ease: 'easeOut' }}
 								>
 									{/* Video Thumbnail Container */}
 									<div className="relative aspect-[3/4] w-full overflow-hidden rounded-[2rem]">
