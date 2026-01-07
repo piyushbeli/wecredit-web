@@ -1,30 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { cn } from '@/lib/utils';
-
-/** Embla carousel types */
-type EmblaCarouselType = UseEmblaCarouselType[1];
-type EmblaOptionsType = Parameters<typeof useEmblaCarousel>[0];
-type EmblaPluginType = Parameters<typeof useEmblaCarousel>[1];
-
-/** Carousel API exposed to consumers */
-interface CarouselApi {
-  selectedIndex: number;
-  scrollSnaps: number[];
-  scrollTo: (index: number) => void;
-  scrollPrev: () => void;
-  scrollNext: () => void;
-  canScrollPrev: boolean;
-  canScrollNext: boolean;
-}
-
-/** Carousel context value */
-interface CarouselContextValue extends CarouselApi {
-  emblaRef: React.RefCallback<HTMLElement>;
-  emblaApi: EmblaCarouselType | undefined;
-}
+import type {
+  CarouselApi,
+  CarouselContextValue,
+  CarouselProps,
+  CarouselContentProps,
+  CarouselSlideProps,
+  CarouselDotsProps,
+  EmblaOptionsType,
+  EmblaPluginType,
+} from '@/types/ui/carousel';
 
 const CarouselContext = React.createContext<CarouselContextValue | null>(null);
 
@@ -39,13 +27,6 @@ const useCarousel = (): CarouselContextValue => {
   }
   return context;
 };
-
-/** Carousel root component props */
-interface CarouselProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
-  options?: EmblaOptionsType;
-  plugins?: EmblaPluginType;
-  children: React.ReactNode | ((api: CarouselApi) => React.ReactNode);
-}
 
 /**
  * Root carousel component
@@ -139,11 +120,6 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(
 );
 Carousel.displayName = 'Carousel';
 
-/** CarouselContent props */
-interface CarouselContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  containerClassName?: string;
-}
-
 /**
  * Carousel content container
  * Wraps slides and applies emblaRef
@@ -162,11 +138,6 @@ const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
   }
 );
 CarouselContent.displayName = 'CarouselContent';
-
-/** CarouselSlide props */
-interface CarouselSlideProps extends React.HTMLAttributes<HTMLDivElement> {
-  index?: number;
-}
 
 /**
  * Individual carousel slide
@@ -187,13 +158,6 @@ const CarouselSlide = React.forwardRef<HTMLDivElement, CarouselSlideProps>(
   }
 );
 CarouselSlide.displayName = 'CarouselSlide';
-
-/** CarouselDots props */
-interface CarouselDotsProps extends React.HTMLAttributes<HTMLDivElement> {
-  dotClassName?: string;
-  activeDotClassName?: string;
-  renderDot?: (index: number, isActive: boolean) => React.ReactNode;
-}
 
 /**
  * Carousel dot indicators
@@ -257,4 +221,3 @@ export {
   type EmblaOptionsType,
   type EmblaPluginType,
 };
-
