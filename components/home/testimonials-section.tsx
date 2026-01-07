@@ -187,7 +187,7 @@ const TestimonialsSection = (): React.ReactNode => {
 											src={testimonial.thumbnailUrl}
 											alt={`${testimonial.customerName || 'Customer'} testimonial`}
 											fill
-											className={`object-cover transition-opacity duration-300 ${
+											className={`object-contain transition-opacity duration-300 ${
 												isPlaying ? 'opacity-0' : 'opacity-100'
 											}`}
 											sizes="(max-width: 640px) 70vw, (max-width: 768px) 60vw, (max-width: 1024px) 45vw, 35vw"
