@@ -1,11 +1,11 @@
 'use client';
 
-import { JSX, useCallback, useEffect, useState } from 'react';
+import { JSX } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
+import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/components/ui/carousel';
 
 /** Slide content configuration */
 interface SlideContent {
@@ -49,46 +49,18 @@ const slides: SlideContent[] = [
  * Hero carousel section with gradient background, 3D avatar, and swipeable slides
  */
 const HeroCarousel = (): JSX.Element => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: true,
-      align: 'center',
-    },
-    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })]
-  );
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    return () => {
-      emblaApi.off('select', onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (emblaApi) emblaApi.scrollTo(index);
-    },
-    [emblaApi]
-  );
-
   return (
     <section className="wc-hero-bg min-h-[85vh] relative pt-16">
-      {/* Carousel */}
-      <div className="relative z-10 h-full flex flex-col" ref={emblaRef}>
-        <div className="flex flex-1">
+      <Carousel
+        options={{ loop: true, align: 'center' }}
+        plugins={[Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })]}
+        className="relative z-10 h-full flex flex-col"
+      >
+        <CarouselContent className="flex-1">
           {slides.map((slide) => (
-            <div
+            <CarouselSlide
               key={slide.id}
-              className="flex-[0_0_100%] min-w-0 flex flex-col items-center justify-center px-6 py-8"
+              className="flex-[0_0_100%] flex flex-col items-center justify-center px-6 py-8"
             >
               {/* 3D Hero Avatar with Floating Elements */}
               <motion.div
@@ -130,26 +102,15 @@ const HeroCarousel = (): JSX.Element => {
                   {slide.ctaText}
                 </Link>
               </motion.div>
-            </div>
+            </CarouselSlide>
           ))}
-        </div>
-      </div>
+        </CarouselContent>
 
-      {/* Dot Indicators */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 z-20">
-        {slides.map((slide, index) => (
-          <button
-            key={slide.id}
-            type="button"
-            onClick={() => scrollTo(index)}
-            className={`wc-dot ${index === selectedIndex ? 'wc-dot-active' : ''}`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+        {/* Dot Indicators - positioned below the carousel content */}
+        <CarouselDots className="py-8 z-20" />
+      </Carousel>
     </section>
   );
 };
 
 export default HeroCarousel;
-

@@ -1,9 +1,14 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import useEmblaCarousel from 'embla-carousel-react';
 import TrendingOfferCard from './trending-offer-card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselSlide,
+  CarouselDots,
+} from '@/components/ui/carousel';
 
 /** Offer configuration interface */
 interface Offer {
@@ -92,38 +97,7 @@ const groupOffersIntoColumns = (items: Offer[], rowsPerColumn: number): Offer[][
  * Mobile: 2 columns visible, Tablet: 3 columns, Desktop: 4 columns
  */
 const TrendingOffersSection = (): React.ReactNode => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: 'start',
-    slidesToScroll: 1,
-  });
-
   const offerColumns = groupOffersIntoColumns(offers, 3);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    onSelect();
-    emblaApi.on('select', onSelect);
-    return () => {
-      emblaApi.off('select', onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (emblaApi) emblaApi.scrollTo(index);
-    },
-    [emblaApi]
-  );
 
   return (
     <section className="bg-white py-8">
@@ -140,13 +114,13 @@ const TrendingOffersSection = (): React.ReactNode => {
         </motion.h2>
       </div>
 
-      {/* Embla Carousel Container */}
-      <div className="overflow-hidden px-4" ref={emblaRef}>
-        <div className="flex -ml-3">
+      <Carousel options={{ loop: true, align: 'start', slidesToScroll: 1 }} className="px-4">
+        <CarouselContent className="-ml-3">
           {offerColumns.map((column, colIndex) => (
-            <div
+            <CarouselSlide
               key={colIndex}
-              className="flex-[0_0_80%] min-w-0 pl-3 md:flex-[0_0_33.333%] lg:flex-[0_0_25%]"
+              index={colIndex}
+              className="basis-4/5 pl-3 md:basis-1/3 lg:basis-1/4"
             >
               {/* 3-row vertical stack */}
               <div className="flex flex-col gap-3">
@@ -156,7 +130,6 @@ const TrendingOffersSection = (): React.ReactNode => {
                     id={offer.id}
                     lenderName={offer.lenderName}
                     logoPath={offer.logoPath}
-                    // badge={offer.badge}
                     badge={'Fast Disbursal'}
                     amount={offer.amount}
                     interestRate={offer.interestRate}
@@ -166,30 +139,19 @@ const TrendingOffersSection = (): React.ReactNode => {
                   />
                 ))}
               </div>
-            </div>
+            </CarouselSlide>
           ))}
-        </div>
-      </div>
+        </CarouselContent>
 
-      {/* Dot Indicators */}
-      {scrollSnaps.length > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          {scrollSnaps.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === selectedIndex ? 'bg-wc-blue-500' : 'bg-gray-300'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
+        {/* Dot Indicators */}
+        <CarouselDots
+          className="mt-4"
+          dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
+          activeDotClassName="bg-wc-blue-500"
+        />
+      </Carousel>
     </section>
   );
 };
 
 export default TrendingOffersSection;
-
