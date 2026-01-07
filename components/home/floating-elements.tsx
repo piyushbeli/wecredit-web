@@ -75,7 +75,7 @@ const floatingElements: FloatingElementConfig[] = [
 /**
  * Floating animated elements that surround the hero avatar
  */
-const FloatingElements = (): JSX.Element => {
+const FloatingElements = (): React.ReactNode => {
   return (
     <>
       {floatingElements.map((element) => (

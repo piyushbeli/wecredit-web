@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 /**
  * WeCredit Home page with hero carousel, stats, and product sections
  */
-const Home = (): JSX.Element => {
+const Home = (): React.ReactNode => {
   return <HomePage />;
 };
 

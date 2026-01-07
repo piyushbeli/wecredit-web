@@ -18,7 +18,7 @@ interface ProductCardProps {
 /**
  * Individual product card with icon/image and label
  */
-const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardProps): JSX.Element => {
+const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardProps): React.ReactNode => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
