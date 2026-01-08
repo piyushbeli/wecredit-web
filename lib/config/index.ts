@@ -8,7 +8,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 /** Check if we're in production mode */
 const isProduction = process.env.NODE_ENV === 'production';
-
+console.log('isDevelopment', isDevelopment);
+console.log('isProduction', isProduction);
 /** WeCredit API Configuration */
 export const wecreditConfig = {
   /** Base URL for WeCredit services */
