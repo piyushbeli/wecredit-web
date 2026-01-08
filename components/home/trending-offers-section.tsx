@@ -9,95 +9,56 @@ import {
   CarouselSlide,
   CarouselDots,
 } from '@/components/ui/carousel';
+import { useActiveLenders, type ActiveLender } from '@/hooks/use-active-lenders';
+import { env } from '@/lib/config';
 
-/** Offer configuration interface */
-interface Offer {
-  id: string;
-  lenderName: string;
-  logoPath?: string;
-  badge?: string;
-  amount: string;
-  interestRate: string;
-  tenure: string;
-  href: string;
+/** Props for TrendingOffersSection component */
+interface TrendingOffersSectionProps {
+  /** Optional mobile number for API header */
+  mobile?: string;
 }
 
-/** Static offers data */
-const offers: Offer[] = [
-  {
-    id: 'creditsea',
-    lenderName: 'CreditSea',
-    logoPath: '/assets/images/credit-sea-logo.png',
-    badge: 'Fast Disbursal',
-    amount: '1 Lakh Rupee',
-    interestRate: '1.5%',
-    tenure: '48 m',
-    href: '/offers/creditsea',
-  },
-  {
-    id: 'kreditbee',
-    lenderName: 'KreditBee',
-    logoPath: '/assets/images/kredit-bee-logo.png',
-    amount: '1 Lakh Rupee',
-    interestRate: '1.5%',
-    tenure: '48 m',
-    href: '/offers/kreditbee',
-  },
-  {
-    id: 'prefr',
-    lenderName: 'Prefr',
-    logoPath: '/assets/images/prefr-logo.png',
-    amount: '1 Lakh Rupee',
-    interestRate: '1.5%',
-    tenure: '48 m',
-    href: '/offers/prefr',
-  },
-  {
-    id: 'creditsea-2',
-    lenderName: 'CreditSea',
-    logoPath: '/assets/images/credit-sea-logo.png',
-    badge: 'Fast Disbursal',
-    amount: '1 Lakh Rupee',
-    interestRate: '1.5%',
-    tenure: '48 m',
-    href: '/offers/creditsea',
-  },
-  {
-    id: 'kreditbee-2',
-    lenderName: 'KreditBee',
-    logoPath: '/assets/images/kredit-bee-logo.png',
-    amount: '1 Lakh Rupee',
-    interestRate: '1.5%',
-    tenure: '48 m',
-    href: '/offers/kreditbee',
-  },
-  {
-    id: 'prefr-2',
-    lenderName: 'Prefr',
-    logoPath: '/assets/images/prefr-logo.png',
-    amount: '1 Lakh Rupee',
-    interestRate: '1.5%',
-    tenure: '48 m',
-    href: '/offers/prefr',
-  },
-];
-
-/** Group offers into columns of 3 for vertical stacking */
-const groupOffersIntoColumns = (items: Offer[], rowsPerColumn: number): Offer[][] => {
-  const columns: Offer[][] = [];
+/** Group items into columns of N for vertical stacking */
+function groupIntoColumns<T>(items: T[], rowsPerColumn: number): T[][] {
+  const columns: T[][] = [];
   for (let i = 0; i < items.length; i += rowsPerColumn) {
     columns.push(items.slice(i, i + rowsPerColumn));
   }
   return columns;
-};
+}
+
+/** Loading skeleton for offer card */
+const OfferCardSkeleton = (): React.ReactNode => (
+  <div className="w-full animate-pulse">
+    <div className="rounded-3xl h-[140px] bg-gray-100 border border-gray-200" />
+  </div>
+);
+
+/** Loading skeleton column */
+const SkeletonColumn = (): React.ReactNode => (
+  <div className="flex flex-col gap-3">
+    <OfferCardSkeleton />
+    <OfferCardSkeleton />
+    <OfferCardSkeleton />
+  </div>
+);
 
 /**
  * Trending Offers section component
  * Displays a responsive carousel with 3-row columns
- * Mobile: 2 columns visible, Tablet: 3 columns, Desktop: 4 columns
+ * Fetches data from WeCredit API with fallback to static data
  */
-const TrendingOffersSection = (): React.ReactNode => {
-  const offerColumns = groupOffersIntoColumns(offers, 3);
+const TrendingOffersSection = ({ mobile }: TrendingOffersSectionProps): React.ReactNode => {
+  const { isLoading, error, getActiveLenders } = useActiveLenders({ mobile });
+
+  const activeLenders = getActiveLenders();
+  const displayLenders = activeLenders.length > 0 ? activeLenders : [];
+  const lenderColumns = groupIntoColumns(displayLenders, 3);
+
+
+  if (displayLenders.length === 0) {
+    return null;
+  }
 
   return (
     <section className="bg-white py-8">
@@ -114,42 +75,62 @@ const TrendingOffersSection = (): React.ReactNode => {
         </motion.h2>
       </div>
 
-      <Carousel options={{ loop: true, align: 'start', slidesToScroll: 1 }} className="px-4">
-        <CarouselContent className="-ml-3">
-          {offerColumns.map((column, colIndex) => (
-            <CarouselSlide
-              key={colIndex}
-              index={colIndex}
-              className="basis-4/5 pl-3 md:basis-1/3 lg:basis-1/4"
-            >
-              {/* 3-row vertical stack */}
-              <div className="flex flex-col gap-3">
-                {column.map((offer, rowIndex) => (
-                  <TrendingOfferCard
-                    key={offer.id}
-                    id={offer.id}
-                    lenderName={offer.lenderName}
-                    logoPath={offer.logoPath}
-                    badge={'Fast Disbursal'}
-                    amount={offer.amount}
-                    interestRate={offer.interestRate}
-                    tenure={offer.tenure}
-                    href={offer.href}
-                    index={colIndex * 3 + rowIndex}
-                  />
-                ))}
-              </div>
-            </CarouselSlide>
-          ))}
-        </CarouselContent>
+      {isLoading ? (
+        <div className="px-4">
+          <div className="flex gap-3 overflow-hidden">
+            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
+              <SkeletonColumn />
+            </div>
+            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
+              <SkeletonColumn />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <Carousel options={{ loop: true, align: 'start', slidesToScroll: 1 }} className="px-4">
+          <CarouselContent className="-ml-3">
+            {lenderColumns.map((column, colIndex) => (
+              <CarouselSlide
+                key={colIndex}
+                index={colIndex}
+                className="basis-4/5 pl-3 md:basis-1/3 lg:basis-1/4"
+              >
+                {/* 3-row vertical stack */}
+                <div className="flex flex-col gap-3">
+                  {column.map(({ id, lender }, rowIndex) => (
+                    <TrendingOfferCard
+                      key={id}
+                      id={id}
+                      lenderName={lender.Name || id}
+                      logoPath={lender.logo || undefined}
+                      badge="Fast Disbursal"
+                      amount={lender.UptoAmount || 'N/A'}
+                      interestRate={lender.IntRate ? `${lender.IntRate}%` : 'N/A'}
+                      tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
+                      href={lender.utmLink || `/offers/${id}`}
+                      index={colIndex * 3 + rowIndex}
+                    />
+                  ))}
+                </div>
+              </CarouselSlide>
+            ))}
+          </CarouselContent>
 
-        {/* Dot Indicators */}
-        <CarouselDots
-          className="mt-4"
-          dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
-          activeDotClassName="bg-wc-blue-500"
-        />
-      </Carousel>
+          {/* Dot Indicators */}
+          <CarouselDots
+            className="mt-4"
+            dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
+            activeDotClassName="bg-wc-blue-500"
+          />
+        </Carousel>
+      )}
+
+      {/* Error indicator (only in development) */}
+      {error && env.isDevelopment && (
+        <p className="px-4 text-xs text-red-500 mt-2">
+          API Error: {error.message} (using fallback data)
+        </p>
+      )}
     </section>
   );
 };

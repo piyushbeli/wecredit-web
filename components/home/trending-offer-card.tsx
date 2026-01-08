@@ -85,7 +85,7 @@ const TrendingOfferCard = ({
                 alt={lenderName}
                 width={100}
                 height={10}
-                className="-ml-2 object-contain h-8 w-auto"
+                className="object-contain h-5 w-auto"
                 priority
               />
             ) : (

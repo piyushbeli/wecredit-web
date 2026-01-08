@@ -19,7 +19,17 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'wecredit-blogs.s3.ap-south-1.amazonaws.com',
         pathname: '/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'wcstaticasset.blob.core.windows.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'wecredit-main-website-assets.s3.ap-south-1.amazonaws.com',
+        pathname: '/**',
+      },
       // Add your production Strapi domain here
       // {
       //   protocol: 'https',
