@@ -1,12 +1,11 @@
 /**
  * WeCredit Public API Client
- * Pure data fetching - no transformation
- * Calls WeCredit API directly with partnerCode in payload
+ * Direct calls to WeCredit backend API
  */
 
-import { api } from '@/lib/utils/api';
-import { wecreditApi } from '@/lib/config/endpoints';
+import { ApiHandler } from '@/lib/utils/api';
 import { wecreditConfig } from '@/lib/config';
+import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
 import type { ActiveLendersResponse } from '@/types/wecredit';
 
 /** Options for WeCredit API requests */
@@ -18,30 +17,32 @@ export interface WeCreditOptions {
 
 /**
  * Builds headers for WeCredit API request
+ * Includes environment-specific headers (X-Agent-Host in dev/staging)
  */
 function buildHeaders(options: WeCreditOptions): Record<string, string> {
   const { mobile, authorization, headers = {} } = options;
   return {
-    ...(mobile && { mobile }),
+    ...wecreditConfig.headers,
+    ...(mobile && { [HEADER_MOBILE]: mobile }),
     ...(authorization && { Authorization: `Bearer ${authorization}` }),
-    ...wecreditConfig.devHeaders,
     ...headers,
   };
 }
 
 /**
  * Fetches active lenders from WeCredit API
- * Returns raw API response - no transformation
+ * Calls backend directly: https://wecredit.co.in/api/public
  */
 export async function fetchActiveLenders(
   options: WeCreditOptions = {}
 ): Promise<ActiveLendersResponse> {
-  return api.post<ActiveLendersResponse>(
-    wecreditApi.gatewayUrl,
+  const response = await ApiHandler.post<ActiveLendersResponse>(
+    wecreditConfig.gatewayUrl,
     {
-      endpoint: wecreditApi.endpoints.activeLenders,
+      endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
       partnerCode: wecreditConfig.partnerCode,
     },
     { headers: buildHeaders(options) }
   );
+  return response.data;
 }

@@ -4,23 +4,23 @@
  */
 
 import { strapiConfig, wecreditConfig } from './index';
+import { ENDPOINTS } from '@/lib/constants/api-keys';
 
 /**
  * WeCredit API Configuration
- * Gateway-style API: single URL, endpoint passed in request body
- * Dev: https://wecredit-uat.co.in/api/public
- * Prod: /api/public (relative, matches frontend origin)
+ * Direct calls to WeCredit backend (same domain as frontend)
+ * URL determined by NEXT_PUBLIC_ENVIRONMENT and NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL
  */
 export const wecreditApi = {
-  /** Gateway URL: full URL in dev, relative URL in prod */
-  gatewayUrl: wecreditConfig.baseUrl + '/api/public',
+  /** Gateway URL for WeCredit public API */
+  gatewayUrl: wecreditConfig.gatewayUrl,
 
   /**
    * Endpoint identifiers (passed in request body)
    * Usage: { endpoint: wecreditApi.endpoints.activeLenders }
    */
   endpoints: {
-    activeLenders: 'active-lenders',
+    activeLenders: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
     // Add more endpoint identifiers as the API grows
     // lenderDetails: 'lender-details',
     // applyLoan: 'apply-loan',
@@ -49,4 +49,3 @@ export const strapiApi = {
 
 /** WeCredit endpoint type for type safety */
 export type WeCreditEndpoint = typeof wecreditApi.endpoints[keyof typeof wecreditApi.endpoints];
-
