@@ -3,19 +3,21 @@
  * Application-specific paths and endpoint identifiers
  */
 
-import { wecreditConfig, strapiConfig } from './index';
+import { strapiConfig, wecreditConfig } from './index';
 
 /**
  * WeCredit API Configuration
  * Gateway-style API: single URL, endpoint passed in request body
+ * Dev: https://wecredit-uat.co.in/api/public
+ * Prod: /api/public (relative, matches frontend origin)
  */
 export const wecreditApi = {
-  /** Full gateway URL */
-  gatewayUrl: `${wecreditConfig.baseUrl}/api/public`,
+  /** Gateway URL: full URL in dev, relative URL in prod */
+  gatewayUrl: wecreditConfig.baseUrl + '/api/public',
 
   /**
    * Endpoint identifiers (passed in request body)
-   * Usage: { endpoint: wecreditApi.endpoints.activeLenders, partnerCode: '...' }
+   * Usage: { endpoint: wecreditApi.endpoints.activeLenders }
    */
   endpoints: {
     activeLenders: 'active-lenders',
