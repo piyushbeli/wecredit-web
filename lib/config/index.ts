@@ -3,18 +3,23 @@
  * Centralized environment-dependent configuration
  */
 
-/** Check if we're in development mode */
-const isDevelopment = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
+/** Check if we're in development mode (NODE_ENV is set automatically by Next.js) */
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 /** Check if we're in production mode */
-const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === 'production';
-console.log('isDevelopment', isDevelopment);
-console.log('isProduction', isProduction);
-/** WeCredit API Configuration */
+const isProduction = process.env.NODE_ENV === 'production';
+
+/**
+ * WeCredit Base URL from env variable
+ * - Set NEXT_PUBLIC_WECREDIT_BASE_URL to test against external API (e.g., https://wecredit.co.in)
+ * - Leave empty or unset to use local proxy route (/api/public) - recommended for production
+ */
+const wecreditBaseUrl = process.env.NEXT_PUBLIC_WECREDIT_BASE_URL || '';
+
+/** WeCredit API Configuration (Client-safe) */
 export const wecreditConfig = {
-  /** Base URL for WeCredit services */
-  // baseUrl: process.env.NEXT_PUBLIC_WECREDIT_BASE_URL || 'https://wecredit.co.in',
-  baseUrl: isProduction ? window.location.origin : 'https://wecredit-uat.co.in',
+  /** Base URL: from env variable, defaults to empty (uses local proxy) */
+  baseUrl: wecreditBaseUrl,
   /** Partner code for API authentication */
   partnerCode: 'WC001',
   /** Development-only headers (stripped in production) */
@@ -37,4 +42,7 @@ export const env = {
   isProduction,
   isTest: process.env.NODE_ENV === 'test',
 } as const;
+
+/** Re-export server config for API routes */
+export { wecreditServerConfig, isAllowedEndpoint } from './server';
 
