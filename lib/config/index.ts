@@ -4,18 +4,19 @@
  */
 
 /** Check if we're in development mode */
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
 
 /** Check if we're in production mode */
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === 'production';
 console.log('isDevelopment', isDevelopment);
 console.log('isProduction', isProduction);
 /** WeCredit API Configuration */
 export const wecreditConfig = {
   /** Base URL for WeCredit services */
-  baseUrl: process.env.NEXT_PUBLIC_WECREDIT_BASE_URL || 'https://wecredit.co.in',
+  // baseUrl: process.env.NEXT_PUBLIC_WECREDIT_BASE_URL || 'https://wecredit.co.in',
+  baseUrl: isProduction ? window.location.origin : 'https://wecredit-uat.co.in',
   /** Partner code for API authentication */
-  partnerCode: process.env.NEXT_PUBLIC_WECREDIT_PARTNER_CODE || 'WC001',
+  partnerCode: 'WC001',
   /** Development-only headers (stripped in production) */
   devHeaders: (isDevelopment
     ? { 'X-Agent-Host': 'gateway-uat' }
