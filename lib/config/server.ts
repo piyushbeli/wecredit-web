@@ -10,17 +10,23 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 /** Check if we're in production mode */
 const isProduction = process.env.NODE_ENV === 'production';
 
-/** UAT URL for local development */
-const UAT_BASE_URL = 'https://wecredit.co.in';
+/** WeCredit API base URL */
+const WECREDIT_API_URL = 'https://wecredit.co.in';
 
 /**
  * Resolve base URL:
- * - Development: UAT domain (https://wecredit.co.in)
- * - Production: WECREDIT_BASE_URL env variable (same as frontend domain)
+ * - Development: WeCredit API domain
+ * - Production: WECREDIT_BASE_URL env variable, falls back to default if not set
  */
-const resolvedBaseUrl = isDevelopment
-  ? UAT_BASE_URL
-  : process.env.WECREDIT_BASE_URL;
+const resolvedBaseUrl = process.env.WECREDIT_BASE_URL || WECREDIT_API_URL;
+
+/** Log warning if env variable is not set in production */
+if (isProduction && !process.env.WECREDIT_BASE_URL) {
+  console.warn(
+    '[WeCredit Config] WECREDIT_BASE_URL not set, using default:',
+    WECREDIT_API_URL
+  );
+}
 
 /**
  * WeCredit Server Configuration
@@ -50,6 +56,8 @@ export const wecreditServerConfig = {
     // 'check-eligibility',
   ] as const,
 } as const;
+
+console.log('wecreditServerConfig', wecreditServerConfig);
 
 /** Type for allowed WeCredit endpoints */
 export type AllowedWeCreditEndpoint = typeof wecreditServerConfig.allowedEndpoints[number];
