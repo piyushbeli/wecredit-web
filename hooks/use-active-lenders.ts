@@ -3,12 +3,18 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Lender, ActiveLendersResponse } from '@/types/wecredit';
 import { fetchActiveLenders, type WeCreditOptions } from '@/lib/api/wecredit';
+import {
+  ApiException,
+  NoInternetException,
+  RequestTimeoutException,
+} from '@/lib/api/api-exceptions';
 
 /** Hook state interface */
 interface UseActiveLendersState {
   lenders: ActiveLendersResponse | null;
   isLoading: boolean;
   error: Error | null;
+  errorType: 'network' | 'timeout' | 'api' | null;
 }
 
 /** Hook options interface */
@@ -29,6 +35,20 @@ interface UseActiveLendersReturn extends UseActiveLendersState {
   refetch: () => Promise<void>;
   /** Helper to get filtered active lenders as array */
   getActiveLenders: () => ActiveLender[];
+  /** Check if error is due to network issues */
+  isNetworkError: boolean;
+  /** Check if error is due to timeout */
+  isTimeoutError: boolean;
+}
+
+/**
+ * Determines the error type from an exception
+ */
+function getErrorType(error: unknown): 'network' | 'timeout' | 'api' | null {
+  if (error instanceof NoInternetException) return 'network';
+  if (error instanceof RequestTimeoutException) return 'timeout';
+  if (error instanceof ApiException) return 'api';
+  return null;
 }
 
 /**
@@ -44,6 +64,7 @@ export function useActiveLenders(
     lenders: null,
     isLoading: fetchOnMount,
     error: null,
+    errorType: null,
   });
 
   const fetchOptions = useMemo(
@@ -52,21 +73,20 @@ export function useActiveLenders(
   );
 
   const fetchData = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-
+    setState(prev => ({ ...prev, isLoading: true, error: null, errorType: null }));
     try {
       const lenders = await fetchActiveLenders(fetchOptions);
-      setState({ lenders, isLoading: false, error: null });
+      setState({ lenders, isLoading: false, error: null, errorType: null });
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch lenders');
-      setState(prev => ({ ...prev, isLoading: false, error }));
+      const errorType = getErrorType(err);
+      setState(prev => ({ ...prev, isLoading: false, error, errorType }));
     }
   }, [fetchOptions]);
 
   /** Get active lenders filtered by status flags */
   const getActiveLenders = useCallback((): ActiveLender[] => {
     if (!state.lenders) return [];
-
     return Object.entries(state.lenders)
       .filter(([, lender]) => lender.IsAppEnabled === 1 && lender.affiliateStatus === 1)
       .map(([id, lender]) => ({ id, lender }));
@@ -82,5 +102,7 @@ export function useActiveLenders(
     ...state,
     refetch: fetchData,
     getActiveLenders,
+    isNetworkError: state.errorType === 'network',
+    isTimeoutError: state.errorType === 'timeout',
   };
 }

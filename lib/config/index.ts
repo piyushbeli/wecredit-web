@@ -1,48 +1,166 @@
 /**
  * Application Configuration
- * Centralized environment-dependent configuration
+ * Centralized environment-dependent configuration using singleton pattern
  */
 
-/** Check if we're in development mode (NODE_ENV is set automatically by Next.js) */
-const isDevelopment = process.env.NODE_ENV === 'development';
+import { PARTNER_CODE } from '@/lib/constants/api-keys';
 
-/** Check if we're in production mode */
-const isProduction = process.env.NODE_ENV === 'production';
+/** Environment type for multi-environment support */
+type EnvironmentType = 'staging' | 'prod';
+
+/** Environment-specific headers */
+interface EnvironmentHeaders {
+  'Content-Type': string;
+  'X-Agent-Host'?: string;
+}
+
+/** Configuration for each environment */
+interface EnvironmentConfig {
+  /** Base URL for both frontend and API (same domain) */
+  baseUrl: string;
+  ondcBaseUrl: string;
+  multilenderBaseUrl: string;
+  wecreditHeaders: EnvironmentHeaders;
+  ondcHeaders: EnvironmentHeaders;
+  multilenderHeaders: EnvironmentHeaders;
+}
+
+/** Environment configurations */
+const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
+  staging: {
+    baseUrl: process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://staging.wecredit.co.in',
+    ondcBaseUrl: process.env.NEXT_PUBLIC_ONDC_BASE_URL_STAGING ||
+      'https://ondc-internal-staging-pl.azurewebsites.net/ondc',
+    multilenderBaseUrl: process.env.NEXT_PUBLIC_MULTILENDER_BASE_URL ||
+      'https://multilender.wecredit.co.in/api/v1/user/data-upload',
+    wecreditHeaders: {
+      'Content-Type': 'application/json',
+      'X-Agent-Host': 'gateway-uat',
+    },
+    ondcHeaders: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    multilenderHeaders: {
+      'Content-Type': 'application/json',
+    },
+  },
+
+  prod: {
+    baseUrl: process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://wecredit.co.in',
+    ondcBaseUrl: process.env.NEXT_PUBLIC_ONDC_BASE_URL_PROD ||
+      'https://ondc-internal-prod-pl.azurewebsites.net/ondc',
+    multilenderBaseUrl: process.env.NEXT_PUBLIC_MULTILENDER_BASE_URL ||
+      'https://multilender.wecredit.co.in/api/v1/user/data-upload',
+    wecreditHeaders: {
+      'Content-Type': 'application/json',
+    },
+    ondcHeaders: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    multilenderHeaders: {
+      'Content-Type': 'application/json',
+    },
+  },
+};
 
 /**
- * WeCredit Base URL from env variable
- * - Set NEXT_PUBLIC_WECREDIT_BASE_URL to test against external API (e.g., https://wecredit.co.in)
- * - Leave empty or unset to use local proxy route (/api/public) - recommended for production
+ * Environment Singleton Class
+ * Provides centralized access to environment-specific configuration
  */
-const wecreditBaseUrl = process.env.NEXT_PUBLIC_WECREDIT_BASE_URL || '';
+class Environment {
+  private static instance: Environment;
+  private readonly config: EnvironmentConfig;
+  private readonly environmentType: EnvironmentType;
 
-/** WeCredit API Configuration (Client-safe) */
+  private constructor() {
+    this.environmentType = (process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod') as EnvironmentType;
+    this.config = ENVIRONMENTS[this.environmentType] || ENVIRONMENTS.prod;
+  }
+
+  /** Get singleton instance */
+  public static getInstance(): Environment {
+    if (!Environment.instance) {
+      Environment.instance = new Environment();
+    }
+    return Environment.instance;
+  }
+
+  /** Get full environment configuration */
+  public getConfig(): EnvironmentConfig {
+    return this.config;
+  }
+
+  /** Get current environment type */
+  public getEnvironmentType(): EnvironmentType {
+    return this.environmentType;
+  }
+
+  /** Base URL for frontend and API (same domain) */
+  public get baseUrl(): string {
+    return this.config.baseUrl;
+  }
+
+  /** WeCredit API headers (includes X-Agent-Host in staging/preprod) */
+  public get wecreditHeaders(): EnvironmentHeaders {
+    return this.config.wecreditHeaders;
+  }
+
+  /** ONDC API base URL */
+  public get ondcBaseUrl(): string {
+    return this.config.ondcBaseUrl;
+  }
+
+  /** Multilender API base URL */
+  public get multilenderBaseUrl(): string {
+    return this.config.multilenderBaseUrl;
+  }
+
+  /** Check if running in development mode */
+  public get isDevelopment(): boolean {
+    return process.env.NODE_ENV === 'development';
+  }
+
+  /** Check if running in production mode */
+  public get isProduction(): boolean {
+    return process.env.NODE_ENV === 'production';
+  }
+
+  /** Check if running in test mode */
+  public get isTest(): boolean {
+    return process.env.NODE_ENV === 'test';
+  }
+}
+
+/** Environment singleton instance */
+export const environment = Environment.getInstance();
+
+/** Environment flags (backward compatible) */
+export const env = {
+  isDevelopment: environment.isDevelopment,
+  isProduction: environment.isProduction,
+  isTest: environment.isTest,
+} as const;
+
+/**
+ * WeCredit API Configuration
+ * API is on the same domain as the frontend
+ */
 export const wecreditConfig = {
-  /** Base URL: from env variable, defaults to empty (uses local proxy) */
-  baseUrl: wecreditBaseUrl,
+  /** Base URL (same as frontend) */
+  apiUrl: environment.baseUrl,
+  /** Gateway URL for public API */
+  gatewayUrl: `${environment.baseUrl}/api/public`,
   /** Partner code for API authentication */
-  partnerCode: 'WC001',
-  /** Development-only headers (stripped in production) */
-  devHeaders: (isDevelopment
-    ? { 'X-Agent-Host': 'gateway-uat' }
-    : {}) as Record<string, string>,
+  partnerCode: PARTNER_CODE,
+  /** Headers for API requests */
+  headers: environment.wecreditHeaders,
 } as const;
 
 /** Strapi API Configuration */
 export const strapiConfig = {
-  /** Strapi base URL */
   url: process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337',
-  /** Strapi API token for authentication */
   token: process.env.STRAPI_API_TOKEN,
 } as const;
 
-/** Environment flags */
-export const env = {
-  isDevelopment,
-  isProduction,
-  isTest: process.env.NODE_ENV === 'test',
-} as const;
-
-/** Re-export server config for API routes */
-export { wecreditServerConfig, isAllowedEndpoint } from './server';
-
+/** Export types */
+export type { EnvironmentConfig, EnvironmentType };
