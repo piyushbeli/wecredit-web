@@ -12,5 +12,6 @@ export { default as TestimonialsSection } from './testimonials-section';
 export { default as PartnersSection } from './partners-section';
 export { default as FaqSection } from './faq-section';
 export { default as BlogSection } from './blog-section';
+export { default as DreamsSection } from './dreams-section';
 export { default as HomePage } from './home-page';
 

@@ -123,7 +123,7 @@ function logApiCall(
   console.log('');
   console.log('📩 RESPONSE');
   console.log(`← STATUS: ${statusEmoji} ${response.status} (${duration}ms)`);
-  console.log('← BODY:', responseBody);
+  // console.log('← BODY:', responseBody);
   console.groupEnd();
 }
 

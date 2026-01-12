@@ -8,6 +8,7 @@ import TestimonialsSection from './testimonials-section';
 import PartnersSection from './partners-section';
 import FaqSection from './faq-section';
 import BlogSection from './blog-section';
+import DreamsSection from './dreams-section';
 import type { ActiveLender } from '@/lib/utils/lenders';
 
 /** Props for HomePage component */
@@ -51,6 +52,9 @@ const HomePage = ({ activeLenders }: HomePageProps): React.ReactNode => {
 
       {/* Blog Section */}
       <BlogSection />
+
+      {/* Dreams Section */}
+      <DreamsSection />
     </div>
   );
 };
