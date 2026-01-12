@@ -9,13 +9,11 @@ import {
   CarouselSlide,
   CarouselDots,
 } from '@/components/ui/carousel';
-import { useActiveLenders } from '@/hooks/use-active-lenders';
-import { env } from '@/lib/config';
+import type { ActiveLender } from '@/lib/utils/lenders';
 
 /** Props for TrendingOffersSection component */
 interface TrendingOffersSectionProps {
-  /** Optional mobile number for API header */
-  mobile?: string;
+  activeLenders: ActiveLender[];
 }
 
 /** Group items into columns of N for vertical stacking */
@@ -27,52 +25,14 @@ function groupIntoColumns<T>(items: T[], rowsPerColumn: number): T[][] {
   return columns;
 }
 
-/** Loading skeleton for offer card */
-const OfferCardSkeleton = (): React.ReactNode => (
-  <div className="w-full animate-pulse">
-    <div className="rounded-3xl h-[140px] bg-gray-100 border border-gray-200" />
-  </div>
-);
-
-/** Loading skeleton column */
-const SkeletonColumn = (): React.ReactNode => (
-  <div className="flex flex-col gap-3">
-    <OfferCardSkeleton />
-    <OfferCardSkeleton />
-    <OfferCardSkeleton />
-  </div>
-);
-
 /**
  * Trending Offers section component
  * Displays a responsive carousel with 3-row columns
- * Fetches data from WeCredit API with fallback to static data
+ * Receives pre-fetched lender data from server
  */
-const TrendingOffersSection = ({ mobile }: TrendingOffersSectionProps): React.ReactNode => {
-  const { isLoading, error, activeLenders } = useActiveLenders({ mobile });
-
+const TrendingOffersSection = ({ activeLenders }: TrendingOffersSectionProps): React.ReactNode => {
   const lenderColumns = groupIntoColumns(activeLenders, 3);
 
-  // Show loading skeleton during fetch
-  if (isLoading) {
-    return (
-      <section className="bg-white py-8">
-        <div className="px-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Trending Offers</h2>
-          <div className="flex gap-3 overflow-hidden">
-            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
-              <SkeletonColumn />
-            </div>
-            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
-              <SkeletonColumn />
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Hide section if no lenders after loading completes
   if (activeLenders.length === 0) {
     return null;
   }
@@ -129,13 +89,6 @@ const TrendingOffersSection = ({ mobile }: TrendingOffersSectionProps): React.Re
           activeDotClassName="bg-wc-blue-500"
         />
       </Carousel>
-
-      {/* Error indicator (only in development) */}
-      {error && env.isDevelopment && (
-        <p className="px-4 text-xs text-red-500 mt-2">
-          API Error: {error.message} (using fallback data)
-        </p>
-      )}
     </section>
   );
 };

@@ -31,7 +31,7 @@ function buildHeaders(options: WeCreditOptions): Record<string, string> {
 
 /**
  * Fetches active lenders from WeCredit API
- * Calls backend directly: https://wecredit.co.in/api/public
+ * Calls backend directly: https://api.wecredit.co.in/api/public
  */
 export async function fetchActiveLenders(
   options: WeCreditOptions = {}
