@@ -9,7 +9,7 @@ import {
   CarouselSlide,
   CarouselDots,
 } from '@/components/ui/carousel';
-import { useActiveLenders, type ActiveLender } from '@/hooks/use-active-lenders';
+import { useActiveLenders } from '@/hooks/use-active-lenders';
 import { env } from '@/lib/config';
 
 /** Props for TrendingOffersSection component */
@@ -49,14 +49,31 @@ const SkeletonColumn = (): React.ReactNode => (
  * Fetches data from WeCredit API with fallback to static data
  */
 const TrendingOffersSection = ({ mobile }: TrendingOffersSectionProps): React.ReactNode => {
-  const { isLoading, error, getActiveLenders } = useActiveLenders({ mobile });
+  const { isLoading, error, activeLenders } = useActiveLenders({ mobile });
 
-  const activeLenders = getActiveLenders();
-  const displayLenders = activeLenders.length > 0 ? activeLenders : [];
-  const lenderColumns = groupIntoColumns(displayLenders, 3);
+  const lenderColumns = groupIntoColumns(activeLenders, 3);
 
+  // Show loading skeleton during fetch
+  if (isLoading) {
+    return (
+      <section className="bg-white py-8">
+        <div className="px-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Trending Offers</h2>
+          <div className="flex gap-3 overflow-hidden">
+            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
+              <SkeletonColumn />
+            </div>
+            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
+              <SkeletonColumn />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
-  if (displayLenders.length === 0) {
+  // Hide section if no lenders after loading completes
+  if (activeLenders.length === 0) {
     return null;
   }
 
@@ -75,55 +92,43 @@ const TrendingOffersSection = ({ mobile }: TrendingOffersSectionProps): React.Re
         </motion.h2>
       </div>
 
-      {isLoading ? (
-        <div className="px-4">
-          <div className="flex gap-3 overflow-hidden">
-            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
-              <SkeletonColumn />
-            </div>
-            <div className="basis-4/5 shrink-0 md:basis-1/3 lg:basis-1/4">
-              <SkeletonColumn />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <Carousel options={{ loop: true, align: 'start', slidesToScroll: 1 }} className="px-4">
-          <CarouselContent className="-ml-3">
-            {lenderColumns.map((column, colIndex) => (
-              <CarouselSlide
-                key={colIndex}
-                index={colIndex}
-                className="basis-4/5 pl-3 md:basis-1/3 lg:basis-1/4"
-              >
-                {/* 3-row vertical stack */}
-                <div className="flex flex-col gap-3">
-                  {column.map(({ id, lender }, rowIndex) => (
-                    <TrendingOfferCard
-                      key={id}
-                      id={id}
-                      lenderName={lender.Name || id}
-                      logoPath={lender.logo || undefined}
-                      badge="Fast Disbursal"
-                      amount={lender.UptoAmount || 'N/A'}
-                      interestRate={lender.IntRate ? `${lender.IntRate}%` : 'N/A'}
-                      tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
-                      href={lender.utmLink || `/offers/${id}`}
-                      index={colIndex * 3 + rowIndex}
-                    />
-                  ))}
-                </div>
-              </CarouselSlide>
-            ))}
-          </CarouselContent>
+      {/* Lender Carousel */}
+      <Carousel options={{ loop: true, align: 'start', slidesToScroll: 1 }} className="px-4">
+        <CarouselContent className="-ml-3">
+          {lenderColumns.map((column, colIndex) => (
+            <CarouselSlide
+              key={colIndex}
+              index={colIndex}
+              className="basis-4/5 pl-3 md:basis-1/3 lg:basis-1/4"
+            >
+              {/* 3-row vertical stack */}
+              <div className="flex flex-col gap-3">
+                {column.map(({ id, lender }, rowIndex) => (
+                  <TrendingOfferCard
+                    key={id}
+                    id={id}
+                    lenderName={lender.Name || id}
+                    logoPath={lender.logo || undefined}
+                    badge="Fast Disbursal"
+                    amount={lender.UptoAmount || 'N/A'}
+                    interestRate={lender.IntRate ? `${lender.IntRate}%` : 'N/A'}
+                    tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
+                    href={lender.utmLink || `/offers/${id}`}
+                    index={colIndex * 3 + rowIndex}
+                  />
+                ))}
+              </div>
+            </CarouselSlide>
+          ))}
+        </CarouselContent>
 
-          {/* Dot Indicators */}
-          <CarouselDots
-            className="mt-4"
-            dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
-            activeDotClassName="bg-wc-blue-500"
-          />
-        </Carousel>
-      )}
+        {/* Dot Indicators */}
+        <CarouselDots
+          className="mt-4"
+          dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
+          activeDotClassName="bg-wc-blue-500"
+        />
+      </Carousel>
 
       {/* Error indicator (only in development) */}
       {error && env.isDevelopment && (

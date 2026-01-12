@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation';
 import { getStaticPageBySlug } from '@/lib/content';
 import StaticPageContent from '@/components/shared/StaticPageContent';
 import DebugData from '@/components/shared/DebugData';
+import { REVALIDATE } from '@/lib/config/cache';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = REVALIDATE.ABOUT_US;
 
 /**
  * Generates metadata for the About Us page

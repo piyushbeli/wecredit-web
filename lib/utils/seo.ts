@@ -7,7 +7,7 @@ import { Metadata } from 'next';
 import { Page, getStrapiMediaUrl } from '@/lib/api/strapi';
 
 const SITE_URL = process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://staging.wecredit.co.in';
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'WeCredit';
+const SITE_NAME = 'WeCredit';
 const DEFAULT_OG_IMAGE = '/og-default.jpg';
 
 /**

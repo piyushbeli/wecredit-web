@@ -33,8 +33,8 @@ export interface ActiveLender {
 interface UseActiveLendersReturn extends UseActiveLendersState {
   /** Refetch the lenders data */
   refetch: () => Promise<void>;
-  /** Helper to get filtered active lenders as array */
-  getActiveLenders: () => ActiveLender[];
+  /** Filtered active lenders array */
+  activeLenders: ActiveLender[];
   /** Check if error is due to network issues */
   isNetworkError: boolean;
   /** Check if error is due to timeout */
@@ -84,12 +84,51 @@ export function useActiveLenders(
     }
   }, [fetchOptions]);
 
-  /** Get active lenders filtered by status flags */
-  const getActiveLenders = useCallback((): ActiveLender[] => {
+  /** Filtered active lenders computed from state */
+  const activeLenders = useMemo((): ActiveLender[] => {
+    console.log('[useActiveLenders] state.lenders type:', typeof state.lenders);
+    console.log('[useActiveLenders] state.lenders:', state.lenders);
     if (!state.lenders) return [];
-    return Object.entries(state.lenders)
-      .filter(([, lender]) => lender.IsAppEnabled === 1 && lender.affiliateStatus === 1)
-      .map(([id, lender]) => ({ id, lender }));
+    
+    // Check if it's a string (needs parsing) or already an object
+    let lendersData: unknown = state.lenders;
+    if (typeof state.lenders === 'string') {
+      console.log('[useActiveLenders] Data is string, parsing...');
+      try {
+        lendersData = JSON.parse(state.lenders);
+      } catch (e) {
+        console.error('[useActiveLenders] Failed to parse string:', e);
+        return [];
+      }
+    }
+    
+    // Check if data is an array or object
+    const isArray = Array.isArray(lendersData);
+    console.log('[useActiveLenders] isArray:', isArray);
+    
+    if (isArray) {
+      // If array, filter directly
+      const lendersArray = lendersData as Lender[];
+      const filtered = lendersArray.filter((lender) => {
+        return Number(lender.IsAppEnabled) === 1 && Number(lender.affiliateStatus) === 1;
+      });
+      console.log('[useActiveLenders] filtered array count:', filtered.length);
+      return filtered.map((lender) => ({ id: String(lender.id || lender.Name), lender }));
+    }
+    
+    // If object with keys
+    const lendersObject = lendersData as Record<string, Lender>;
+    const entries = Object.entries(lendersObject);
+    console.log('[useActiveLenders] entries count:', entries.length);
+    if (entries.length > 0) {
+      console.log('[useActiveLenders] first entry:', entries[0]);
+    }
+    
+    const filtered = entries.filter(([, lender]) => {
+      return Number(lender.IsAppEnabled) === 1 && Number(lender.affiliateStatus) === 1;
+    });
+    console.log('[useActiveLenders] filtered count:', filtered.length);
+    return filtered.map(([id, lender]) => ({ id, lender }));
   }, [state.lenders]);
 
   useEffect(() => {
@@ -101,7 +140,7 @@ export function useActiveLenders(
   return {
     ...state,
     refetch: fetchData,
-    getActiveLenders,
+    activeLenders,
     isNetworkError: state.errorType === 'network',
     isTimeoutError: state.errorType === 'timeout',
   };
