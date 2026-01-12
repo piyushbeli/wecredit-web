@@ -173,6 +173,3 @@ export const strapiConfig = {
 
 /** Export types */
 export type { EnvironmentConfig, EnvironmentType };
-
-/** Cache configuration */
-export { REVALIDATE, DEFAULT_STATIC_REVALIDATE } from './cache';

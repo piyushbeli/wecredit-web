@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getStaticPageBySlug } from '@/lib/content';
 import StaticPageContent from '@/components/shared/StaticPageContent';
-import { REVALIDATE } from '@/lib/config/cache';
+import { CACHE_TIMES } from '@/lib/constants/common';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
-export const revalidate = REVALIDATE.TERMS_OF_SERVICE;
+export const revalidate = CACHE_TIMES.HOUR_1; // Revalidate every hour
 
 /**
  * Generates metadata for the Terms of Service page
