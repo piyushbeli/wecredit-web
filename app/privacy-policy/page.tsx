@@ -5,7 +5,7 @@ import StaticPageContent from '@/components/shared/StaticPageContent';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 3600; // 1 hour
 
 /**
  * Generates metadata for the Privacy Policy page

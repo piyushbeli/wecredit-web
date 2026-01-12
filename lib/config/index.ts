@@ -17,6 +17,7 @@ interface EnvironmentHeaders {
 /** Configuration for each environment */
 interface EnvironmentConfig {
   /** Base URL for both frontend and API (same domain) */
+  apiUrl: string;
   baseUrl: string;
   ondcBaseUrl: string;
   multilenderBaseUrl: string;
@@ -28,6 +29,7 @@ interface EnvironmentConfig {
 /** Environment configurations */
 const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
   staging: {
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wecredit.co.in',
     baseUrl: process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://staging.wecredit.co.in',
     ondcBaseUrl: process.env.NEXT_PUBLIC_ONDC_BASE_URL_STAGING ||
       'https://ondc-internal-staging-pl.azurewebsites.net/ondc',
@@ -46,6 +48,7 @@ const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
   },
 
   prod: {
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wecredit.co.in',
     baseUrl: process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://wecredit.co.in',
     ondcBaseUrl: process.env.NEXT_PUBLIC_ONDC_BASE_URL_PROD ||
       'https://ondc-internal-prod-pl.azurewebsites.net/ondc',
@@ -53,6 +56,7 @@ const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
       'https://multilender.wecredit.co.in/api/v1/user/data-upload',
     wecreditHeaders: {
       'Content-Type': 'application/json',
+      'X-Agent-Host': 'gateway-uat',
     },
     ondcHeaders: {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -98,6 +102,11 @@ class Environment {
   /** Base URL for frontend and API (same domain) */
   public get baseUrl(): string {
     return this.config.baseUrl;
+  }
+
+  /** API URL */
+  public get apiUrl(): string {
+    return this.config.apiUrl;
   }
 
   /** WeCredit API headers (includes X-Agent-Host in staging/preprod) */
@@ -147,9 +156,9 @@ export const env = {
  */
 export const wecreditConfig = {
   /** Base URL (same as frontend) */
-  apiUrl: environment.baseUrl,
+  apiUrl: environment.apiUrl,
   /** Gateway URL for public API */
-  gatewayUrl: `${environment.baseUrl}/api/public`,
+  gatewayUrl: `${environment.apiUrl}/api/public`,
   /** Partner code for API authentication */
   partnerCode: PARTNER_CODE,
   /** Headers for API requests */

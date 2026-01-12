@@ -8,12 +8,18 @@ import TestimonialsSection from './testimonials-section';
 import PartnersSection from './partners-section';
 import FaqSection from './faq-section';
 import BlogSection from './blog-section';
+import type { ActiveLender } from '@/lib/utils/lenders';
+
+/** Props for HomePage component */
+interface HomePageProps {
+  activeLenders: ActiveLender[];
+}
 
 /**
  * Main home page component that composes all sections
  * Uses continuous gradient from blue to white across hero and stats
  */
-const HomePage = (): React.ReactNode => {
+const HomePage = ({ activeLenders }: HomePageProps): React.ReactNode => {
   return (
     <div className="min-h-screen">
       {/* Gradient wrapper for Hero + Stats for seamless transition */}
@@ -32,7 +38,7 @@ const HomePage = (): React.ReactNode => {
       <ToolsCalculatorsSection />
 
       {/* Trending Offers Section */}
-      <TrendingOffersSection />
+      <TrendingOffersSection activeLenders={activeLenders} />
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -50,4 +56,3 @@ const HomePage = (): React.ReactNode => {
 };
 
 export default HomePage;
-

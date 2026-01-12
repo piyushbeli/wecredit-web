@@ -6,7 +6,7 @@ import DebugData from '@/components/shared/DebugData';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 3600; // 1 hour
 
 /**
  * Generates metadata for the About Us page
