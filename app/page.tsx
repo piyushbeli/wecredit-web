@@ -1,10 +1,9 @@
 import { HomePage } from '@/components/home';
-import { CACHE_TIMES } from '@/lib/constants/common';
 import { fetchActiveLenders } from '@/lib/api/wecredit';
 import { filterActiveLenders } from '@/lib/utils/lenders';
 
 export const dynamic = 'force-static';
-export const revalidate = CACHE_TIMES.MINUTE_5;
+export const revalidate = 300; // 5 minutes
 
 /**
  * WeCredit Home page with hero carousel, stats, and product sections
