@@ -12,14 +12,15 @@ interface BottomSheetProps {
 }
 
 /**
- * Bottom sheet component with slide-up animation
+ * Bottom sheet component with rounded top corners
  * Used for login/auth forms
  */
 const BottomSheet = ({ children, className }: BottomSheetProps): React.ReactNode => {
+  const hasFlex = className?.includes('flex');
   return (
     <motion.div
       className={cn(
-        'bg-white rounded-t-3xl -mt-6 relative z-10 min-h-[60vh] shadow-2xl',
+        'bg-white rounded-t-3xl -mt-6 relative z-10 shadow-2xl',
         className
       )}
       initial={{ y: 100, opacity: 0 }}
@@ -35,9 +36,8 @@ const BottomSheet = ({ children, className }: BottomSheetProps): React.ReactNode
       <div className="flex justify-center pt-3 pb-2">
         <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
       </div>
-
       {/* Content */}
-      <div className="px-6 pb-8">{children}</div>
+      <div className={cn('px-6 pb-8', hasFlex && 'flex-1 flex flex-col')}>{children}</div>
     </motion.div>
   );
 };

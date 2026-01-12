@@ -24,3 +24,12 @@ export * from './api-exceptions';
 export { fetchActiveLenders } from './wecredit';
 export type { WeCreditOptions } from './wecredit';
 
+export { authService } from './auth-service';
+export type {
+  SendOtpRequest,
+  SendOtpResponse,
+  VerifyOtpRequest,
+  VerifyOtpResponse,
+  AuthResult,
+} from './auth-service';
+

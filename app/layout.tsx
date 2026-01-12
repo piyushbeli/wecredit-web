@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import MobileHeader from '@/components/home/mobile-header';
 import Footer from '@/components/layout/Footer';
+import { AuthModal } from '@/components/auth';
 import { getGlobal } from '@/lib/strapi';
 
 const geistSans = Geist({
@@ -41,13 +42,8 @@ export default async function RootLayout({
           siteName={globalData.siteName}
         />
         <main className="flex-1">{children}</main>
-        <Footer
-          footerLinks={globalData.footerLinks}
-          socialLinks={globalData.socialLinks}
-          copyrightText={globalData.copyrightText}
-          logo={globalData.logo}
-          siteName={globalData.siteName}
-        />
+        <Footer />
+        <AuthModal />
       </body>
     </html>
   );
