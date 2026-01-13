@@ -1,15 +1,16 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
+import React, { useCallback } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { PercentIcon, CalendarIcon } from '../icons';
 import ArrowBadge from '../ui/arrow-badge';
+import { useAuth } from '@/hooks/use-auth';
 
 /** Props for TrendingOfferCard component */
 interface TrendingOfferCardProps {
-  /** Unique identifier */
+  /** Unique identifier (lender ID) */
   id: string;
   /** Lender name */
   lenderName: string;
@@ -32,8 +33,13 @@ interface TrendingOfferCardProps {
 /**
  * Trending offer card component
  * Displays lender info with amount, rate, tenure and CTA
+ * 
+ * Flow (per PDF Step 5 - User Interaction with Trending Offers):
+ * - 5A: If user NOT logged in → Show login modal, continue after success
+ * - 5B: If user IS logged in → Proceed directly to check eligibility
  */
 const TrendingOfferCard = ({
+  id,
   lenderName,
   logoPath,
   badge,
@@ -43,6 +49,35 @@ const TrendingOfferCard = ({
   href,
   index,
 }: TrendingOfferCardProps): React.ReactNode => {
+  const router = useRouter();
+  const { isAuthenticated, openAuthModalWithAction } = useAuth();
+
+  /**
+   * Handle CTA button click
+   * Per PDF Step 5: Check auth status before proceeding
+   */
+  const handleCheckEligibility = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>): void => {
+      e.preventDefault();
+
+      // PDF Step 5A: User Not Logged In → Show login first
+      if (!isAuthenticated) {
+        openAuthModalWithAction({
+          type: 'check_eligibility',
+          lenderId: id,
+          lenderName,
+          href,
+        });
+        return;
+      }
+
+      // PDF Step 5B: User Logged In → Proceed directly
+      // TODO: Will add Check Status API call here (Step 6)
+      router.push(href);
+    },
+    [isAuthenticated, openAuthModalWithAction, id, lenderName, href, router]
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -122,15 +157,16 @@ const TrendingOfferCard = ({
 
         {/* CTA Button - On white background outside gradient */}
         <div className="p-2 bg-white">
-          <Link
-            href={href}
-            className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-base font-semibold py-1 rounded-full transition-all duration-200"
+          <button
+            type="button"
+            onClick={handleCheckEligibility}
+            className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-base font-semibold py-1 rounded-full transition-all duration-200 cursor-pointer"
             style={{
               boxShadow: '0 4px 14px rgba(30, 95, 230, 0.25)',
             }}
           >
             Check Eligibility
-          </Link>
+          </button>
         </div>
       </div>
     </motion.div>

@@ -119,7 +119,7 @@ const BlogSection = (): React.ReactNode => {
 			</motion.h2>
 
 			{/* Blog Grid - 2x2 on mobile, 4 columns on larger screens */}
-			<div className="mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+			<div className="mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
 				{blogPosts.map((post, index) => (
 					<BlogCard key={post.id} post={post} index={index} />
 				))}

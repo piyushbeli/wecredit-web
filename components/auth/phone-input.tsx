@@ -96,14 +96,10 @@ const PhoneInput = ({
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="flex items-center gap-1 py-3 pr-3 text-gray-700 hover:text-gray-900 transition-colors"
         >
-          <span className="text-xl">{selectedCountry.flag}</span>
-          <span className="text-sm font-medium">{selectedCountry.dialCode}</span>
-          <ChevronDown
-            className={cn(
-              'w-4 h-4 transition-transform',
-              isDropdownOpen && 'rotate-180'
-            )}
-          />
+          <span className="text-xl">🇮🇳
+          </span>
+          <span className="text-sm font-medium">+91</span>
+          
         </button>
 
         {/* Divider */}
@@ -116,7 +112,7 @@ const PhoneInput = ({
           onChange={handlePhoneChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={placeholder}
+          placeholder={'Enter your phone number'}
           className="flex-1 py-3 text-gray-900 text-base outline-none placeholder:text-gray-400"
           maxLength={10}
           inputMode="numeric"

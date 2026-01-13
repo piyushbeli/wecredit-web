@@ -33,7 +33,7 @@ const PageLayout = ({ page, breadcrumbs }: PageLayoutProps) => {
   const hasSidebar = widgets.length > 0 || groupedRelatedLinks.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+    <div className="max-w-7xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-12">
       <div className={`grid grid-cols-1 ${hasSidebar ? 'lg:grid-cols-12' : ''} gap-8`}>
         {/* Main Content */}
         <div className={hasSidebar ? 'lg:col-span-8' : ''}>
@@ -43,7 +43,7 @@ const PageLayout = ({ page, breadcrumbs }: PageLayoutProps) => {
         {/* Sidebar */}
         {hasSidebar && (
           <aside className="lg:col-span-4">
-            <div className="sticky top-8 space-y-6">
+            <div className="sticky top-24 space-y-6">
               {widgets.length > 0 && <PageSidebar widgets={widgets} />}
               {groupedRelatedLinks.length > 0 && (
                 <GroupedRelatedLinksWidget

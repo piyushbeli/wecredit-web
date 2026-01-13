@@ -2,24 +2,24 @@ import React from 'react';
 import HeroCarousel from './hero-carousel';
 import StatsSection from './stats-section';
 import ProductsSection from './products-section';
-import TrendingOffersSection from './trending-offers-section';
+import TrendingOffersClient from './trending-offers-client';
 import ToolsCalculatorsSection from './tools-calculators-section';
 import TestimonialsSection from './testimonials-section';
 import PartnersSection from './partners-section';
 import FaqSection from './faq-section';
 import BlogSection from './blog-section';
-import type { ActiveLender } from '@/lib/utils/lenders';
-
-/** Props for HomePage component */
-interface HomePageProps {
-  activeLenders: ActiveLender[];
-}
+import DreamsSection from './dreams-section';
 
 /**
  * Main home page component that composes all sections
  * Uses continuous gradient from blue to white across hero and stats
+ * 
+ * Lender Display Flow (PDF Steps 2 & 3):
+ * - TrendingOffersClient handles all lender fetching internally
+ * - Step 2: Generic lenders (client-side)
+ * - Step 3: User-specific lenders when logged in (client-side)
  */
-const HomePage = ({ activeLenders }: HomePageProps): React.ReactNode => {
+const HomePage = (): React.ReactNode => {
   return (
     <div className="min-h-screen">
       {/* Gradient wrapper for Hero + Stats for seamless transition */}
@@ -37,8 +37,10 @@ const HomePage = ({ activeLenders }: HomePageProps): React.ReactNode => {
       {/* Tools & Calculators Section */}
       <ToolsCalculatorsSection />
 
-      {/* Trending Offers Section */}
-      <TrendingOffersSection activeLenders={activeLenders} />
+      {/* Trending Offers Section
+          - Fetches generic lenders as fallback (PDF Step 2) - client-side
+          - Fetches user-specific lenders when logged in (PDF Step 3) */}
+      <TrendingOffersClient />
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -51,6 +53,9 @@ const HomePage = ({ activeLenders }: HomePageProps): React.ReactNode => {
 
       {/* Blog Section */}
       <BlogSection />
+
+      {/* Dreams Section */}
+      <DreamsSection />
     </div>
   );
 };

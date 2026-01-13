@@ -1,19 +1,15 @@
-import { HomePage } from '@/components/home';
-import { fetchActiveLenders } from '@/lib/api/wecredit';
-import { filterActiveLenders } from '@/lib/utils/lenders';
 
-export const dynamic = 'force-static';
-export const revalidate = 300; // 5 minutes
+import { HomePage } from '@/components/home';
 
 /**
  * WeCredit Home page with hero carousel, stats, and product sections
- * Fetches lender data server-side for ISR caching
+ * 
+ * PDF Flow Implementation:
+ * - Step 2: Generic lenders fetched in TrendingOffersClient (client-side)
+ * - Step 3: User-specific lenders fetched in TrendingOffersClient (client-side)
  */
-const Home = async (): Promise<React.ReactNode> => {
-  const lendersResponse = await fetchActiveLenders();
-  const activeLenders = filterActiveLenders(lendersResponse);
-
-  return <HomePage activeLenders={activeLenders} />;
+const Home = (): React.ReactNode => {
+  return <HomePage />;
 };
 
 export default Home;

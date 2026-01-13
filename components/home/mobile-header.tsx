@@ -5,8 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import type { GlobalLink, StrapiMedia } from '@/types/strapi';
+import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 
 /** Scroll threshold in pixels to trigger header style change */
@@ -63,6 +64,7 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const { isAuthenticated, user, openAuthModal, logout } = useAuth();
 
   /** Only show transparent glass pill on home page */
   const isHomePage = pathname === '/';
@@ -130,21 +132,58 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
             />
           </Link>
 
-          {/* Hamburger Menu Button - glass background with icon */}
-          <motion.button
-            type="button"
-            onClick={toggleMenu}
-            className={cn(
-              'p-2.5 rounded-md transition-all duration-300',
-              showSolidHeader
-                ? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
-                : 'wc-menu-btn-glass text-wc-blue-600'
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Login/User Button */}
+            {isAuthenticated ? (
+              <motion.button
+                type="button"
+                onClick={toggleMenu}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-2 rounded-md transition-all duration-300 text-sm font-medium',
+                  showSolidHeader
+                    ? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
+                    : 'wc-menu-btn-glass text-white'
+                )}
+                whileTap={{ scale: 0.95 }}
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline max-w-[80px] truncate">
+                  {user?.name || 'Account'}
+                </span>
+              </motion.button>
+            ) : (
+              <motion.button
+                type="button"
+                onClick={openAuthModal}
+                className={cn(
+                  'px-4 py-2 rounded-md transition-all duration-300 text-sm font-semibold',
+                  showSolidHeader
+                    ? 'bg-wc-blue-600 text-white hover:bg-wc-blue-700'
+                    : 'bg-white text-wc-blue-600 hover:bg-white/90'
+                )}
+                whileTap={{ scale: 0.95 }}
+              >
+                Login
+              </motion.button>
             )}
-            aria-label="Open menu"
-            whileTap={{ scale: 0.95 }}
-          >
-            <Menu className={cn("w-5 h-5", showSolidHeader ? 'text-wc-blue-600' : 'text-white')} />
-          </motion.button>
+
+            {/* Hamburger Menu Button */}
+            <motion.button
+              type="button"
+              onClick={toggleMenu}
+              className={cn(
+                'p-2.5 rounded-md transition-all duration-300',
+                showSolidHeader
+                  ? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
+                  : 'wc-menu-btn-glass text-wc-blue-600'
+              )}
+              aria-label="Open menu"
+              whileTap={{ scale: 0.95 }}
+            >
+              <Menu className={cn("w-5 h-5", showSolidHeader ? 'text-wc-blue-600' : 'text-white')} />
+            </motion.button>
+          </div>
         </div>
       </header>
 
@@ -189,6 +228,51 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
                 >
                   <X className="w-5 h-5" />
                 </motion.button>
+              </div>
+
+              {/* User Section */}
+              <div className="p-4 border-b border-white/10">
+                {isAuthenticated ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-wc-blue-500 flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">
+                          {user?.name || 'User'}
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          +91 {user?.phoneNumber}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        closeMenu();
+                      }}
+                      className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                      aria-label="Logout"
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <LogOut className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+                ) : (
+                  <motion.button
+                    type="button"
+                    onClick={() => {
+                      openAuthModal();
+                      closeMenu();
+                    }}
+                    className="w-full py-3 bg-wc-blue-500 text-white rounded-lg font-semibold hover:bg-wc-blue-600 transition-colors"
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Login / Sign Up
+                  </motion.button>
+                )}
               </div>
 
               {/* Navigation Links */}

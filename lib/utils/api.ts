@@ -3,6 +3,7 @@
  * Class-based API handler with logging, timeouts, and custom exceptions
  */
 
+import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { environment } from '@/lib/config';
 import {
   ApiException,
@@ -22,6 +23,17 @@ import {
 
 /** Default timeout based on environment */
 const DEFAULT_TIMEOUT = environment.isDevelopment ? TIMEOUT_DEVELOPMENT : TIMEOUT_PRODUCTION;
+
+/** Cookie expiry duration: 7 days in seconds */
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+
+/** Default cookie options for secure auth data storage */
+const AUTH_COOKIE_OPTIONS = {
+  maxAge: COOKIE_MAX_AGE,
+  path: '/',
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+};
 
 /** Request options interface */
 export interface RequestOptions {
@@ -49,47 +61,49 @@ export interface ApiResponse<T = unknown> {
 }
 
 /**
- * Get auth token from localStorage (client-side only)
+ * Retrieves the authentication token from cookies
+ * Works on both client and server side via cookies-next
+ * @returns The JWT token string or null if not found
  */
 function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(STORAGE_AUTH_TOKEN);
+  const token = getCookie(STORAGE_AUTH_TOKEN);
+  return token ? String(token) : null;
 }
 
 /**
- * Get mobile number from localStorage (client-side only)
+ * Retrieves the user's mobile number from cookies
+ * @returns The 10-digit mobile number or null if not found
  */
 function getMobile(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(STORAGE_MOBILE);
+  const mobile = getCookie(STORAGE_MOBILE);
+  return mobile ? String(mobile) : null;
 }
 
 /**
- * Set auth token in localStorage
+ * Stores the authentication token in a secure cookie
+ * Cookie is configured with sameSite and secure flags for XSS protection
+ * @param token - The JWT token received after OTP verification
  */
 export function setAuthToken(token: string): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_AUTH_TOKEN, token);
-  }
+  setCookie(STORAGE_AUTH_TOKEN, token, AUTH_COOKIE_OPTIONS);
 }
 
 /**
- * Set mobile in localStorage
+ * Stores the user's mobile number in a cookie
+ * Used for authenticated API requests that require mobile in headers
+ * @param mobile - The 10-digit mobile number (must start with 6-9)
  */
 export function setMobile(mobile: string): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_MOBILE, mobile);
-  }
+  setCookie(STORAGE_MOBILE, mobile, AUTH_COOKIE_OPTIONS);
 }
 
 /**
- * Clear auth data from localStorage
+ * Clears all authentication data from cookies
+ * Called during logout or when token validation fails
  */
 export function clearAuthData(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(STORAGE_AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_MOBILE);
-  }
+  deleteCookie(STORAGE_AUTH_TOKEN);
+  deleteCookie(STORAGE_MOBILE);
 }
 
 /**
@@ -123,7 +137,7 @@ function logApiCall(
   console.log('');
   console.log('📩 RESPONSE');
   console.log(`← STATUS: ${statusEmoji} ${response.status} (${duration}ms)`);
-  console.log('← BODY:', responseBody);
+  // console.log('← BODY:', responseBody);
   console.groupEnd();
 }
 

@@ -100,7 +100,7 @@ const TestimonialSlide = ({
           ref={(el) => setVideoRef(testimonial.id, el)}
           src={testimonial.videoUrl}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-            isPlaying ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            isPlaying ? 'opacity-100 z-10' : 'opacity-50 z-0'
           }`}
           playsInline
           onEnded={() => onVideoEnded(testimonial.id)}

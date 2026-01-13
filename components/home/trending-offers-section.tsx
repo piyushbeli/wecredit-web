@@ -59,7 +59,7 @@ const TrendingOffersSection = ({ activeLenders }: TrendingOffersSectionProps): R
             <CarouselSlide
               key={colIndex}
               index={colIndex}
-              className="basis-4/5 pl-3 md:basis-1/3 lg:basis-1/4"
+              className="basis-4/5 pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
             >
               {/* 3-row vertical stack */}
               <div className="flex flex-col gap-3">

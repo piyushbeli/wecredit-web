@@ -3,19 +3,23 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Menu } from 'lucide-react';
+import { Menu, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /** Props for GradientHeader component */
 interface GradientHeaderProps {
-  /** Header variant - logo-only for simple pages, with-menu for home */
-  variant?: 'logo-only' | 'with-menu';
+  /** Header variant - logo-only for simple pages, with-menu for home, with-illustration for auth screens */
+  variant?: 'logo-only' | 'with-menu' | 'with-illustration';
   /** Optional callback when menu button is clicked */
   onMenuClick?: () => void;
   /** Additional CSS classes */
   className?: string;
   /** Height of the header section */
-  height?: 'short' | 'medium' | 'tall';
+  height?: 'short' | 'medium' | 'tall' | 'half' | 'threeQuarter';
+  /** Illustration image path for with-illustration variant */
+  illustration?: string;
+  /** Alt text for illustration image */
+  illustrationAlt?: string;
 }
 
 /** Height class mapping */
@@ -23,6 +27,8 @@ const heightClasses = {
   short: 'min-h-[200px]',
   medium: 'min-h-[300px]',
   tall: 'min-h-[40vh]',
+  half: 'h-[50vh]',
+  threeQuarter: 'h-[75vh]',
 };
 
 /**
@@ -34,6 +40,8 @@ const GradientHeader = ({
   onMenuClick,
   className,
   height = 'tall',
+  illustration,
+  illustrationAlt = 'Illustration',
 }: GradientHeaderProps): React.ReactNode => {
   return (
     <header
@@ -88,6 +96,38 @@ const GradientHeader = ({
             />
           </motion.div>
         </div>
+      )}
+
+      {/* Illustration variant - for auth screens */}
+      {variant === 'with-illustration' && (
+        <>
+          {/* Curved bottom edge */}
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-white rounded-t-[2rem] z-10" />
+          {/* Illustration or placeholder */}
+          <div className="flex-1 flex items-center justify-center relative z-0">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {illustration ? (
+                <Image
+                  src={illustration}
+                  alt={illustrationAlt}
+                  width={200}
+                  height={200}
+                  className="w-auto h-auto max-w-[200px] max-h-[200px] object-contain"
+                  priority
+                />
+              ) : (
+                <div className="w-[180px] h-[180px] border-2 border-dashed border-white/40 rounded-2xl flex flex-col items-center justify-center text-white/60">
+                  <ImageIcon className="w-12 h-12 mb-2" />
+                  <span className="text-sm font-medium">Add Image</span>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </>
       )}
     </header>
   );

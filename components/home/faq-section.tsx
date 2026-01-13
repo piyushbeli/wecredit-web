@@ -77,7 +77,7 @@ const FaqAccordionItem = ({
 }: FaqAccordionItemProps): React.ReactNode => {
 	return (
 		<motion.div
-			className="border border-gray-200 rounded-xl overflow-hidden bg-white"
+			className="border border-gray-200 rounded-sm overflow-hidden bg-gray-100"
 			initial={{ opacity: 0, y: 10 }}
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true }}
@@ -89,7 +89,7 @@ const FaqAccordionItem = ({
 				className="w-full px-4 sm:px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
 				aria-expanded={isExpanded}
 			>
-				<span className="text-sm sm:text-base font-medium text-gray-800 pr-4">
+				<span className="text-sm sm:text-base pr-4">
 					{item.question}
 				</span>
 				<ChevronDown

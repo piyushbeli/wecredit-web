@@ -44,8 +44,11 @@ export const SOURCE_WEBSITE = 'website';
  */
 export const ENDPOINTS = {
   PUBLIC: {
-    /** Endpoint identifier for active lenders */
+    /** Endpoint identifier for active lenders (generic - no auth) */
     ACTIVE_LENDERS: 'active-lenders',
+
+    /** Endpoint identifier for check status all (PDF Step 6) */
+    CHECK_STATUS_ALL: 'check-status-all',
   },
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',
