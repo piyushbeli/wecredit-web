@@ -329,10 +329,12 @@ async function authPost<T>(payload: unknown): Promise<{ data: T | null; error: s
 /**
  * Makes a GET request to the auth endpoint with auth headers
  * Used for token validation
+ * @param endpoint - Optional endpoint query parameter (e.g., 'validate')
  */
-async function authGet<T>(): Promise<{ data: T | null; error: string | null; code: number | null }> {
+async function authGet<T>(endpoint?: string): Promise<{ data: T | null; error: string | null; code: number | null }> {
   try {
-    const response = await fetch(AUTH_ENDPOINT, {
+    const url = endpoint ? `${AUTH_ENDPOINT}?endpoint=${endpoint}` : AUTH_ENDPOINT;
+    const response = await fetch(url, {
       method: 'GET',
       headers: buildAuthHeaders(),
     });
@@ -498,10 +500,11 @@ async function resendOtp(mobile: string): Promise<AuthResult<ResendOtpResponse>>
 
 /**
  * Validates existing auth token
+ * Makes GET request to /api/auth?endpoint=validate
  * @returns Validation result with profile status
  */
 async function validateToken(): Promise<ValidateTokenResponse> {
-  const { data, error: networkError } = await authGet<AuthApiResponse>();
+  const { data, error: networkError } = await authGet<AuthApiResponse>('validate');
   if (networkError || !data) {
     // On network error, clear auth data
     clearAllAuthData();

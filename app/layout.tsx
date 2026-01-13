@@ -4,6 +4,7 @@ import './globals.css';
 import MobileHeader from '@/components/home/mobile-header';
 import Footer from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth';
+import { AuthProvider } from '@/providers/auth-provider';
 import { getGlobal } from '@/lib/strapi';
 
 const geistSans = Geist({
@@ -23,6 +24,9 @@ export const metadata: Metadata = {
 
 /**
  * Root layout component that fetches global data from Strapi
+ * 
+ * Auth Flow (PDF Step 1):
+ * AuthProvider validates existing token on app mount
  */
 export default async function RootLayout({
   children,
@@ -36,14 +40,17 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <MobileHeader
-          headerLinks={globalData.headerLinks}
-          logo={globalData.logo}
-          siteName={globalData.siteName}
-        />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <AuthModal />
+        {/* AuthProvider validates token on mount (PDF Step 1) */}
+        <AuthProvider>
+          <MobileHeader
+            headerLinks={globalData.headerLinks}
+            logo={globalData.logo}
+            siteName={globalData.siteName}
+          />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <AuthModal />
+        </AuthProvider>
       </body>
     </html>
   );

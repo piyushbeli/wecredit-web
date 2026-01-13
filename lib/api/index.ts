@@ -21,7 +21,12 @@ export type {
 
 export * from './api-exceptions';
 
-export { fetchActiveLenders } from './wecredit';
+export {
+  fetchActiveLenders,
+  fetchActiveLendersForUser,
+  checkStatusAll,
+  determineLenderHandling,
+} from './wecredit';
 export type { WeCreditOptions } from './wecredit';
 
 export {

@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowLeft } from 'lucide-react';
 import { GradientHeader } from '@/components/shared';
@@ -13,23 +14,62 @@ import { cn } from '@/lib/utils';
 /**
  * Auth Modal component
  * Renders a full-screen modal with phone input and OTP verification steps
+ * 
+ * Post-Login Behaviour (PDF Step 5A):
+ * After successful login, checks for pending action and executes it
  */
 const AuthModal = (): React.ReactNode => {
+  const router = useRouter();
   const {
     isModalOpen,
     currentStep,
     phoneNumber,
     isLoading,
     error,
+    pendingAction,
     closeModal,
     setStep,
     setPhoneNumber,
     setUser,
     setLoading,
     setError,
+    consumePendingAction,
   } = useAuthStore();
 
   const [otpValue, setOtpValue] = useState('');
+  const wasAuthenticated = useRef(false);
+
+  /**
+   * PDF Step 5A - Post Login Behaviour
+   * Watch for successful login and execute pending action
+   */
+  useEffect(() => {
+    const { isAuthenticated } = useAuthStore.getState();
+    
+    // Detect transition from not authenticated to authenticated
+    if (isAuthenticated && !wasAuthenticated.current) {
+      // User just logged in - check for pending action
+      const action = consumePendingAction();
+      
+      if (action) {
+        console.info('[AuthModal] Executing pending action:', action.type, action.lenderId);
+        
+        // Execute the pending action based on type
+        switch (action.type) {
+          case 'navigate_to_offer':
+          case 'check_eligibility':
+            // Navigate to the offer/eligibility page
+            // TODO: Add Check Status API call here before navigation (Step 6)
+            router.push(action.href);
+            break;
+          default:
+            console.warn('[AuthModal] Unknown pending action type:', action.type);
+        }
+      }
+    }
+    
+    wasAuthenticated.current = isAuthenticated;
+  }, [consumePendingAction, router]);
 
   /** Handle phone number change */
   const handlePhoneChange = useCallback(
