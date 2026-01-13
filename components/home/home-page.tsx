@@ -9,25 +9,17 @@ import PartnersSection from './partners-section';
 import FaqSection from './faq-section';
 import BlogSection from './blog-section';
 import DreamsSection from './dreams-section';
-import type { ActiveLender } from '@/lib/utils/lenders';
-
-/** Props for HomePage component */
-interface HomePageProps {
-  /** Generic active lenders fetched client-side (PDF Step 2) */
-  activeLenders: ActiveLender[];
-  /** Loading state for initial lenders fetch */
-  isLoading?: boolean;
-}
 
 /**
  * Main home page component that composes all sections
  * Uses continuous gradient from blue to white across hero and stats
  * 
  * Lender Display Flow (PDF Steps 2 & 3):
- * - Client fetches generic lenders (Step 2) - visible in network tab
- * - TrendingOffersClient handles user-specific lenders when logged in (Step 3)
+ * - TrendingOffersClient handles all lender fetching internally
+ * - Step 2: Generic lenders (client-side)
+ * - Step 3: User-specific lenders when logged in (client-side)
  */
-const HomePage = ({ activeLenders, isLoading = false }: HomePageProps): React.ReactNode => {
+const HomePage = (): React.ReactNode => {
   return (
     <div className="min-h-screen">
       {/* Gradient wrapper for Hero + Stats for seamless transition */}
@@ -46,9 +38,9 @@ const HomePage = ({ activeLenders, isLoading = false }: HomePageProps): React.Re
       <ToolsCalculatorsSection />
 
       {/* Trending Offers Section
-          - Uses generic lenders as fallback (PDF Step 2) - fetched client-side
+          - Fetches generic lenders as fallback (PDF Step 2) - client-side
           - Fetches user-specific lenders when logged in (PDF Step 3) */}
-      <TrendingOffersClient genericLenders={activeLenders} isLoadingGeneric={isLoading} />
+      <TrendingOffersClient />
 
       {/* Testimonials Section */}
       <TestimonialsSection />

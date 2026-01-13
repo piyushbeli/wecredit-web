@@ -4,31 +4,27 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { fetchActiveLendersForUser } from '@/lib/api/wecredit';
 import { filterActiveLenders } from '@/lib/utils/lenders';
+import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import type { ActiveLender } from '@/lib/utils/lenders';
 import TrendingOffersSection from './trending-offers-section';
 import TrendingOffersSkeleton from './trending-offers-skeleton';
 
 /**
- * Props for TrendingOffersClient component
- */
-interface TrendingOffersClientProps {
-  /** Client-fetched generic lenders (fallback for non-logged-in users) */
-  genericLenders: ActiveLender[];
-  /** Loading state for generic lenders fetch */
-  isLoadingGeneric?: boolean;
-}
-
-/**
  * Client wrapper for TrendingOffersSection
  * 
  * Implements PDF Steps 2 & 3:
- * - Step 2: Uses generic lenders (fetched client-side) when user is NOT logged in
+ * - Step 2: Fetches generic lenders (client-side) when user is NOT logged in
  * - Step 3: Fetches user-specific lenders (client-side) when user IS logged in
  * 
- * Both API calls are now client-side and visible in the network tab
+ * Completely independent component - handles all lender fetching internally
  */
-const TrendingOffersClient = ({ genericLenders, isLoadingGeneric = false }: TrendingOffersClientProps): React.ReactNode => {
+const TrendingOffersClient = (): React.ReactNode => {
   const { isAuthenticated, user } = useAuthStore();
+  
+  // PDF Step 2: Fetch generic lenders (always fetched as fallback)
+  const { activeLenders: genericLenders, isLoading: isLoadingGeneric } = useFilteredActiveLenders();
+  
+  // PDF Step 3: Fetch user-specific lenders when logged in
   const [userLenders, setUserLenders] = useState<ActiveLender[] | null>(null);
   const [isLoadingUserLenders, setIsLoadingUserLenders] = useState(false);
   const hasFetchedForUser = useRef<string | null>(null);
@@ -54,14 +50,11 @@ const TrendingOffersClient = ({ genericLenders, isLoadingGeneric = false }: Tren
       setIsLoadingUserLenders(true);
       
       try {
-        console.info('[TrendingOffersClient] Fetching user-specific lenders for:', user.phoneNumber);
         const response = await fetchActiveLendersForUser(user.phoneNumber);
         const filteredLenders = filterActiveLenders(response);
         setUserLenders(filteredLenders);
         hasFetchedForUser.current = user.phoneNumber;
-        console.info('[TrendingOffersClient] User-specific lenders fetched:', filteredLenders.length);
       } catch (error) {
-        console.error('[TrendingOffersClient] Failed to fetch user-specific lenders:', error);
         // Fall back to generic lenders on error
         setUserLenders(null);
       } finally {

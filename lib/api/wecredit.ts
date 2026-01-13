@@ -10,6 +10,7 @@
 
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
+import { withApiLogging } from '@/lib/utils/api-logger';
 import type {
   ActiveLendersResponse,
   CheckStatusAllResponse,
@@ -60,26 +61,30 @@ function buildHeaders(options: WeCreditOptions): Record<string, string> {
 export async function fetchActiveLenders(
   options: WeCreditOptions = {}
 ): Promise<ActiveLendersResponse> {
+  const requestBody = {
+    endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
+    partnerCode: wecreditConfig.partnerCode,
+  };
   try {
-    const response = await fetch(wecreditConfig.gatewayUrl, {
-      method: 'POST',
-      headers: buildHeaders(options),
-      body: JSON.stringify({
-        endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
-        partnerCode: wecreditConfig.partnerCode,
+    const data = await withApiLogging<ActiveLendersResponse>(
+      'fetchActiveLenders',
+      () => fetch(wecreditConfig.gatewayUrl, {
+        method: 'POST',
+        headers: buildHeaders(options),
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
       }),
-      // No caching - ensure network call is visible in browser dev tools
-      cache: 'no-store',
-    });
-    
-    if (!response.ok) {
-      console.warn(`[fetchActiveLenders] API returned ${response.status}, using fallback`);
-      return DEFAULT_LENDERS_RESPONSE;
-    }
-    const data = await response.json() as ActiveLendersResponse;
+      {
+        method: 'POST',
+        url: wecreditConfig.gatewayUrl,
+        headers: buildHeaders(options),
+        body: requestBody,
+        mobile: options.mobile,
+        hasAuthorization: Boolean(options.authorization),
+      }
+    );
     return data;
   } catch {
-    console.warn('[fetchActiveLenders] API unavailable, using fallback');
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -96,28 +101,32 @@ export async function fetchActiveLendersForUser(
   authorization?: string
 ): Promise<ActiveLendersResponse> {
   if (!mobile) {
-    console.warn('[fetchActiveLendersForUser] Mobile number required');
     return DEFAULT_LENDERS_RESPONSE;
   }
+  const requestBody = {
+    endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
+    partnerCode: wecreditConfig.partnerCode,
+  };
   try {
-    const response = await fetch(wecreditConfig.gatewayUrl, {
-      method: 'POST',
-      headers: buildHeaders({ mobile, authorization }),
-      body: JSON.stringify({
-        endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
-        partnerCode: wecreditConfig.partnerCode,
+    const data = await withApiLogging<ActiveLendersResponse>(
+      'fetchActiveLendersForUser',
+      () => fetch(wecreditConfig.gatewayUrl, {
+        method: 'POST',
+        headers: buildHeaders({ mobile, authorization }),
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
       }),
-      // No caching for user-specific data
-      cache: 'no-store',
-    });
-    if (!response.ok) {
-      console.warn(`[fetchActiveLendersForUser] API returned ${response.status}, using fallback`);
-      return DEFAULT_LENDERS_RESPONSE;
-    }
-    const data = await response.json() as ActiveLendersResponse;
+      {
+        method: 'POST',
+        url: wecreditConfig.gatewayUrl,
+        headers: buildHeaders({ mobile, authorization }),
+        body: requestBody,
+        mobile,
+        hasAuthorization: Boolean(authorization),
+      }
+    );
     return data;
   } catch {
-    console.warn('[fetchActiveLendersForUser] API unavailable, using fallback');
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -142,33 +151,39 @@ export async function checkStatusAll(
       error: 'Mobile number required',
     };
   }
+  const requestBody = {
+    endpoint: ENDPOINTS.PUBLIC.CHECK_STATUS_ALL,
+    partnerCode: wecreditConfig.partnerCode,
+  };
   try {
-    const response = await fetch(wecreditConfig.gatewayUrl, {
-      method: 'POST',
-      headers: buildHeaders({ mobile, authorization }),
-      body: JSON.stringify({
-        endpoint: ENDPOINTS.PUBLIC.CHECK_STATUS_ALL,
-        partnerCode: wecreditConfig.partnerCode,
+    const data = await withApiLogging<CheckStatusAllResponse>(
+      'checkStatusAll',
+      () => fetch(wecreditConfig.gatewayUrl, {
+        method: 'POST',
+        headers: buildHeaders({ mobile, authorization }),
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
       }),
-      cache: 'no-store',
-    });
-    if (!response.ok) {
-      console.warn(`[checkStatusAll] API returned ${response.status}`);
-      return {
-        success: false,
-        error: `Server returned ${response.status}`,
-      };
-    }
-    const data = await response.json() as CheckStatusAllResponse;
+      {
+        method: 'POST',
+        url: wecreditConfig.gatewayUrl,
+        headers: buildHeaders({ mobile, authorization }),
+        body: requestBody,
+        mobile,
+        hasAuthorization: Boolean(authorization),
+      }
+    );
     return {
       success: true,
       data,
     };
   } catch (error) {
-    console.error('[checkStatusAll] API error:', error);
+    const errorMessage = error instanceof Error
+      ? error.message
+      : 'Unable to check status. Please try again.';
     return {
       success: false,
-      error: 'Unable to check status. Please try again.',
+      error: errorMessage,
       data: DEFAULT_CHECK_STATUS_RESPONSE,
     };
   }
