@@ -34,3 +34,9 @@ export interface Lender {
 export interface ActiveLendersResponse {
   [key: string]: Lender;
 }
+
+
+export interface Partner {
+	name: string;
+	logo: string;
+}

@@ -83,7 +83,7 @@ const AuthModal = (): React.ReactNode => {
   const handleResendOtp = async (): Promise<void> => {
     setError(null);
     setOtpValue('');
-    const result = await authService.sendOtp(phoneNumber);
+    const result = await authService.resendOtp(phoneNumber);
     if (!result.success) {
       setError(result.error || 'Failed to resend OTP. Please try again.');
     }

@@ -24,12 +24,26 @@ export * from './api-exceptions';
 export { fetchActiveLenders } from './wecredit';
 export type { WeCreditOptions } from './wecredit';
 
-export { authService } from './auth-service';
+export {
+  authService,
+  AuthResponseCodes,
+  AuthErrorCodes,
+  getDeviceFingerprint,
+  fetchUserIp,
+  buildDefaultHeaders,
+  buildAuthHeaders,
+} from './auth-service';
 export type {
   SendOtpRequest,
   SendOtpResponse,
   VerifyOtpRequest,
   VerifyOtpResponse,
+  ResendOtpRequest,
+  ResendOtpResponse,
+  ValidateTokenResponse,
+  LogoutRequest,
+  LogoutResponse,
   AuthResult,
+  AuthApiResponse,
 } from './auth-service';
 
