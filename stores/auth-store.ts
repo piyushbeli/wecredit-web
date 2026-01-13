@@ -126,10 +126,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       }),
       {
         name: 'auth-storage',
+        // Only persist UI-related state, token is stored in secure cookies
         partialize: (state) => ({
           isAuthenticated: state.isAuthenticated,
           user: state.user,
-          token: state.token,
         }),
       }
     ),

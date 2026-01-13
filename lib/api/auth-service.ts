@@ -4,6 +4,7 @@
  * Based on WeCredit OTP Authentication API documentation
  */
 
+import { getCookie, deleteCookie } from 'cookies-next';
 import { wecreditConfig } from '@/lib/config';
 import { PARTNER_CODE, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { User } from '@/stores/auth-store';
@@ -278,20 +279,18 @@ function buildDefaultHeaders(): Record<string, string> {
 }
 
 /**
- * Build headers for authenticated requests
- * Includes Authorization, mobile, and deviceInfo
+ * Builds HTTP headers for authenticated API requests
+ * Retrieves token and mobile from cookies and includes them in headers
+ * @returns Headers object with Authorization, mobile, and deviceInfo
  */
 function buildAuthHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') {
-    return buildDefaultHeaders();
-  }
-  const token = localStorage.getItem(STORAGE_AUTH_TOKEN) || '';
-  const mobile = localStorage.getItem(STORAGE_MOBILE) || '';
+  const token = getCookie(STORAGE_AUTH_TOKEN);
+  const mobile = getCookie(STORAGE_MOBILE);
   const deviceInfo = getDeviceInfo();
   return {
     ...buildDefaultHeaders(),
-    'Authorization': `Bearer ${token}`,
-    'mobile': mobile,
+    'Authorization': `Bearer ${token || ''}`,
+    'mobile': String(mobile || ''),
     ...(deviceInfo && { 'deviceInfo': deviceInfo }),
   };
 }
@@ -550,27 +549,32 @@ async function logout(mobile: string): Promise<AuthResult<LogoutResponse>> {
 }
 
 /**
- * Clears all authentication data from localStorage
+ * Clears all authentication data from storage
+ * Removes auth cookies (token, mobile) and localStorage items (fingerprint, device info)
+ * Called on logout or when token validation fails
  */
 function clearAllAuthData(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_AUTH_TOKEN);
-  localStorage.removeItem(STORAGE_MOBILE);
-  localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
-  localStorage.removeItem('isLoggedIn');
-  localStorage.removeItem('fingerprint');
-  localStorage.removeItem('ip');
-  localStorage.removeItem(DEVICE_INFO_STORAGE_KEY);
+  // Clear auth cookies
+  deleteCookie(STORAGE_AUTH_TOKEN);
+  deleteCookie(STORAGE_MOBILE);
+  // Clear localStorage items (non-sensitive device data)
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('fingerprint');
+    localStorage.removeItem('ip');
+    localStorage.removeItem(DEVICE_INFO_STORAGE_KEY);
+  }
 }
 
 /**
- * Checks if user is logged in
- * @returns true if auth token and mobile are present
+ * Checks if user is currently logged in
+ * Verifies presence of both auth token and mobile number in cookies
+ * @returns true if valid auth credentials exist, false otherwise
  */
 function isUserLoggedIn(): boolean {
-  if (typeof window === 'undefined') return false;
-  const token = localStorage.getItem(STORAGE_AUTH_TOKEN);
-  const mobile = localStorage.getItem(STORAGE_MOBILE);
+  const token = getCookie(STORAGE_AUTH_TOKEN);
+  const mobile = getCookie(STORAGE_MOBILE);
   return !!(token && mobile);
 }
 
