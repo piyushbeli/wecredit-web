@@ -9,6 +9,7 @@ import { useState, useCallback } from 'react';
 import { leadService } from '@/lib/api/lead-service';
 import type { CheckDedupeResponse } from '@/types/lead';
 import type { LeadServiceResult } from '@/lib/api/lead-service';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
 
 /**
  * Return type for useCheckDedupe hook
@@ -50,6 +51,7 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
   const [needsForm, setNeedsForm] = useState(false);
   const [response, setResponse] = useState<CheckDedupeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const bypassDedupeCheck = useFeatureFlag('bypassDedupeCheck');
 
   /**
    * Checks if user exists and needs to fill form
@@ -61,6 +63,17 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     mobile: string,
     partnerCode: string
   ): Promise<boolean> => {
+    // Feature flag: Bypass dedupe check for testing
+    if (bypassDedupeCheck) {
+      console.info('[FeatureFlag] Bypassing dedupe check');
+      setNeedsForm(true);
+      setResponse({
+        statusCode: 1003,
+        statusMessage: 'Dedupe check bypassed (feature flag)',
+      });
+      return true;
+    }
+
     setIsLoading(true);
     setNeedsForm(false);
     setError(null);
@@ -93,7 +106,7 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [bypassDedupeCheck]);
 
   /**
    * Reset all state to initial values
