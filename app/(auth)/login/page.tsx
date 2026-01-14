@@ -109,7 +109,7 @@ const LoginPage = (): React.ReactNode => {
   const isOtpComplete = otpValue.length === 6;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-white">
+    <div className="fixed inset-0 z-100 flex flex-col bg-white">
       <AnimatePresence mode="wait">
         {step === 'phone' ? (
           <motion.div

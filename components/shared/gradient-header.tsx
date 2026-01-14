@@ -46,7 +46,7 @@ const GradientHeader = ({
   return (
     <header
       className={cn(
-        'wc-hero-gradient-wrapper relative flex flex-col',
+        'bg-brand-primary relative flex flex-col',
         heightClasses[height],
         className
       )}
