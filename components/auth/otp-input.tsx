@@ -21,6 +21,8 @@ interface OTPInputProps {
   onComplete?: (otp: string) => void;
   /** Callback when resend is clicked */
   onResend?: () => void;
+  /** Callback when change number is clicked */
+  onChangeNumber?: () => void;
   /** Error message to display */
   error?: string;
   /** Whether the input is disabled */
@@ -29,6 +31,8 @@ interface OTPInputProps {
   className?: string;
   /** Whether to show resend section */
   showResend?: boolean;
+  /** Phone number to display */
+  phoneNumber?: string;
   /** Variant for styling - default white boxes, blue for blue background */
   variant?: 'default' | 'blue';
 }
@@ -42,10 +46,12 @@ const OTPInput = ({
   onChange,
   onComplete,
   onResend,
+  onChangeNumber,
   error,
   disabled = false,
   className,
   showResend = true,
+  phoneNumber = '',
   variant = 'default',
 }: OTPInputProps): React.ReactNode => {
   const [otp, setOtp] = useState(controlledValue || '');
@@ -98,63 +104,66 @@ const OTPInput = ({
 
   /** Get input class based on variant and state */
   const getInputClass = (hasValue: boolean): string => {
+    // Consistent styling for all states - matching Figma design
     if (variant === 'blue') {
       return cn(
-        'w-12 h-14 border rounded-sm text-center text-2xl font-semibold transition-all duration-200',
-        'focus:outline-none focus:ring-2',
-        hasValue
-          ? 'border-wc-blue-300 bg-[#045CCF26] text-white focus:ring-[#045CCF26]'
-          : 'border-gray-300 bg-white text-gray-900 focus:border-wc-blue-500',
+        'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-2 rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
+        'border-white/30 bg-white/20 text-white placeholder:text-white/40',
+        'backdrop-blur-sm ',
         disabled && 'opacity-50 cursor-not-allowed'
       );
     }
 
-    // Default variant
+    // Default variant - matching Figma: #045CCF at 15% opacity, corner radius 4
     return cn(
-      'w-12 h-14 border rounded-sm text-center text-2xl font-semibold transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-wc-blue-100',
+      'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-b-2 border-brand-primary rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
       error
-        ? 'border-red-500 bg-red-50 text-gray-900'
-        : hasValue
-          ? 'border-[#045CCF26] bg-[#045CCF26] text-gray-900'
-          : 'border-gray-300 bg-white text-gray-900 focus:border-wc-blue-500',
+        ? 'border-b-red-400 bg-red-50 text-gray-900'
+        : 'bg-[#045CCF]/15 text-gray-900 placeholder:text-gray-400',
       disabled && 'opacity-50 cursor-not-allowed'
     );
   };
 
   return (
     <motion.div
-      className={cn('w-full', className)}
+      className={cn('w-full flex flex-col items-center', className)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {/* OTP Input */}
-      <OtpInput
-        value={otp}
-        onChange={handleOtpChange}
-        numInputs={OTP_LENGTH}
-        renderInput={(props, index) => {
-          const hasValue = otp[index] !== undefined && otp[index] !== '';
-          // Exclude the default style from props to allow Tailwind classes to work
-          const { style: _style, ...restProps } = props;
-          return (
-            <input
-              {...restProps}
-              inputMode="numeric"
-              className={getInputClass(hasValue)}
-              disabled={disabled}
-            />
-          );
-        }}
-        shouldAutoFocus
-        containerStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem',
-        }}
-      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3 }}
+        className="mb-6 px-4 sm:px-0"
+      >
+        <OtpInput
+          value={otp}
+          onChange={handleOtpChange}
+          numInputs={OTP_LENGTH}
+          renderInput={(props, index) => {
+            const hasValue = otp[index] !== undefined && otp[index] !== '';
+            // Exclude the default style from props to allow Tailwind classes to work
+            const { style: _style, ...restProps } = props;
+            return (
+              <input
+                {...restProps}
+                inputMode="numeric"
+                className={getInputClass(hasValue)}
+                disabled={disabled}
+              />
+            );
+          }}
+          shouldAutoFocus
+          containerStyle={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+          }}
+        />
+      </motion.div>
 
       {/* Error Message */}
       {error && (
@@ -162,8 +171,8 @@ const OTPInput = ({
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            'text-sm text-center mt-4',
-            variant === 'blue' ? 'text-red-300' : 'text-red-500'
+            'text-sm text-center mb-4 font-medium',
+            variant === 'blue' ? 'text-red-200' : 'text-red-500'
           )}
         >
           {error}
@@ -172,35 +181,61 @@ const OTPInput = ({
 
       {/* Resend Section */}
       {showResend && (
-        <div className={cn(
-          'flex justify-center items-center my-6 text-sm',
-          variant === 'blue' ? 'text-white/80' : 'text-gray-500'
-        )}>
-          <span>Didn&apos;t receive the OTP?</span>
-          {canResend ? (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={disabled}
-              className={cn(
-                'ml-1 font-semibold underline transition-colors',
-                variant === 'blue'
-                  ? 'text-white hover:text-white/90'
-                  : 'text-wc-blue-300',
-                disabled && 'opacity-50 cursor-not-allowed'
-              )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-center space-y-2"
+        >
+          <div className={cn(
+            'flex flex-wrap justify-center items-center gap-1 text-sm',
+            variant === 'blue' ? 'text-white/90' : 'text-gray-600'
+          )}>
+            <span>Didn&apos;t receive the OTP?</span>
+            {canResend ? (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={disabled}
+                className={cn(
+                  'font-semibold transition-colors',
+                  variant === 'blue'
+                    ? 'text-white  hover:text-white/80'
+                    : 'text-brand-primary hover:text-brand-primary/80',
+                  disabled && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                Resend OTP
+              </button>
+            ) : (
+              <span className={cn(
+                'font-semibold',
+                variant === 'blue' ? 'text-white' : 'text-gray-900'
+              )}>
+                Resend in {resendTimer}s
+              </span>
+            )}
+          </div>
+
+          {/* Phone number and change link */}
+          {phoneNumber && (
+            <motion.p
+              className="text-sm text-gray-600 mb-6 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
             >
-              Resend OTP
-            </button>
-          ) : (
-            <span className={cn(
-              'ml-1 font-semibold',
-              variant === 'blue' ? 'text-white' : 'text-gray-700'
-            )}>
-              {resendTimer}s
-            </span>
+              we have sent OTP on {phoneNumber}{' '}
+              <button
+                type="button"
+                onClick={onChangeNumber}
+                className="text-wc-blue-500 font-bold hover:text-wc-blue-600 transition-colors"
+              >
+                Change Number
+              </button>
+            </motion.p>
           )}
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );

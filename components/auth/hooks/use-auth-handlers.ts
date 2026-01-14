@@ -1,0 +1,113 @@
+import { useCallback, useState } from 'react';
+import { useAuthStore } from '@/stores/auth-store';
+import { authService, setAuthToken, setMobile } from '@/lib/api';
+
+/**
+ * Return type for useAuthHandlers hook
+ */
+interface UseAuthHandlersReturn {
+  phoneNumber: string;
+  otpValue: string;
+  isPhoneValid: boolean;
+  isLoading: boolean;
+  error: string | null;
+  handlePhoneChange: (value: string, isValid: boolean) => void;
+  handleSendOtp: () => Promise<void>;
+  handleOtpChange: (otp: string) => void;
+  handleVerifyOtp: () => Promise<void>;
+  handleResendOtp: () => Promise<void>;
+  setOtpValue: (value: string) => void;
+}
+
+/**
+ * Custom hook for handling authentication business logic
+ * Encapsulates phone validation, OTP sending, verification, and resend logic
+ * 
+ * @returns Handler functions and state for authentication flow
+ */
+export const useAuthHandlers = (): UseAuthHandlersReturn => {
+  const {
+    phoneNumber,
+    isLoading,
+    error,
+    setStep,
+    setPhoneNumber,
+    setUser,
+    setLoading,
+    setError,
+  } = useAuthStore();
+
+  const [otpValue, setOtpValue] = useState('');
+
+  /** Handle phone number change */
+  const handlePhoneChange = useCallback(
+    (value: string, _isValid: boolean): void => {
+      setPhoneNumber(value);
+      setError(null);
+    },
+    [setPhoneNumber, setError]
+  );
+
+  /** Check if phone number is valid */
+  const isPhoneValid = phoneNumber.length === 10 && /^[6-9]/.test(phoneNumber);
+
+  /** Handle continue button click - send OTP */
+  const handleSendOtp = async (): Promise<void> => {
+    if (!isPhoneValid || isLoading) return;
+    setLoading(true);
+    setError(null);
+    const result = await authService.sendOtp(phoneNumber);
+    if (result.success) {
+      setStep('otp');
+      setLoading(false);
+    } else {
+      setError(result.error || 'Failed to send OTP. Please try again.');
+    }
+  };
+
+  /** Handle OTP change */
+  const handleOtpChange = (otp: string): void => {
+    setOtpValue(otp);
+    setError(null);
+  };
+
+  /** Handle OTP verification */
+  const handleVerifyOtp = async (): Promise<void> => {
+    if (otpValue.length !== 6 || isLoading) return;
+    setLoading(true);
+    setError(null);
+    const result = await authService.verifyOtp(phoneNumber, otpValue);
+    if (result.success && result.data) {
+      setAuthToken(result.data.token);
+      setMobile(phoneNumber);
+      setUser(result.data.user, result.data.token);
+      setOtpValue('');
+    } else {
+      setError(result.error || 'Invalid OTP. Please try again.');
+    }
+  };
+
+  /** Handle OTP resend */
+  const handleResendOtp = async (): Promise<void> => {
+    setError(null);
+    setOtpValue('');
+    const result = await authService.resendOtp(phoneNumber);
+    if (!result.success) {
+      setError(result.error || 'Failed to resend OTP. Please try again.');
+    }
+  };
+
+  return {
+    phoneNumber,
+    otpValue,
+    isPhoneValid,
+    isLoading,
+    error,
+    handlePhoneChange,
+    handleSendOtp,
+    handleOtpChange,
+    handleVerifyOtp,
+    handleResendOtp,
+    setOtpValue,
+  };
+};
