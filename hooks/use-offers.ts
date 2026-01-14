@@ -4,6 +4,12 @@ import { toast } from 'sonner';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { LenderOfferStatus, CheckStatusAllResponse, WcStatus } from '@/types/wecredit';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { 
+  MOCK_CHECK_STATUS_RESPONSE, 
+  MOCK_REHIT_RESPONSE,
+  simulateMockApiCall 
+} from '@/lib/mock-data/offers';
 
 /**
  * Hook return type
@@ -40,6 +46,7 @@ interface UseOffersReturn {
  * - Filter offers by status
  * - Status counts for UI badges
  * - Retry mechanism on error
+ * - Feature flag support: Use mock data when 'enableOfferMockData' is enabled
  * 
  * @returns Offers data and management functions
  */
@@ -49,14 +56,32 @@ export function useOffers(): UseOffersReturn {
   const [error, setError] = useState<string | null>(null);
   const [canReHit, setCanReHit] = useState(false);
   const [isReHitting, setIsReHitting] = useState(false);
-  const [statusCode, setStatusCode] = useState<string | null>(null)
+  const [statusCode, setStatusCode] = useState<string | null>(null);
+  const enableMockData = useFeatureFlag('enableOfferMockData');
   /**
-   * Fetch offers from API
+   * Fetch offers from API or mock data
    */
   const fetchOffers = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
+    // Feature flag: Use mock data for testing
+    if (enableMockData) {
+      console.info('[FeatureFlag] Using mock offers data');
+      try {
+        const mockResponse = await simulateMockApiCall(MOCK_CHECK_STATUS_RESPONSE);
+        setOffers(mockResponse.lenders || []);
+        setCanReHit(mockResponse.isRehitLenders === 0);
+        setStatusCode(mockResponse.statusCode);
+      } catch (err) {
+        setError('Failed to load mock data');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Real API call
     const mobile = getCookie(STORAGE_MOBILE) as string;
     const token = getCookie(STORAGE_AUTH_TOKEN) as string;
 
@@ -85,7 +110,7 @@ export function useOffers(): UseOffersReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [enableMockData]);
 
   /**
    * Re-hit all lenders to check for more offers
@@ -104,6 +129,26 @@ export function useOffers(): UseOffersReturn {
     setIsReHitting(true);
     setError(null);
 
+    // Feature flag: Use mock data for testing
+    if (enableMockData) {
+      console.info('[FeatureFlag] Using mock re-hit offers data');
+      try {
+        const mockResponse = await simulateMockApiCall(MOCK_REHIT_RESPONSE);
+        setOffers(mockResponse.lenders || []);
+        setCanReHit(mockResponse.isRehitLenders === 0);
+        setStatusCode(mockResponse.statusCode);
+        toast.success('Found more offers!', {
+          description: 'We found additional lenders for you.',
+        });
+      } catch (err) {
+        setError('Failed to load mock data');
+      } finally {
+        setIsReHitting(false);
+      }
+      return;
+    }
+
+    // Real API call
     const mobile = getCookie(STORAGE_MOBILE) as string;
     const token = getCookie(STORAGE_AUTH_TOKEN) as string;
 
@@ -130,7 +175,7 @@ export function useOffers(): UseOffersReturn {
     } finally {
       setIsReHitting(false);
     }
-  }, [canReHit]);
+  }, [canReHit, enableMockData]);
 
   /**
    * Filter offers by status

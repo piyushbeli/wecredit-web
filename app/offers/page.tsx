@@ -2,51 +2,25 @@
 
 /**
  * Offers Screen Page
- * Displays user's loan application statuses and offers
- * Implements check-status-all and hit-all-lenders APIs
+ * Simplified design matching screenshot mockup
+ * Displays loan offers with eligibility message and simplified layout
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useOffers } from '@/hooks/use-offers';
 import { OfferCard } from '@/components/offers/offer-card';
-import { STATUS_CODES } from '@/types/wecredit';
-import type { WcStatus, LenderOfferStatus } from '@/types/wecredit';
-import { cn } from '@/lib/utils';
-
-/**
- * Status filter tabs
- */
-const STATUS_FILTERS: Array<{ label: string; value: WcStatus | 'ALL' }> = [
-  { label: 'All', value: 'ALL' },
-  { label: 'Ready', value: 'INITIATED' },
-  { label: 'Approved', value: 'APPROVED' },
-  { label: 'Reviewing', value: 'UNDER_REVIEW' },
-  { label: 'Rejected', value: 'REJECTED' },
-];
+import { OffersHero } from '@/components/offers/offers-hero';
+import type { LenderOfferStatus } from '@/types/wecredit';
 
 /**
  * Offers Page Component
  */
 export default function OffersPage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
-  const {
-    offers,
-    isLoading,
-    error,
-    canReHit,
-    isReHitting,
-    statusCode,
-    fetchOffers,
-    reHitLenders,
-    filterByStatus,
-    statusCounts,
-  } = useOffers();
-
-  const [selectedFilter, setSelectedFilter] = useState<WcStatus | 'ALL'>('ALL');
-  const filteredOffers = filterByStatus(selectedFilter);
+  const { isAuthenticated } = useAuthStore();
+  const { offers, isLoading, error, fetchOffers } = useOffers();
 
   /**
    * Redirect to personal loan page if not authenticated
@@ -62,51 +36,45 @@ export default function OffersPage() {
    */
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     if (offer.utmLink) {
-      // Open lender application in new tab
       window.open(offer.utmLink, '_blank');
-    } else {
-      // Log for debugging - in production, might show a message
-      console.log('Offer clicked:', offer.lenderName, offer.wcStatus);
     }
   };
 
   /**
-   * Handle re-hit lenders button click
+   * Handle check loan status button click
    */
-  const handleReHit = async (): Promise<void> => {
-    await reHitLenders();
+  const handleCheckStatus = (): void => {
+    // Navigate to loan status page or open status modal
+    // This can be implemented based on your requirements
+    console.log('Check loan status clicked');
   };
 
-  // Show loading skeleton on initial load
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="min-h-screen bg-gray-50">
         <OffersLoadingSkeleton />
       </div>
     );
   }
 
-  // Show error state with retry
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="min-h-screen bg-gray-50">
         <ErrorState error={error} onRetry={fetchOffers} />
       </div>
     );
   }
 
-  // Determine if we should show empty state
-  const showEmptyState = offers.length === 0 && statusCode !== STATUS_CODES.NO_OFFERS_CAN_REHIT;
-
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      {/* Header */}
+      {/* Simplified Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="px-4 py-4">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
               className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              aria-label="Go back"
             >
               <svg
                 className="w-5 h-5 text-gray-700"
@@ -122,86 +90,19 @@ export default function OffersPage() {
                 />
               </svg>
             </button>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900">Your Offers</h1>
-              {user?.phoneNumber && (
-                <p className="text-xs text-gray-600">
-                  {user.phoneNumber}
-                </p>
-              )}
-            </div>
+            <h1 className="text-xl font-semibold text-gray-900">Loan offers</h1>
           </div>
-
-          {/* Stats */}
-          {offers.length > 0 && (
-            <div className="flex gap-4 text-center py-3 bg-blue-50 rounded-xl">
-              <div className="flex-1">
-                <p className="text-xs text-gray-600 mb-1">Total Offers</p>
-                <p className="text-lg font-bold text-blue-600">{offers.length}</p>
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-600 mb-1">Ready to Apply</p>
-                <p className="text-lg font-bold text-green-600">
-                  {statusCounts.INITIATED}
-                </p>
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-600 mb-1">Approved</p>
-                <p className="text-lg font-bold text-purple-600">
-                  {statusCounts.APPROVED}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
-
-        {/* Filter Tabs */}
-        {offers.length > 0 && (
-          <div className="px-4 pb-3 overflow-x-auto scrollbar-hide">
-            <div className="flex gap-2">
-              {STATUS_FILTERS.map((filter) => {
-                const count = statusCounts[filter.value];
-                if (count === 0 && filter.value !== 'ALL') return null;
-
-                return (
-                  <button
-                    key={filter.value}
-                    onClick={() => setSelectedFilter(filter.value)}
-                    className={cn(
-                      'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
-                      selectedFilter === filter.value
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300'
-                    )}
-                  >
-                    {filter.label}
-                    {count > 0 && (
-                      <span className="ml-1.5 text-xs">({count})</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </header>
 
-      {/* Content */}
-      <div className="px-4 py-6">
-        {/* Empty State */}
-        {showEmptyState && (
-          <EmptyState onReHit={canReHit ? handleReHit : undefined} />
-        )}
+      {/* Hero Section with Eligibility Message */}
+      <OffersHero eligibleAmount="₹1,00,000" offerCount={offers.length} />
 
-        {/* No Offers with Re-hit Available */}
-        {statusCode === STATUS_CODES.NO_OFFERS_CAN_REHIT && (
-          <NoOffersReHitState onReHit={handleReHit} isReHitting={isReHitting} />
-        )}
-
-        {/* Offers Grid */}
-        {filteredOffers.length > 0 && (
+      {/* Offers List */}
+      <div className="px-4 py-4 pb-28">
+        {offers.length > 0 ? (
           <div className="space-y-4">
-            {filteredOffers.map((offer, index) => (
+            {offers.map((offer, index) => (
               <OfferCard
                 key={`${offer.lenderName}-${index}`}
                 offer={offer}
@@ -209,40 +110,19 @@ export default function OffersPage() {
               />
             ))}
           </div>
+        ) : (
+          <EmptyState />
         )}
+      </div>
 
-        {/* Re-hit Button (shown when offers exist and more lenders available) */}
-        {offers.length > 0 && canReHit && (
-          <div className="mt-6">
-            <button
-              onClick={handleReHit}
-              disabled={isReHitting}
-              className={cn(
-                'w-full py-4 rounded-xl font-semibold text-base',
-                'bg-linear-to-r from-purple-500 to-purple-600',
-                'text-white shadow-lg shadow-purple-500/30',
-                'hover:from-purple-600 hover:to-purple-700',
-                'active:scale-[0.98] transition-all duration-200',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
-              )}
-            >
-              {isReHitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Checking for More Offers...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <span>🔄</span>
-                  Check More Lenders
-                </span>
-              )}
-            </button>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              We'll check with more lenders to find you the best offers
-            </p>
-          </div>
-        )}
+      {/* Fixed Bottom CTA - Check Loan Status */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg z-10">
+        <button
+          onClick={handleCheckStatus}
+          className="w-full py-4 bg-blue-600 text-white font-semibold text-base rounded-full hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-500/30"
+        >
+          Check your Loan Status
+        </button>
       </div>
     </div>
   );
@@ -256,30 +136,36 @@ function OffersLoadingSkeleton() {
     <div className="animate-pulse">
       {/* Header skeleton */}
       <div className="bg-white border-b px-4 py-4">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gray-200" />
-          <div className="flex-1">
-            <div className="h-6 bg-gray-200 rounded w-32 mb-2" />
-            <div className="h-3 bg-gray-200 rounded w-24" />
-          </div>
+          <div className="h-6 bg-gray-200 rounded w-32" />
         </div>
-        <div className="h-20 bg-gray-100 rounded-xl" />
+      </div>
+
+      {/* Hero skeleton */}
+      <div className="bg-white px-4 py-6">
+        <div className="text-center">
+          <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-3" />
+          <div className="h-5 bg-gray-200 rounded w-64 mx-auto" />
+        </div>
       </div>
 
       {/* Offers skeleton */}
-      <div className="px-4 py-6 space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-2xl overflow-hidden">
-            <div className="h-32 bg-gray-200" />
-            <div className="p-4">
-              <div className="h-6 bg-gray-200 rounded w-24 mb-4" />
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                {[1, 2, 3, 4].map((j) => (
-                  <div key={j} className="h-16 bg-gray-100 rounded-lg" />
-                ))}
+      <div className="px-4 py-4 space-y-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-gray-100 rounded-2xl p-4">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                  <div className="h-3 bg-gray-200 rounded w-32" />
+                </div>
               </div>
-              <div className="h-12 bg-gray-200 rounded-xl" />
+              <div className="w-20 h-20 bg-gray-200 rounded-full" />
             </div>
+            <div className="h-4 bg-gray-200 rounded w-48 mb-4" />
+            <div className="h-12 bg-gray-200 rounded-xl" />
           </div>
         ))}
       </div>
@@ -313,66 +199,18 @@ function ErrorState({ error, onRetry }: { error: string; onRetry: () => void }) 
 /**
  * Empty State Component
  */
-function EmptyState({ onReHit }: { onReHit?: () => void }) {
+function EmptyState() {
   return (
     <div className="px-4 py-12 text-center">
       <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
         <span className="text-5xl">📋</span>
       </div>
       <h2 className="text-xl font-bold text-gray-900 mb-2">
-        No Offers Yet
+        No Offers Available
       </h2>
       <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-        You don't have any loan offers at the moment. Complete your profile to get personalized offers.
+        We couldn't find any loan offers at the moment. Please check back later or complete your profile.
       </p>
-      {onReHit && (
-        <button
-          onClick={onReHit}
-          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-        >
-          Check for Offers
-        </button>
-      )}
-    </div>
-  );
-}
-
-/**
- * No Offers with Re-hit Available State
- */
-function NoOffersReHitState({ onReHit, isReHitting }: { onReHit: () => void; isReHitting: boolean }) {
-  return (
-    <div className="px-4 py-12 text-center">
-      <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-yellow-50 flex items-center justify-center">
-        <span className="text-5xl">🔍</span>
-      </div>
-      <h2 className="text-xl font-bold text-gray-900 mb-2">
-        No Offers Found
-      </h2>
-      <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-        We couldn't find any offers right now, but we can check with more lenders for you.
-      </p>
-      <button
-        onClick={onReHit}
-        disabled={isReHitting}
-        className={cn(
-          'px-8 py-4 rounded-xl font-semibold text-base',
-          'bg-linear-to-r from-blue-500 to-blue-600',
-          'text-white shadow-lg shadow-blue-500/30',
-          'hover:from-blue-600 hover:to-blue-700',
-          'active:scale-[0.98] transition-all duration-200',
-          'disabled:opacity-50 disabled:cursor-not-allowed'
-        )}
-      >
-        {isReHitting ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            Checking...
-          </span>
-        ) : (
-          'Check More Lenders'
-        )}
-      </button>
     </div>
   );
 }

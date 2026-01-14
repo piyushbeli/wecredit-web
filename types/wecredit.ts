@@ -87,6 +87,8 @@ export interface LenderOfferStatus {
   subtitle?: string;
   /** Human-readable status message */
   statusMessage?: string;
+  /** Approval chance percentage (0-100) */
+  approvalChance?: number;
 }
 
 /**
