@@ -49,6 +49,12 @@ export const ENDPOINTS = {
 
     /** Endpoint identifier for check status all (PDF Step 6) */
     CHECK_STATUS_ALL: 'check-status-all',
+
+    /** Endpoint identifier for fetching lender-specific form fields */
+    LENDERS_FORM_FILLED: 'lenders-form-filled',
+
+    /** Endpoint identifier for creating a new lead */
+    CREATE_LEAD: 'create-lead',
   },
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',

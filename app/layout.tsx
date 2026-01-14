@@ -5,6 +5,7 @@ import MobileHeader from '@/components/home/mobile-header';
 import Footer from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth';
 import { AuthProvider } from '@/providers/auth-provider';
+import { ToastProvider } from '@/providers/toast-provider';
 import { getGlobal } from '@/lib/strapi';
 
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default async function RootLayout({
       >
         {/* AuthProvider validates token on mount (PDF Step 1) */}
         <AuthProvider>
+          <ToastProvider />
           <MobileHeader
             headerLinks={globalData.headerLinks}
             logo={globalData.logo}

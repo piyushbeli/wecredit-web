@@ -11,6 +11,7 @@
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
+import { toast } from 'sonner';
 import type {
   ActiveLendersResponse,
   CheckStatusAllResponse,
@@ -84,7 +85,11 @@ export async function fetchActiveLenders(
       }
     );
     return data;
-  } catch {
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Unable to fetch lenders. Please try again later.';
+    toast.error(errorMessage);
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -126,7 +131,13 @@ export async function fetchActiveLendersForUser(
       }
     );
     return data;
-  } catch {
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Failed to load personalized lenders';
+    toast.error(errorMessage, {
+      description: 'Unable to fetch your personalized offers. Please try again later.',
+    });
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -181,6 +192,9 @@ export async function checkStatusAll(
     const errorMessage = error instanceof Error
       ? error.message
       : 'Unable to check status. Please try again.';
+    toast.error(errorMessage, {
+      description: 'Failed to check your loan application status.',
+    });
     return {
       success: false,
       error: errorMessage,
