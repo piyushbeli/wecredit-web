@@ -32,10 +32,9 @@ const DEFAULT_LENDERS_RESPONSE: ActiveLendersResponse = {};
 
 /** Default check status response when API fails */
 const DEFAULT_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
-  success: false,
-  message: 'Unable to check status',
-  hasOffers: false,
-  offers: [],
+  statusCode: '3012',
+  lenders: [],
+  isRehitLenders: 1,
 };
 
 /**
@@ -148,10 +147,18 @@ export async function fetchActiveLendersForUser(
  * Checks the status of all loan applications/offers for the user
  * Used after login to determine if user has existing offers
  * 
- * Decision Logic:
- * - Case 1: No Offer Generated → hasOffers = false
- * - Case 2: Offers Exist for User → hasOffers = true, offers array populated
+ * Response Status Codes:
+ * - 3003: Offers found successfully
+ * - 3004: No offers, but can try more lenders
+ * - 3005: API error occurred
+ * - 3006: All lenders rejected
+ * - 3012: General error
+ * - 3018: Other specific error condition
  */
+
+/** Lead API endpoint - uses /api/forward for lead operations */
+const CHECK_STATUS_ALL_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
+
 export async function checkStatusAll(
   mobile: string,
   authorization?: string
@@ -163,13 +170,14 @@ export async function checkStatusAll(
     };
   }
   const requestBody = {
+    mobile: Number(mobile),
     endpoint: ENDPOINTS.PUBLIC.CHECK_STATUS_ALL,
     partnerCode: wecreditConfig.partnerCode,
   };
   try {
     const data = await withApiLogging<CheckStatusAllResponse>(
       'checkStatusAll',
-      () => fetch(wecreditConfig.gatewayUrl, {
+      () => fetch(CHECK_STATUS_ALL_ENDPOINT, {
         method: 'POST',
         headers: buildHeaders({ mobile, authorization }),
         body: JSON.stringify(requestBody),
@@ -177,7 +185,7 @@ export async function checkStatusAll(
       }),
       {
         method: 'POST',
-        url: wecreditConfig.gatewayUrl,
+        url: CHECK_STATUS_ALL_ENDPOINT,
         headers: buildHeaders({ mobile, authorization }),
         body: requestBody,
         mobile,
@@ -209,7 +217,7 @@ export async function checkStatusAll(
  * Determines how to handle a clicked lender based on wcStatus
  * 
  * @param offers - List of user's existing offers from checkStatusAll
- * @param lenderId - ID of the lender user clicked
+ * @param lenderName - Name of the lender user clicked
  * @returns Handling result with appropriate action type
  * 
  * Cases:
@@ -219,7 +227,7 @@ export async function checkStatusAll(
  */
 export function determineLenderHandling(
   offers: LenderOfferStatus[],
-  lenderId: string
+  lenderName: string
 ): LenderHandlingResult {
   // Case: No offers exist at all
   if (!offers || offers.length === 0) {
@@ -227,11 +235,11 @@ export function determineLenderHandling(
   }
   // Find the clicked lender in the offers list
   const matchingOffer = offers.find(
-    (offer) => offer.lenderId === lenderId || offer.lenderName === lenderId
+    (offer) => offer.lenderName === lenderName
   );
   // Case: Lender not found in offer list → New application
   if (!matchingOffer) {
-    return { type: 'not_found', lenderId };
+    return { type: 'not_found', lenderName };
   }
   // Case: Lender found with INITIATED status
   if (matchingOffer.wcStatus === 'INITIATED') {
@@ -239,4 +247,77 @@ export function determineLenderHandling(
   }
   // Case: Lender found with other status (existing application)
   return { type: 'existing', offer: matchingOffer };
+}
+
+/**
+ * Re-hit All Lenders API
+ * 
+ * Triggers a re-check across all available lenders to find more offers
+ * Used when user wants to check for additional lenders beyond initial offers
+ * 
+ * @param mobile - User's mobile number
+ * @param authorization - Optional auth token
+ * @returns Result with updated offers list
+ */
+
+/** Lead API endpoint - uses /api/forward for lead operations */
+const HIT_ALL_LENDERS_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
+
+
+export async function hitAllLenders(
+  mobile: string,
+  authorization?: string
+): Promise<CheckStatusResult> {
+  if (!mobile) {
+    return {
+      success: false,
+      error: 'Mobile number required',
+    };
+  }
+  const requestBody = {
+    mobile: Number(mobile),
+    endpoint: ENDPOINTS.PUBLIC.HIT_ALL_LENDERS,
+    partnerCode: wecreditConfig.partnerCode,
+  };
+  try {
+    const data = await withApiLogging<CheckStatusAllResponse>(
+      'hitAllLenders',
+      () => fetch(HIT_ALL_LENDERS_ENDPOINT, {
+        method: 'POST',
+        headers: buildHeaders({ mobile, authorization }),
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
+      }),
+      {
+        method: 'POST',
+        url: HIT_ALL_LENDERS_ENDPOINT,
+        headers: buildHeaders({ mobile, authorization }),
+        body: requestBody,
+        mobile,
+        hasAuthorization: Boolean(authorization),
+      }
+    );
+    
+    // Show success toast
+    toast.success('Checked for new offers', {
+      description: `Found ${data.lenders.length} lender${data.lenders.length !== 1 ? 's' : ''}`,
+    });
+    
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error
+      ? error.message
+      : 'Unable to check for new offers. Please try again.';
+    toast.error(errorMessage, {
+      description: 'Failed to refresh your loan offers.',
+    });
+    return {
+      success: false,
+      error: errorMessage,
+      data: DEFAULT_CHECK_STATUS_RESPONSE,
+    };
+  }
 }

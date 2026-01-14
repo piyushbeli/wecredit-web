@@ -50,11 +50,17 @@ export const ENDPOINTS = {
     /** Endpoint identifier for check status all (PDF Step 6) */
     CHECK_STATUS_ALL: 'check-status-all',
 
+    /** Endpoint identifier for check dedupe (determine if user needs to fill form) */
+    CHECK_DEDUPE: 'check-dedupe',
+
     /** Endpoint identifier for fetching lender-specific form fields */
     LENDERS_FORM_FILLED: 'lenders-form-filled',
 
     /** Endpoint identifier for creating a new lead */
     CREATE_LEAD: 'create-lead',
+
+    /** Endpoint identifier for re-hitting all lenders (PDF Offers Screen) */
+    HIT_ALL_LENDERS: 'hit-all-lenders',
   },
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',

@@ -50,6 +50,7 @@ export interface Partner {
  */
 export type WcStatus =
   | 'INITIATED'      // Loan application just started
+  | 'UNDER_REVIEW'   // Application under review
   | 'PENDING'        // Waiting for processing
   | 'APPROVED'       // Loan approved
   | 'REJECTED'       // Loan rejected
@@ -59,42 +60,66 @@ export type WcStatus =
 
 /**
  * Individual lender offer status in check-status-all response
+ * Matches actual API response structure from documentation
  */
 export interface LenderOfferStatus {
-  /** Lender identifier */
-  lenderId: string;
-  /** Lender name */
+  /** Lender name/identifier */
   lenderName: string;
   /** WeCredit application status */
   wcStatus: WcStatus;
-  /** Application/Offer ID if exists */
-  applicationId?: string;
-  /** Offer amount if approved */
-  offerAmount?: number;
-  /** Interest rate offered */
-  interestRate?: number;
-  /** Loan tenure offered (months) */
-  tenure?: number;
-  /** UTM/redirect link for the lender */
+  /** Direct application link (for INITIATED status) */
   utmLink?: string;
-  /** Timestamp of last status update */
-  updatedAt?: string;
+  /** Offered/requested loan amount */
+  loanAmount?: string;
+  /** Interest rate percentage */
+  interestRate?: string;
+  /** Loan tenure in months */
+  tenure?: string;
+  /** Monthly EMI amount */
+  emi?: string;
+  /** Lender logo URL */
+  logo?: string;
+  /** UI gradient colors [startColor, endColor] */
+  gradient?: [string, string];
+  /** Display title for the offer */
+  title?: string;
+  /** Display subtitle for the offer */
+  subtitle?: string;
+  /** Human-readable status message */
+  statusMessage?: string;
 }
 
 /**
  * Check Status All API Response
  * Per PDF Step 6 - Check Status Result – Decision Logic
+ * Matches actual API response structure from documentation
  */
 export interface CheckStatusAllResponse {
-  /** Whether the API call was successful */
-  success: boolean;
-  /** Response message */
-  message: string;
-  /** Whether user has any offers */
-  hasOffers: boolean;
-  /** List of lender offer statuses (empty if no offers) */
-  offers: LenderOfferStatus[];
+  /** Domain-specific status code from API */
+  statusCode: string;
+  /** List of lender/offer objects */
+  lenders: LenderOfferStatus[];
+  /** Re-hit flag: 0 = more lenders available, 1 = all checked */
+  isRehitLenders: number;
 }
+
+/**
+ * Status code constants from API documentation
+ */
+export const STATUS_CODES = {
+  /** Offers found successfully */
+  OFFERS_FOUND: '3003',
+  /** No offers, but can try more lenders */
+  NO_OFFERS_CAN_REHIT: '3004',
+  /** API error occurred */
+  API_ERROR: '3005',
+  /** All lenders rejected */
+  ALL_REJECTED: '3006',
+  /** General error */
+  GENERAL_ERROR: '3012',
+  /** Other specific error condition */
+  OTHER_ERROR: '3018',
+} as const;
 
 /**
  * Result type for check status operation
@@ -115,5 +140,5 @@ export interface CheckStatusResult {
 export type LenderHandlingResult =
   | { type: 'initiated'; offer: LenderOfferStatus }    // wcStatus = INITIATED
   | { type: 'existing'; offer: LenderOfferStatus }     // wcStatus != INITIATED
-  | { type: 'not_found'; lenderId: string }            // Lender not in offer list
+  | { type: 'not_found'; lenderName: string }          // Lender not in offer list
   | { type: 'no_offers' };                             // No offers exist

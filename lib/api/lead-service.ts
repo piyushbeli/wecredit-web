@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import type {
   FormField,
   FetchFormFieldsResponse,
+  CheckDedupeRequest,
+  CheckDedupeResponse,
   CreateLeadRequest,
   CreateLeadResponse,
   LeadFormData,
@@ -132,6 +134,59 @@ function buildCreateLeadHeaders(): Record<string, string> {
 // ============================================
 // API Functions
 // ============================================
+
+/**
+ * Checks if user exists in system and needs to fill form
+ * @param mobile - User's mobile number (10 digits)
+ * @param partnerCode - Partner code (default: WC001)
+ * @returns Result with dedupe response (statusCode 1003 = needs form)
+ */
+async function checkDedupe(
+  mobile: string,
+  partnerCode: string = PARTNER_CODE
+): Promise<LeadServiceResult<CheckDedupeResponse>> {
+  const requestBody: CheckDedupeRequest = {
+    mobile,
+    endpoint: ENDPOINTS.PUBLIC.CHECK_DEDUPE,
+    partnerCode,
+  };
+  try {
+    const token = getCookie(STORAGE_AUTH_TOKEN);
+    const response = await fetch(LEAD_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        ...buildDefaultHeaders(),
+        'Authorization': `Bearer ${token || ''}`,
+        'mobile': mobile,
+      },
+      body: JSON.stringify(requestBody),
+    });
+    if (!response.ok) {
+      const errorMsg = `Failed to check dedupe: ${response.status}`;
+      toast.error(errorMsg, {
+        description: 'Unable to verify user status. Please try again.',
+      });
+      return {
+        success: false,
+        error: errorMsg,
+      };
+    }
+    const data: CheckDedupeResponse = await response.json();
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Network error';
+    toast.error(errorMessage, {
+      description: 'Failed to check user status. Please check your connection.',
+    });
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
 
 /**
  * Fetches dynamic form field configuration for a specific lender
@@ -257,6 +312,7 @@ async function createLead(
 
 /** Lead service object with all lead-related API calls */
 export const leadService = {
+  checkDedupe,
   fetchFormFields,
   createLead,
 };

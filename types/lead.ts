@@ -60,6 +60,28 @@ export interface FetchFormFieldsResponse {
 }
 
 // ============================================
+// CHECK DEDUPE TYPES
+// ============================================
+
+/** Request body for check-dedupe API */
+export interface CheckDedupeRequest {
+  /** 10-digit mobile number */
+  mobile: string;
+  /** Always "check-dedupe" */
+  endpoint: 'check-dedupe';
+  /** Partner code from URL */
+  partnerCode: string;
+}
+
+/** Response from check-dedupe API */
+export interface CheckDedupeResponse {
+  /** Status code: 1003 means user needs to fill form, otherwise user can proceed */
+  statusCode: number | string;
+  /** Human-readable status message */
+  statusMessage: string;
+}
+
+// ============================================
 // CREATE LEAD TYPES
 // ============================================
 

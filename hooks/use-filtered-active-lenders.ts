@@ -63,7 +63,7 @@ export function useFilteredActiveLenders(
     if (fetchOnMount) {
       fetchLenders();
     }
-  }, [fetchOnMount, fetchLenders]);
+  }, [fetchOnMount]);
 
   return {
     activeLenders,
