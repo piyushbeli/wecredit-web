@@ -6,6 +6,7 @@ import TrendingOffersClient from './trending-offers-client';
 import ToolsCalculatorsSection from './tools-calculators-section';
 import TestimonialsSection from './testimonials-section';
 import PartnersSection from './partners-section';
+import CertificationsSection from './certifications-section';
 import FaqSection from './faq-section';
 import BlogSection from './blog-section';
 import DreamsSection from './dreams-section';
@@ -42,6 +43,9 @@ const HomePage = (): React.ReactNode => {
           - Fetches user-specific lenders when logged in (PDF Step 3) */}
       <TrendingOffersClient />
 
+      {/* Certifications Section */}
+      <CertificationsSection />
+      
       {/* Testimonials Section */}
       <TestimonialsSection />
 
