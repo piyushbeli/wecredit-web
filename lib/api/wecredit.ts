@@ -110,7 +110,7 @@ export async function fetchActiveLenders(
     const errorMessage = error instanceof Error 
       ? error.message 
       : 'Unable to fetch lenders. Please try again later.';
-    toast.error(errorMessage);
+    // toast.error(errorMessage);
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -156,9 +156,9 @@ export async function fetchActiveLendersForUser(
     const errorMessage = error instanceof Error 
       ? error.message 
       : 'Failed to load personalized lenders';
-    toast.error(errorMessage, {
-      description: 'Unable to fetch your personalized offers. Please try again later.',
-    });
+    // toast.error(errorMessage, {
+    //   description: 'Unable to fetch your personalized offers. Please try again later.',
+    // });
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
