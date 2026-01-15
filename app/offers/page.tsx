@@ -84,7 +84,7 @@ export default function OffersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))]">
       {/* Simplified Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="px-4 py-4">
@@ -156,7 +156,7 @@ export default function OffersPage() {
       </div>
 
       {/* Fixed Bottom CTA - Check Loan Status */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg z-10">
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
         <button
           onClick={handleCheckStatus}
           className="w-full py-4 bg-blue-600 text-white font-semibold text-base rounded-full hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-500/30"

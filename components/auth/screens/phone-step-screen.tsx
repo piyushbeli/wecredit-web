@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { GradientHeader } from '@/components/shared';
 import { BottomSheet, PhoneInput } from '@/components/auth';
+import { useAppHeight } from '@/hooks/use-app-height';
 import { cn } from '@/lib/utils';
-import type { PhoneStepScreenProps } from '../types';
+import type { HeaderHeightPreset, PhoneStepScreenProps } from '../types';
 
 /**
  * Phone step screen component
@@ -21,10 +22,24 @@ export const PhoneStepScreen = ({
   onPhoneChange,
   onContinue,
   onClose,
+  headerHeight = 'sixtyFive',
+  headerHeightPercent = 65,
+  headerClassName,
+  bottomSheetClassName,
 }: PhoneStepScreenProps): React.ReactNode => {
+  const bottomSheetClasses: string =
+    bottomSheetClassName ?? 'flex-1 flex flex-col';
+  const containerStyle: React.CSSProperties = useAppHeight();
+  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent
+    ? { height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})` }
+    : undefined;
+  const resolvedHeaderHeight: HeaderHeightPreset | undefined =
+    headerHeightPercent ? undefined : headerHeight;
+
   return (
     <motion.div
-      className="relative flex flex-col h-full bg-white"
+      className="relative flex flex-col bg-white"
+      style={containerStyle}
       initial={{ x: '-30%', opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '-30%', opacity: 0 }}
@@ -43,14 +58,16 @@ export const PhoneStepScreen = ({
       {/* Gradient Header with Illustration - 75% height */}
       <GradientHeader
         variant="with-illustration"
-        height="threeQuarter"
+        height={resolvedHeaderHeight}
+        style={headerHeightStyle}
+        className={headerClassName}
         illustration="/images/logo.png"
         isPhoneNumberHeader={true}
         illustrationAlt="Phone authentication illustration"
       />
 
       {/* Bottom Sheet - fills remaining 50% */}
-      <BottomSheet className="flex-1 flex flex-col">
+      <BottomSheet className={bottomSheetClasses}>
         <motion.div
           className="flex-1 flex flex-col"
           initial={{ opacity: 0, y: 20 }}

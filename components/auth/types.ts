@@ -3,6 +3,14 @@
  */
 
 /** Props for PhoneStepScreen component */
+export type HeaderHeightPreset =
+  | 'short'
+  | 'medium'
+  | 'tall'
+  | 'half'
+  | 'threeQuarter'
+  | 'sixtyFive';
+
 export interface PhoneStepScreenProps {
   phoneNumber: string;
   isPhoneValid: boolean;
@@ -11,6 +19,10 @@ export interface PhoneStepScreenProps {
   onPhoneChange: (value: string, isValid: boolean) => void;
   onContinue: () => void;
   onClose: () => void;
+  headerHeight?: HeaderHeightPreset;
+  headerHeightPercent?: number;
+  headerClassName?: string;
+  bottomSheetClassName?: string;
 }
 
 /** Props for OTPStepScreen component */
@@ -24,4 +36,6 @@ export interface OTPStepScreenProps {
   onResend: () => void;
   onBack: () => void;
   onClose: () => void;
+  headerHeightPercent?: number;
+  headerHeight?: HeaderHeightPreset;
 }
