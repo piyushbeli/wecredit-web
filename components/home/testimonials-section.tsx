@@ -220,7 +220,7 @@ const TestimonialsSection = (): React.ReactNode => {
   };
 
   return (
-    <section className="bg-white py-8 sm:py-10 md:py-12 overflow-hidden">
+    <section className="bg-white py-4 sm:py-10 md:py-12 overflow-hidden">
       {/* Section Title */}
       <motion.h2
         className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8 px-4"

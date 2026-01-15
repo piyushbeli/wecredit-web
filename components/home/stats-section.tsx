@@ -63,7 +63,7 @@ const itemVariants: Variants = {
  */
 const StatsSection = (): React.ReactNode => {
   return (
-    <section className="py-8 px-4">
+    <section className="py-2 px-4">
       <motion.div
         className="flex justify-around items-start mx-auto"
         variants={containerVariants}

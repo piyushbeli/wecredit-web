@@ -73,7 +73,7 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 				className="group block bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300"
 			>
 				{/* Image Container */}
-				<div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+				<div className="relative aspect-4/3 w-full overflow-hidden bg-gray-100">
 					<Image
 						src={post.imagePath}
 						alt={post.title}
@@ -106,7 +106,7 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
  */
 const BlogSection = (): React.ReactNode => {
 	return (
-		<section className="bg-white py-8 sm:py-10 md:py-12 px-4">
+		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
 			{/* Section Title */}
 			<motion.h2
 				className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8"

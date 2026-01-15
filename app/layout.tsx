@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import MobileHeader from '@/components/home/mobile-header';
 import Footer from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth';
 import { AuthProvider } from '@/providers/auth-provider';
+import { ToastProvider } from '@/providers/toast-provider';
+import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
 import { getGlobal } from '@/lib/strapi';
 
 const geistSans = Geist({
@@ -40,17 +43,23 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        {/* AuthProvider validates token on mount (PDF Step 1) */}
-        <AuthProvider>
-          <MobileHeader
-            headerLinks={globalData.headerLinks}
-            logo={globalData.logo}
-            siteName={globalData.siteName}
-          />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <AuthModal />
-        </AuthProvider>
+        {/* FeatureFlagProvider must wrap everything for dev tools */}
+        <FeatureFlagProvider>
+          {/* AuthProvider validates token on mount (PDF Step 1) */}
+          <Suspense fallback={null}>
+            <AuthProvider>
+              <ToastProvider />
+              <MobileHeader
+                headerLinks={globalData.headerLinks}
+                logo={globalData.logo}
+                siteName={globalData.siteName}
+              />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <AuthModal />
+            </AuthProvider>
+          </Suspense>
+        </FeatureFlagProvider>
       </body>
     </html>
   );

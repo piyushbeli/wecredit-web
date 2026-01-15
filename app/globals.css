@@ -59,6 +59,21 @@
   --color-wc-dark: #0A1B3D;
   --color-wc-accent: #3B82F6;
   --color-wc-green: #22C55E;
+
+  /* WeCredit Design System - Color Palette */
+  /* Primary Blues */
+  --color-brand-primary: #045BCF;
+  --color-brand-light-from: #CBDFFC;
+  --color-brand-light-to: #076FDA;
+  --color-brand-lightest-from: #CCDFFC;
+  --color-brand-lightest-to: #FAFCFF;
+
+  /* Grayscale */
+  --color-gray-900: #121111;
+  --color-gray-700: #303030;
+  --color-gray-500: #7F7F7F;
+  --color-gray-100: #D9D9D9;
+  --color-white: #FFFFFF;
 }
 
 /* =============================================================================

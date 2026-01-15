@@ -11,6 +11,7 @@ export { default as ToolCard } from './tool-card';
 export { default as ToolsCalculatorsSection } from './tools-calculators-section';
 export { default as TestimonialsSection } from './testimonials-section';
 export { default as PartnersSection } from './partners-section';
+export { default as CertificationsSection } from './certifications-section';
 export { default as FaqSection } from './faq-section';
 export { default as BlogSection } from './blog-section';
 export { default as DreamsSection } from './dreams-section';

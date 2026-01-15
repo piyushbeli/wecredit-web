@@ -38,7 +38,7 @@ const TrendingOffersSection = ({ activeLenders }: TrendingOffersSectionProps): R
   }
 
   return (
-    <section className="bg-white py-8">
+    <section className="bg-white py-4">
       <div className="px-4">
         {/* Section Title */}
         <motion.h2

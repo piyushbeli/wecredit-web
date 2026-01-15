@@ -51,7 +51,7 @@ const products: Product[] = [
  */
 const ProductsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white py-6 px-4">
+    <section className="bg-white py-4 px-4">
       {/* Section Title */}
       <motion.h2
         className="text-lg font-semibold text-gray-900 text-center mb-6"

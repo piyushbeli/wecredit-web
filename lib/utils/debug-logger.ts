@@ -3,6 +3,8 @@
  * Captures and stores API call details for debugging in development mode
  */
 
+import { useFeatureFlagStore } from '@/stores/feature-flag-store';
+
 /** Interface for a single debug log entry */
 export interface DebugLogEntry {
   id: string;
@@ -44,8 +46,32 @@ class DebugStore {
   private isEnabled: boolean;
 
   private constructor() {
-    // Only enable in development
-    this.isEnabled = process.env.NODE_ENV !== 'production';
+    // Check both NODE_ENV and feature flag
+    this.isEnabled = this.shouldEnableDebug();
+  }
+
+  /**
+   * Check if debug should be enabled based on environment and feature flag
+   */
+  private shouldEnableDebug(): boolean {
+    // Always disabled in production
+    if (process.env.NODE_ENV === 'production') {
+      return false;
+    }
+
+    // In development, check feature flag if available
+    if (typeof window !== 'undefined') {
+      try {
+        const store = useFeatureFlagStore.getState();
+        return store.isDevMode && store.flags.enableDebugLogs;
+      } catch {
+        // Fallback to environment check if store not available
+        return true;
+      }
+    }
+
+    // Server-side or during initial render
+    return true;
   }
 
   /**
@@ -60,8 +86,17 @@ class DebugStore {
 
   /**
    * Check if debug logging is enabled
+   * Rechecks the feature flag state
    */
   public isDebugEnabled(): boolean {
+    if (typeof window !== 'undefined') {
+      try {
+        const store = useFeatureFlagStore.getState();
+        this.isEnabled = store.isDevMode && store.flags.enableDebugLogs;
+      } catch {
+        // Keep existing state if store access fails
+      }
+    }
     return this.isEnabled;
   }
 

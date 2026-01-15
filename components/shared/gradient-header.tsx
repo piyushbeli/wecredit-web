@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 interface GradientHeaderProps {
   /** Header variant - logo-only for simple pages, with-menu for home, with-illustration for auth screens */
   variant?: 'logo-only' | 'with-menu' | 'with-illustration';
+  /** Whether the header is a phone number header */
+  isPhoneNumberHeader?: boolean;
   /** Optional callback when menu button is clicked */
   onMenuClick?: () => void;
   /** Additional CSS classes */
@@ -37,6 +39,7 @@ const heightClasses = {
  */
 const GradientHeader = ({
   variant = 'logo-only',
+  isPhoneNumberHeader = false,
   onMenuClick,
   className,
   height = 'tall',
@@ -46,7 +49,8 @@ const GradientHeader = ({
   return (
     <header
       className={cn(
-        'wc-hero-gradient-wrapper relative flex flex-col',
+        'relative flex flex-col',
+        isPhoneNumberHeader ? 'bg-brand-primary' : '',
         heightClasses[height],
         className
       )}
@@ -104,20 +108,22 @@ const GradientHeader = ({
           {/* Curved bottom edge */}
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-white rounded-t-[2rem] z-10" />
           {/* Illustration or placeholder */}
-          <div className="flex-1 flex items-center justify-center relative z-0">
+          <div className={cn("flex items-center justify-center relative z-0", isPhoneNumberHeader ? 'flex-1 px-4' : 'px-0')}>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
+              className="relative w-full "
             >
               {illustration ? (
                 <Image
                   src={illustration}
                   alt={illustrationAlt}
-                  width={200}
-                  height={200}
-                  className="w-auto h-auto max-w-[200px] max-h-[200px] object-contain"
+                  width={320}
+                  height={243}
+                  className="w-full h-auto object-contain"
                   priority
+                  unoptimized
                 />
               ) : (
                 <div className="w-[180px] h-[180px] border-2 border-dashed border-white/40 rounded-2xl flex flex-col items-center justify-center text-white/60">

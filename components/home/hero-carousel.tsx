@@ -50,7 +50,7 @@ const slides: SlideContent[] = [
  */
 const HeroCarousel = (): JSX.Element => {
   return (
-    <section className="wc-hero-bg min-h-[85vh] relative pt-16">
+    <section className="wc-hero-bg min-h-[40vh] relative pt-16">
       <Carousel
         options={{ loop: true, align: 'center' }}
         plugins={[Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })]}
@@ -60,11 +60,11 @@ const HeroCarousel = (): JSX.Element => {
           {slides.map((slide) => (
             <CarouselSlide
               key={slide.id}
-              className="flex-[0_0_100%] flex flex-col items-center justify-center px-6 py-8"
+              className="flex-[0_0_100%] flex flex-col items-center justify-center px-6 pt-8"
             >
               {/* 3D Hero Avatar with Floating Elements */}
               <motion.div
-                className="relative w-96 h-96 mb-4"
+                className="relative w-96 h-40 mb-4"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 100 }}

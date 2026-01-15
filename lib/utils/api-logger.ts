@@ -201,7 +201,21 @@ export async function withApiLogging<T>(
     const response = await requestFn();
     const duration = Date.now() - startTime;
     if (!response.ok) {
-      const error = new Error(`API returned ${response.status}`);
+      // Try to extract error message from response body
+      let errorMessage = `API returned ${response.status}`;
+      try {
+        const errorBody = await response.json();
+        if (errorBody?.error) {
+          errorMessage = errorBody.error;
+        } else if (errorBody?.message) {
+          errorMessage = errorBody.message;
+        } else if (typeof errorBody === 'string') {
+          errorMessage = errorBody;
+        }
+      } catch {
+        // Response body is not JSON or couldn't be parsed
+      }
+      const error = new Error(errorMessage);
       logError(endpoint, {
         error,
         duration,

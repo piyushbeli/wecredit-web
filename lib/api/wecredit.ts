@@ -11,6 +11,7 @@
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
+import { toast } from 'sonner';
 import type {
   ActiveLendersResponse,
   CheckStatusAllResponse,
@@ -26,15 +27,20 @@ export interface WeCreditOptions {
   headers?: Record<string, string>;
 }
 
+/** Result type for update utm clicked operation */
+interface UpdateUtmClickedResult {
+  success: boolean;
+  error?: string;
+}
+
 /** Default empty response when API fails */
 const DEFAULT_LENDERS_RESPONSE: ActiveLendersResponse = {};
 
 /** Default check status response when API fails */
 const DEFAULT_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
-  success: false,
-  message: 'Unable to check status',
-  hasOffers: false,
-  offers: [],
+  statusCode: '3012',
+  lenders: [],
+  isRehitLenders: 1,
 };
 
 /**
@@ -48,6 +54,22 @@ function buildHeaders(options: WeCreditOptions): Record<string, string> {
     ...(mobile && { [HEADER_MOBILE]: mobile }),
     ...(authorization && { Authorization: `Bearer ${authorization}` }),
     ...headers,
+  };
+}
+
+/**
+ * Builds headers for update utm clicked API
+ */
+function buildUtmClickedHeaders(
+  mobile: string,
+  lenderName: string,
+  authorization?: string
+): Record<string, string> {
+  return {
+    ...wecreditConfig.headers,
+    [HEADER_MOBILE]: mobile,
+    lendername: lenderName,
+    ...(authorization && { Authorization: `Bearer ${authorization}` }),
   };
 }
 
@@ -84,7 +106,11 @@ export async function fetchActiveLenders(
       }
     );
     return data;
-  } catch {
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Unable to fetch lenders. Please try again later.';
+    // toast.error(errorMessage);
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -126,7 +152,13 @@ export async function fetchActiveLendersForUser(
       }
     );
     return data;
-  } catch {
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Failed to load personalized lenders';
+    // toast.error(errorMessage, {
+    //   description: 'Unable to fetch your personalized offers. Please try again later.',
+    // });
     return DEFAULT_LENDERS_RESPONSE;
   }
 }
@@ -137,10 +169,20 @@ export async function fetchActiveLendersForUser(
  * Checks the status of all loan applications/offers for the user
  * Used after login to determine if user has existing offers
  * 
- * Decision Logic:
- * - Case 1: No Offer Generated → hasOffers = false
- * - Case 2: Offers Exist for User → hasOffers = true, offers array populated
+ * Response Status Codes:
+ * - 3003: Offers found successfully
+ * - 3004: No offers, but can try more lenders
+ * - 3005: API error occurred
+ * - 3006: All lenders rejected
+ * - 3012: General error
+ * - 3018: Other specific error condition
  */
+
+/** Lead API endpoint - uses /api/forward for lead operations */
+const CHECK_STATUS_ALL_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
+/** Lead API endpoint - uses /api/forward for offer click updates */
+const UPDATE_UTM_CLICKED_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
+
 export async function checkStatusAll(
   mobile: string,
   authorization?: string
@@ -152,13 +194,14 @@ export async function checkStatusAll(
     };
   }
   const requestBody = {
+    mobile: Number(mobile),
     endpoint: ENDPOINTS.PUBLIC.CHECK_STATUS_ALL,
     partnerCode: wecreditConfig.partnerCode,
   };
   try {
     const data = await withApiLogging<CheckStatusAllResponse>(
       'checkStatusAll',
-      () => fetch(wecreditConfig.gatewayUrl, {
+      () => fetch(CHECK_STATUS_ALL_ENDPOINT, {
         method: 'POST',
         headers: buildHeaders({ mobile, authorization }),
         body: JSON.stringify(requestBody),
@@ -166,7 +209,7 @@ export async function checkStatusAll(
       }),
       {
         method: 'POST',
-        url: wecreditConfig.gatewayUrl,
+        url: CHECK_STATUS_ALL_ENDPOINT,
         headers: buildHeaders({ mobile, authorization }),
         body: requestBody,
         mobile,
@@ -181,10 +224,69 @@ export async function checkStatusAll(
     const errorMessage = error instanceof Error
       ? error.message
       : 'Unable to check status. Please try again.';
+    toast.error(errorMessage, {
+      description: 'Failed to check your loan application status.',
+    });
     return {
       success: false,
       error: errorMessage,
       data: DEFAULT_CHECK_STATUS_RESPONSE,
+    };
+  }
+}
+
+/**
+ * Updates UTM clicked status for a lender offer
+ * @param mobile - User's mobile number
+ * @param lenderName - Lender identifier for tracking
+ */
+export async function updateUtmClicked(
+  mobile: string,
+  lenderName: string,
+  authorization?: string
+): Promise<UpdateUtmClickedResult> {
+  if (!mobile || !lenderName) {
+    return {
+      success: false,
+      error: 'Mobile number and lender name required',
+    };
+  }
+  const requestBody: { endpoint: string; partnerCode: string } = {
+    endpoint: ENDPOINTS.PUBLIC.UPDATE_UTM_CLICKED,
+    partnerCode: lenderName,
+  };
+  const headers: Record<string, string> = buildUtmClickedHeaders(mobile, lenderName, authorization);
+  try {
+    await withApiLogging<unknown>(
+      'updateUtmClicked',
+      () => fetch(UPDATE_UTM_CLICKED_ENDPOINT, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
+      }),
+      {
+        method: 'PUT',
+        url: UPDATE_UTM_CLICKED_ENDPOINT,
+        headers,
+        body: requestBody,
+        mobile,
+        hasAuthorization: false,
+      }
+    );
+    return {
+      success: true,
+    };
+  } catch (error) {
+    const errorMessage: string = error instanceof Error
+      ? error.message
+      : 'Unable to update offer click.';
+    toast.error(errorMessage, {
+      description: 'Failed to track offer click.',
+    });
+    return {
+      success: false,
+      error: errorMessage,
     };
   }
 }
@@ -195,7 +297,7 @@ export async function checkStatusAll(
  * Determines how to handle a clicked lender based on wcStatus
  * 
  * @param offers - List of user's existing offers from checkStatusAll
- * @param lenderId - ID of the lender user clicked
+ * @param lenderName - Name of the lender user clicked
  * @returns Handling result with appropriate action type
  * 
  * Cases:
@@ -205,7 +307,7 @@ export async function checkStatusAll(
  */
 export function determineLenderHandling(
   offers: LenderOfferStatus[],
-  lenderId: string
+  lenderName: string
 ): LenderHandlingResult {
   // Case: No offers exist at all
   if (!offers || offers.length === 0) {
@@ -213,11 +315,11 @@ export function determineLenderHandling(
   }
   // Find the clicked lender in the offers list
   const matchingOffer = offers.find(
-    (offer) => offer.lenderId === lenderId || offer.lenderName === lenderId
+    (offer) => offer.lenderName === lenderName
   );
   // Case: Lender not found in offer list → New application
   if (!matchingOffer) {
-    return { type: 'not_found', lenderId };
+    return { type: 'not_found', lenderName };
   }
   // Case: Lender found with INITIATED status
   if (matchingOffer.wcStatus === 'INITIATED') {
@@ -225,4 +327,77 @@ export function determineLenderHandling(
   }
   // Case: Lender found with other status (existing application)
   return { type: 'existing', offer: matchingOffer };
+}
+
+/**
+ * Re-hit All Lenders API
+ * 
+ * Triggers a re-check across all available lenders to find more offers
+ * Used when user wants to check for additional lenders beyond initial offers
+ * 
+ * @param mobile - User's mobile number
+ * @param authorization - Optional auth token
+ * @returns Result with updated offers list
+ */
+
+/** Lead API endpoint - uses /api/forward for lead operations */
+const HIT_ALL_LENDERS_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
+
+
+export async function hitAllLenders(
+  mobile: string,
+  authorization?: string
+): Promise<CheckStatusResult> {
+  if (!mobile) {
+    return {
+      success: false,
+      error: 'Mobile number required',
+    };
+  }
+  const requestBody = {
+    mobile: Number(mobile),
+    endpoint: ENDPOINTS.PUBLIC.HIT_ALL_LENDERS,
+    partnerCode: wecreditConfig.partnerCode,
+  };
+  try {
+    const data = await withApiLogging<CheckStatusAllResponse>(
+      'hitAllLenders',
+      () => fetch(HIT_ALL_LENDERS_ENDPOINT, {
+        method: 'POST',
+        headers: buildHeaders({ mobile, authorization }),
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
+      }),
+      {
+        method: 'POST',
+        url: HIT_ALL_LENDERS_ENDPOINT,
+        headers: buildHeaders({ mobile, authorization }),
+        body: requestBody,
+        mobile,
+        hasAuthorization: Boolean(authorization),
+      }
+    );
+    
+    // Show success toast
+    toast.success('Checked for new offers', {
+      description: `Found ${data.lenders.length} lender${data.lenders.length !== 1 ? 's' : ''}`,
+    });
+    
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error
+      ? error.message
+      : 'Unable to check for new offers. Please try again.';
+    toast.error(errorMessage, {
+      description: 'Failed to refresh your loan offers.',
+    });
+    return {
+      success: false,
+      error: errorMessage,
+      data: DEFAULT_CHECK_STATUS_RESPONSE,
+    };
+  }
 }
