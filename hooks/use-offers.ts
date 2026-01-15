@@ -203,6 +203,7 @@ export function useOffers(): UseOffersReturn {
     COMPLETED: offers.filter((o) => o.wcStatus === 'COMPLETED').length,
     CANCELLED: offers.filter((o) => o.wcStatus === 'CANCELLED').length,
     UNDER_REVIEW: offers.filter((o) => o.wcStatus === 'UNDER_REVIEW').length,
+    UTM_CLICKED: offers.filter((o) => o.wcStatus === 'UTM_CLICKED').length,
   };
 
   // Fetch offers on mount

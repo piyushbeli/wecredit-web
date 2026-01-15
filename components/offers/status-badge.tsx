@@ -79,6 +79,13 @@ const STATUS_CONFIG: Record<WcStatus, {
     borderColor: 'border-gray-200',
     icon: '🚫',
   },
+  UTM_CLICKED: {
+    label: 'UTM Clicked',
+    bgColor: 'bg-orange-50',
+    textColor: 'text-orange-700',
+    borderColor: 'border-orange-200',
+    icon: '⚠️',
+  },
 };
 
 /**

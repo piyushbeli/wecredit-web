@@ -20,7 +20,7 @@ export const MOCK_OFFERS: LenderOfferStatus[] = [
     interestRate: '1.5',
     tenure: '48',
     logo: '/logos/creditsea.png',
-    approvalChance: 70,
+    approvalRate: 70,
   },
   {
     lenderName: 'PhatkaPay',
@@ -30,7 +30,7 @@ export const MOCK_OFFERS: LenderOfferStatus[] = [
     interestRate: '1.5',
     tenure: '48',
     logo: '/logos/phatkapay.png',
-    approvalChance: 70,
+    approvalRate: 70,
   },
   {
     lenderName: 'Aditya Birla Capital',
@@ -40,7 +40,7 @@ export const MOCK_OFFERS: LenderOfferStatus[] = [
     interestRate: '1.5',
     tenure: '48',
     logo: '/logos/aditya-birla.png',
-    approvalChance: 70,
+    approvalRate: 70,
   },
   {
     lenderName: 'KreditBee',
@@ -50,7 +50,7 @@ export const MOCK_OFFERS: LenderOfferStatus[] = [
     interestRate: '1.5',
     tenure: '48',
     logo: '/logos/kreditbee.png',
-    approvalChance: 70,
+    approvalRate: 70,
   },
 ];
 
@@ -85,7 +85,7 @@ export const MOCK_REHIT_OFFERS: LenderOfferStatus[] = [
     interestRate: '1.5',
     tenure: '48',
     logo: '/logos/bajaj.png',
-    approvalChance: 70,
+    approvalRate: 70,
   },
   {
     lenderName: 'Tata Capital',
@@ -95,7 +95,7 @@ export const MOCK_REHIT_OFFERS: LenderOfferStatus[] = [
     interestRate: '1.5',
     tenure: '48',
     logo: '/logos/tata.png',
-    approvalChance: 70,
+    approvalRate: 70,
   },
 ];
 
