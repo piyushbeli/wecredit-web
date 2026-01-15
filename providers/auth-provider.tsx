@@ -31,7 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
   const searchParams = useSearchParams();
   const { isAuthenticated, logout, setLoading, setUser, setAuthInitialized } = useAuthStore();
-
+  console.log("AUTH PROVIDER:", {isAuthenticated })
   /**
    * Handle pre-authentication from URL parameters
    * Extracts pre_auth and mn from query params and applies them

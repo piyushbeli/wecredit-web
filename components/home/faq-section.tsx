@@ -131,7 +131,7 @@ const FaqSection = (): React.ReactNode => {
 	};
 
 	return (
-		<section className="bg-white py-8 sm:py-10 md:py-12 px-4">
+		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
 			{/* Section Title */}
 			<motion.h2
 				className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8"

@@ -58,7 +58,7 @@ const tools: Tool[] = [
  */
 const ToolsCalculatorsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white py-8 px-4">
+    <section className="bg-white py-4 px-4">
       <div className="mx-auto">
         {/* Section Title */}
         <motion.h2

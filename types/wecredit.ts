@@ -56,7 +56,8 @@ export type WcStatus =
   | 'REJECTED'       // Loan rejected
   | 'DISBURSED'      // Loan disbursed
   | 'COMPLETED'      // Loan completed
-  | 'CANCELLED';     // Loan cancelled
+  | 'CANCELLED'      // Loan cancelled
+  | 'UTM_CLICKED';   // Lender link clicked
 
 /**
  * Individual lender offer status in check-status-all response
@@ -65,6 +66,8 @@ export type WcStatus =
 export interface LenderOfferStatus {
   /** Lender name/identifier */
   lenderName: string;
+  /** Lender name/identifier */
+  uptoAmount?: string;
   /** WeCredit application status */
   wcStatus: WcStatus;
   /** Direct application link (for INITIATED status) */
@@ -88,7 +91,7 @@ export interface LenderOfferStatus {
   /** Human-readable status message */
   statusMessage?: string;
   /** Approval chance percentage (0-100) */
-  approvalChance?: number;
+  approvalRate?: number;
 }
 
 /**

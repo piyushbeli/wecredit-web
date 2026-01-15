@@ -61,6 +61,9 @@ export const ENDPOINTS = {
 
     /** Endpoint identifier for re-hitting all lenders (PDF Offers Screen) */
     HIT_ALL_LENDERS: 'hit-all-lenders',
+
+    /** Endpoint identifier for update utm clicked (Offers Screen) */
+    UPDATE_UTM_CLICKED: 'update-utm-clicked',
   },
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',

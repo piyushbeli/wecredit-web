@@ -27,6 +27,12 @@ export interface WeCreditOptions {
   headers?: Record<string, string>;
 }
 
+/** Result type for update utm clicked operation */
+interface UpdateUtmClickedResult {
+  success: boolean;
+  error?: string;
+}
+
 /** Default empty response when API fails */
 const DEFAULT_LENDERS_RESPONSE: ActiveLendersResponse = {};
 
@@ -48,6 +54,22 @@ function buildHeaders(options: WeCreditOptions): Record<string, string> {
     ...(mobile && { [HEADER_MOBILE]: mobile }),
     ...(authorization && { Authorization: `Bearer ${authorization}` }),
     ...headers,
+  };
+}
+
+/**
+ * Builds headers for update utm clicked API
+ */
+function buildUtmClickedHeaders(
+  mobile: string,
+  lenderName: string,
+  authorization?: string
+): Record<string, string> {
+  return {
+    ...wecreditConfig.headers,
+    [HEADER_MOBILE]: mobile,
+    lendername: lenderName,
+    ...(authorization && { Authorization: `Bearer ${authorization}` }),
   };
 }
 
@@ -158,6 +180,8 @@ export async function fetchActiveLendersForUser(
 
 /** Lead API endpoint - uses /api/forward for lead operations */
 const CHECK_STATUS_ALL_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
+/** Lead API endpoint - uses /api/forward for offer click updates */
+const UPDATE_UTM_CLICKED_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 
 export async function checkStatusAll(
   mobile: string,
@@ -207,6 +231,62 @@ export async function checkStatusAll(
       success: false,
       error: errorMessage,
       data: DEFAULT_CHECK_STATUS_RESPONSE,
+    };
+  }
+}
+
+/**
+ * Updates UTM clicked status for a lender offer
+ * @param mobile - User's mobile number
+ * @param lenderName - Lender identifier for tracking
+ */
+export async function updateUtmClicked(
+  mobile: string,
+  lenderName: string,
+  authorization?: string
+): Promise<UpdateUtmClickedResult> {
+  if (!mobile || !lenderName) {
+    return {
+      success: false,
+      error: 'Mobile number and lender name required',
+    };
+  }
+  const requestBody: { endpoint: string; partnerCode: string } = {
+    endpoint: ENDPOINTS.PUBLIC.UPDATE_UTM_CLICKED,
+    partnerCode: lenderName,
+  };
+  const headers: Record<string, string> = buildUtmClickedHeaders(mobile, lenderName, authorization);
+  try {
+    await withApiLogging<unknown>(
+      'updateUtmClicked',
+      () => fetch(UPDATE_UTM_CLICKED_ENDPOINT, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(requestBody),
+        cache: 'no-store',
+      }),
+      {
+        method: 'PUT',
+        url: UPDATE_UTM_CLICKED_ENDPOINT,
+        headers,
+        body: requestBody,
+        mobile,
+        hasAuthorization: false,
+      }
+    );
+    return {
+      success: true,
+    };
+  } catch (error) {
+    const errorMessage: string = error instanceof Error
+      ? error.message
+      : 'Unable to update offer click.';
+    toast.error(errorMessage, {
+      description: 'Failed to track offer click.',
+    });
+    return {
+      success: false,
+      error: errorMessage,
     };
   }
 }

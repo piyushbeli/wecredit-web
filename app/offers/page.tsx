@@ -7,12 +7,15 @@
  */
 
 import { useEffect } from 'react';
+import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useOffers } from '@/hooks/use-offers';
 import { OfferCard } from '@/components/offers/offer-card';
 import { OffersHero } from '@/components/offers/offers-hero';
 import type { LenderOfferStatus } from '@/types/wecredit';
+import { updateUtmClicked } from '@/lib/api/wecredit';
+import { PARTNER_CODE, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 
 /**
  * Offers Page Component
@@ -22,13 +25,12 @@ export default function OffersPage() {
   const { isAuthenticated, isAuthInitialized } = useAuthStore();
   const { offers, isLoading, error, fetchOffers } = useOffers();
 
+  console.log("OFFER:", {isAuthenticated, isAuthInitialized })
+
   /**
    * Redirect to personal loan page if not authenticated
    */
   useEffect(() => {
-    if (!isAuthInitialized) {
-      return;
-    }
     if (!isAuthenticated) {
       router.push('/personal-loan');
     }
@@ -38,9 +40,19 @@ export default function OffersPage() {
    * Handle offer card click
    */
   const handleOfferClick = (offer: LenderOfferStatus): void => {
-    if (offer.utmLink) {
-      window.open(offer.utmLink, '_blank');
+    const utmLink: string | undefined = offer.utmLink;
+    if (!utmLink) {
+      return;
     }
+    const lenderName: string = offer.lenderName || '';
+    const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
+    const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
+    const isUtmClicked: boolean = offer.wcStatus === 'UTM_CLICKED';
+    if (lenderName && mobile && !isUtmClicked) {
+      void updateUtmClicked(mobile, lenderName, token);
+    }
+    window.open(utmLink, '_blank'); 
+    fetchOffers()
   };
 
   /**
@@ -51,6 +63,9 @@ export default function OffersPage() {
     // This can be implemented based on your requirements
     console.log('Check loan status clicked');
   };
+  const isUtmClickedOffer = (offer: LenderOfferStatus): boolean => offer.wcStatus === 'UTM_CLICKED';
+  const utmClickedOffers: LenderOfferStatus[] = offers.filter(isUtmClickedOffer);
+  const otherOffers: LenderOfferStatus[] = offers.filter((offer) => !isUtmClickedOffer(offer));
 
   if (isLoading) {
     return (
@@ -103,18 +118,40 @@ export default function OffersPage() {
 
       {/* Offers List */}
       <div className="px-4 py-4 pb-28">
-        {offers.length > 0 ? (
-          <div className="space-y-4">
-            {offers.map((offer, index) => (
-              <OfferCard
-                key={`${offer.lenderName}-${index}`}
-                offer={offer}
-                onClick={() => handleOfferClick(offer)}
-              />
-            ))}
-          </div>
-        ) : (
+        {utmClickedOffers.length === 0 && otherOffers.length === 0 ? (
           <EmptyState />
+        ) : (
+          <div className="space-y-6">
+            {otherOffers.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-lg font-semibold text-gray-900">Explore more loan offers</h2>
+                <div className="space-y-4">
+                  {otherOffers.map((offer, index) => (
+                    <OfferCard
+                      key={`${offer.lenderName}-${index}`}
+                      offer={offer}
+                      onClick={() => handleOfferClick(offer)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {utmClickedOffers.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-lg font-semibold text-gray-900">Check loan status</h2>
+                <div className="space-y-4">
+                  {utmClickedOffers.map((offer, index) => (
+                    <OfferCard
+                      key={`${offer.lenderName}-${index}`}
+                      offer={offer}
+                      variant="utmClicked"
+                      onClick={() => handleOfferClick(offer)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         )}
       </div>
 

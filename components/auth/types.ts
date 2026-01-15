@@ -20,7 +20,7 @@ export interface OTPStepScreenProps {
   isLoading: boolean;
   error: string | null;
   onOtpChange: (otp: string) => void;
-  onVerify: () => void;
+  onVerify: (otpOverride?: string) => void;
   onResend: () => void;
   onBack: () => void;
   onClose: () => void;

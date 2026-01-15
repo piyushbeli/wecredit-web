@@ -41,7 +41,7 @@ const CertificationBadge = ({
  */
 const CertificationsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white py-8 sm:py-10 md:py-12">
+    <section className="bg-white py-4 sm:py-10 md:py-12">
       {/* Section Title */}
       <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-10">
         Certified By

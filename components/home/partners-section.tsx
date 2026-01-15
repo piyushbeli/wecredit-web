@@ -37,7 +37,7 @@ const MarqueeRow = ({
  */
 const PartnersSection = (): React.ReactNode => {
 	return (
-		<section className="bg-white py-8 sm:py-10 md:py-12 overflow-hidden">
+		<section className="bg-white py-4 sm:py-10 md:py-12 overflow-hidden">
 			{/* Container with blue left border accent */}
 				{/* Section Title */}
 				<h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">

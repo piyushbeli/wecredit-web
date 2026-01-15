@@ -64,7 +64,7 @@ const STEPS = [
  */
 export default function PersonalLoanPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 py-24">
       {/* Hero Section */}
       <section className="bg-white px-4 pt-6 pb-8">
         <p className="text-gray-600 text-sm mb-1">Loans for every Credit Profile.</p>

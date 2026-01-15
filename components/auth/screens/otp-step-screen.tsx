@@ -82,8 +82,8 @@ export const OTPStepScreen = ({
         >
           <OTPInput
             onChange={onOtpChange}
-            onComplete={() => {
-              void onVerify();
+            onComplete={(otp) => {
+              void onVerify(otp);
             }}
             onResend={onResend}
             error={error || undefined}
@@ -100,7 +100,9 @@ export const OTPStepScreen = ({
         {/* Continue Button */}
         <motion.button
           type="button"
-          onClick={onVerify}
+          onClick={() => {
+            void onVerify();
+          }}
           disabled={!isOtpComplete || isLoading}
           className={cn(
             'w-full max-w-sm mx-auto py-4 rounded-md font-semibold text-base transition-all duration-300 block',
