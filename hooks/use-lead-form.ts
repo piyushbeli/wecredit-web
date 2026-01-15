@@ -16,7 +16,7 @@ const WIZARD_STEPS: WizardStep[] = [
   { 
     stepNumber: 1, 
     title: 'Personal Information', 
-    fieldKeys: ['name', 'mobile', 'email', 'gender', 'maritalStatus'] 
+    fieldKeys: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'] 
   },
   { 
     stepNumber: 2, 

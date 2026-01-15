@@ -82,6 +82,9 @@ export const OTPStepScreen = ({
         >
           <OTPInput
             onChange={onOtpChange}
+            onComplete={() => {
+              void onVerify();
+            }}
             onResend={onResend}
             error={error || undefined}
             disabled={isLoading}

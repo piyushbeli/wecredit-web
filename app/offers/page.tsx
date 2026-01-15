@@ -19,17 +19,20 @@ import type { LenderOfferStatus } from '@/types/wecredit';
  */
 export default function OffersPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isAuthInitialized } = useAuthStore();
   const { offers, isLoading, error, fetchOffers } = useOffers();
 
   /**
    * Redirect to personal loan page if not authenticated
    */
   useEffect(() => {
+    if (!isAuthInitialized) {
+      return;
+    }
     if (!isAuthenticated) {
       router.push('/personal-loan');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthInitialized, isAuthenticated, router]);
 
   /**
    * Handle offer card click

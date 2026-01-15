@@ -47,6 +47,8 @@ interface AuthState {
   currentStep: AuthStep;
   /** Phone number being authenticated */
   phoneNumber: string;
+  /** Whether auth state has been initialized */
+  isAuthInitialized: boolean;
   /** Whether user is authenticated */
   isAuthenticated: boolean;
   /** Current user data */
@@ -85,6 +87,8 @@ interface AuthActions {
   setError: (error: string | null) => void;
   /** Reset modal state (but keep auth state) */
   resetModalState: () => void;
+  /** Mark auth as initialized */
+  setAuthInitialized: (isAuthInitialized: boolean) => void;
   /** Set pending action */
   setPendingAction: (action: PendingAction | null) => void;
   /** Clear pending action after execution */
@@ -105,6 +109,7 @@ const initialModalState = {
 
 /** Initial auth state */
 const initialAuthState = {
+  isAuthInitialized: false,
   isAuthenticated: false,
   user: null,
   token: null,
@@ -166,7 +171,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         setError: (error: string | null) => set({ error, isLoading: false }),
 
         resetModalState: () => set(initialModalState),
-
+        setAuthInitialized: (isAuthInitialized: boolean) => set({ isAuthInitialized }),
         setPendingAction: (action: PendingAction | null) =>
           set({ pendingAction: action }),
 
@@ -189,6 +194,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           isAuthenticated: state.isAuthenticated,
           user: state.user,
         }),
+        onRehydrateStorage: () => (state, error) => {
+          if (error || !state) {
+            state?.setAuthInitialized(true);
+            return;
+          }
+          state.setAuthInitialized(true);
+        },
       }
     ),
     {

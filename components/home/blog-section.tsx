@@ -73,7 +73,7 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 				className="group block bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300"
 			>
 				{/* Image Container */}
-				<div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+				<div className="relative aspect-4/3 w-full overflow-hidden bg-gray-100">
 					<Image
 						src={post.imagePath}
 						alt={post.title}

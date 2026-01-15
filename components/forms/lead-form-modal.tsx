@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
@@ -15,7 +15,7 @@ import { useLeadForm } from '@/hooks/use-lead-form';
 import { Button } from '@/components/ui/button';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
-import type { LeadFormData } from '@/types/lead';
+import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 import { cn } from '@/lib/utils';
 import PersonalInfoStep from './steps/personal-info-step';
 import AddressInfoStep from './steps/address-info-step';
@@ -31,6 +31,49 @@ interface LeadFormModalProps {
   isAllLenders?: boolean;
 }
 
+const PREFILL_QUERY_KEY = 'prefill';
+const PREFILL_QUERY_VALUE = '1';
+const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
+  name: 'Test User',
+  mobile: '9876543210',
+  dob: '01-01-1990',
+  email: 'test.user@example.com',
+  pan: 'ABCDE1234F',
+  pincode: '560001',
+  gender: 'male',
+  employmentType: 'salaried',
+  salary: '50000',
+  companyName: 'Test Company',
+  companyAddress: '123 Test Street',
+  companyPincode: '560001',
+  permanentAddress: '123 Test Street',
+  addressType: 'current',
+  maritalStatus: 'single',
+  modeOfSalary: 'bank',
+};
+
+interface PrefillOptions {
+  fields: FormField[];
+  isEnabled: boolean;
+  userIp: string;
+}
+
+function getPrefillValue(fieldKey: FormFieldKey, userIp: string): string | null {
+  if (fieldKey === 'ConsentIp' && userIp) return userIp;
+  const sampleValue = sampleLeadValues[fieldKey];
+  return sampleValue ?? null;
+}
+
+function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): FormField[] {
+  if (!isEnabled) return fields;
+  return fields.map((field) => {
+    if (field.value?.trim()) return field;
+    const prefillValue = getPrefillValue(field.key, userIp);
+    if (!prefillValue) return field;
+    return { ...field, value: prefillValue };
+  });
+}
+
 const LeadFormModal = ({
   isOpen,
   onClose,
@@ -40,6 +83,7 @@ const LeadFormModal = ({
   onSuccess,
 }: LeadFormModalProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
@@ -61,6 +105,9 @@ const LeadFormModal = ({
     handleBack,
     initializeFormValues,
   } = useLeadForm(fields);
+
+  const isPrefillEnabled = process.env.NODE_ENV !== 'production'
+    && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE;
 
   // Fetch user IP on mount
   useEffect(() => {
@@ -84,9 +131,10 @@ const LeadFormModal = ({
   // Initialize form values from API response
   useEffect(() => {
     if (fields.length > 0 && userIp) {
-      initializeFormValues(fields, userIp);
+      const prefilledFields = getPrefilledFields({ fields, isEnabled: isPrefillEnabled, userIp });
+      initializeFormValues(prefilledFields, userIp);
     }
-  }, [fields, userIp, initializeFormValues]);
+  }, [fields, isPrefillEnabled, userIp, initializeFormValues]);
 
   const handleHeaderBackClick = (): void => {
     if (currentStep === 1) {
@@ -149,12 +197,14 @@ const LeadFormModal = ({
             firstName={firstName}
             lastName={lastName}
             mobile={formValues.mobile || ''}
+            dob={formValues.dob || ''}
             email={formValues.email || ''}
             gender={formValues.gender || ''}
             maritalStatus={formValues.maritalStatus || ''}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
             onMobileChange={(val) => handleFieldChange('mobile', val)}
+            onDobChange={(val) => handleFieldChange('dob', val)}
             onEmailChange={(val) => handleFieldChange('email', val)}
             onGenderChange={(val) => handleFieldChange('gender', val)}
             onMaritalStatusChange={(val) => handleFieldChange('maritalStatus', val)}

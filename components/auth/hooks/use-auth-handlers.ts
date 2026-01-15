@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { authService, setAuthToken, setMobile } from '@/lib/api';
 
@@ -14,7 +14,7 @@ interface UseAuthHandlersReturn {
   handlePhoneChange: (value: string, isValid: boolean) => void;
   handleSendOtp: () => Promise<void>;
   handleOtpChange: (otp: string) => void;
-  handleVerifyOtp: () => Promise<void>;
+  handleVerifyOtp: (otpOverride?: string) => Promise<void>;
   handleResendOtp: () => Promise<void>;
   setOtpValue: (value: string) => void;
 }
@@ -38,6 +38,7 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
   } = useAuthStore();
 
   const [otpValue, setOtpValue] = useState('');
+  const isVerifyingOtpRef = useRef<boolean>(false);
 
   /** Handle phone number change */
   const handlePhoneChange = useCallback(
@@ -72,18 +73,24 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
   };
 
   /** Handle OTP verification */
-  const handleVerifyOtp = async (): Promise<void> => {
-    if (otpValue.length !== 6 || isLoading) return;
+  const handleVerifyOtp = async (otpOverride?: string): Promise<void> => {
+    const otpToVerify = otpOverride ?? otpValue;
+    if (otpToVerify.length !== 6 || isLoading || isVerifyingOtpRef.current) return;
+    isVerifyingOtpRef.current = true;
     setLoading(true);
     setError(null);
-    const result = await authService.verifyOtp(phoneNumber, otpValue);
-    if (result.success && result.data) {
-      setAuthToken(result.data.token);
-      setMobile(phoneNumber);
-      setUser(result.data.user, result.data.token);
-      setOtpValue('');
-    } else {
+    try {
+      const result = await authService.verifyOtp(phoneNumber, otpToVerify);
+      if (result.success && result.data) {
+        setAuthToken(result.data.token);
+        setMobile(phoneNumber);
+        setUser(result.data.user, result.data.token);
+        setOtpValue('');
+        return;
+      }
       setError(result.error || 'Invalid OTP. Please try again.');
+    } finally {
+      isVerifyingOtpRef.current = false;
     }
   };
 

@@ -22,7 +22,9 @@ const TrendingOffersClient = (): React.ReactNode => {
   const { isAuthenticated, user } = useAuthStore();
   
   // PDF Step 2: Fetch generic lenders (always fetched as fallback)
-  const { activeLenders: genericLenders, isLoading: isLoadingGeneric } = useFilteredActiveLenders();
+  const { activeLenders: genericLenders, isLoading: isLoadingGeneric } = useFilteredActiveLenders({
+    fetchOnMount: !isAuthenticated,
+  });
   
   // PDF Step 3: Fetch user-specific lenders when logged in
   const [userLenders, setUserLenders] = useState<ActiveLender[] | null>(null);

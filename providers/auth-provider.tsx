@@ -30,7 +30,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
   const searchParams = useSearchParams();
-  const { isAuthenticated, logout, setLoading, setUser } = useAuthStore();
+  const { isAuthenticated, logout, setLoading, setUser, setAuthInitialized } = useAuthStore();
 
   /**
    * Handle pre-authentication from URL parameters
@@ -40,22 +40,18 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const handlePreAuth = useCallback((): boolean => {
     const preAuth = searchParams?.get('pre_auth');
     const mobile = searchParams?.get('mn');
-
     // Both parameters must be present
     if (!preAuth || !mobile) {
       return false;
     }
-
     // Set auth token in cookie
     setCookie(STORAGE_AUTH_TOKEN, preAuth, {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
-
     // Set mobile in cookie
     setCookie(STORAGE_MOBILE, mobile, {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
-
     // Update auth store
     setUser(
       {
@@ -65,9 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       },
       preAuth
     );
-
     console.log('[PRE-AUTH] Applied from URL:', { mobile, hasToken: true });
-
     // Clean up URL parameters
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
@@ -75,7 +69,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       url.searchParams.delete('mn');
       window.history.replaceState({}, '', url.toString());
     }
-
     return true; // Pre-auth was applied
   }, [searchParams, setUser]);
 
@@ -86,29 +79,26 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const initializeAuth = useCallback(async (): Promise<void> => {
     // First check for pre-auth in URL
     const preAuthApplied = handlePreAuth();
-    
     if (preAuthApplied) {
       // Pre-auth was applied, skip token validation
+      setAuthInitialized(true);
       return;
     }
-
     // Check if token exists in cookies
     const token = getCookie(STORAGE_AUTH_TOKEN);
-    
-    if (!token) {
+    const mobile = getCookie(STORAGE_MOBILE);
+    if (!token || !mobile) {
       // No token in cookies - ensure clean logout state
       if (isAuthenticated) {
         logout();
       }
+      setAuthInitialized(true);
       return;
     }
-
     // Token exists - validate with backend
     setLoading(true);
-    
     try {
       const result = await authService.validateToken();
-      
       if (!result.isValid) {
         // Token is invalid - clear auth state
         // authService.validateToken already calls clearAllAuthData()
@@ -116,8 +106,16 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         console.info('[AuthProvider] Token validation failed, user logged out');
       } else {
         console.info('[AuthProvider] Token validated successfully');
-        // Token is valid - auth state persisted in Zustand is correct
-        // No action needed as user state is already in store
+        if (!isAuthenticated) {
+          setUser(
+            {
+              id: `user-${mobile}`,
+              phoneNumber: mobile.toString(),
+              name: `User ${mobile.toString().slice(-4)}`,
+            },
+            token.toString()
+          );
+        }
       }
     } catch (error) {
       // On error, clear auth for safety
@@ -125,8 +123,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       logout();
     } finally {
       setLoading(false);
+      setAuthInitialized(true);
     }
-  }, [isAuthenticated, logout, setLoading, handlePreAuth]);
+  }, [handlePreAuth, isAuthenticated, logout, setAuthInitialized, setLoading, setUser]);
 
   useEffect(() => {
     // Only run once on mount

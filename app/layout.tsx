@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import MobileHeader from '@/components/home/mobile-header';
@@ -45,17 +46,19 @@ export default async function RootLayout({
         {/* FeatureFlagProvider must wrap everything for dev tools */}
         <FeatureFlagProvider>
           {/* AuthProvider validates token on mount (PDF Step 1) */}
-          <AuthProvider>
-            <ToastProvider />
-            <MobileHeader
-              headerLinks={globalData.headerLinks}
-              logo={globalData.logo}
-              siteName={globalData.siteName}
-            />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <AuthModal />
-          </AuthProvider>
+          <Suspense fallback={null}>
+            <AuthProvider>
+              <ToastProvider />
+              <MobileHeader
+                headerLinks={globalData.headerLinks}
+                logo={globalData.logo}
+                siteName={globalData.siteName}
+              />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <AuthModal />
+            </AuthProvider>
+          </Suspense>
         </FeatureFlagProvider>
       </body>
     </html>

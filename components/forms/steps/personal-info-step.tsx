@@ -10,12 +10,14 @@ interface PersonalInfoStepProps {
   firstName: string;
   lastName: string;
   mobile: string;
+  dob: string;
   email: string;
   gender: string;
   maritalStatus: string;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
   onMobileChange: (value: string) => void;
+  onDobChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onGenderChange: (value: string) => void;
   onMaritalStatusChange: (value: string) => void;
@@ -27,12 +29,14 @@ const PersonalInfoStep = ({
   firstName,
   lastName,
   mobile,
+  dob,
   email,
   gender,
   maritalStatus,
   onFirstNameChange,
   onLastNameChange,
   onMobileChange,
+  onDobChange,
   onEmailChange,
   onGenderChange,
   onMaritalStatusChange,
@@ -72,6 +76,18 @@ const PersonalInfoStep = ({
         disabled={disabled}
         placeholder="Phone Number"
         inputMode="tel"
+        required
+      />
+
+      <InputField
+        label="Date of Birth"
+        value={dob}
+        onChange={onDobChange}
+        error={errors.dob}
+        disabled={disabled}
+        placeholder="DD-MM-YYYY"
+        helperText="As per PAN card"
+        inputMode="numeric"
         required
       />
 
