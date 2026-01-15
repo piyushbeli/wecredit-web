@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { X, ArrowLeft } from 'lucide-react';
 import { GradientHeader } from '@/components/shared';
 import { OTPInput } from '@/components/auth';
+import { useAppHeight } from '@/hooks/use-app-height';
 import { cn } from '@/lib/utils';
-import type { OTPStepScreenProps } from '../types';
+import type { HeaderHeightPreset, OTPStepScreenProps } from '../types';
 
 /**
  * OTP step screen component
@@ -22,12 +23,21 @@ export const OTPStepScreen = ({
   onResend,
   onBack,
   onClose,
+  headerHeightPercent = 65,
+  headerHeight = 'threeQuarter',
 }: OTPStepScreenProps): React.ReactNode => {
   const isOtpComplete = otpValue.length === 6;
+  const containerStyle: React.CSSProperties = useAppHeight();
+  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent
+    ? { height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})` }
+    : undefined;
+  const resolvedHeaderHeight: HeaderHeightPreset | undefined =
+    headerHeightPercent ? undefined : headerHeight;
 
   return (
     <motion.div
-      className="relative flex flex-col h-full bg-white"
+      className="relative flex flex-col bg-white"
+      style={containerStyle}
       initial={{ x: '30%', opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '30%', opacity: 0 }}
@@ -56,7 +66,8 @@ export const OTPStepScreen = ({
       {/* Gradient Header with OTP Illustration - 75% height */}
       <GradientHeader
         variant="with-illustration"
-        height="threeQuarter"
+        height={resolvedHeaderHeight}
+        style={headerHeightStyle}
         illustration="/assets/images/otp-sms.png"
         illustrationAlt="OTP verification illustration"
       />

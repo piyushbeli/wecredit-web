@@ -16,8 +16,10 @@ interface GradientHeaderProps {
   onMenuClick?: () => void;
   /** Additional CSS classes */
   className?: string;
+  /** Optional inline styles */
+  style?: React.CSSProperties;
   /** Height of the header section */
-  height?: 'short' | 'medium' | 'tall' | 'half' | 'threeQuarter';
+  height?: 'short' | 'medium' | 'tall' | 'half' | 'threeQuarter' | 'sixtyFive';
   /** Illustration image path for with-illustration variant */
   illustration?: string;
   /** Alt text for illustration image */
@@ -31,6 +33,7 @@ const heightClasses = {
   tall: 'min-h-[40vh]',
   half: 'h-[50vh]',
   threeQuarter: 'h-[75vh]',
+  sixtyFive: 'h-[65vh] h-[65svh] h-[65dvh]',
 };
 
 /**
@@ -42,6 +45,7 @@ const GradientHeader = ({
   isPhoneNumberHeader = false,
   onMenuClick,
   className,
+  style,
   height = 'tall',
   illustration,
   illustrationAlt = 'Illustration',
@@ -54,6 +58,7 @@ const GradientHeader = ({
         heightClasses[height],
         className
       )}
+      style={style}
     >
       {/* Top Bar - only visible for with-menu variant */}
       {variant === 'with-menu' && (
