@@ -1,3 +1,4 @@
+import { SlideContent } from "@/components/home/hero-carousel";
 import { Partner } from "@/types/wecredit";
 
 /**
@@ -49,3 +50,32 @@ export const PARTNERS: Partner[] = [
 export const ROW_1_PARTNERS = PARTNERS.slice(0, 7);
 export const ROW_2_PARTNERS = PARTNERS.slice(7, 14);
 export const ROW_3_PARTNERS = PARTNERS.slice(14, 21);
+
+/** Carousel slides data */
+export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
+	{
+	  id: 'slide-1',
+	  image: '/assets/images/carousel-one.png',
+	  titleWhite: 'More Savings',
+	  titleGradient: 'on Every Loan',
+	  ctaText: 'Apply For Loan',
+	  ctaLink: '#',
+	},
+	{
+	  id: 'slide-2',
+	  image: '/assets/images/carousel-two.png',
+	  titleWhite: 'More Savings',
+	  titleGradient: 'on Every Loan',
+	  ctaText: 'Get Your Card',
+	  ctaLink: '#',
+	},
+	{
+	  id: 'slide-3',
+	  image: '/assets/images/carousel-three.png',
+	  titleWhite: 'More Savings',
+	  titleGradient: 'on Every Loan',
+	  ctaText: 'Check Eligibility',
+	  ctaLink: '#',
+	},
+  ];
+  

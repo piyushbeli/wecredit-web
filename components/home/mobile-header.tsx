@@ -108,7 +108,7 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
           <Link href="/" className="flex items-center relative">
             {/* Light logo (for transparent header on blue background) */}
             <Image
-              src="/images/logo.png"
+              src="/assets/images/logo.png"
               alt={siteName || 'WeCredit'}
               width={120}
               height={32}
