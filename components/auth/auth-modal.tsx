@@ -1,6 +1,8 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useAuthHandlers } from './hooks/use-auth-handlers';
 import { usePostLogin } from './hooks/use-post-login';
@@ -16,6 +18,8 @@ import { OTPStepScreen } from './screens/otp-step-screen';
  */
 const AuthModal = (): React.ReactNode => {
   const { isModalOpen, currentStep, closeModal, setStep, setError } = useAuthStore();
+  const pathname: string = usePathname();
+  const previousPathnameRef = useRef<string | null>(null);
 
   // Use custom hooks for business logic
   const {
@@ -45,10 +49,10 @@ const AuthModal = (): React.ReactNode => {
   };
 
   /** Handle close */
-  const handleClose = (): void => {
+  const handleClose = useCallback((): void => {
     closeModal();
     setOtpValue('');
-  };
+  }, [closeModal, setOtpValue]);
 
   /** Handle backdrop click */
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>): void => {
@@ -57,6 +61,16 @@ const AuthModal = (): React.ReactNode => {
     }
   };
 
+  useEffect((): void => {
+    if (!isModalOpen) {
+      previousPathnameRef.current = pathname;
+      return;
+    }
+    if (previousPathnameRef.current && previousPathnameRef.current !== pathname) {
+      handleClose();
+    }
+    previousPathnameRef.current = pathname;
+  }, [handleClose, isModalOpen, pathname]);
   if (!isModalOpen) return null;
 
   return (
