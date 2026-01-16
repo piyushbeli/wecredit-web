@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { IMAGES } from '@/lib/constants/images';
+import { EXTERNAL_LINKS } from '@/lib/constants/links';
 
 /** Footer link item */
 interface FooterLinkItem {
@@ -96,10 +97,10 @@ const InstagramIcon = ({ className }: { className?: string }) => (
 
 /** Social links configuration */
 const socialLinks: SocialLink[] = [
-  { platform: 'X', href: 'https://x.com/wecredit', icon: <XIcon className="w-5 h-5" /> },
-  { platform: 'LinkedIn', href: 'https://linkedin.com/company/wecredit', icon: <LinkedInIcon className="w-5 h-5" /> },
-  { platform: 'Facebook', href: 'https://facebook.com/wecredit', icon: <FacebookIcon className="w-5 h-5" /> },
-  { platform: 'Instagram', href: 'https://instagram.com/wecredit', icon: <InstagramIcon className="w-5 h-5" /> },
+  { platform: 'X', href: EXTERNAL_LINKS.SOCIAL.X, icon: <XIcon className="w-5 h-5" /> },
+  { platform: 'LinkedIn', href: EXTERNAL_LINKS.SOCIAL.LINKEDIN, icon: <LinkedInIcon className="w-5 h-5" /> },
+  { platform: 'Facebook', href: EXTERNAL_LINKS.SOCIAL.FACEBOOK, icon: <FacebookIcon className="w-5 h-5" /> },
+  { platform: 'Instagram', href: EXTERNAL_LINKS.SOCIAL.INSTAGRAM, icon: <InstagramIcon className="w-5 h-5" /> },
 ];
 
 /**

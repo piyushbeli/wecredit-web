@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IMAGES } from '@/lib/constants/images';
+import { EXTERNAL_LINKS } from '@/lib/constants/links';
 
 /**
  * AppDownloadSection Component
@@ -40,7 +41,7 @@ const AppDownloadSection = (): React.ReactNode => {
             {/* App Store Badges - Stacked vertically */}
             <div className="flex flex-col gap-3 md:gap-4">
               <a 
-                href="#" 
+                href={EXTERNAL_LINKS.PLAY_STORE} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="transition-all hover:opacity-80 active:scale-95 w-fit"
@@ -53,7 +54,7 @@ const AppDownloadSection = (): React.ReactNode => {
                   className="h-11 w-auto md:h-14 lg:h-16"
                 />
               </a>
-              <a 
+              {/* <a 
                 href="#" 
                 target="_blank" 
                 rel="noopener noreferrer"
@@ -66,7 +67,7 @@ const AppDownloadSection = (): React.ReactNode => {
                   height={54}
                   className="h-11 w-auto md:h-14 lg:h-16"
                 />
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
