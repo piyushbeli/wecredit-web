@@ -18,7 +18,7 @@ const CertificationBadge = ({
 }): React.ReactNode => {
   return (
     <div className="flex items-center justify-center">
-      <div className="relative  sm:w-40 sm:h-40 md:w-44 md:h-44">
+      <div className="relative">
         <Image
           src={src}
           alt={alt}
