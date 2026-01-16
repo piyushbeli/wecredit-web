@@ -56,7 +56,7 @@ const ToolCard = ({
         <div className="flex flex-col h-full">
           {/* Text Content */}
           <div className="flex-1">
-            <h3 className="text-sm font-bold text-gray-900 leading-tight mb-1">
+            <h3 className="text-sm font-medium leading-tight mb-1">
               {title.split('\n').map((line, idx) => (
                 <span key={idx}>
                   {line}

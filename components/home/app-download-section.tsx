@@ -24,13 +24,13 @@ const AppDownloadSection = (): React.ReactNode => {
         <div className="absolute w-[180px] h-[160px] md:w-[300px] md:h-[260px] right-0 bottom-0 bg-brand-primary blur-[60px] md:blur-[100px] opacity-70 rounded-full" />
 
         {/* Text and Badges Content */}
-        <div className="z-10 flex flex-col items-start gap-16 w-full md:w-1/2">
+        <div className="z-10 flex flex-col items-start gap-28 w-full md:w-1/2">
           <div className="space-y-4">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-gray-900">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium leading-tight text-gray-900">
               No more Waiting.<br />
               Get up to <span className="text-brand-primary">₹3 Lakh</span> in Minutes
             </h2>
-            <div className="flex items-center gap-3 text-lg font-normal text-gray-600 md:text-2xl">
+            <div className="flex items-start gap-3 text-lg font-normal text-gray-500 md:text-2xl">
               <span>Download The WeCredit App Now</span>
               <ArrowDown className="h-6 w-6 md:h-8 md:w-8" />
             </div>

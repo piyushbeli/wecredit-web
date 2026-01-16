@@ -42,7 +42,7 @@ const TrendingOffersSection = ({ activeLenders }: TrendingOffersSectionProps): R
       <div className="px-4">
         {/* Section Title */}
         <motion.h2
-          className="text-lg font-semibold text-gray-900 mb-6"
+          className="text-lg font-medium text-center mb-6"
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

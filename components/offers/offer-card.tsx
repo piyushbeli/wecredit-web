@@ -123,7 +123,7 @@ export function OfferCard({ offer, onClick, variant }: OfferCardProps) {
         <button
           type="button"
           onClick={onClick}
-          className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-base font-semibold py-1 rounded-full transition-all duration-200 cursor-pointer"
+          className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-xs font-medium py-1 rounded-full transition-all duration-200 cursor-pointer"
           style={{
             boxShadow: '0 4px 14px rgba(30, 95, 230, 0.25)',
           }}

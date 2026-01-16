@@ -30,7 +30,7 @@ const AddressInfoStep = ({
   return (
     <>
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+        <label className="lead-form-label">
           Address Information <span className="text-red-500">*</span>
         </label>
         <ButtonGroup

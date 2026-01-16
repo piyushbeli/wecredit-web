@@ -34,7 +34,7 @@ const EmploymentInfoStep = ({
   return (
     <>
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+        <label className="lead-form-label">
           Employment Type <span className="text-red-500">*</span>
         </label>
         <ButtonGroup

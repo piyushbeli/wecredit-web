@@ -68,7 +68,7 @@ export default function PersonalLoanPage() {
       {/* Hero Section */}
       <section className="bg-white px-4 pt-6 pb-8">
         <p className="text-gray-600 text-sm mb-1">Loans for every Credit Profile.</p>
-        <h1 className="text-2xl font-bold text-blue-600 mb-6">
+        <h1 className="text-2xl font-medium text-blue-600 mb-6">
           Get Instant Personal Loans.
         </h1>
 
@@ -93,11 +93,11 @@ export default function PersonalLoanPage() {
         <div className="flex divide-x divide-gray-200">
           <div className="flex-1 py-4 text-center">
             <p className="text-xs text-gray-500 mb-1">Total Loan Disbursed</p>
-            <p className="text-lg font-bold text-gray-900">₹650 Crore</p>
+            <p className="text-lg font-medium text-gray-900">₹650 Crore</p>
           </div>
           <div className="flex-1 py-4 text-center">
             <p className="text-xs text-gray-500 mb-1">Trusted by</p>
-            <p className="text-lg font-bold text-gray-900">4 lakh + Indians</p>
+            <p className="text-lg font-medium text-gray-900">4 lakh + Indians</p>
           </div>
         </div>
       </section>
@@ -118,7 +118,7 @@ export default function PersonalLoanPage() {
 
       {/* Steps Section */}
       <section className="bg-white mx-4 rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 text-center mb-6">
+        <h2 className="text-xl font-medium text-gray-900 text-center mb-6">
           Get your <span className="text-blue-600">loan</span> in 3 easy steps
         </h2>
 
@@ -153,7 +153,7 @@ export default function PersonalLoanPage() {
               <div className="flex-1 pb-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-medium text-gray-900 mb-1">
                       {step.title}
                     </h3>
                     <p className="text-sm text-gray-600">{step.description}</p>

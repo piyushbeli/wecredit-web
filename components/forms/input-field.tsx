@@ -32,14 +32,10 @@ const InputField = ({
 }: InputFieldProps) => {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-900">
+      {/* <label className="block text-sm font-medium text-gray-900">
         {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      
-      {helperText && (
-        <p className="text-xs text-gray-500">{helperText}</p>
-      )}
-      
+      </label> */}
+
       <input
         type={type}
         inputMode={inputMode}
@@ -54,7 +50,11 @@ const InputField = ({
           disabled && 'opacity-50 cursor-not-allowed'
         )}
       />
-      
+
+      {helperText && (
+        <p className="text-xs text-gray-500">{helperText}</p>
+      )}
+
       {error && (
         <p className="text-xs text-red-600">{error}</p>
       )}

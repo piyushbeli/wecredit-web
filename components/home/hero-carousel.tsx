@@ -59,8 +59,8 @@ const HeroCarousel = (): JSX.Element => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <h1 className="text-3xl font-bold mb-1">{slide.titleWhite}</h1>
-                <p className="text-3xl font-bold wc-gradient-text">{slide.titleGradient}</p>
+                <h1 className="text-3xl font-medium mb-1">{slide.titleWhite}</h1>
+                <p className="text-3xl font-medium wc-gradient-text">{slide.titleGradient}</p>
               </motion.div>
 
               {/* CTA Button */}
@@ -71,7 +71,7 @@ const HeroCarousel = (): JSX.Element => {
               >
                 <Link
                   href={slide.ctaLink}
-                  className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-wc-blue-500/30 transition-all duration-300 active:scale-95"
+                  className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white rounded-lg shadow-lg shadow-wc-blue-500/30 transition-all duration-300 active:scale-95"
                 >
                   {slide.ctaText}
                 </Link>

@@ -54,7 +54,7 @@ const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardP
         </motion.div>
         
         {/* Label */}
-        <span className="text-xs text-gray-700 text-center leading-tight font-medium">
+        <span className="text-xs text-center leading-tight">
           {label}
         </span>
       </Link>

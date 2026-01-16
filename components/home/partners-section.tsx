@@ -24,7 +24,7 @@ const PartnersSection = (): React.ReactNode => {
 		<section className="bg-white py-4 sm:py-10 md:py-12 overflow-hidden">
 			{/* Container with blue left border accent */}
 			{/* Section Title */}
-			<h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
+			<h2 className="text-xl sm:text-2xl md:text-3xl font-medium mb-6 sm:mb-8 text-center">
 				Our Partners
 			</h2>
 			<div className="px-1 sm:pl-6 md:pl-8">

@@ -124,7 +124,7 @@ export default function OffersPage() {
           <div className="space-y-6">
             {otherOffers.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-gray-900">Explore more loan offers</h2>
+                <h2 className="lead-form-heading">Explore more loan offers</h2>
                 <div className="space-y-4">
                   {otherOffers.map((offer, index) => (
                     <OfferCard
@@ -138,7 +138,7 @@ export default function OffersPage() {
             )}
             {utmClickedOffers.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-gray-900">Check loan status</h2>
+                <h2 className="lead-form-heading">Check loan status</h2>
                 <div className="space-y-4">
                   {utmClickedOffers.map((offer, index) => (
                     <OfferCard

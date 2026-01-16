@@ -146,11 +146,11 @@ const TrendingOfferCard = ({
           <div className="flex items-center gap-6 text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <PercentIcon />
-              <span className="text-gray-600 text-xs">Int. rate {interestRate}</span>
+              <span className="text-gray-500 text-xs font-light">Int. rate {interestRate}</span>
             </div>
             <div className="flex items-center gap-1">
               <CalendarIcon />
-              <span className="text-gray-600 text-xs">Upto {tenure}</span>
+              <span className="text-gray-500 text-xs font-light">Upto {tenure}</span>
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ const TrendingOfferCard = ({
           <button
             type="button"
             onClick={handleCheckEligibility}
-            className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-base font-semibold py-1 rounded-full transition-all duration-200 cursor-pointer"
+            className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-xs font-medium py-1 rounded-full transition-all duration-200 cursor-pointer"
             style={{
               boxShadow: '0 4px 14px rgba(30, 95, 230, 0.25)',
             }}

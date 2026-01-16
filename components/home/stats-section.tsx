@@ -78,11 +78,11 @@ const StatsSection = (): React.ReactNode => {
             variants={itemVariants}
           >
             <div className="flex items-baseline">
-              <span className="text-2xl font-bold text-wc-blue-600 wc-stat-number">
+              <span className="text-2xl font-medium text-wc-blue-600 wc-stat-number">
                 {stat.value}
               </span>
               {stat.suffix && (
-                <span className="text-lg font-bold text-wc-blue-600">{stat.suffix}</span>
+                <span className="text-lg font-medium text-wc-blue-600">{stat.suffix}</span>
               )}
             </div>
             <span className="text-xs text-gray-600 mt-1 leading-tight">{stat.label}</span>

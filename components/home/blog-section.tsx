@@ -86,10 +86,10 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 
 				{/* Content */}
 				<div className="p-3 sm:p-4">
-					<h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
+					<h3 className="text-sm sm:text-base font-medium mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
 						{post.title}
 					</h3>
-					<p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2">
+					<p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mb-2">
 						{post.description}
 					</p>
 					<span className="text-xs font-medium text-blue-600">
@@ -110,7 +110,7 @@ const BlogSection = (): React.ReactNode => {
 		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
 			{/* Section Title */}
 			<motion.h2
-				className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8"
+				className="text-lg sm:text-xl md:text-2xl font-medium text-center mb-6 sm:mb-8"
 				initial={{ opacity: 0, y: 10 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: true }}
