@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Menu, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { IMAGES } from '@/lib/constants/images';
 
 /** Props for GradientHeader component */
 interface GradientHeaderProps {
@@ -66,7 +67,7 @@ const GradientHeader = ({
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center">
               <Image
-                src="/images/logo.png"
+                src={IMAGES.LOGOS.DEFAULT}
                 alt="WeCredit"
                 width={120}
                 height={32}
@@ -96,7 +97,7 @@ const GradientHeader = ({
             transition={{ duration: 0.5 }}
           >
             <Image
-              src="/images/logo.png"
+              src={IMAGES.LOGOS.DEFAULT}
               alt="WeCredit"
               width={200}
               height={56}

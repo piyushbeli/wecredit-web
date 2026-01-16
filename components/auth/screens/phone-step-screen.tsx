@@ -7,6 +7,7 @@ import { GradientHeader } from '@/components/shared';
 import { BottomSheet, PhoneInput } from '@/components/auth';
 import { useAppHeight } from '@/hooks/use-app-height';
 import { cn } from '@/lib/utils';
+import { IMAGES } from '@/lib/constants/images';
 import type { HeaderHeightPreset, PhoneStepScreenProps } from '../types';
 
 /**
@@ -61,7 +62,7 @@ export const PhoneStepScreen = ({
         height={resolvedHeaderHeight}
         style={headerHeightStyle}
         className={headerClassName}
-        illustration="/images/logo.png"
+        illustration={IMAGES.LOGOS.DEFAULT}
         isPhoneNumberHeader={true}
         illustrationAlt="Phone authentication illustration"
       />

@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { IMAGES } from '@/lib/constants/images';
 
 /**
  * AppDownloadSection Component
@@ -45,7 +46,7 @@ const AppDownloadSection = (): React.ReactNode => {
                 className="transition-all hover:opacity-80 active:scale-95 w-fit"
               >
                 <Image
-                  src="/assets/images/google-play-badge.png"
+                  src={IMAGES.APP.GOOGLE_PLAY}
                   alt="Get it on Google Play"
                   width={180}
                   height={54}
@@ -59,7 +60,7 @@ const AppDownloadSection = (): React.ReactNode => {
                 className="transition-all hover:opacity-80 active:scale-95 w-fit"
               >
                 <Image
-                  src="/assets/images/app-store-badge.png"
+                  src={IMAGES.APP.APP_STORE}
                   alt="Download on the App Store"
                   width={180}
                   height={54}
@@ -73,7 +74,7 @@ const AppDownloadSection = (): React.ReactNode => {
         {/* Phone Mockup - Positioned at bottom-right */}
         <div className="absolute right-0 bottom-0 w-[45%] md:w-[40%] lg:w-[35%] pointer-events-none select-none">
           <Image
-            src="/assets/images/wecredit-app-mock.png"
+            src={IMAGES.APP.MOCKUP}
             alt="WeCredit App Mockup"
             width={600}
             height={600}

@@ -9,6 +9,7 @@ import { Menu, X, User, LogOut } from 'lucide-react';
 import type { GlobalLink, StrapiMedia } from '@/types/strapi';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
+import { IMAGES } from '@/lib/constants/images';
 
 /** Scroll threshold in pixels to trigger header style change */
 const SCROLL_THRESHOLD = 50;
@@ -108,7 +109,7 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
           <Link href="/" className="flex items-center relative">
             {/* Light logo (for transparent header on blue background) */}
             <Image
-              src="/assets/images/logo.png"
+              src={IMAGES.LOGOS.DEFAULT}
               alt={siteName || 'WeCredit'}
               width={120}
               height={32}
@@ -120,7 +121,7 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
             />
             {/* Dark logo (for white solid header) */}
             <Image
-              src="/images/logo-transparent.jpg"
+              src={IMAGES.LOGOS.TRANSPARENT}
               alt={siteName || 'WeCredit'}
               width={120}
               height={32}
@@ -212,7 +213,7 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
               <div className="flex items-center justify-between p-4 border-b border-white/10">
                 <Link href="/" onClick={closeMenu} className="flex items-center">
                   <Image
-                    src="/images/logo.png"
+                    src={IMAGES.LOGOS.DEFAULT}
                     alt={siteName || 'WeCredit'}
                     width={100}
                     height={28}

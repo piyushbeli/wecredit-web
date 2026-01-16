@@ -1,9 +1,10 @@
 import Image from "next/image";
+import { IMAGES } from "@/lib/constants/images";
 
-// imagePath: '/assets/svgs/business-loan.svg',
+// imagePath: IMAGES.ICONS.BUSINESS_LOAN,
 export const PercentIcon = (): React.ReactNode => (
     <Image
-        src="/assets/svgs/percentage-icon.svg"
+        src={IMAGES.ICONS.PERCENTAGE}
         alt="Percent"
         width={10}
         height={10}
@@ -13,7 +14,7 @@ export const PercentIcon = (): React.ReactNode => (
 
 export const CalendarIcon = (): React.ReactNode => (
     <Image
-        src="/assets/svgs/calendar-icon.svg"
+        src={IMAGES.ICONS.CALENDAR}
         alt="Calendar"
         width={10}
         height={10}

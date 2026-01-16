@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import { IMAGES } from '@/lib/constants/images';
 
 /**
  * Certification badge component
@@ -60,7 +61,7 @@ const CertificationsSection = (): React.ReactNode => {
               <div className="flex justify-around items-center gap-4 sm:gap-6 md:gap-10 max-w-4xl mx-auto">
                 {/* ISO Badge 1 */}
                 <CertificationBadge
-                  src="/images/certifications/iso-badge-1.png"
+                  src={IMAGES.CERTIFICATIONS.ISO_BADGE_1}
                   alt="ISO Certification Badge"
                   width={140}
                   height={140}
@@ -68,7 +69,7 @@ const CertificationsSection = (): React.ReactNode => {
 
                 {/* CII Logo */}
                 <CertificationBadge
-                  src="/images/certifications/cii-logo.png"
+                  src={IMAGES.CERTIFICATIONS.CII_LOGO}
                   alt="Confederation of Indian Industry"
                   width={300}
                   height={300}
@@ -76,7 +77,7 @@ const CertificationsSection = (): React.ReactNode => {
 
                 {/* ISO Certified Company Badge */}
                 <CertificationBadge
-                  src="/images/certifications/iso-certified-company.png"
+                  src={IMAGES.CERTIFICATIONS.ISO_CERTIFIED}
                   alt="ISO Certified Company"
                   width={120}
                   height={120}

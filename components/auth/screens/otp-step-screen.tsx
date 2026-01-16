@@ -6,6 +6,7 @@ import { GradientHeader } from '@/components/shared';
 import { OTPInput } from '@/components/auth';
 import { useAppHeight } from '@/hooks/use-app-height';
 import { cn } from '@/lib/utils';
+import { IMAGES } from '@/lib/constants/images';
 import type { HeaderHeightPreset, OTPStepScreenProps } from '../types';
 
 /**
@@ -68,7 +69,7 @@ export const OTPStepScreen = ({
         variant="with-illustration"
         height={resolvedHeaderHeight}
         style={headerHeightStyle}
-        illustration="/assets/images/otp-sms.png"
+        illustration={IMAGES.ILLUSTRATIONS.OTP_SMS}
         illustrationAlt="OTP verification illustration"
       />
 
