@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { IMAGES } from '@/lib/constants/images';
 
 /** Blog post configuration */
 interface BlogPost {
@@ -21,7 +22,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-1',
 		title: 'Validate your idea',
 		description: 'Test your product idea by launching payments with little to no code.',
-		imagePath: '/assets/images/emi-calculator-illustration.png',
+		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
 		readTime: 4,
 		href: '/blog/validate-your-idea',
 	},
@@ -29,7 +30,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-2',
 		title: 'Validate your idea',
 		description: 'Test your product idea by launching payments with little to no code.',
-		imagePath: '/assets/images/personal-loan-illustration.png',
+		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
 		readTime: 4,
 		href: '/blog/validate-your-idea-2',
 	},
@@ -37,7 +38,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-3',
 		title: 'Validate your idea',
 		description: 'Test your product idea by launching payments with little to no code.',
-		imagePath: '/assets/images/check-credit-score.png',
+		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
 		readTime: 4,
 		href: '/blog/validate-your-idea-3',
 	},
@@ -45,7 +46,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-4',
 		title: 'Validate your idea',
 		description: 'Test your product idea by launching payments with little to no code.',
-		imagePath: '/assets/images/business-loan-calculator-illustration.png',
+		imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
 		readTime: 4,
 		href: '/blog/validate-your-idea-4',
 	},

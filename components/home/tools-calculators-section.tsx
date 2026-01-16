@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Calculator, PieChart, Briefcase, Gauge, ArrowRight } from 'lucide-react';
 import ToolCard from './tool-card';
+import { IMAGES } from '@/lib/constants/images';
 import type { LucideIcon } from 'lucide-react';
 
 /** Tool configuration interface */
@@ -23,7 +24,7 @@ const tools: Tool[] = [
     title: 'Personal Loan\ncalculator',
     description: 'Calculate personal loan EMI',
     href: '/calculators/personal-loan',
-    imagePath: '/assets/images/personal-loan-illustration.png',
+    imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
     fallbackIcon: Calculator,
   },
   {
@@ -31,7 +32,7 @@ const tools: Tool[] = [
     title: 'EMI\ncalculator',
     description: 'Calculate personal loan EMI',
     href: '/calculators/emi',
-    imagePath: '/assets/images/emi-calculator-illustration.png',
+    imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
     fallbackIcon: PieChart,
   },
   {
@@ -39,7 +40,7 @@ const tools: Tool[] = [
     title: 'Business Loan\ncalculator',
     description: 'Calculate personal loan EMI',
     href: '/calculators/business-loan',
-    imagePath: '/assets/images/business-loan-calculator-illustration.png',
+    imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
     fallbackIcon: Briefcase,
   },
   {
@@ -47,7 +48,7 @@ const tools: Tool[] = [
     title: 'Check Credit\nScore',
     description: 'Check personal loan EMI',
     href: '/credit-score',
-    imagePath: '/assets/images/check-credit-score.png',
+    imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
     fallbackIcon: Gauge,
   },
 ];

@@ -1,47 +1,63 @@
 import { SlideContent } from "@/components/home/hero-carousel";
 import { Partner } from "@/types/wecredit";
+import { IMAGES } from "./images";
 
 /**
  * Cache revalidation times for different data types
  * Optimized to reduce Vercel function costs while maintaining data freshness
  */
 export const CACHE_TIMES = {
+  HOUR_24: 86400, // 24 hours
+  HOUR_1: 3600, // 1 hour
+  MINUTE_5: 300, // 5 minutes
 
-    HOUR_24: 86400, // 24 hours
-    HOUR_1: 3600, // 1 hour
-    MINUTE_5: 300, // 5 minutes
-  
-    STATIC_PAGES: 3600,      // 1 hour
-    
-  } as const;
+  STATIC_PAGES: 3600, // 1 hour
+} as const;
 
-
-  /**
+/**
  * List of all partner logos
  * Images should be placed in /public/assets/images/partners/
  */
 export const PARTNERS: Partner[] = [
-	{ name: 'MoneyView', logo: '/assets/images/partners/moneyview.png' },
-	{ name: 'KreditBee', logo: '/assets/images/partners/KB.png' },
-	{ name: 'L&T Finance', logo: '/assets/images/partners/L&T.png' },
-	{ name: 'Olyv', logo: '/assets/images/partners/OLYV.png' },
-	{ name: 'Zype', logo: '/assets/images/partners/ZYPE.png' },
-	{ name: 'mPokket', logo: '/assets/images/partners/MPOKKET.png' },
-	{ name: 'Hero Fincorp', logo: '/assets/images/partners/HERO FINCORPV.png' },
-	{ name: 'CreditSea', logo: '/assets/images/partners/CREDIT SEA.png' },
-	{ name: 'Poonawalla Fincorp', logo: '/assets/images/partners/Poonawala fincorp.png' },
-	{ name: 'Ram Fincorp', logo: '/assets/images/partners/Ram fincorp.png' },
-	{ name: 'Creditt+', logo: '/assets/images/partners/creditt.png' },
-	{ name: 'True Balance', logo: '/assets/images/partners/truebalance.png' },
-	{ name: 'Chintamani Finlease', logo: '/assets/images/partners/chintamani finlease.png' },
-	{ name: 'FLot', logo: '/assets/images/partners/Flot.png' },
-	{ name: 'TrustPaisa', logo: '/assets/images/partners/Trust Paisa.png' },
-	{ name: 'LendingPlate', logo: '/assets/images/partners/lending plate.png' },
-	{ name: 'FDPL Finance', logo: '/assets/images/partners/FDPL.png' },
-	{ name: 'Salary On Time', logo: '/assets/images/partners/Salary on time.png' },
-	{ name: 'Emergency Paisa', logo: '/assets/images/partners/emergency paisa.png' },
-	{ name: 'BrightLoans', logo: '/assets/images/partners/Bright loans.png' },
-	{ name: 'FatakPay', logo: '/assets/images/partners/FATAK PAY.png' },
+  { name: "MoneyView", logo: `${IMAGES.PARTNERS.BASE_PATH}/moneyview.png` },
+  { name: "KreditBee", logo: `${IMAGES.PARTNERS.BASE_PATH}/KB.png` },
+  { name: "L&T Finance", logo: `${IMAGES.PARTNERS.BASE_PATH}/L&T.png` },
+  { name: "Olyv", logo: `${IMAGES.PARTNERS.BASE_PATH}/OLYV.png` },
+  { name: "Zype", logo: `${IMAGES.PARTNERS.BASE_PATH}/ZYPE.png` },
+  { name: "mPokket", logo: `${IMAGES.PARTNERS.BASE_PATH}/MPOKKET.png` },
+  {
+    name: "Hero Fincorp",
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/HERO FINCORPV.png`,
+  },
+  { name: "CreditSea", logo: `${IMAGES.PARTNERS.BASE_PATH}/CREDIT SEA.png` },
+  {
+    name: "Poonawalla Fincorp",
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/Poonawala fincorp.png`,
+  },
+  { name: "Ram Fincorp", logo: `${IMAGES.PARTNERS.BASE_PATH}/Ram fincorp.png` },
+  { name: "Creditt+", logo: `${IMAGES.PARTNERS.BASE_PATH}/creditt.png` },
+  { name: "True Balance", logo: `${IMAGES.PARTNERS.BASE_PATH}/truebalance.png` },
+  {
+    name: "Chintamani Finlease",
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/chintamani finlease.png`,
+  },
+  { name: "FLot", logo: `${IMAGES.PARTNERS.BASE_PATH}/Flot.png` },
+  { name: "TrustPaisa", logo: `${IMAGES.PARTNERS.BASE_PATH}/Trust Paisa.png` },
+  {
+    name: "LendingPlate",
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/lending plate.png`,
+  },
+  { name: "FDPL Finance", logo: `${IMAGES.PARTNERS.BASE_PATH}/FDPL.png` },
+  {
+    name: "Salary On Time",
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/Salary on time.png`,
+  },
+  {
+    name: "Emergency Paisa",
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/emergency paisa.png`,
+  },
+  { name: "BrightLoans", logo: `${IMAGES.PARTNERS.BASE_PATH}/Bright loans.png` },
+  { name: "FatakPay", logo: `${IMAGES.PARTNERS.BASE_PATH}/FATAK PAY.png` },
 ];
 
 /**
@@ -53,29 +69,29 @@ export const ROW_3_PARTNERS = PARTNERS.slice(14, 21);
 
 /** Carousel slides data */
 export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
-	{
-	  id: 'slide-1',
-	  image: '/assets/images/carousel-one.png',
-	  titleWhite: 'More Savings',
-	  titleGradient: 'on Every Loan',
-	  ctaText: 'Apply For Loan',
-	  ctaLink: '#',
-	},
-	{
-	  id: 'slide-2',
-	  image: '/assets/images/carousel-two.png',
-	  titleWhite: 'More Savings',
-	  titleGradient: 'on Every Loan',
-	  ctaText: 'Get Your Card',
-	  ctaLink: '#',
-	},
-	{
-	  id: 'slide-3',
-	  image: '/assets/images/carousel-three.png',
-	  titleWhite: 'More Savings',
-	  titleGradient: 'on Every Loan',
-	  ctaText: 'Check Eligibility',
-	  ctaLink: '#',
-	},
-  ];
+  {
+    id: "slide-1",
+    image: IMAGES.CAROUSEL.SLIDE_1,
+    titleWhite: "More Savings",
+    titleGradient: "on Every Loan",
+    ctaText: "Apply For Loan",
+    ctaLink: "#",
+  },
+  {
+    id: "slide-2",
+    image: IMAGES.CAROUSEL.SLIDE_2,
+    titleWhite: "More Savings",
+    titleGradient: "on Every Loan",
+    ctaText: "Get Your Card",
+    ctaLink: "#",
+  },
+  {
+    id: "slide-3",
+    image: IMAGES.CAROUSEL.SLIDE_3,
+    titleWhite: "More Savings",
+    titleGradient: "on Every Loan",
+    ctaText: "Check Eligibility",
+    ctaLink: "#",
+  },
+];
   

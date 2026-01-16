@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { IMAGES } from '@/lib/constants/images';
 
 /** Footer link item */
 interface FooterLinkItem {
@@ -113,7 +114,7 @@ const Footer = () => {
           {/* Logo */}
           <Link href="/" className="inline-block mb-3">
             <Image
-              src="/images/logo-transparent.jpg"
+              src={IMAGES.LOGOS.TRANSPARENT}
               alt={'WeCredit'}
               width={120}
               height={32}
