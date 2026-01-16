@@ -11,9 +11,10 @@ import {
   CarouselDots,
   useCarousel,
 } from '@/components/ui/carousel';
+import { TESTIMONIALS } from '@/lib/constants/common';
 
 /** Testimonial video configuration */
-interface Testimonial {
+export interface Testimonial {
   id: string;
   thumbnailUrl: string;
   videoUrl: string;
@@ -21,37 +22,6 @@ interface Testimonial {
   customerName?: string;
 }
 
-/** Static testimonials data */
-const testimonials: Testimonial[] = [
-  {
-    id: 'testimonial-1',
-    thumbnailUrl: '/images/logo-transparent.jpg',
-    videoUrl: '/videos/dummy.mp4',
-    quote: 'I got my loan approved faster than I ever expected completely hassle-free!',
-    customerName: 'Sarah M.',
-  },
-  {
-    id: 'testimonial-2',
-    thumbnailUrl: '/images/logo-transparent.jpg',
-    videoUrl: '/videos/dummy.mp4',
-    quote: 'WeCredit made the entire process so simple. Highly recommended!',
-    customerName: 'Rahul K.',
-  },
-  {
-    id: 'testimonial-3',
-    thumbnailUrl: '/images/logo-transparent.jpg',
-    videoUrl: '/videos/dummy.mp4',
-    quote: 'Best loan experience I have ever had. Quick approval and great rates!',
-    customerName: 'Priya S.',
-  },
-  {
-    id: 'testimonial-4',
-    thumbnailUrl: '/images/logo-transparent.jpg',
-    videoUrl: '/videos/dummy.mp4',
-    quote: 'From application to disbursement, everything was seamless!',
-    customerName: 'Amit P.',
-  },
-];
 
 /** Props for TestimonialSlide component */
 interface TestimonialSlideProps {
@@ -77,8 +47,8 @@ const TestimonialSlide = ({
 }: TestimonialSlideProps): React.ReactNode => {
   const { selectedIndex } = useCarousel();
   const isActive = index === selectedIndex;
-  const isPrev = index === (selectedIndex - 1 + testimonials.length) % testimonials.length;
-  const isNext = index === (selectedIndex + 1) % testimonials.length;
+  const isPrev = index === (selectedIndex - 1 + TESTIMONIALS.length) % TESTIMONIALS.length;
+  const isNext = index === (selectedIndex + 1) % TESTIMONIALS.length;
   const isAdjacent = isPrev || isNext;
   const isPlaying = playingVideoId === testimonial.id;
 
@@ -276,7 +246,7 @@ const TestimonialsCarouselContent = ({
   /** Pause video when slide changes */
   useEffect(() => {
     if (playingVideoId) {
-      const currentTestimonial = testimonials[selectedIndex];
+      const currentTestimonial = TESTIMONIALS[selectedIndex];
       if (currentTestimonial && playingVideoId !== currentTestimonial.id) {
         const videoElement = videoRefs.current.get(playingVideoId);
         if (videoElement) {
@@ -291,7 +261,7 @@ const TestimonialsCarouselContent = ({
     <>
       {/* Embla Carousel Container */}
       <CarouselContent className="items-center">
-        {testimonials.map((testimonial, index) => (
+        {TESTIMONIALS.map((testimonial, index) => (
           <CarouselSlide
             key={testimonial.id}
             index={index}
