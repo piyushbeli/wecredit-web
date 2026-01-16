@@ -9,6 +9,7 @@ import PartnersSection from './partners-section';
 import CertificationsSection from './certifications-section';
 import FaqSection from './faq-section';
 import BlogSection from './blog-section';
+import AppDownloadSection from './app-download-section';
 import DreamsSection from './dreams-section';
 
 /**
@@ -57,6 +58,9 @@ const HomePage = (): React.ReactNode => {
 
       {/* Blog Section */}
       <BlogSection />
+
+      {/* App Download Section */}
+      <AppDownloadSection />
 
       {/* Dreams Section */}
       <DreamsSection />

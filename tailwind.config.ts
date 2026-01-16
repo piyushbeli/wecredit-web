@@ -131,8 +131,9 @@ const config = {
        * Font Families
        */
       fontFamily: {
-        sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-poppins)', 'var(--font-geist-sans)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'monospace'],
+        poppins: ['var(--font-poppins)', 'sans-serif'],
       },
 
       /**
