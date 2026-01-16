@@ -6,9 +6,10 @@ import Link from 'next/link';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
 import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/components/ui/carousel';
+import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
 
 /** Slide content configuration */
-interface SlideContent {
+export interface SlideContent {
   id: string;
   image: string;
   titleWhite: string;
@@ -17,33 +18,6 @@ interface SlideContent {
   ctaLink: string;
 }
 
-/** Carousel slides data */
-const slides: SlideContent[] = [
-  {
-    id: 'slide-1',
-    image: '/images/carousel-one.png',
-    titleWhite: 'More Savings',
-    titleGradient: 'on Every Loan',
-    ctaText: 'Apply For Loan',
-    ctaLink: '#',
-  },
-  {
-    id: 'slide-2',
-    image: '/images/carousel-two.png',
-    titleWhite: 'More Savings',
-    titleGradient: 'on Every Loan',
-    ctaText: 'Get Your Card',
-    ctaLink: '#',
-  },
-  {
-    id: 'slide-3',
-    image: '/images/carousel-three.png',
-    titleWhite: 'More Savings',
-    titleGradient: 'on Every Loan',
-    ctaText: 'Check Eligibility',
-    ctaLink: '#',
-  },
-];
 
 /**
  * Hero carousel section with gradient background, 3D avatar, and swipeable slides
@@ -57,7 +31,7 @@ const HeroCarousel = (): JSX.Element => {
         className="relative z-10 h-full flex flex-col"
       >
         <CarouselContent className="flex-1">
-          {slides.map((slide) => (
+          {HERO_CAROUSEL_SLIDES.map((slide) => (
             <CarouselSlide
               key={slide.id}
               className="flex-[0_0_100%] flex flex-col items-center justify-center px-6 pt-8"
