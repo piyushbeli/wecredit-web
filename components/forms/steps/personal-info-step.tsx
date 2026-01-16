@@ -104,7 +104,7 @@ const PersonalInfoStep = ({
       />
 
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+        <label className="lead-form-label">
           Gender <span className="text-red-500">*</span>
         </label>
         <ButtonGroup
@@ -121,7 +121,7 @@ const PersonalInfoStep = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+        <label className="lead-form-label">
           Marital Status <span className="text-red-500">*</span>
         </label>
         <ButtonGroup

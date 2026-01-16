@@ -8,7 +8,7 @@ interface ConfigurableWidgetComponentProps {
 /** Stub component for redirect-form type */
 const RedirectFormStub = ({ widget }: ConfigurableWidgetComponentProps) => (
   <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-    {widget.title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{widget.title}</h3>}
+    {widget.title && <h3 className="lead-form-heading mb-4">{widget.title}</h3>}
     <p className="text-gray-500 italic">Redirect Form Widget (Coming Soon)</p>
   </div>
 );
@@ -16,7 +16,7 @@ const RedirectFormStub = ({ widget }: ConfigurableWidgetComponentProps) => (
 /** Stub component for emi-calculator type */
 const EMICalculatorStub = ({ widget }: ConfigurableWidgetComponentProps) => (
   <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-    {widget.title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{widget.title}</h3>}
+    {widget.title && <h3 className="lead-form-heading mb-4">{widget.title}</h3>}
     <p className="text-gray-500 italic">EMI Calculator Widget (Coming Soon)</p>
   </div>
 );
@@ -24,7 +24,7 @@ const EMICalculatorStub = ({ widget }: ConfigurableWidgetComponentProps) => (
 /** Stub component for custom-html type */
 const CustomHTMLStub = ({ widget }: ConfigurableWidgetComponentProps) => (
   <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-    {widget.title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{widget.title}</h3>}
+    {widget.title && <h3 className="lead-form-heading mb-4">{widget.title}</h3>}
     {widget.content ? (
       <div dangerouslySetInnerHTML={{ __html: widget.content }} />
     ) : (

@@ -23,7 +23,7 @@ const DreamsSection = (): React.ReactNode => {
           <br />
           don&apos;t wait !
         </h2> */}
-        <h2 className="text-5xl font-light italic text-gray-400 leading-tight">
+        <h2 className="text-5xl font-semibold text-gray-100 leading-tight">
           For dreams that{' '}
           don&apos;t wait !
         </h2>

@@ -329,7 +329,7 @@ const LeadFormModal = ({
             <div className="flex-1 flex items-center justify-center p-6">
               <div className="text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to load form</h3>
+                <h3 className="lead-form-heading mb-2">Unable to load form</h3>
                 <p className="text-red-600 mb-6">{fieldsError}</p>
                 <Button
                   onClick={() => fetchFields(lenderName, true)}
@@ -344,7 +344,7 @@ const LeadFormModal = ({
             <>
               <div className="flex-1 overflow-y-auto">
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="lead-form-heading">
                     {currentStepConfig.title}
                   </h2>
 

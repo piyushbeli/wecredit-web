@@ -44,7 +44,7 @@ const CertificationsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-4 sm:py-10 md:py-12">
       {/* Section Title */}
-      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-10">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-center mb-8 sm:mb-10">
         Certified By
       </h2>
       
@@ -86,12 +86,6 @@ const CertificationsSection = (): React.ReactNode => {
             </div>
           </div>
 
-          {/* Bottom Section - Bank Empanelment */}
-          <div className="mt-6 sm:mt-8">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 text-center">
-              Bank Empanelment/Certifications etc
-            </h3>
-          </div>
         </div>
       </div>
     </section>

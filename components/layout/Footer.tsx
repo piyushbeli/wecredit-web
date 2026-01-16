@@ -152,7 +152,7 @@ const Footer = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10">
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4">
+              <h3 className="font-medium  mb-3 sm:mb-4">
                 {section.title}
               </h3>
               <ul className="space-y-2">
