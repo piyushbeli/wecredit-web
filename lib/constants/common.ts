@@ -101,28 +101,28 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
 export const TESTIMONIALS: Testimonial[] = [
   {
     id: 'testimonial-1',
-    thumbnailUrl: '/images/logo-transparent.jpg',
+    thumbnailUrl: IMAGES.LOGOS.TRANSPARENT,
     videoUrl: '/videos/dummy.mp4',
     quote: 'I got my loan approved faster than I ever expected completely hassle-free!',
     customerName: 'Sarah M.',
   },
   {
     id: 'testimonial-2',
-    thumbnailUrl: '/images/logo-transparent.jpg',
+    thumbnailUrl: IMAGES.LOGOS.TRANSPARENT,
     videoUrl: '/videos/dummy.mp4',
     quote: 'WeCredit made the entire process so simple. Highly recommended!',
     customerName: 'Rahul K.',
   },
   {
     id: 'testimonial-3',
-    thumbnailUrl: '/images/logo-transparent.jpg',
+    thumbnailUrl: IMAGES.LOGOS.TRANSPARENT,
     videoUrl: '/videos/dummy.mp4',
     quote: 'Best loan experience I have ever had. Quick approval and great rates!',
     customerName: 'Priya S.',
   },
   {
     id: 'testimonial-4',
-    thumbnailUrl: '/images/logo-transparent.jpg',
+    thumbnailUrl: IMAGES.LOGOS.TRANSPARENT,
     videoUrl: '/videos/dummy.mp4',
     quote: 'From application to disbursement, everything was seamless!',
     customerName: 'Amit P.',
