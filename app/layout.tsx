@@ -8,6 +8,7 @@ import { AuthModal } from '@/components/auth';
 import { AuthProvider } from '@/providers/auth-provider';
 import { ToastProvider } from '@/providers/toast-provider';
 import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 import { getGlobal } from '@/lib/strapi';
 
 const geistSans = Geist({
@@ -63,6 +64,7 @@ export default async function RootLayout({
               <main className="flex-1">{children}</main>
               <Footer />
               <AuthModal />
+              <LoadingScreen />
             </AuthProvider>
           </Suspense>
         </FeatureFlagProvider>
