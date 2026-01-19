@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { PercentIcon, CalendarIcon } from '../icons';
 import ArrowBadge from '../ui/arrow-badge';
 import { useAuth } from '@/hooks/use-auth';
+import { ActionButton } from '../shared';
 
 /** Props for TrendingOfferCard component */
 interface TrendingOfferCardProps {
@@ -167,6 +168,15 @@ const TrendingOfferCard = ({
           >
             Check Eligibility
           </button>
+
+          {/* <ActionButton
+            type="button"
+            onClick={handleCheckEligibility}
+            fullWidth
+            className="text-xs font-medium rounded-full h-8"
+          >
+            Check Eligibility
+          </ActionButton> */}
         </div>
       </div>
     </motion.div>
