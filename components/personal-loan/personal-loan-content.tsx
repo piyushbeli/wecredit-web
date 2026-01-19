@@ -13,7 +13,7 @@ import { useCheckDedupe } from '@/hooks/use-check-dedupe';
 import { useModal } from '@/hooks/use-modal';
 import { useAuthStore } from '@/stores/auth-store';
 import { PARTNER_CODE, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { cn } from '@/lib/utils';
+import { ActionButton } from '../shared';
 
 type UseRouterResult = ReturnType<typeof useRouter>;
 type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
@@ -41,7 +41,7 @@ export function PersonalLoanContent() {
     await checkDedupe(mobile, PARTNER_CODE);
     hasCheckedDedupe.current = true;
   }, [checkDedupe]);
-  
+
   const handleDedupeResponse = useCallback((): void => {
     if (!response || isCheckingDedupe || !hasCheckedDedupe.current) {
       return;
@@ -55,7 +55,7 @@ export function PersonalLoanContent() {
     }
     didInitiateCheckOffers.current = false;
   }, [needsForm, openLeadFormModal, isCheckingDedupe, response, router]);
-  
+
   /**
    * Watch for authentication state change (user just completed login)
    * Automatically run check-dedupe when user logs in
@@ -98,32 +98,21 @@ export function PersonalLoanContent() {
     hasCheckedDedupe.current = true;
     await checkDedupe(mobile, PARTNER_CODE);
   };
-  
+
   return (
     <>
       {/* Fixed Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg z-10">
-        <button
+        <ActionButton
+          type="button"
           onClick={handleOpenModal}
           disabled={isCheckingDedupe}
-          className={cn(
-            'w-full py-4 rounded-full font-semibold text-base',
-            'bg-linear-to-r from-blue-500 to-blue-600',
-            'text-white shadow-lg shadow-blue-500/30',
-            'hover:from-blue-600 hover:to-blue-700',
-            'active:scale-[0.98] transition-all duration-200',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
-          )}
+          isLoading={isCheckingDedupe}
+          fullWidth
+          className="h-14 text-base"
         >
-          {isCheckingDedupe ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Checking...
-            </span>
-          ) : (
-            'Check Offers Now'
-          )}
-        </button>
+          Check Offers Now
+        </ActionButton>
       </div>
       {/* Lead Form Modal */}
       <LeadFormModal

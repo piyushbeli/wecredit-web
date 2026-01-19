@@ -13,6 +13,7 @@ import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
 import { useCreateLead } from '@/hooks/use-create-lead';
 import { useLeadForm } from '@/hooks/use-lead-form';
 import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
@@ -182,7 +183,8 @@ const LeadFormModal = ({
         if (onSuccess) {
           onSuccess('');
         } else {
-          router.push('/offers');
+          // Case A: Redirect to offers with newLead=true to trigger polling
+          router.push('/offers?newLead=true');
         }
         onClose();
       }, 2000);
@@ -425,32 +427,25 @@ const LeadFormModal = ({
               {/* Footer Button */}
               <div className="border-t bg-white p-4">
                 {currentStep < 4 ? (
-                  <Button
+                  <ActionButton
                     type="button"
                     onClick={handleNext}
-                    className="w-full h-14 text-base font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                    fullWidth
+                    className="h-14 text-base"
                   >
                     Next
-                  </Button>
+                  </ActionButton>
                 ) : (
-                  <Button
+                  <ActionButton
                     type="submit"
                     onClick={handleSubmit}
-                    disabled={isSubmitting || !consent}
-                    className={cn(
-                      'w-full h-14 text-base font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white',
-                      'disabled:opacity-50 disabled:cursor-not-allowed'
-                    )}
+                    disabled={!consent}
+                    isLoading={isSubmitting}
+                    fullWidth
+                    className="h-14 text-base"
                   >
-                    {isSubmitting ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Processing...
-                      </span>
-                    ) : (
-                      'Submit'
-                    )}
-                  </Button>
+                    Submit
+                  </ActionButton>
                 )}
               </div>
             </>

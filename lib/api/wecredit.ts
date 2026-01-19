@@ -185,7 +185,8 @@ const UPDATE_UTM_CLICKED_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 
 export async function checkStatusAll(
   mobile: string,
-  authorization?: string
+  authorization?: string,
+  signal?: AbortSignal
 ): Promise<CheckStatusResult> {
   if (!mobile) {
     return {
@@ -206,6 +207,7 @@ export async function checkStatusAll(
         headers: buildHeaders({ mobile, authorization }),
         body: JSON.stringify(requestBody),
         cache: 'no-store',
+        signal, // Support for request timeout via AbortController
       }),
       {
         method: 'POST',
@@ -221,6 +223,15 @@ export async function checkStatusAll(
       data,
     };
   } catch (error) {
+    // Handle manual cancellation or timeout from AbortController
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('[checkStatusAll] Request timed out or was aborted');
+      return {
+        success: false,
+        error: 'Request timed out',
+        data: DEFAULT_CHECK_STATUS_RESPONSE,
+      };
+    }
     const errorMessage = error instanceof Error
       ? error.message
       : 'Unable to check status. Please try again.';

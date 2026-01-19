@@ -15,7 +15,8 @@ import { OfferCard } from '@/components/offers/offer-card';
 import { OffersHero } from '@/components/offers/offers-hero';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
-import { PARTNER_CODE, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { ActionButton } from '@/components/shared';
 
 /**
  * Offers Page Component
@@ -23,9 +24,7 @@ import { PARTNER_CODE, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constant
 export default function OffersPage() {
   const router = useRouter();
   const { isAuthenticated, isAuthInitialized } = useAuthStore();
-  const { offers, isLoading, error, fetchOffers } = useOffers();
-
-  console.log("OFFER:", {isAuthenticated, isAuthInitialized })
+  const { offers, isLoading, isPolling, error, fetchOffers } = useOffers();
 
   /**
    * Redirect to personal loan page if not authenticated
@@ -118,7 +117,10 @@ export default function OffersPage() {
 
       {/* Offers List */}
       <div className="px-4 py-4 pb-28">
-        {utmClickedOffers.length === 0 && otherOffers.length === 0 ? (
+        {/* Case A: Show polling/searching UI if currently polling and no offers yet */}
+        {isPolling && offers.length === 0 ? (
+          <PollingState />
+        ) : utmClickedOffers.length === 0 && otherOffers.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="space-y-6">
@@ -157,12 +159,14 @@ export default function OffersPage() {
 
       {/* Fixed Bottom CTA - Check Loan Status */}
       <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
-        <button
+        <ActionButton
+          type="button"
           onClick={handleCheckStatus}
-          className="w-full py-4 bg-blue-600 text-white font-semibold text-base rounded-full hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-500/30"
+          fullWidth
+          className="h-14 text-base font-medium"
         >
           Check your Loan Status
-        </button>
+        </ActionButton>
       </div>
     </div>
   );
@@ -232,6 +236,33 @@ function ErrorState({ error, onRetry }: { error: string; onRetry: () => void }) 
       >
         Try Again
       </button>
+    </div>
+  );
+}
+
+/**
+ * Polling State Component
+ */
+function PollingState() {
+  return (
+    <div className="px-4 py-12 text-center">
+      <div className="relative w-24 h-24 mx-auto mb-6">
+        <div className="absolute inset-0 rounded-full border-4 border-blue-100 animate-ping" />
+        <div className="relative w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
+          <span className="text-5xl animate-bounce">🔍</span>
+        </div>
+      </div>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">
+        Searching for best offers
+      </h2>
+      <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+        We are checking with our lender partners to find the best loan offers for you. This may take a moment...
+      </p>
+      <div className="flex justify-center gap-1">
+        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+      </div>
     </div>
   );
 }
