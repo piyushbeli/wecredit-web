@@ -37,6 +37,9 @@ export const IMAGES = {
     BUSINESS_LOAN: '/assets/svgs/business-loan.svg',
     PL_BY_ONDC: '/assets/svgs/pl-by-ondc.svg',
     CREDIT_CARD: '/assets/svgs/credit-card.svg',
+    DOCUMENT: '/assets/svgs/document.svg',
+    OTP: '/assets/svgs/otp.svg',
+    VECTOR: '/assets/svgs/vector.svg',
   },
   PARTNERS: {
     BASE_PATH: '/assets/images/partners',

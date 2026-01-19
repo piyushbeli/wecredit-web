@@ -18,7 +18,7 @@ import TrendingOffersSkeleton from './trending-offers-skeleton';
  * 
  * Completely independent component - handles all lender fetching internally
  */
-const TrendingOffersClient = (): React.ReactNode => {
+const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: string }): React.ReactNode => {
   const { isAuthenticated, user } = useAuthStore();
   
   // PDF Step 2: Fetch generic lenders (always fetched as fallback)
@@ -92,7 +92,7 @@ const TrendingOffersClient = (): React.ReactNode => {
           </div>
         </div>
       )}
-      <TrendingOffersSection activeLenders={displayLenders} />
+      <TrendingOffersSection activeLenders={displayLenders} heading={heading} />
     </div>
   );
 };
