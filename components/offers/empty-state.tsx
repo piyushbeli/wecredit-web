@@ -1,7 +1,7 @@
 /**
  * Empty State for Offers Page
  */
-export function EmptyState() {
+export const EmptyState = () => {
   return (
     <div className="px-4 py-12 text-center">
       <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
@@ -15,4 +15,4 @@ export function EmptyState() {
       </p>
     </div>
   );
-}
+};

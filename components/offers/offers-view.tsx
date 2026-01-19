@@ -20,13 +20,9 @@ import { ActionButton } from '@/components/shared';
  * Offers View Component
  * Handles the interactive part of the offers page
  */
-export function OffersView() {
+export const OffersView = () => {
   const router = useRouter();
   const { offers, isLoading, isPolling, error, fetchOffers } = useOffers();
-
-  /**
-   * Handle offer card click
-   */
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
     if (!utmLink) {
@@ -42,19 +38,35 @@ export function OffersView() {
     window.open(utmLink, '_blank'); 
     fetchOffers();
   };
-
-  /**
-   * Handle check loan status button click
-   */
   const handleCheckStatus = (): void => {
-    // Navigate to loan status page or open status modal
     console.log('Check loan status clicked');
   };
-
   const isUtmClickedOffer = (offer: LenderOfferStatus): boolean => offer.wcStatus === 'UTM_CLICKED';
   const utmClickedOffers: LenderOfferStatus[] = offers.filter(isUtmClickedOffer);
   const otherOffers: LenderOfferStatus[] = offers.filter((offer) => !isUtmClickedOffer(offer));
-
+  const hasOffers = offers.length > 0;
+  const showPolling = isPolling && !hasOffers;
+  const showEmpty = !isPolling && !hasOffers;
+  const renderOfferSection = (title: string, offerList: LenderOfferStatus[], variant?: 'utmClicked') => {
+    if (offerList.length === 0) {
+      return null;
+    }
+    return (
+      <section className="space-y-3">
+        <h2 className="lead-form-heading">{title}</h2>
+        <div className="space-y-4">
+          {offerList.map((offer, index) => (
+            <OfferCard
+              key={`${offer.lenderName}-${index}`}
+              offer={offer}
+              variant={variant}
+              onClick={() => handleOfferClick(offer)}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -62,7 +74,6 @@ export function OffersView() {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -70,10 +81,8 @@ export function OffersView() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      {/* Simplified Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
@@ -100,53 +109,17 @@ export function OffersView() {
           </div>
         </div>
       </header>
-
-      {/* Hero Section with Eligibility Message */}
       <OffersHero eligibleAmount="₹1,00,000" offerCount={offers.length} />
-
-      {/* Offers List */}
       <div className="px-4 py-4 pb-28">
-        {/* Case A: Show polling/searching UI if currently polling and no offers yet */}
-        {isPolling && offers.length === 0 ? (
-          <PollingState />
-        ) : utmClickedOffers.length === 0 && otherOffers.length === 0 ? (
-          <EmptyState />
-        ) : (
+        {showPolling && <PollingState />}
+        {showEmpty && <EmptyState />}
+        {hasOffers && (
           <div className="space-y-6">
-            {otherOffers.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="lead-form-heading">Explore more loan offers</h2>
-                <div className="space-y-4">
-                  {otherOffers.map((offer, index) => (
-                    <OfferCard
-                      key={`${offer.lenderName}-${index}`}
-                      offer={offer}
-                      onClick={() => handleOfferClick(offer)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-            {utmClickedOffers.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="lead-form-heading">Check loan status</h2>
-                <div className="space-y-4">
-                  {utmClickedOffers.map((offer, index) => (
-                    <OfferCard
-                      key={`${offer.lenderName}-${index}`}
-                      offer={offer}
-                      variant="utmClicked"
-                      onClick={() => handleOfferClick(offer)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+            {renderOfferSection('Check loan status', utmClickedOffers, 'utmClicked')}
+            {renderOfferSection('Explore more loan offers', otherOffers)}
           </div>
         )}
       </div>
-
-      {/* Fixed Bottom CTA - Check Loan Status */}
       <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
         <ActionButton
           type="button"
@@ -159,4 +132,4 @@ export function OffersView() {
       </div>
     </div>
   );
-}
+};

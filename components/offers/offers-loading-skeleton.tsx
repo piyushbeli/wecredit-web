@@ -1,7 +1,7 @@
 /**
  * Loading Skeleton for Offers Page
  */
-export function OffersLoadingSkeleton() {
+export const OffersLoadingSkeleton = () => {
   return (
     <div className="animate-pulse">
       {/* Header skeleton */}
@@ -11,7 +11,6 @@ export function OffersLoadingSkeleton() {
           <div className="h-6 bg-gray-200 rounded w-32" />
         </div>
       </div>
-
       {/* Hero skeleton */}
       <div className="bg-white px-4 py-6">
         <div className="text-center">
@@ -19,7 +18,6 @@ export function OffersLoadingSkeleton() {
           <div className="h-5 bg-gray-200 rounded w-64 mx-auto" />
         </div>
       </div>
-
       {/* Offers skeleton */}
       <div className="px-4 py-4 space-y-4">
         {[1, 2, 3, 4].map((i) => (
@@ -41,4 +39,4 @@ export function OffersLoadingSkeleton() {
       </div>
     </div>
   );
-}
+};

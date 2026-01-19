@@ -12,14 +12,13 @@ import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 /**
  * Offers Page Server Component
  */
-export default async function OffersPage() {
+const OffersPage = async () => {
   const cookieStore = await cookies();
   const token = cookieStore.get(STORAGE_AUTH_TOKEN)?.value;
-
-  // Redirect to personal loan page if not authenticated
   if (!token) {
     redirect('/personal-loan');
   }
-
   return <OffersView />;
-}
+};
+
+export default OffersPage;

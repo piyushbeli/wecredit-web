@@ -1,7 +1,7 @@
 /**
  * Polling State for Offers Page
  */
-export function PollingState() {
+export const PollingState = () => {
   return (
     <div className="px-4 py-12 text-center">
       <div className="relative w-24 h-24 mx-auto mb-6">
@@ -23,4 +23,4 @@ export function PollingState() {
       </div>
     </div>
   );
-}
+};

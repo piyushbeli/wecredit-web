@@ -6,7 +6,7 @@ interface ErrorStateProps {
 /**
  * Error State for Offers Page
  */
-export function ErrorState({ error, onRetry }: ErrorStateProps) {
+export const ErrorState = ({ error, onRetry }: ErrorStateProps) => {
   return (
     <div className="px-4 py-12 text-center">
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
@@ -24,4 +24,4 @@ export function ErrorState({ error, onRetry }: ErrorStateProps) {
       </button>
     </div>
   );
-}
+};
