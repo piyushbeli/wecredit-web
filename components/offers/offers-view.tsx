@@ -1,0 +1,162 @@
+'use client';
+
+import { getCookie } from 'cookies-next';
+import { useRouter } from 'next/navigation';
+import { useOffers } from '@/hooks/use-offers';
+import {
+  OfferCard,
+  OffersHero,
+  OffersLoadingSkeleton,
+  ErrorState,
+  PollingState,
+  EmptyState,
+} from '@/components/offers';
+import type { LenderOfferStatus } from '@/types/wecredit';
+import { updateUtmClicked } from '@/lib/api/wecredit';
+import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { ActionButton } from '@/components/shared';
+
+/**
+ * Offers View Component
+ * Handles the interactive part of the offers page
+ */
+export function OffersView() {
+  const router = useRouter();
+  const { offers, isLoading, isPolling, error, fetchOffers } = useOffers();
+
+  /**
+   * Handle offer card click
+   */
+  const handleOfferClick = (offer: LenderOfferStatus): void => {
+    const utmLink: string | undefined = offer.utmLink;
+    if (!utmLink) {
+      return;
+    }
+    const lenderName: string = offer.lenderName || '';
+    const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
+    const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
+    const isUtmClicked: boolean = offer.wcStatus === 'UTM_CLICKED';
+    if (lenderName && mobile && !isUtmClicked) {
+      void updateUtmClicked(mobile, lenderName, token);
+    }
+    window.open(utmLink, '_blank'); 
+    fetchOffers();
+  };
+
+  /**
+   * Handle check loan status button click
+   */
+  const handleCheckStatus = (): void => {
+    // Navigate to loan status page or open status modal
+    console.log('Check loan status clicked');
+  };
+
+  const isUtmClickedOffer = (offer: LenderOfferStatus): boolean => offer.wcStatus === 'UTM_CLICKED';
+  const utmClickedOffers: LenderOfferStatus[] = offers.filter(isUtmClickedOffer);
+  const otherOffers: LenderOfferStatus[] = offers.filter((offer) => !isUtmClickedOffer(offer));
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <OffersLoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <ErrorState error={error} onRetry={fetchOffers} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))]">
+      {/* Simplified Header */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="px-4 py-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              aria-label="Go back"
+            >
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900">Loan offers</h1>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section with Eligibility Message */}
+      <OffersHero eligibleAmount="₹1,00,000" offerCount={offers.length} />
+
+      {/* Offers List */}
+      <div className="px-4 py-4 pb-28">
+        {/* Case A: Show polling/searching UI if currently polling and no offers yet */}
+        {isPolling && offers.length === 0 ? (
+          <PollingState />
+        ) : utmClickedOffers.length === 0 && otherOffers.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="space-y-6">
+            {otherOffers.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="lead-form-heading">Explore more loan offers</h2>
+                <div className="space-y-4">
+                  {otherOffers.map((offer, index) => (
+                    <OfferCard
+                      key={`${offer.lenderName}-${index}`}
+                      offer={offer}
+                      onClick={() => handleOfferClick(offer)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {utmClickedOffers.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="lead-form-heading">Check loan status</h2>
+                <div className="space-y-4">
+                  {utmClickedOffers.map((offer, index) => (
+                    <OfferCard
+                      key={`${offer.lenderName}-${index}`}
+                      offer={offer}
+                      variant="utmClicked"
+                      onClick={() => handleOfferClick(offer)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Fixed Bottom CTA - Check Loan Status */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
+        <ActionButton
+          type="button"
+          onClick={handleCheckStatus}
+          fullWidth
+          className="h-14 text-base font-medium"
+        >
+          Check your Loan Status
+        </ActionButton>
+      </div>
+    </div>
+  );
+}
