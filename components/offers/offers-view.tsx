@@ -22,7 +22,7 @@ import { ActionButton } from '@/components/shared';
  */
 export const OffersView = () => {
   const router = useRouter();
-  const { offers, isLoading, isPolling, error, fetchOffers } = useOffers();
+  const { exploreOffers, isLoading, isPolling, error, fetchOffers } = useOffers();
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
     if (!utmLink) {
@@ -41,11 +41,10 @@ export const OffersView = () => {
   const handleCheckStatus = (): void => {
     router.push('/offers/status');
   };
-  const exploreOffers = offers.filter(offer => offer.wcStatus === 'INITIATED');
   const hasOffers = exploreOffers.length > 0;
   const showPolling = isPolling && !hasOffers;
   const showEmpty = !isPolling && !hasOffers;
-  const renderOfferSection = (title: string, offerList: LenderOfferStatus[], variant?: 'utmClicked') => {
+  const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
     if (offerList.length === 0) {
       return null;
     }
@@ -57,7 +56,6 @@ export const OffersView = () => {
             <OfferCard
               key={`${offer.lenderName}-${index}`}
               offer={offer}
-              variant={variant}
               onClick={() => handleOfferClick(offer)}
             />
           ))}
@@ -82,7 +80,6 @@ export const OffersView = () => {
 
   if (exploreOffers.length === 0) {
     redirect('/offers/status');
-    return null;
   }
 
   return (

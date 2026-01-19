@@ -1,7 +1,6 @@
 'use client';
 
 import { getCookie } from 'cookies-next';
-import { useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
 import {
   OfferCard,
@@ -13,15 +12,13 @@ import {
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { ActionButton } from '@/components/shared';
 
 /**
  * Offers Status View Component
  * Displays non-INITIATED offers in Status section
  */
 export const OffersStatusView = () => {
-  const router = useRouter();
-  const { offers, isLoading, error, fetchOffers, canReHit, isReHitting, reHitLenders } = useOffers();
+  const { statusOffers, isLoading, error, fetchOffers } = useOffers();
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
@@ -40,15 +37,9 @@ export const OffersStatusView = () => {
     fetchOffers();
   };
 
-  const handleUnlockMore = async () => {
-    await reHitLenders();
-    await fetchOffers();
-  };
-
-  const statusOffers = offers.filter(offer => offer.wcStatus !== 'INITIATED');
   const hasStatusOffers = statusOffers.length > 0;
 
-  const renderOfferSection = (title: string, offerList: LenderOfferStatus[], variant?: 'utmClicked') => {
+  const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
     if (offerList.length === 0) {
       return null;
     }
@@ -60,7 +51,6 @@ export const OffersStatusView = () => {
             <OfferCard
               key={`${offer.lenderName}-${index}`}
               offer={offer}
-              variant={variant}
               onClick={() => handleOfferClick(offer)}
             />
           ))}
@@ -97,7 +87,7 @@ export const OffersStatusView = () => {
           />
         ) : (
           <div className="space-y-6">
-            {renderOfferSection('Check your application status', statusOffers, 'utmClicked')}
+            {renderOfferSection('Check your application status', statusOffers)}
           </div>
         )}
       </div>

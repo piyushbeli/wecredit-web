@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { clearAuthData } from '@/lib/api';
 import type { User, PendingAction } from '@/stores/auth-store';
+import { useRouter } from 'next/navigation';
 
 /**
  * Return type for useAuth hook
@@ -62,6 +63,7 @@ interface UseAuthReturn {
  * ```
  */
 export function useAuth(): UseAuthReturn {
+  const router = useRouter();
   const {
     isModalOpen,
     isAuthenticated,
@@ -79,6 +81,7 @@ export function useAuth(): UseAuthReturn {
   const logout = useCallback((): void => {
     clearAuthData();
     storeLogout();
+    router.push('/');
   }, [storeLogout]);
 
   return {

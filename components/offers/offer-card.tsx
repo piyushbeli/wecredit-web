@@ -9,24 +9,21 @@ import Image from 'next/image';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { PercentIcon, CalendarIcon } from '@/components/icons';
 import { ApprovalBadge } from './approval-badge';
+import { StatusBadge, getStatusCtaLabel } from './status-badge';
 import { ActionButton } from '../shared';
-
-type OfferCardVariant = 'default' | 'utmClicked';
 
 interface OfferCardProps {
   /** Lender offer data */
   offer: LenderOfferStatus;
-  /** Click handler for the View Details button */
+  /** Click handler for the CTA button */
   onClick?: () => void;
-  /** Offer card style variant */
-  variant?: OfferCardVariant;
 }
 
 /**
  * Offer card component with approval chances badge
  * Matches trending card structure but shows approval percentage
  */
-export function OfferCard({ offer, onClick, variant }: OfferCardProps) {
+export function OfferCard({ offer, onClick }: OfferCardProps) {
   const {
     lenderName,
     loanAmount,
@@ -35,10 +32,9 @@ export function OfferCard({ offer, onClick, variant }: OfferCardProps) {
     logo,
     wcStatus
   } = offer;
-  const resolvedVariant: OfferCardVariant = variant ?? 'default';
-  const isUtmClicked: boolean = wcStatus === 'UTM_CLICKED';
+  const isNewOffer: boolean = wcStatus === 'INITIATED';
   const approvalChance: number = offer.approvalRate || 70;
-  const ctaLabel: string = isUtmClicked ? 'View Details' : 'Apply Now';
+  const ctaLabel: string = getStatusCtaLabel(wcStatus);
   return (
     <div
       className="relative rounded-3xl overflow-hidden bg-white border border-gray-200"
@@ -53,24 +49,18 @@ export function OfferCard({ offer, onClick, variant }: OfferCardProps) {
           background: 'linear-gradient(145deg, #D4E4FC 0%, #EEF4FF 50%, #FAFCFF 100%)',
         }}
       >
-        {/* Approval Badge - Circular percentage at top right corner */}
-        {!isUtmClicked && (
+        {/* Approval Badge - Only for new offers (INITIATED) */}
+        {isNewOffer && (
           <div className="absolute right-2 top-2">
             <ApprovalBadge percentage={approvalChance} size="sm" />
           </div>
         )}
-        {isUtmClicked && (
-          <div className="absolute right-3 top-3 flex flex-col items-center">
-            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
-              <span className="text-orange-600 text-sm font-semibold">!</span>
-            </div>
-            <span className="mt-1 text-[10px] font-semibold text-orange-600 tracking-wide">
-              UTM CLICKED
-            </span>
+        {/* Status Badge - For non-INITIATED offers */}
+        {!isNewOffer && (
+          <div className="absolute right-3 top-3">
+            <StatusBadge status={wcStatus} showIcon />
           </div>
         )}
-
-        {/* {JSON.stringify({wcStatus})} */}
 
         {/* Header: Logo */}
         <div className="flex items-center mb-1">

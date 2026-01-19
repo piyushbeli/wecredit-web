@@ -14,77 +14,86 @@ interface StatusBadgeProps {
 }
 
 /**
- * Status configuration with colors and labels
+ * Status configuration with colors, labels, and CTA text
  */
-const STATUS_CONFIG: Record<WcStatus, {
+interface StatusConfigItem {
   label: string;
   bgColor: string;
   textColor: string;
-  borderColor: string;
-  icon?: string;
-}> = {
+  iconChar: string;
+  ctaLabel: string;
+}
+
+const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
   INITIATED: {
-    label: 'Ready to Apply',
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-700',
-    borderColor: 'border-blue-200',
-    icon: '🚀',
+    label: 'NEW',
+    bgColor: 'bg-blue-100',
+    textColor: 'text-blue-600',
+    iconChar: '★',
+    ctaLabel: 'Apply Now',
+  },
+  JOURNEY_STARTED: {
+    label: 'IN PROGRESS',
+    bgColor: 'bg-indigo-100',
+    textColor: 'text-indigo-600',
+    iconChar: '→',
+    ctaLabel: 'Continue Application',
   },
   UNDER_REVIEW: {
-    label: 'Under Review',
-    bgColor: 'bg-yellow-50',
-    textColor: 'text-yellow-700',
-    borderColor: 'border-yellow-200',
-    icon: '⏳',
+    label: 'UNDER REVIEW',
+    bgColor: 'bg-yellow-100',
+    textColor: 'text-yellow-600',
+    iconChar: '⏳',
+    ctaLabel: 'Check Status',
   },
   PENDING: {
-    label: 'Pending',
-    bgColor: 'bg-orange-50',
-    textColor: 'text-orange-700',
-    borderColor: 'border-orange-200',
-    icon: '⏱️',
+    label: 'PENDING',
+    bgColor: 'bg-orange-100',
+    textColor: 'text-orange-600',
+    iconChar: '⏱',
+    ctaLabel: 'Check Status',
   },
   APPROVED: {
-    label: 'Approved',
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-700',
-    borderColor: 'border-green-200',
-    icon: '✅',
+    label: 'APPROVED',
+    bgColor: 'bg-green-100',
+    textColor: 'text-green-600',
+    iconChar: '✓',
+    ctaLabel: 'Complete Setup',
   },
   REJECTED: {
-    label: 'Rejected',
-    bgColor: 'bg-red-50',
-    textColor: 'text-red-700',
-    borderColor: 'border-red-200',
-    icon: '❌',
+    label: 'REJECTED',
+    bgColor: 'bg-red-100',
+    textColor: 'text-red-600',
+    iconChar: '✕',
+    ctaLabel: 'View Details',
   },
   DISBURSED: {
-    label: 'Disbursed',
-    bgColor: 'bg-purple-50',
-    textColor: 'text-purple-700',
-    borderColor: 'border-purple-200',
-    icon: '💰',
+    label: 'DISBURSED',
+    bgColor: 'bg-purple-100',
+    textColor: 'text-purple-600',
+    iconChar: '💰',
+    ctaLabel: 'View Details',
   },
   COMPLETED: {
-    label: 'Completed',
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    borderColor: 'border-gray-200',
-    icon: '✔️',
+    label: 'COMPLETED',
+    bgColor: 'bg-gray-100',
+    textColor: 'text-gray-600',
+    iconChar: '✔',
+    ctaLabel: 'View Details',
   },
   CANCELLED: {
-    label: 'Cancelled',
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-600',
-    borderColor: 'border-gray-200',
-    icon: '🚫',
+    label: 'CANCELLED',
+    bgColor: 'bg-gray-100',
+    textColor: 'text-gray-500',
+    iconChar: '⊘',
+    ctaLabel: 'View Details',
   },
   UTM_CLICKED: {
-    label: 'UTM Clicked',
-    bgColor: 'bg-orange-50',
-    textColor: 'text-orange-700',
-    borderColor: 'border-orange-200',
-    icon: '⚠️',
+    label: 'UTM CLICKED',
+    bgColor: 'bg-orange-100',
+    textColor: 'text-orange-600',
+    iconChar: '!',
+    ctaLabel: 'View Details',
   },
 };
 
@@ -92,11 +101,12 @@ const STATUS_CONFIG: Record<WcStatus, {
  * StatusBadge Component
  * 
  * Displays a color-coded badge for loan application status
+ * Vertical layout with circular icon and label text below
  * 
  * @example
  * ```tsx
  * <StatusBadge status="APPROVED" />
- * <StatusBadge status="UNDER_REVIEW" showIcon />
+ * <StatusBadge status="UTM_CLICKED" showIcon />
  * ```
  */
 export function StatusBadge({ status, className, showIcon = false }: StatusBadgeProps) {
@@ -107,18 +117,29 @@ export function StatusBadge({ status, className, showIcon = false }: StatusBadge
   }
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border',
-        config.bgColor,
-        config.textColor,
-        config.borderColor,
-        className
+    <div className={cn('flex flex-col items-center', className)}>
+      {showIcon && (
+        <div
+          className={cn(
+            'w-8 h-8 rounded-full flex items-center justify-center',
+            config.bgColor
+          )}
+        >
+          <span className={cn('text-sm font-semibold', config.textColor)}>
+            {config.iconChar}
+          </span>
+        </div>
       )}
-    >
-      {showIcon && config.icon && <span className="text-sm">{config.icon}</span>}
-      {config.label}
-    </span>
+      <span
+        className={cn(
+          'text-[10px] font-semibold',
+          config.textColor,
+          showIcon && 'mt-1'
+        )}
+      >
+        {config.label}
+      </span>
+    </div>
   );
 }
 
@@ -126,6 +147,13 @@ export function StatusBadge({ status, className, showIcon = false }: StatusBadge
  * Helper function to get status configuration
  * Useful for custom status displays
  */
-export function getStatusConfig(status: WcStatus) {
+export function getStatusConfig(status: WcStatus): StatusConfigItem | undefined {
   return STATUS_CONFIG[status];
+}
+
+/**
+ * Helper function to get CTA label for a status
+ */
+export function getStatusCtaLabel(status: WcStatus): string {
+  return STATUS_CONFIG[status]?.ctaLabel || 'View Details';
 }

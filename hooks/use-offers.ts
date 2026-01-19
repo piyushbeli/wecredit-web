@@ -1,12 +1,13 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCookie } from 'cookies-next';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import type { LenderOfferStatus, CheckStatusAllResponse, WcStatus } from '@/types/wecredit';
+import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { MOCK_CHECK_STATUS_RESPONSE, MOCK_REHIT_RESPONSE, simulateMockApiCall } from '@/lib/mock-data/offers';
+import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
 
 /** Polling constants */
 const POLL_INTERVAL = 15000; // 15 seconds
@@ -19,6 +20,10 @@ const API_TIMEOUT = 15000; // 15 seconds
 interface UseOffersReturn {
   /** List of lender offers */
   offers: LenderOfferStatus[];
+  /** Explore offers (INITIATED status - new offers to explore) */
+  exploreOffers: LenderOfferStatus[];
+  /** Status offers (non-INITIATED - offers user has clicked/applied) */
+  statusOffers: LenderOfferStatus[];
   /** Loading state for initial fetch */
   isLoading: boolean;
   /** Whether the hook is currently polling for offers */
@@ -39,6 +44,10 @@ interface UseOffersReturn {
   filterByStatus: (status: WcStatus | 'ALL') => LenderOfferStatus[];
   /** Count of offers by status */
   statusCounts: Record<WcStatus | 'ALL', number>;
+  /** Currently selected status filter */
+  selectedStatus: StatusFilter;
+  /** Set selected status filter */
+  setSelectedStatus: (status: StatusFilter) => void;
 }
 
 /**
@@ -52,17 +61,32 @@ interface UseOffersReturn {
  * - Status counts for UI badges
  * - Retry mechanism on error
  * - Feature flag support: Use mock data when 'enableOfferMockData' is enabled
+ * - Uses centralized Zustand store for state management
  * 
  * @returns Offers data and management functions
  */
 export function useOffers(): UseOffersReturn {
-  const [offers, setOffers] = useState<LenderOfferStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isPolling, setIsPolling] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [canReHit, setCanReHit] = useState(false);
-  const [isReHitting, setIsReHitting] = useState(false);
-  const [statusCode, setStatusCode] = useState<string | null>(null);
+  // Get state and actions from the store
+  const {
+    offers,
+    isLoading,
+    isPolling,
+    error,
+    canReHit,
+    isReHitting,
+    statusCode,
+    selectedStatus,
+    setOffers,
+    setIsLoading,
+    setIsPolling,
+    setError,
+    setCanReHit,
+    setIsReHitting,
+    setStatusCode,
+    setSelectedStatus,
+  } = useOfferStore();
+
+  // Local state for poll tick (not shared across components)
   const [pollTick, setPollTick] = useState(0);
   
   const searchParams = useSearchParams();
@@ -135,7 +159,7 @@ export function useOffers(): UseOffersReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [enableMockData, isPolling]);
+  }, [enableMockData, isPolling, setOffers, setIsLoading, setError, setCanReHit, setStatusCode]);
 
   /**
    * Re-hit all lenders to check for more offers
@@ -200,17 +224,14 @@ export function useOffers(): UseOffersReturn {
     } finally {
       setIsReHitting(false);
     }
-  }, [canReHit, enableMockData]);
+  }, [canReHit, enableMockData, setOffers, setIsReHitting, setError, setCanReHit, setStatusCode]);
 
   /**
    * Filter offers by status
    */
   const filterByStatus = useCallback(
     (status: WcStatus | 'ALL'): LenderOfferStatus[] => {
-      if (status === 'ALL') {
-        return offers;
-      }
-      return offers.filter((offer) => offer.wcStatus === status);
+      return selectFilteredOffers(offers, status);
     },
     [offers]
   );
@@ -218,18 +239,13 @@ export function useOffers(): UseOffersReturn {
   /**
    * Calculate status counts for UI badges
    */
-  const statusCounts: Record<WcStatus | 'ALL', number> = {
-    ALL: offers.length,
-    INITIATED: offers.filter((o) => o.wcStatus === 'INITIATED').length,
-    PENDING: offers.filter((o) => o.wcStatus === 'PENDING').length,
-    APPROVED: offers.filter((o) => o.wcStatus === 'APPROVED').length,
-    REJECTED: offers.filter((o) => o.wcStatus === 'REJECTED').length,
-    DISBURSED: offers.filter((o) => o.wcStatus === 'DISBURSED').length,
-    COMPLETED: offers.filter((o) => o.wcStatus === 'COMPLETED').length,
-    CANCELLED: offers.filter((o) => o.wcStatus === 'CANCELLED').length,
-    UNDER_REVIEW: offers.filter((o) => o.wcStatus === 'UNDER_REVIEW').length,
-    UTM_CLICKED: offers.filter((o) => o.wcStatus === 'UTM_CLICKED').length,
-  };
+  const statusCounts = selectStatusCounts(offers);
+
+  /**
+   * Derived arrays for different offer categories
+   */
+  const exploreOffers = selectExploreOffers(offers);
+  const statusOffers = selectStatusOffers(offers);
 
   /**
    * Stop polling and clear timers
@@ -241,7 +257,7 @@ export function useOffers(): UseOffersReturn {
     }
     pollStartTimeRef.current = null;
     setIsPolling(false);
-  }, []);
+  }, [setIsPolling]);
 
   /**
    * Logic for a single poll attempt
@@ -290,7 +306,7 @@ export function useOffers(): UseOffersReturn {
       console.error('[useOffers] Error during polling, stopping.');
       stopPolling();
     }
-  }, [isNewLead, offers.length, isPolling, error, stopPolling]);
+  }, [isNewLead, offers.length, isPolling, error, stopPolling, setIsPolling]);
 
   // Set up the next poll interval timer
   useEffect(() => {
@@ -313,6 +329,8 @@ export function useOffers(): UseOffersReturn {
 
   return {
     offers,
+    exploreOffers,
+    statusOffers,
     isLoading,
     isPolling,
     error,
@@ -323,5 +341,7 @@ export function useOffers(): UseOffersReturn {
     reHitLenders,
     filterByStatus,
     statusCounts,
+    selectedStatus,
+    setSelectedStatus,
   };
 }
