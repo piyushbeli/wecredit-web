@@ -8,3 +8,4 @@ export * from './offers-view';
 export * from './offers-status-view';
 export * from './approval-badge';
 export * from './status-badge';
+export * from './unmatched-offers-section';

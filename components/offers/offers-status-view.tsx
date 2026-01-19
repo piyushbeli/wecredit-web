@@ -9,6 +9,7 @@ import {
   EmptyState,
   OffersHero,
 } from '@/components/offers';
+import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
@@ -88,6 +89,7 @@ export const OffersStatusView = () => {
         ) : (
           <div className="space-y-6">
             {renderOfferSection('Check your application status', statusOffers)}
+            <UnmatchedOffersSection />
           </div>
         )}
       </div>
