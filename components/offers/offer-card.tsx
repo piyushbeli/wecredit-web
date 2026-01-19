@@ -9,6 +9,7 @@ import Image from 'next/image';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { PercentIcon, CalendarIcon } from '@/components/icons';
 import { ApprovalBadge } from './approval-badge';
+import { ActionButton } from '../shared';
 
 type OfferCardVariant = 'default' | 'utmClicked';
 
@@ -120,16 +121,14 @@ export function OfferCard({ offer, onClick, variant }: OfferCardProps) {
 
       {/* CTA Button - On white background outside gradient */}
       <div className="p-2 bg-white">
-        <button
+        <ActionButton
           type="button"
           onClick={onClick}
-          className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-xs font-medium py-1 rounded-full transition-all duration-200 cursor-pointer"
-          style={{
-            boxShadow: '0 4px 14px rgba(30, 95, 230, 0.25)',
-          }}
+          fullWidth
+          className="text-xs font-medium rounded-full py-1 h-6"
         >
           {ctaLabel}
-        </button>
+        </ActionButton>
       </div>
     </div>
   );

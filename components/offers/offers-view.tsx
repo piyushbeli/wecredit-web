@@ -1,7 +1,7 @@
 'use client';
 
 import { getCookie } from 'cookies-next';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
 import {
   OfferCard,
@@ -39,12 +39,10 @@ export const OffersView = () => {
     fetchOffers();
   };
   const handleCheckStatus = (): void => {
-    console.log('Check loan status clicked');
+    router.push('/offers/status');
   };
-  const isUtmClickedOffer = (offer: LenderOfferStatus): boolean => offer.wcStatus === 'UTM_CLICKED';
-  const utmClickedOffers: LenderOfferStatus[] = offers.filter(isUtmClickedOffer);
-  const otherOffers: LenderOfferStatus[] = offers.filter((offer) => !isUtmClickedOffer(offer));
-  const hasOffers = offers.length > 0;
+  const exploreOffers = offers.filter(offer => offer.wcStatus === 'INITIATED');
+  const hasOffers = exploreOffers.length > 0;
   const showPolling = isPolling && !hasOffers;
   const showEmpty = !isPolling && !hasOffers;
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[], variant?: 'utmClicked') => {
@@ -81,6 +79,12 @@ export const OffersView = () => {
       </div>
     );
   }
+
+  if (exploreOffers.length === 0) {
+    redirect('/offers/status');
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <header className="bg-white border-b sticky top-0 z-10">
@@ -109,14 +113,13 @@ export const OffersView = () => {
           </div>
         </div>
       </header>
-      <OffersHero eligibleAmount="₹1,00,000" offerCount={offers.length} />
+      <OffersHero eligibleAmount="₹1,00,000" offerCount={exploreOffers.length} />
       <div className="px-4 py-4 pb-28">
         {showPolling && <PollingState />}
         {showEmpty && <EmptyState />}
         {hasOffers && (
           <div className="space-y-6">
-            {renderOfferSection('Check loan status', utmClickedOffers, 'utmClicked')}
-            {renderOfferSection('Explore more loan offers', otherOffers)}
+            {renderOfferSection('Explore more loan offers', exploreOffers)}
           </div>
         )}
       </div>

@@ -158,25 +158,14 @@ const TrendingOfferCard = ({
 
         {/* CTA Button - On white background outside gradient */}
         <div className="p-2 bg-white">
-          <button
-            type="button"
-            onClick={handleCheckEligibility}
-            className="block w-full text-center bg-wc-blue-500 hover:bg-wc-blue-600 active:bg-wc-blue-700 text-white text-xs font-medium py-1 rounded-full transition-all duration-200 cursor-pointer"
-            style={{
-              boxShadow: '0 4px 14px rgba(30, 95, 230, 0.25)',
-            }}
-          >
-            Check Eligibility
-          </button>
-
-          {/* <ActionButton
+          <ActionButton
             type="button"
             onClick={handleCheckEligibility}
             fullWidth
-            className="text-xs font-medium rounded-full h-8"
+            className="text-xs font-medium rounded-full py-1 h-6"
           >
             Check Eligibility
-          </ActionButton> */}
+          </ActionButton>
         </div>
       </div>
     </motion.div>
