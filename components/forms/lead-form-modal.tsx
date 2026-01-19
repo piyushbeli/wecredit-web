@@ -5,7 +5,7 @@
  * Full-screen mobile-first multi-step form for lead capture
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -107,6 +107,8 @@ const LeadFormModal = ({
     initializeFormValues,
   } = useLeadForm(fields);
 
+  const isFirstStep = currentStep === 1;
+  const isLastStep = currentStep === 4;
   const isPrefillEnabled = process.env.NODE_ENV !== 'production'
     && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE;
 
@@ -137,15 +139,15 @@ const LeadFormModal = ({
     }
   }, [fields, isPrefillEnabled, userIp, initializeFormValues]);
 
-  const handleHeaderBackClick = (): void => {
-    if (currentStep === 1) {
+  const handleHeaderBackClick = useCallback((): void => {
+    if (isFirstStep) {
       onClose();
     } else {
       handleBack();
     }
-  };
+  }, [isFirstStep, onClose, handleBack]);
 
-  const handleSubmit = async (event: React.FormEvent): Promise<void> => {
+  const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     
     if (!consent) {
@@ -189,6 +191,99 @@ const LeadFormModal = ({
         onClose();
       }, 2000);
     }
+  }, [consent, firstName, lastName, formValues, userIp, createLead, partnerCode, lenderName, onSuccess, router, onClose]);
+
+  const renderConsentSection = (): React.ReactElement | null => {
+    if (!isLastStep) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="pt-6 border-t border-gray-200"
+      >
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="modal-consent"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+          <label htmlFor="modal-consent" className="text-sm text-gray-700 cursor-pointer flex-1">
+            I agree to the{' '}
+            <a
+              href="/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              Terms and Conditions
+            </a>{' '}
+            and{' '}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              Privacy Policy
+            </a>{' '}
+            of WeCredit. I authorize WeCredit and its partners to contact me.
+          </label>
+        </div>
+        {!consent && (
+          <p className="text-xs text-red-500 mt-2 ml-8">Please accept to continue</p>
+        )}
+      </motion.div>
+    );
+  };
+
+  const renderSubmitError = (): React.ReactElement | null => {
+    if (!submitError) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+      >
+        <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-red-900">Submission Failed</p>
+          <p className="text-sm text-red-700 mt-1">{submitError}</p>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderFooterButton = (): React.ReactElement => {
+    if (!isLastStep) {
+      return (
+        <ActionButton
+          type="button"
+          onClick={handleNext}
+          fullWidth
+          className="h-14 text-base"
+        >
+          Next
+        </ActionButton>
+      );
+    }
+
+    return (
+      <ActionButton
+        type="submit"
+        onClick={handleSubmit}
+        disabled={!consent}
+        isLoading={isSubmitting}
+        fullWidth
+        className="h-14 text-base"
+      >
+        Submit
+      </ActionButton>
+    );
   };
 
   const renderStepContent = (): React.ReactElement | null => {
@@ -307,7 +402,7 @@ const LeadFormModal = ({
             type="button"
             onClick={handleHeaderBackClick}
             className="p-1 text-gray-700 hover:text-gray-900"
-            aria-label={currentStep === 1 ? 'Close' : 'Back'}
+            aria-label={isFirstStep ? 'Close' : 'Back'}
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -363,90 +458,14 @@ const LeadFormModal = ({
                     </motion.div>
                   </AnimatePresence>
 
-                  {/* Consent Section - Only on Step 4 */}
-                  {currentStep === 4 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="pt-6 border-t border-gray-200"
-                    >
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="checkbox"
-                          id="modal-consent"
-                          checked={consent}
-                          onChange={(e) => setConsent(e.target.checked)}
-                          className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <label htmlFor="modal-consent" className="text-sm text-gray-700 cursor-pointer flex-1">
-                          I agree to the{' '}
-                          <a
-                            href="/terms-of-service"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline font-medium"
-                          >
-                            Terms and Conditions
-                          </a>{' '}
-                          and{' '}
-                          <a
-                            href="/privacy-policy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline font-medium"
-                          >
-                            Privacy Policy
-                          </a>{' '}
-                          of WeCredit. I authorize WeCredit and its partners to contact me.
-                        </label>
-                      </div>
-                      {!consent && (
-                        <p className="text-xs text-red-500 mt-2 ml-8">Please accept to continue</p>
-                      )}
-                    </motion.div>
-                  )}
-
-                  {/* Submit Error */}
-                  {submitError && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
-                    >
-                      <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-red-900">Submission Failed</p>
-                        <p className="text-sm text-red-700 mt-1">{submitError}</p>
-                      </div>
-                    </motion.div>
-                  )}
+                  {renderConsentSection()}
+                  {renderSubmitError()}
                 </form>
               </div>
 
               {/* Footer Button */}
               <div className="border-t bg-white p-4">
-                {currentStep < 4 ? (
-                  <ActionButton
-                    type="button"
-                    onClick={handleNext}
-                    fullWidth
-                    className="h-14 text-base"
-                  >
-                    Next
-                  </ActionButton>
-                ) : (
-                  <ActionButton
-                    type="submit"
-                    onClick={handleSubmit}
-                    disabled={!consent}
-                    isLoading={isSubmitting}
-                    fullWidth
-                    className="h-14 text-base"
-                  >
-                    Submit
-                  </ActionButton>
-                )}
+                {renderFooterButton()}
               </div>
             </>
           )}
