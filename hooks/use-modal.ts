@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 type UseModalResult = {
   readonly isOpen: boolean;
@@ -11,11 +11,14 @@ type UseModalResult = {
  */
 export function useModal(): UseModalResult {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const openModal = (): void => {
+  
+  const openModal = useCallback((): void => {
     setIsOpen(true);
-  };
-  const closeModal = (): void => {
+  }, []);
+
+  const closeModal = useCallback((): void => {
     setIsOpen(false);
-  };
+  }, []);
+
   return { isOpen, openModal, closeModal };
 }

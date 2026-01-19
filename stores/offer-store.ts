@@ -1,0 +1,150 @@
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
+
+/**
+ * Selected status filter type
+ */
+type StatusFilter = WcStatus | 'ALL';
+
+/**
+ * Offer store state interface
+ */
+interface OfferState {
+  /** List of lender offers */
+  offers: LenderOfferStatus[];
+  /** Loading state for initial fetch */
+  isLoading: boolean;
+  /** Whether the store is currently polling for offers */
+  isPolling: boolean;
+  /** Error message if fetch failed */
+  error: string | null;
+  /** Whether more lenders can be checked (isRehitLenders === 0) */
+  canReHit: boolean;
+  /** Loading state for re-hit operation */
+  isReHitting: boolean;
+  /** Status code from API */
+  statusCode: string | null;
+  /** Currently selected status filter */
+  selectedStatus: StatusFilter;
+}
+
+/**
+ * Offer store actions interface
+ */
+interface OfferActions {
+  /** Set offers list */
+  setOffers: (offers: LenderOfferStatus[]) => void;
+  /** Set loading state */
+  setIsLoading: (isLoading: boolean) => void;
+  /** Set polling state */
+  setIsPolling: (isPolling: boolean) => void;
+  /** Set error message */
+  setError: (error: string | null) => void;
+  /** Set canReHit flag */
+  setCanReHit: (canReHit: boolean) => void;
+  /** Set re-hitting state */
+  setIsReHitting: (isReHitting: boolean) => void;
+  /** Set status code */
+  setStatusCode: (statusCode: string | null) => void;
+  /** Set selected status filter */
+  setSelectedStatus: (status: StatusFilter) => void;
+  /** Reset store to initial state */
+  reset: () => void;
+}
+
+/** Initial offer state */
+const initialState: OfferState = {
+  offers: [],
+  isLoading: true,
+  isPolling: false,
+  error: null,
+  canReHit: false,
+  isReHitting: false,
+  statusCode: null,
+  selectedStatus: 'ALL',
+};
+
+/**
+ * Zustand store for offer state management
+ * Uses devtools middleware for Redux DevTools integration
+ */
+export const useOfferStore = create<OfferState & OfferActions>()(
+  devtools(
+    (set) => ({
+      ...initialState,
+
+      setOffers: (offers: LenderOfferStatus[]) => set({ offers }, false, 'setOffers'),
+
+      setIsLoading: (isLoading: boolean) => set({ isLoading }, false, 'setIsLoading'),
+
+      setIsPolling: (isPolling: boolean) => set({ isPolling }, false, 'setIsPolling'),
+
+      setError: (error: string | null) => set({ error }, false, 'setError'),
+
+      setCanReHit: (canReHit: boolean) => set({ canReHit }, false, 'setCanReHit'),
+
+      setIsReHitting: (isReHitting: boolean) => set({ isReHitting }, false, 'setIsReHitting'),
+
+      setStatusCode: (statusCode: string | null) => set({ statusCode }, false, 'setStatusCode'),
+
+      setSelectedStatus: (selectedStatus: StatusFilter) =>
+        set({ selectedStatus }, false, 'setSelectedStatus'),
+
+      reset: () => set(initialState, false, 'reset'),
+    }),
+    {
+      name: 'offer-store',
+    }
+  )
+);
+
+/**
+ * Selector: Filter offers by status
+ */
+export const selectFilteredOffers = (
+  offers: LenderOfferStatus[],
+  status: StatusFilter
+): LenderOfferStatus[] => {
+  if (status === 'ALL') {
+    return offers;
+  }
+  return offers.filter((offer) => offer.wcStatus === status);
+};
+
+/**
+ * Selector: Get explore offers (INITIATED status - new offers to explore)
+ */
+export const selectExploreOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
+  return offers.filter((offer) => offer.wcStatus === 'INITIATED');
+};
+
+/**
+ * Selector: Get status offers (non-INITIATED - offers user has clicked/applied)
+ */
+export const selectStatusOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
+  return offers.filter((offer) => offer.wcStatus !== 'INITIATED');
+};
+
+/**
+ * Selector: Calculate status counts for UI badges
+ */
+export const selectStatusCounts = (
+  offers: LenderOfferStatus[]
+): Record<StatusFilter, number> => {
+  return {
+    ALL: offers.length,
+    INITIATED: offers.filter((o) => o.wcStatus === 'INITIATED').length,
+    JOURNEY_STARTED: offers.filter((o) => o.wcStatus === 'JOURNEY_STARTED').length,
+    PENDING: offers.filter((o) => o.wcStatus === 'PENDING').length,
+    APPROVED: offers.filter((o) => o.wcStatus === 'APPROVED').length,
+    REJECTED: offers.filter((o) => o.wcStatus === 'REJECTED').length,
+    DISBURSED: offers.filter((o) => o.wcStatus === 'DISBURSED').length,
+    COMPLETED: offers.filter((o) => o.wcStatus === 'COMPLETED').length,
+    CANCELLED: offers.filter((o) => o.wcStatus === 'CANCELLED').length,
+    UNDER_REVIEW: offers.filter((o) => o.wcStatus === 'UNDER_REVIEW').length,
+    UTM_CLICKED: offers.filter((o) => o.wcStatus === 'UTM_CLICKED').length,
+  };
+};
+
+export type { StatusFilter };
