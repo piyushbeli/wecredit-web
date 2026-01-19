@@ -11,6 +11,7 @@ import {
   PollingState,
   EmptyState,
 } from '@/components/offers';
+import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
@@ -117,6 +118,7 @@ export const OffersView = () => {
         {hasOffers && (
           <div className="space-y-6">
             {renderOfferSection('Explore more loan offers', exploreOffers)}
+            <UnmatchedOffersSection />
           </div>
         )}
       </div>

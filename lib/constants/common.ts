@@ -76,7 +76,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     titleWhite: "More Savings",
     titleGradient: "on Every Loan",
     ctaText: "Apply For Loan",
-    ctaLink: "#",
+    ctaLink: "/personal-loan",
   },
   {
     id: "slide-2",
@@ -84,7 +84,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     titleWhite: "More Savings",
     titleGradient: "on Every Loan",
     ctaText: "Get Your Card",
-    ctaLink: "#",
+    ctaLink: "/credit-card",
   },
   {
     id: "slide-3",
@@ -92,7 +92,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     titleWhite: "More Savings",
     titleGradient: "on Every Loan",
     ctaText: "Check Eligibility",
-    ctaLink: "#",
+    ctaLink: "/eligibility-check",
   },
 ];
   

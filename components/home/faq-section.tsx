@@ -144,7 +144,7 @@ const FaqSection = (): React.ReactNode => {
 			</motion.h2>
 
 			{/* FAQ Accordion */}
-			<div className="max-w-2xl mx-auto space-y-3">
+			<div className="max-w-2xl mx-auto space-y-1">
 				{faqItems.map((item, index) => (
 					<FaqAccordionItem
 						key={item.id}

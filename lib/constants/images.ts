@@ -30,6 +30,10 @@ export const IMAGES = {
     BUSINESS_LOAN_CALC: '/assets/images/business-loan-calculator-illustration.png',
     OTP_SMS: '/assets/images/otp-sms.png',
   },
+  DIRECT_CONTACT_EXPERTS: {
+    LAKASH: '/assets/images/lakash.png',
+    PLAYSTORE_ICON: '/assets/images/playstoreicon.png',
+  },
   ICONS: {
     PERCENTAGE: '/assets/svgs/percentage-icon.svg',
     CALENDAR: '/assets/svgs/calendar-icon.svg',
@@ -37,6 +41,10 @@ export const IMAGES = {
     BUSINESS_LOAN: '/assets/svgs/business-loan.svg',
     PL_BY_ONDC: '/assets/svgs/pl-by-ondc.svg',
     CREDIT_CARD: '/assets/svgs/credit-card.svg',
+    DOCUMENT: '/assets/svgs/document.svg',
+    OTP: '/assets/svgs/otp.svg',
+    VECTOR: '/assets/svgs/vector.svg',
+    HOURGLASS: '/assets/svgs/hourglass.svg',
   },
   PARTNERS: {
     BASE_PATH: '/assets/images/partners',

@@ -75,6 +75,10 @@
   --color-gray-500: #7F7F7F;
   --color-gray-100: #D9D9D9;
   --color-white: #FFFFFF;
+
+  /* Background Gradients */
+  --background-image-brand-lightest: linear-gradient(135deg, #CCDFFC 0%, #FAFCFF 100%);
+  --background-image-brand-light: linear-gradient(135deg, #CBDFFC 0%, #076FDA 100%);
 }
 
 /* =============================================================================
@@ -445,4 +449,56 @@
 
 .lead-form-label {
   @apply block text-sm text-gray-900 mb-2
+}
+
+/* =============================================================================
+ * EMI Calculator Slider Styles
+ * ============================================================================= */
+
+/* Custom slider thumb styling */
+.slider-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1E5FE6;
+  cursor: pointer;
+  border: 4px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(30, 95, 230, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slider-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(30, 95, 230, 0.5);
+}
+
+.slider-thumb::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+.slider-thumb::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1E5FE6;
+  cursor: pointer;
+  border: 4px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(30, 95, 230, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slider-thumb::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(30, 95, 230, 0.5);
+}
+
+/* Slider track focus state */
+.slider-thumb:focus {
+  outline: none;
+}
+
+.slider-thumb:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(30, 95, 230, 0.2), 0 2px 8px rgba(30, 95, 230, 0.4);
 }

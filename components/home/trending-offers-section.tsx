@@ -14,6 +14,7 @@ import type { ActiveLender } from '@/lib/utils/lenders';
 /** Props for TrendingOffersSection component */
 interface TrendingOffersSectionProps {
   activeLenders: ActiveLender[];
+  heading?: string;
 }
 
 /** Group items into columns of N for vertical stacking */
@@ -30,7 +31,7 @@ function groupIntoColumns<T>(items: T[], rowsPerColumn: number): T[][] {
  * Displays a responsive carousel with 3-row columns
  * Receives pre-fetched lender data from server
  */
-const TrendingOffersSection = ({ activeLenders }: TrendingOffersSectionProps): React.ReactNode => {
+const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSectionProps): React.ReactNode => {
   const lenderColumns = groupIntoColumns(activeLenders, 3);
 
   if (activeLenders.length === 0) {
@@ -48,7 +49,7 @@ const TrendingOffersSection = ({ activeLenders }: TrendingOffersSectionProps): R
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
         >
-          Trending Offers
+          {heading || 'Trending Offers'}
         </motion.h2>
       </div>
 
