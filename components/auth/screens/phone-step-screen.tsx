@@ -77,7 +77,7 @@ export const PhoneStepScreen = ({
         >
           {/* Title Section */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            <h1 className="text-2xl font-medium mb-1">
               Account
             </h1>
             <p className="text-gray-500 text-sm">
@@ -87,7 +87,7 @@ export const PhoneStepScreen = ({
 
           {/* Phone Input Section */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 tracking-wider mb-2">
+            <label className="block text-xs font-semibold tracking-wider mb-2">
               PHONE NUMBER
             </label>
             <PhoneInput

@@ -86,7 +86,6 @@ const PersonalInfoStep = ({
         error={errors.dob}
         disabled={disabled}
         placeholder="DD-MM-YYYY"
-        helperText="As per PAN card"
         inputMode="numeric"
         required
       />
