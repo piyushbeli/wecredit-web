@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { HOW_TO_APPLY_STEPS, StepItem } from './constants';
 import { ActionButton } from '../shared';
 import { IMAGES } from '@/lib/constants/images';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
 
 /** Step icons mapping using SVG images */
 const STEP_ICONS = [IMAGES.ICONS.OTP, IMAGES.ICONS.DOCUMENT, IMAGES.ICONS.VECTOR];
@@ -69,6 +70,8 @@ const StepRow = ({ step, index, isLast }: StepRowProps): JSX.Element => {
  * Displays the loan application process in a compact vertical timeline
  */
 const HowToApplySteps = (): JSX.Element => {
+	const { triggerApplyFlow } = useLoanApplicationStore();
+
 	return (
 		<section className="bg-gray-50 py-6 px-4">
 			<motion.div
@@ -104,6 +107,7 @@ const HowToApplySteps = (): JSX.Element => {
 					fullWidth
 					variant="secondary"
 					size="lg"
+					onClick={triggerApplyFlow}
 				>
 					Start Loan Application
 				</ActionButton>

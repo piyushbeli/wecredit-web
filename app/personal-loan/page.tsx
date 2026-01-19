@@ -4,7 +4,7 @@
  * Interactive logic is in PersonalLoanContent client component
  */
 
-import { JSX } from 'react';
+import React from 'react';
 import HeroSection from '@/components/personal-loan/hero-section';
 import EmiCalculator from '@/components/personal-loan/emi-calculator';
 import VideoSection from '@/components/personal-loan/video-section';
@@ -13,20 +13,23 @@ import DocumentsRequired from '@/components/personal-loan/documents-required';
 import EligibilityCriteria from '@/components/personal-loan/eligibility-criteria';
 import InterestRatesInfo from '@/components/personal-loan/interest-rates-info';
 import WhyWeCredit from '@/components/personal-loan/why-wecredit';
-import PersonalLoanFaq from '@/components/personal-loan/personal-loan-faq';
+import FeesAndChargesSection from '@/components/personal-loan/fees-charges-section';
+import HowWeWorkSection from '@/components/personal-loan/how-we-work-section';
+import BeforeApplyingSection from '@/components/personal-loan/before-applying-section';
+import AfterClosureSection from '@/components/personal-loan/after-closure-section';
+import ExpertQuoteSection from '@/components/personal-loan/expert-quote-section';
 import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-content';
 import TestimonialsSection from '@/components/home/testimonials-section';
-import CertificationsSection from '@/components/home/certifications-section';
 import PartnersSection from '@/components/home/partners-section';
-import { TrendingOffersClient } from '@/components/home';
+import { FaqSection, TrendingOffersClient } from '@/components/home';
 
 /**
  * Personal Loan Page - Server Component
  * Renders all sections, delegates interactivity to PersonalLoanContent
  */
-const PersonalLoanPage = (): JSX.Element => {
+const PersonalLoanPage = (): React.ReactNode => {
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen">
       {/* Hero Section with gradient background */}
       <HeroSection />
 
@@ -34,6 +37,7 @@ const PersonalLoanPage = (): JSX.Element => {
       <EmiCalculator />
 
       <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
+
 
       {/* Video Section */}
       <VideoSection />
@@ -54,16 +58,33 @@ const PersonalLoanPage = (): JSX.Element => {
       <WhyWeCredit />
 
       {/* Testimonials - Reused from home */}
-      <TestimonialsSection  />
+      <TestimonialsSection />
 
       {/* Partners - Reused from home */}
       <PartnersSection />
 
-      {/* FAQ Section - Personal loan specific */}
-      {/* <PersonalLoanFaq /> */}
+      {/* Fees and Charges Table */}
+      <FeesAndChargesSection />
 
-      {/* Client Component: CTA Button and Modal */}
-      {/* <PersonalLoanContent /> */}
+
+      {/* How We Work Explanation */}
+      <HowWeWorkSection />
+
+      {/* Things to Know Before Applying */}
+      <BeforeApplyingSection />
+
+
+      {/* Things to Do After Loan Closure */}
+      <AfterClosureSection />
+
+      {/* Expert Quote / Testimonial */}
+      <ExpertQuoteSection />
+
+      {/* FAQ Section - Personal loan specific */}
+      <FaqSection />
+
+      {/* Client Component: Modal and Auth Flow Logic */}
+      <PersonalLoanContent />
     </div>
   );
 };

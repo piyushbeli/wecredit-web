@@ -13,6 +13,11 @@ export { default as InterestRatesInfo } from './interest-rates-info';
 export { default as WhyWeCredit } from './why-wecredit';
 export { default as PersonalLoanFaq } from './personal-loan-faq';
 export { PersonalLoanContent } from './personal-loan-content';
+export { default as FeesAndChargesSection } from './fees-charges-section';
+export { default as HowWeWorkSection } from './how-we-work-section';
+export { default as BeforeApplyingSection } from './before-applying-section';
+export { default as AfterClosureSection } from './after-closure-section';
+export { default as ExpertQuoteSection } from './expert-quote-section';
 
 // Re-export constants for external use
 export * from './constants';

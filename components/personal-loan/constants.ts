@@ -3,6 +3,7 @@
  * Static data for all sections of the personal loan landing page
  */
 
+import { IMAGES } from '@/lib/constants/images';
 import { Calculator, Clock, Shield, Percent, FileText, Users, Zap, HeadphonesIcon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -429,3 +430,180 @@ export const PERSONAL_LOAN_FAQS: FaqItem[] = [
     answer: 'Missing an EMI payment can result in late payment fees, increased interest charges, and negatively impact your credit score. If you anticipate difficulty in making payments, contact your lender immediately to discuss options.',
   },
 ];
+
+/** Fee and charge item configuration */
+export interface FeeChargeItem {
+  id: string;
+  label: string;
+  value: string;
+}
+
+/** Fees and charges for personal loan */
+export const FEES_AND_CHARGES: FeeChargeItem[] = [
+  {
+    id: 'interest-rates',
+    label: 'Interest rates:',
+    value: 'Starting from 9.99%',
+  },
+  {
+    id: 'processing-fee',
+    label: 'Processing fee',
+    value: '0.5% to 4% of the loan amount',
+  },
+  {
+    id: 'foreclosure-charges',
+    label: 'Foreclosure charges',
+    value: 'Often 1-5% of the outstanding loan amount',
+  },
+  {
+    id: 'late-payment-charges',
+    label: 'Late payment charges',
+    value: 'Around 2% per month on overdue EMIs',
+  },
+  {
+    id: 'emi-bounce-charges',
+    label: 'EMI bounce charges',
+    value: '₹300 to ₹1,500 per bounce depending on policy',
+  },
+  {
+    id: 'loan-cancellation',
+    label: 'Loan Cancellation',
+    value: '₹300 to ₹1,500 per bounce depending on policy',
+  },
+  {
+    id: 'statement-fees',
+    label: 'Statement Fees',
+    value: '₹100 to ₹500 per request',
+  },
+];
+
+/** Fees and charges section content */
+export const FEES_CHARGES_INFO = {
+  title: 'Fees and charges',
+  description:
+    'Personal loan fees and charges vary based on lender and bank policies. The information below explains the charges generally applicable.',
+};
+
+/** How we work section content */
+export const HOW_WE_WORK_INFO = {
+  title: 'How We Work',
+  description:
+    'When an application is submitted, our PL engine reviews the provided details such as basic information, income, and credit profile. Based on the given information, eligible lenders are matched according to their criteria. The engine then shows suitable personal loan offers available for the profile, making it easier to compare and proceed with the most relevant option.',
+};
+
+/** Tip card item configuration */
+export interface TipCardItem {
+  id: string;
+  title: string;
+  description: string;
+}
+
+/** Tips to know before applying for a personal loan */
+export const BEFORE_APPLYING_TIPS: TipCardItem[] = [
+  {
+    id: 'credit-score-impact',
+    title: 'Credit Score Impact on Loan Approval and Interest Rate',
+    description:
+      'A higher credit score improves approval chances and may help get a lower interest rate. A low credit score can lead to higher rates or even rejection.',
+  },
+  {
+    id: 'eligibility-varies',
+    title: 'Personal Loan Eligibility Varies Across Lenders',
+    description:
+      'Each bank or NBFC has its own eligibility rules based on factors like income, employment type, and location.',
+  },
+  {
+    id: 'fees-increase-cost',
+    title: 'Fees and Charges Increase the Total Loan Cost',
+    description:
+      'Charges such as processing fees, prepayment charges, and late payment penalties add to the overall cost of the loan. These should be checked along with the interest rate.',
+  },
+  {
+    id: 'multiple-applications',
+    title: 'Multiple Loan Applications Can Affect Credit Score',
+    description:
+      'Applying to many lenders separately can result in multiple credit checks, which may impact the credit score. Comparing offers on one platform can help reduce this.',
+  },
+  {
+    id: 'emi-payment-history',
+    title: 'EMI Payment History Affects Future Loan Eligibility',
+    description:
+      'Missing or delaying EMI payments can lower the credit score and affect eligibility for future loans or better interest rates.',
+  },
+];
+
+/** Before applying section content */
+export const BEFORE_APPLYING_INFO = {
+  title: 'Things to Know Before Applying',
+};
+
+/** Checklist item configuration */
+export interface ChecklistItem {
+  id: string;
+  title: string;
+  description: string;
+}
+
+/** Things to do after loan closure */
+export const AFTER_CLOSURE_CHECKLIST: ChecklistItem[] = [
+  {
+    id: 'confirm-closure',
+    title: 'Confirm loan closure',
+    description: 'Ensure the lender has officially marked the loan as closed after the final EMI.',
+  },
+  {
+    id: 'collect-noc',
+    title: 'Collect loan closure letter and NOC',
+    description: 'These documents confirm that there are no pending dues on the loan.',
+  },
+  {
+    id: 'check-credit-report',
+    title: 'Check credit report status',
+    description:
+      'Verify that the loan shows as "closed" in the credit report to avoid issues in future applications.',
+  },
+  {
+    id: 'avoid-new-loans',
+    title: 'Avoid new loans instantly',
+    description:
+      'Allow some time after loan closure before applying for a new loan to keep the credit profile stable.',
+  },
+  {
+    id: 'stop-auto-debit',
+    title: 'Stop EMI auto-debit',
+    description: 'Cancel the EMI auto-debit mandate to prevent any unintended deductions.',
+  },
+  {
+    id: 'save-documents',
+    title: 'Save all loan documents',
+    description:
+      'Keep loan agreements, payment receipts, and closure documents for future reference.',
+  },
+];
+
+/** After closure section content */
+export const AFTER_CLOSURE_INFO = {
+  title: 'Things to Do After Loan Closure',
+};
+
+/** Expert quote configuration */
+export interface ExpertQuote {
+  quote: string;
+  name: string;
+  designation: string;
+  imageUrl: string;
+}
+
+/** Expert testimonial quote */
+export const EXPERT_QUOTE: ExpertQuote = {
+  quote:
+    'I got my loan approved faster than I ever expected — the whole process was smooth, simple, and completely hassle-free!',
+  name: 'Laksh Dua',
+  designation: 'Co - Founder',
+  imageUrl:IMAGES.DIRECT_CONTACT_EXPERTS.LAKASH,
+};
+
+/** Expert quote section content */
+export const EXPERT_QUOTE_INFO = {
+  title: 'Direct from Expert',
+};

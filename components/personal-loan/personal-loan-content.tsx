@@ -3,32 +3,31 @@
 /**
  * Personal Loan Content - Client Component
  * Handles interactive logic: authentication, check-dedupe, modal state
- * Renders fixed bottom CTA button
+ * Triggered by Apply Now and Start Loan Application buttons via store
  */
 
 import { JSX, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCookie } from 'cookies-next';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
 import { useCheckDedupe } from '@/hooks/use-check-dedupe';
 import { useModal } from '@/hooks/use-modal';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { PARTNER_CODE, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { ActionButton } from '../shared';
 
-type UseRouterResult = ReturnType<typeof useRouter>;
 type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
 
 /**
  * Client-side interactive component
- * Handles CTA button and modal interactions
+ * Handles modal and auth/dedupe flow logic
+ * Triggered by Apply Now and Start Loan Application buttons
  */
 export const PersonalLoanContent = (): JSX.Element => {
-  const router: UseRouterResult = useRouter();
+  const router = useRouter();
   const { isOpen: isLeadFormModalOpen, openModal: openLeadFormModal, closeModal: closeLeadFormModal } = useModal();
   const { isAuthenticated, openModal }: { isAuthenticated: boolean; openModal: () => void } = useAuthStore();
+  const { triggerApply, resetTrigger } = useLoanApplicationStore();
   const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response }: UseCheckDedupeResult = useCheckDedupe();
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);
@@ -81,6 +80,17 @@ export const PersonalLoanContent = (): JSX.Element => {
   }, [handleDedupeResponse]);
 
   /**
+   * Watch for triggerApply from other components (Apply Now, Start Loan Application buttons)
+   * Executes the same flow as handleOpenModal when triggered
+   */
+  useEffect(() => {
+    if (triggerApply) {
+      handleOpenModal();
+      resetTrigger();
+    }
+  }, [triggerApply, resetTrigger]);
+
+  /**
    * Handle "Check Offers Now" button click
    * Triggers auth/dedupe flow for offers
    */
@@ -104,36 +114,11 @@ export const PersonalLoanContent = (): JSX.Element => {
   };
 
   return (
-    <>
-      {/* Fixed Bottom CTA */}
-      <motion.div
-        className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-50"
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      >
-        <div className="max-w-lg mx-auto">
-          <ActionButton
-            type="button"
-            onClick={handleOpenModal}
-            disabled={isCheckingDedupe}
-            isLoading={isCheckingDedupe}
-            fullWidth
-            className="h-14 text-base font-semibold rounded-xl shadow-lg shadow-brand-primary/30"
-            rightIcon={!isCheckingDedupe && <ArrowRight className="w-5 h-5" />}
-          >
-            Check Offers Now
-          </ActionButton>
-        </div>
-      </motion.div>
-
-      {/* Lead Form Modal */}
-      <LeadFormModal
-        isOpen={isLeadFormModalOpen}
-        onClose={closeLeadFormModal}
-        lenderName=""
-        isAllLenders={true}
-      />
-    </>
+    <LeadFormModal
+      isOpen={isLeadFormModalOpen}
+      onClose={closeLeadFormModal}
+      lenderName=""
+      isAllLenders={true}
+    />
   );
 };

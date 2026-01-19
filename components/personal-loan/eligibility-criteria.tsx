@@ -9,6 +9,8 @@ import { JSX } from 'react';
 import { motion } from 'framer-motion';
 import { Hourglass } from 'lucide-react';
 import { ELIGIBILITY_CRITERIA, ELIGIBILITY_SECTION_INFO, EligibilityItem } from './constants';
+import { IMAGES } from '@/lib/constants/images';
+import Image from 'next/image';
 
 /** Eligibility item card props */
 interface EligibilityCardProps {
@@ -22,7 +24,7 @@ interface EligibilityCardProps {
 const EligibilityCard = ({ item, index }: EligibilityCardProps): JSX.Element => {
   return (
     <motion.div
-      className="flex items-start gap-3 p-2 bg-white rounded-lg shadow-sm border border-gray-200"
+      className="flex items-center justify-center gap-3 p-2 bg-white rounded-lg shadow border border-gray-50"
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -30,7 +32,7 @@ const EligibilityCard = ({ item, index }: EligibilityCardProps): JSX.Element => 
     >
       {/* Icon Container */}
       <div className="w-9 h-9 bg-wc-blue-100 rounded flex items-center justify-center shrink-0">
-        <Hourglass className="w-5 h-5 text-wc-blue-600" />
+        <Image src={IMAGES.ICONS.HOURGLASS} alt="Hourglass Icon" width={24} height={24} className="w-5 h-5" />
       </div>
       {/* Text Content */}
       <div className="flex-1 min-w-0 pt-0.5">

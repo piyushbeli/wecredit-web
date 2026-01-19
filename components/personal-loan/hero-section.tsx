@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Personal Loan Hero Section
  * Gradient background with title, subtitle, and benefit cards
@@ -5,12 +7,15 @@
 
 import { JSX } from 'react';
 import { ActionButton } from '../shared';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
 
 /**
  * Hero Section for Personal Loan Page
  * Displays gradient background, headline, benefits, and stats
  */
 const HeroSection = (): JSX.Element => {
+	const { triggerApplyFlow } = useLoanApplicationStore();
+
 	return (
 		<section className="pt-20 pb-6">
 			{/* Main Content */}
@@ -32,6 +37,7 @@ const HeroSection = (): JSX.Element => {
 					fullWidth
 					variant="secondary"
 					size="lg"
+					onClick={triggerApplyFlow}
 				>
 					Apply Now
 				</ActionButton>
