@@ -11,7 +11,6 @@ export { default as DocumentsRequired } from './documents-required';
 export { default as EligibilityCriteria } from './eligibility-criteria';
 export { default as InterestRatesInfo } from './interest-rates-info';
 export { default as WhyWeCredit } from './why-wecredit';
-export { default as PersonalLoanFaq } from './personal-loan-faq';
 export { PersonalLoanContent } from './personal-loan-content';
 export { default as FeesAndChargesSection } from './fees-charges-section';
 export { default as HowWeWorkSection } from './how-we-work-section';
