@@ -17,7 +17,7 @@ const AppDownloadSection = (): React.ReactNode => {
     <section className="container mx-auto px-4 py-12 md:py-24">
       <div className={cn(
         "relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem]",
-        "bg-brand-lightest px-8 py-6 md:px-20 md:py-20",
+        "px-8 py-6 md:px-20 md:py-20",
         "flex flex-col md:flex-row items-start border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
       )}>
         {/* Blue Gradient/Glow behind mock - from design snippet */}

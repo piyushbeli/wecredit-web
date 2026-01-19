@@ -139,7 +139,7 @@ const Footer = () => {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-md text-brand-primary transition-colors"
                 aria-label={social.platform}
               >
                 {social.icon}
