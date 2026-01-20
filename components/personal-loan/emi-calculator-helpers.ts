@@ -106,3 +106,92 @@ export const formatTenureDisplay = (value: number, mode: TenureMode): string => 
 export const formatRateDisplay = (rate: number): string => {
   return `${rate} %`;
 };
+
+/**
+ * Parses Indian currency format string to number
+ * Handles formats like "25,000", "₹25,000", "₹ 25,000", "25000"
+ * @param input - Currency string to parse
+ * @returns Parsed number or NaN if invalid
+ */
+export const parseIndianCurrency = (input: string): number => {
+  if (!input || typeof input !== 'string') {
+    return NaN;
+  }
+
+  // Remove rupee symbol, spaces, and commas
+  const cleaned = input.replace(/[₹,\s]/g, '');
+
+  // Parse the cleaned string
+  const parsed = parseFloat(cleaned);
+
+  return parsed;
+};
+
+/**
+ * Parses percentage string to number
+ * Handles formats like "10.5", "10.5%", "10.5 %"
+ * @param input - Percentage string to parse
+ * @returns Parsed number or NaN if invalid
+ */
+export const parsePercentage = (input: string): number => {
+  if (!input || typeof input !== 'string') {
+    return NaN;
+  }
+
+  // Remove percentage symbol and spaces
+  const cleaned = input.replace(/[%\s]/g, '');
+
+  // Parse the cleaned string
+  const parsed = parseFloat(cleaned);
+
+  return parsed;
+};
+
+/**
+ * Parses tenure string to number
+ * Handles formats like "4", "4 Months", "2 Years"
+ * @param input - Tenure string to parse
+ * @returns Parsed number or NaN if invalid
+ */
+export const parseTenure = (input: string): number => {
+  if (!input || typeof input !== 'string') {
+    return NaN;
+  }
+
+  // Remove text like "Months", "Years", "Month", "Year" and spaces
+  const cleaned = input.replace(/[^0-9.]/g, '');
+
+  // Parse the cleaned string
+  const parsed = parseFloat(cleaned);
+
+  return parsed;
+};
+
+/**
+ * Clamps value to min/max bounds and rounds to nearest step
+ * @param value - Value to clamp and round
+ * @param min - Minimum allowed value
+ * @param max - Maximum allowed value
+ * @param step - Step to round to
+ * @returns Clamped and stepped value
+ */
+export const clampAndStep = (
+  value: number,
+  min: number,
+  max: number,
+  step: number
+): number => {
+  // Handle NaN or invalid input
+  if (isNaN(value) || !isFinite(value)) {
+    return min;
+  }
+
+  // Clamp to bounds
+  const clamped = Math.max(min, Math.min(max, value));
+
+  // Round to nearest step
+  const stepped = Math.round(clamped / step) * step;
+
+  // Ensure result is still within bounds after stepping
+  return Math.max(min, Math.min(max, stepped));
+};

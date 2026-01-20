@@ -17,11 +17,7 @@ import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
-import { cn } from '@/lib/utils';
-import PersonalInfoStep from './steps/personal-info-step';
-import AddressInfoStep from './steps/address-info-step';
-import EmploymentInfoStep from './steps/employment-info-step';
-import IdentityVerificationStep from './steps/identity-verification-step';
+import DynamicField from './dynamic-field';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -37,6 +33,7 @@ const PREFILL_QUERY_VALUE = '1';
 const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   name: 'Test User',
   mobile: '9876543210',
+  phone: '9876543210',
   dob: '01-01-1990',
   email: 'test.user@example.com',
   pan: 'ABCDE1234F',
@@ -44,6 +41,9 @@ const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   gender: 'male',
   employmentType: 'salaried',
   salary: '50000',
+  monthlyIncome: '50000',
+  declaredIncome: '50000',
+  loanAmount: '100000',
   companyName: 'Test Company',
   companyAddress: '123 Test Street',
   companyPincode: '560001',
@@ -51,6 +51,7 @@ const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   addressType: 'current',
   maritalStatus: 'single',
   modeOfSalary: 'bank',
+  consent: 'true',
 };
 
 interface PrefillOptions {
@@ -88,22 +89,19 @@ const LeadFormModal = ({
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
-  const [consent, setConsent] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const ipFetched = useRef(false);
 
   const {
     currentStep,
-    firstName,
-    lastName,
     formValues,
     formErrors,
     currentStepConfig,
-    setFirstName,
-    setLastName,
+    currentStepFields,
     handleFieldChange,
     handleNext,
     handleBack,
+    validateField,
     initializeFormValues,
   } = useLeadForm(fields);
 
@@ -150,22 +148,43 @@ const LeadFormModal = ({
   const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     
-    if (!consent) {
-      return;
+    // Check consent - only block if consent field is mandatory AND not checked
+    const consentField = fields.find(f => f.key === 'consent');
+    
+    // If consent field exists in API and is mandatory, check if it's checked
+    if (consentField?.isMandatory) {
+      const hasConsent = formValues.consent === 'true';
+      if (!hasConsent) {
+        // Don't submit if mandatory consent is not checked
+        return;
+      }
     }
 
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    
+    // Convert date from YYYY-MM-DD (native input) to DD-MM-YYYY (API format)
+    const formatDateForApi = (dateStr: string): string => {
+      if (!dateStr) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}-${month}-${year}`;
+      }
+      return dateStr;
+    };
+
+    // Build form data dynamically from all fields
     const formData: LeadFormData = {
-      name: fullName,
+      name: formValues.name || '',
       mobile: formValues.mobile || '',
-      dob: formValues.dob || '',
+      phone: formValues.phone || '',
+      dob: formatDateForApi(formValues.dob || ''),
       email: formValues.email || '',
       pan: formValues.pan || '',
       pincode: formValues.pincode || '',
       gender: formValues.gender || '',
       employmentType: formValues.employmentType || '',
       salary: formValues.salary || '',
+      monthlyIncome: formValues.monthlyIncome || '',
+      declaredIncome: formValues.declaredIncome || '',
+      loanAmount: formValues.loanAmount || '',
       maritalStatus: formValues.maritalStatus || '',
       addressType: formValues.addressType || '',
       permanentAddress: formValues.permanentAddress || '',
@@ -175,6 +194,7 @@ const LeadFormModal = ({
       companyPincode: formValues.companyPincode || '',
       ConsentIp: userIp || formValues.ConsentIp || '',
       ConsentDateTime: getCurrentDateTime(),
+      consent: formValues.consent || 'false',
     };
     
     const success = await createLead(formData, partnerCode, lenderName);
@@ -191,54 +211,8 @@ const LeadFormModal = ({
         onClose();
       }, 2000);
     }
-  }, [consent, firstName, lastName, formValues, userIp, createLead, partnerCode, lenderName, onSuccess, router, onClose]);
+  }, [formValues, userIp, createLead, partnerCode, lenderName, onSuccess, router, onClose, fields]);
 
-  const renderConsentSection = (): React.ReactElement | null => {
-    if (!isLastStep) return null;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="pt-6 border-t border-gray-200"
-      >
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="modal-consent"
-            checked={consent}
-            onChange={(e) => setConsent(e.target.checked)}
-            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-          />
-          <label htmlFor="modal-consent" className="text-sm text-gray-700 cursor-pointer flex-1">
-            I agree to the{' '}
-            <a
-              href="/terms-of-service"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline font-medium"
-            >
-              Terms and Conditions
-            </a>{' '}
-            and{' '}
-            <a
-              href="/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline font-medium"
-            >
-              Privacy Policy
-            </a>{' '}
-            of WeCredit. I authorize WeCredit and its partners to contact me.
-          </label>
-        </div>
-        {!consent && (
-          <p className="text-xs text-red-500 mt-2 ml-8">Please accept to continue</p>
-        )}
-      </motion.div>
-    );
-  };
 
   const renderSubmitError = (): React.ReactElement | null => {
     if (!submitError) return null;
@@ -272,11 +246,19 @@ const LeadFormModal = ({
       );
     }
 
+    // Check if consent is mandatory - only disable button if mandatory consent is not checked
+    const consentField = fields.find(f => f.key === 'consent');
+    const isConsentRequired = consentField?.isMandatory ?? false;
+    const hasConsent = formValues.consent === 'true';
+    
+    // Only disable submit if consent is mandatory AND not checked
+    const isSubmitDisabled = isConsentRequired && !hasConsent;
+
     return (
       <ActionButton
         type="submit"
         onClick={handleSubmit}
-        disabled={!consent}
+        disabled={isSubmitDisabled}
         isLoading={isSubmitting}
         fullWidth
         className="h-14 text-base"
@@ -287,72 +269,68 @@ const LeadFormModal = ({
   };
 
   const renderStepContent = (): React.ReactElement | null => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <PersonalInfoStep
-            firstName={firstName}
-            lastName={lastName}
-            mobile={formValues.mobile || ''}
-            dob={formValues.dob || ''}
-            email={formValues.email || ''}
-            gender={formValues.gender || ''}
-            maritalStatus={formValues.maritalStatus || ''}
-            onFirstNameChange={setFirstName}
-            onLastNameChange={setLastName}
-            onMobileChange={(val) => handleFieldChange('mobile', val)}
-            onDobChange={(val) => handleFieldChange('dob', val)}
-            onEmailChange={(val) => handleFieldChange('email', val)}
-            onGenderChange={(val) => handleFieldChange('gender', val)}
-            onMaritalStatusChange={(val) => handleFieldChange('maritalStatus', val)}
-            errors={formErrors}
-            disabled={isSubmitting}
-          />
-        );
-      
-      case 2:
-        return (
-          <AddressInfoStep
-            addressType={formValues.addressType || ''}
-            address={formValues.permanentAddress || ''}
-            pincode={formValues.pincode || ''}
-            onAddressTypeChange={(val) => handleFieldChange('addressType', val)}
-            onAddressChange={(val) => handleFieldChange('permanentAddress', val)}
-            onPincodeChange={(val) => handleFieldChange('pincode', val)}
-            errors={formErrors}
-            disabled={isSubmitting}
-          />
-        );
-      
-      case 3:
-        return (
-          <EmploymentInfoStep
-            employmentType={formValues.employmentType || ''}
-            salary={formValues.salary || ''}
-            companyAddress={formValues.companyAddress || ''}
-            companyPincode={formValues.companyPincode || ''}
-            onEmploymentTypeChange={(val) => handleFieldChange('employmentType', val)}
-            onSalaryChange={(val) => handleFieldChange('salary', val)}
-            onCompanyAddressChange={(val) => handleFieldChange('companyAddress', val)}
-            onCompanyPincodeChange={(val) => handleFieldChange('companyPincode', val)}
-            errors={formErrors}
-            disabled={isSubmitting}
-          />
-        );
-      
-      case 4:
-        return (
-          <IdentityVerificationStep
-            pan={formValues.pan || ''}
-            onPanChange={(val) => handleFieldChange('pan', val)}
-            errors={formErrors}
-            disabled={isSubmitting}
-          />
-        );
-      
-      default:
-        return null;
+    // Debug logging
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[LeadFormModal] Rendering step ${currentStep}:`, {
+        stepTitle: currentStepConfig.title,
+        totalFieldsFromHook: currentStepFields.length,
+        fields: currentStepFields.map(f => ({
+          key: f.key,
+          title: f.title,
+          value: formValues[f.key] || f.value || '(empty)',
+          hasError: !!formErrors[f.key],
+        })),
+        formValuesKeys: Object.keys(formValues),
+      });
     }
+
+    // currentStepFields already filters out hidden fields, no need to filter again
+    const visibleFields = currentStepFields;
+
+    // Handle empty step - show message
+    if (visibleFields.length === 0) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[LeadFormModal] Step ${currentStep} has no fields to render`);
+      }
+      return (
+        <div className="text-center py-8 text-gray-500">
+          <p>No fields available for this step.</p>
+        </div>
+      );
+    }
+
+    // Render fields dynamically
+    return (
+      <>
+        {visibleFields.map((field) => {
+          // Debug logging for each field
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`[LeadFormModal] Rendering field:`, {
+              key: field.key,
+              title: field.title,
+              type: field.type,
+              options: field.options.length,
+              isMandatory: field.isMandatory,
+              currentValue: formValues[field.key] || '(empty)',
+              apiValue: field.value || '(empty)',
+              hasError: !!formErrors[field.key],
+            });
+          }
+          
+          return (
+            <DynamicField
+              key={field.key}
+              field={field}
+              value={formValues[field.key] || ''}
+              onChange={(val) => handleFieldChange(field.key, val)}
+              onBlur={() => validateField(field.key)}
+              error={formErrors[field.key]}
+              disabled={isSubmitting}
+            />
+          );
+        })}
+      </>
+    );
   };
 
   if (!isOpen) return null;
@@ -458,7 +436,6 @@ const LeadFormModal = ({
                     </motion.div>
                   </AnimatePresence>
 
-                  {renderConsentSection()}
                   {renderSubmitError()}
                 </form>
               </div>

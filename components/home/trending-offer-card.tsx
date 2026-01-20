@@ -29,6 +29,8 @@ interface TrendingOfferCardProps {
   href: string;
   /** Animation delay index */
   index: number;
+  /** Skip animation for carousel scrolling */
+  skipAnimation?: boolean;
 }
 
 /**
@@ -49,6 +51,7 @@ const TrendingOfferCard = ({
   tenure,
   href,
   index,
+  skipAnimation = false,
 }: TrendingOfferCardProps): React.ReactNode => {
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithAction } = useAuth();
@@ -81,10 +84,10 @@ const TrendingOfferCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
+      initial={skipAnimation ? false : { opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      transition={{
+      transition={skipAnimation ? { duration: 0 } : {
         type: 'spring',
         stiffness: 100,
         damping: 15,

@@ -43,7 +43,7 @@ export const IMAGES = {
     CREDIT_CARD: '/assets/svgs/credit-card.svg',
     DOCUMENT: '/assets/svgs/document.svg',
     OTP: '/assets/svgs/otp.svg',
-    VECTOR: '/assets/svgs/vector.svg',
+    WALLET: '/assets/svgs/wallet.svg',
     HOURGLASS: '/assets/svgs/hourglass.svg',
   },
   PARTNERS: {

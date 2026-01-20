@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
     bgColor: 'bg-blue-100',
     textColor: 'text-blue-600',
     iconChar: '★',
-    ctaLabel: 'Apply Now',
+    ctaLabel: 'Add to Status',
   },
   JOURNEY_STARTED: {
     label: 'IN PROGRESS',

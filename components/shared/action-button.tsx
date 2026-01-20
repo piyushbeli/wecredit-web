@@ -52,7 +52,7 @@ const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
         disabled={isLoading || disabled}
         className={cn(
           'relative font-semibold transition-all duration-200 active:scale-[0.98]',
-          variant === 'default' && 'bg-brand-primary hover:bg-brand-primary/90 text-white shadow-md hover:shadow-lg',
+          variant === 'default' && 'bg-brand-primary hover:bg-brand-primary/90 text-white! shadow-md hover:shadow-lg',
           fullWidth && 'w-full',
           className
         )}

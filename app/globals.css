@@ -46,6 +46,9 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
+  /* Blue Primary */
+  --color-blue-primary: #0771DB;
+
   /* WeCredit Brand Colors */
   --color-wc-blue-50: #EBF2FF;
   --color-wc-blue-100: #D6E4FF;
@@ -448,7 +451,7 @@
 }
 
 .lead-form-label {
-  @apply block text-sm text-gray-900 mb-2
+  @apply block text-sm mb-2 text-gray-700
 }
 
 /* =============================================================================

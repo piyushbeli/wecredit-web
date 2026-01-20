@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Calculator, PieChart, Briefcase, Gauge, ArrowRight } from 'lucide-react';
+import { Calculator, PieChart, Briefcase, Gauge } from 'lucide-react';
 import ToolCard from './tool-card';
 import { IMAGES } from '@/lib/constants/images';
 import type { LucideIcon } from 'lucide-react';
@@ -87,23 +86,6 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
             />
           ))}
         </div>
-
-        {/* Explore All Link */}
-        <motion.div
-          className="mt-6 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-        >
-          <Link
-            href="/calculators"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-wc-blue-500 hover:text-wc-blue-600 transition-colors group"
-          >
-            Explore All Calculators
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </motion.div>
       </div>
     </section>
   );

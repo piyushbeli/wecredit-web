@@ -15,7 +15,7 @@ import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { ActionButton } from '@/components/shared';
+import { ActionButton, PageHeader } from '@/components/shared';
 
 /**
  * Offers View Component
@@ -51,7 +51,7 @@ export const OffersView = () => {
     }
     return (
       <section className="space-y-3">
-        <h2 className="lead-form-heading">{title}</h2>
+        <h2 className="lead-form-label">{title}</h2>
         <div className="space-y-4">
           {offerList.map((offer, index) => (
             <OfferCard
@@ -84,40 +84,15 @@ export const OffersView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.back()}
-              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-              aria-label="Go back"
-            >
-              <svg
-                className="w-5 h-5 text-gray-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <h1 className="text-xl font-semibold text-gray-900">Loan offers</h1>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen ">
+      <PageHeader title="Loan offers" />
       <OffersHero eligibleAmount="₹1,00,000" offerCount={exploreOffers.length} />
-      <div className="px-4 py-4 pb-28">
+      <div className="px-4 pb-4">
         {showPolling && <PollingState />}
         {showEmpty && <EmptyState />}
         {hasOffers && (
           <div className="space-y-6">
-            {renderOfferSection('Explore more loan offers', exploreOffers)}
+            {renderOfferSection('Please select the offers you are interested in.', exploreOffers)}
             <UnmatchedOffersSection />
           </div>
         )}
