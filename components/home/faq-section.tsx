@@ -77,7 +77,7 @@ const FaqAccordionItem = ({
 }: FaqAccordionItemProps): React.ReactNode => {
 	return (
 		<motion.div
-			className="border border-gray-200 overflow-hidden bg-[#0000000D]"
+			className="border border-gray-200 overflow-hidden bg-[#0000000D] rounded-sm"
 			initial={{ opacity: 0, y: 10 }}
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true }}

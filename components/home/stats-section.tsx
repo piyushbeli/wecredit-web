@@ -20,8 +20,8 @@ const stats: StatItem[] = [
   },
   {
     id: 'disbursal',
-    value: '100',
-    suffix: ' Cr',
+    value: '100Cr',
+    suffix: '',
     label: 'Total Disbursal',
   },
   {

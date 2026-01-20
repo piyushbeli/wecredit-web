@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TrendingOfferCard from './trending-offer-card';
 import {
@@ -32,7 +32,13 @@ function groupIntoColumns<T>(items: T[], rowsPerColumn: number): T[][] {
  * Receives pre-fetched lender data from server
  */
 const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSectionProps): React.ReactNode => {
+  const [skipAnimation, setSkipAnimation] = useState(false);
   const lenderColumns = groupIntoColumns(activeLenders, 3);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setSkipAnimation(true), 800);
+    return () => clearTimeout(timeout);
+  }, []);
 
   if (activeLenders.length === 0) {
     return null;
@@ -76,6 +82,7 @@ const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSection
                     tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
                     href={lender.utmLink || `/offers/${id}`}
                     index={colIndex * 3 + rowIndex}
+                    skipAnimation={skipAnimation}
                   />
                 ))}
               </div>

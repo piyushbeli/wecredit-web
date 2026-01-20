@@ -4,9 +4,10 @@
  * EMI Calculator Component
  * Interactive calculator with sliders for loan amount, tenure, and interest rate
  * Calculates and displays EMI, total interest, and total amount in real-time
+ * Users can edit values directly by clicking on them or using the sliders
  */
 
-import { JSX, useState, useCallback, useMemo, useRef } from 'react';
+import { JSX, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { EMI_CALCULATOR_CONFIG } from './constants';
 import {
@@ -15,9 +16,192 @@ import {
   formatLoanDisplay,
   formatIndianNumber,
   formatTenureDisplay,
-  formatRateDisplay,
+  parseIndianCurrency,
+  parsePercentage,
+  parseTenure,
+  clampAndStep,
   type TenureMode,
 } from './emi-calculator-helpers';
+
+/** Input type for editable value component */
+type InputType = 'currency' | 'number' | 'percentage';
+
+/** Editable value component props */
+interface EditableValueProps {
+  value: number;
+  displayValue: string;
+  onChange: (value: number) => void;
+  inputType: InputType;
+  min: number;
+  max: number;
+  step: number;
+}
+
+/**
+ * Editable Value Component
+ * Displays a value that can be clicked to edit directly
+ * Handles validation, clamping, and keyboard navigation
+ */
+const EditableValue = ({
+  value,
+  displayValue,
+  onChange,
+  inputType,
+  min,
+  max,
+  step,
+}: EditableValueProps): JSX.Element => {
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  /**
+   * Parses input based on type and returns validated number
+   */
+  const parseInput = useCallback(
+    (input: string): number => {
+      switch (inputType) {
+        case 'currency':
+          return parseIndianCurrency(input);
+        case 'percentage':
+          return parsePercentage(input);
+        case 'number':
+        default:
+          return parseTenure(input);
+      }
+    },
+    [inputType]
+  );
+
+  /**
+   * Handles click on value to start editing
+   */
+  const handleClick = useCallback((): void => {
+    setIsEditing(true);
+    // Set initial input value based on type (raw number for easier editing)
+    if (inputType === 'currency') {
+      setInputValue(value.toString());
+    } else if (inputType === 'percentage') {
+      setInputValue(value.toString());
+    } else {
+      setInputValue(value.toString());
+    }
+  }, [value, inputType]);
+
+  /**
+   * Commits the input value and closes edit mode
+   */
+  const commitValue = useCallback((): void => {
+    const parsed = parseInput(inputValue);
+    const validated = clampAndStep(parsed, min, max, step);
+    onChange(validated);
+    setIsEditing(false);
+  }, [inputValue, parseInput, min, max, step, onChange]);
+
+  /**
+   * Cancels editing and restores previous value
+   */
+  const cancelEdit = useCallback((): void => {
+    setIsEditing(false);
+    setInputValue('');
+  }, []);
+
+  /**
+   * Handles keyboard events for submit/cancel
+   */
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>): void => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        commitValue();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelEdit();
+      }
+    },
+    [commitValue, cancelEdit]
+  );
+
+  /**
+   * Handles blur event to commit value
+   */
+  const handleBlur = useCallback((): void => {
+    commitValue();
+  }, [commitValue]);
+
+  /**
+   * Handles input change with basic filtering
+   */
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const newValue = e.target.value;
+
+      // Allow only valid characters based on input type
+      if (inputType === 'percentage') {
+        // Allow digits and one decimal point
+        if (/^[0-9]*\.?[0-9]*$/.test(newValue) || newValue === '') {
+          setInputValue(newValue);
+        }
+      } else if (inputType === 'currency') {
+        // Allow digits and commas for currency
+        if (/^[0-9,]*$/.test(newValue) || newValue === '') {
+          setInputValue(newValue);
+        }
+      } else {
+        // Allow only digits for number
+        if (/^[0-9]*$/.test(newValue) || newValue === '') {
+          setInputValue(newValue);
+        }
+      }
+    },
+    [inputType]
+  );
+
+  /**
+   * Gets the appropriate input mode for mobile keyboards
+   */
+  const getInputMode = (): 'numeric' | 'decimal' => {
+    return inputType === 'percentage' ? 'decimal' : 'numeric';
+  };
+
+  // Render editing input or display value
+  if (isEditing) {
+    return (
+      <input
+        ref={inputRef}
+        type="text"
+        inputMode={getInputMode()}
+        value={inputValue}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+        className="text-neutral-900 text-lg font-semibold font-['Poppins'] leading-9 
+                   bg-transparent outline-none w-full max-w-[200px]"
+        aria-label="Edit value"
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="text-neutral-900 text-lg font-semibold font-['Poppins'] leading-9 
+                 cursor-pointer hover:text-wc-blue-600 transition-colors"
+      aria-label={`Edit ${displayValue}`}
+    >
+      {displayValue}
+    </button>
+  );
+};
 
 /** Base slider component props */
 interface SliderProps {
@@ -31,10 +215,13 @@ interface SliderProps {
   formatMin: (value: number) => string;
   formatMax: (value: number) => string;
   rightElement?: JSX.Element;
+  /** Input type for direct editing - determines parsing and keyboard behavior */
+  inputType: InputType;
 }
 
 /**
  * Custom slider component with new design
+ * Supports both slider interaction and direct value editing
  */
 const Slider = ({
   label,
@@ -47,6 +234,7 @@ const Slider = ({
   formatMin,
   formatMax,
   rightElement,
+  inputType,
 }: SliderProps): JSX.Element => {
   const trackRef = useRef<HTMLDivElement>(null);
   const percentage = ((value - min) / (max - min)) * 100;
@@ -119,9 +307,17 @@ const Slider = ({
         {rightElement}
       </div>
 
-      {/* Large value display */}
-      <div className="text-neutral-900 text-lg font-semibold font-['Poppins'] leading-9 mt-1">
-        {formatValue(value)}
+      {/* Editable value display - click to edit directly */}
+      <div className="mt-1">
+        <EditableValue
+          value={value}
+          displayValue={formatValue(value)}
+          onChange={onChange}
+          inputType={inputType}
+          min={min}
+          max={max}
+          step={step}
+        />
       </div>
 
       {/* Custom slider track */}
@@ -259,7 +455,8 @@ const EmiCalculator = (): JSX.Element => {
     return formatTenureDisplay(maxYears, 'years');
   };
 
-  const formatRateValue = (value: number): string => formatRateDisplay(value);
+  // Show just the number for rate value since % is in the label
+  const formatRateValueSimple = (value: number): string => `${value}`;
   const formatRateMin = (value: number): string => `${value}%`;
   const formatRateMax = (value: number): string => `${value}%`;
 
@@ -281,7 +478,7 @@ const EmiCalculator = (): JSX.Element => {
 
         {/* Calculator Card */}
         <div className="">
-          {/* Loan Amount Slider */}
+          {/* Loan Amount Slider - currency input for direct editing */}
           <Slider
             label="Loan Amount"
             value={loanAmount}
@@ -292,9 +489,10 @@ const EmiCalculator = (): JSX.Element => {
             formatValue={formatLoanValue}
             formatMin={formatLoanMin}
             formatMax={formatLoanMax}
+            inputType="currency"
           />
 
-          {/* Tenure Slider with Toggle */}
+          {/* Tenure Slider with Toggle - number input for direct editing */}
           <Slider
             label={tenureLabel}
             value={tenureValue}
@@ -308,19 +506,21 @@ const EmiCalculator = (): JSX.Element => {
             rightElement={
               <TenureToggle mode={tenureMode} onModeChange={handleTenureModeChange} />
             }
+            inputType="number"
           />
 
-          {/* Interest Rate Slider */}
+          {/* Interest Rate Slider - percentage input for direct editing */}
           <Slider
-            label="Rate of Interest"
+            label="Rate of Interest (%)"
             value={interestRate}
             min={rateConfig.min}
             max={rateConfig.max}
             step={rateConfig.step}
             onChange={handleInterestRateChange}
-            formatValue={formatRateValue}
+            formatValue={formatRateValueSimple}
             formatMin={formatRateMin}
             formatMax={formatRateMax}
+            inputType="percentage"
           />
 
           {/* Results Card */}

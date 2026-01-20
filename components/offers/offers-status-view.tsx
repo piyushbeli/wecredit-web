@@ -9,10 +9,10 @@ import {
   EmptyState,
   OffersHero,
 } from '@/components/offers';
-import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { PageHeader } from '@/components/shared';
 
 /**
  * Offers Status View Component
@@ -20,7 +20,6 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
  */
 export const OffersStatusView = () => {
   const { statusOffers, isLoading, error, fetchOffers } = useOffers();
-
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
     if (!utmLink) {
@@ -46,7 +45,6 @@ export const OffersStatusView = () => {
     }
     return (
       <section className="space-y-3">
-        <h2 className="lead-form-heading">{title}</h2>
         <div className="space-y-4">
           {offerList.map((offer, index) => (
             <OfferCard
@@ -77,10 +75,11 @@ export const OffersStatusView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-16">
+    <div className="min-h-screen">
+      <PageHeader title="Loan Status" />
       <OffersHero eligibleAmount="₹1,00,000" offerCount={statusOffers.length} />
 
-      <div className="px-4 py-6">
+      <div className="px-4 pb-4">
         {!hasStatusOffers ? (
           <EmptyState 
             title="No active applications" 
@@ -89,7 +88,6 @@ export const OffersStatusView = () => {
         ) : (
           <div className="space-y-6">
             {renderOfferSection('Check your application status', statusOffers)}
-            <UnmatchedOffersSection />
           </div>
         )}
       </div>

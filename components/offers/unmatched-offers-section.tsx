@@ -89,8 +89,8 @@ export const UnmatchedOffersSection = () => {
     >
       {/* Title */}
       <h3
-        className="text-base font-medium mb-2"
-        style={{ color: '#303030', fontFamily: 'DM Sans, sans-serif' }}
+        className="text-base font-medium mb-2 text-gray-700"
+        style={{ fontFamily: 'DM Sans, sans-serif' }}
       >
         Unmatched Offers
       </h3>
@@ -100,8 +100,7 @@ export const UnmatchedOffersSection = () => {
         {UNMATCHED_REASONS.map((reason, index) => (
           <li
             key={index}
-            className="text-xs leading-snug flex items-start gap-1"
-            style={{ color: '#7F7F7F' }}
+            className="text-xs leading-snug flex items-start gap-1 text-gray-500"
           >
             <span>•</span>
             <span>{reason}</span>

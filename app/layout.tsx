@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 import './globals.css';
-import MobileHeader from '@/components/home/mobile-header';
+import ConditionalMobileHeader from '@/components/layout/conditional-mobile-header';
 import Footer from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth';
 import { AuthProvider } from '@/providers/auth-provider';
@@ -56,7 +56,7 @@ export default async function RootLayout({
           <Suspense fallback={null}>
             <AuthProvider>
               <ToastProvider />
-              <MobileHeader
+              <ConditionalMobileHeader
                 headerLinks={globalData.headerLinks}
                 logo={globalData.logo}
                 siteName={globalData.siteName}

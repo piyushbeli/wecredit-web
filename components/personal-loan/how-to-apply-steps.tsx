@@ -14,7 +14,7 @@ import { IMAGES } from '@/lib/constants/images';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 
 /** Step icons mapping using SVG images */
-const STEP_ICONS = [IMAGES.ICONS.OTP, IMAGES.ICONS.DOCUMENT, IMAGES.ICONS.VECTOR];
+const STEP_ICONS = [IMAGES.ICONS.OTP, IMAGES.ICONS.DOCUMENT, IMAGES.ICONS.WALLET];
 
 /** Step row props */
 interface StepRowProps {
