@@ -11,6 +11,7 @@
 export type FormFieldKey =
   | 'name'
   | 'mobile'
+  | 'phone'
   | 'dob'
   | 'email'
   | 'pan'
@@ -18,6 +19,9 @@ export type FormFieldKey =
   | 'gender'
   | 'employmentType'
   | 'salary'
+  | 'monthlyIncome'
+  | 'declaredIncome'
+  | 'loanAmount'
   | 'companyName'
   | 'companyAddress'
   | 'companyPincode'
@@ -26,10 +30,11 @@ export type FormFieldKey =
   | 'maritalStatus'
   | 'modeOfSalary'
   | 'ConsentIp'
-  | 'ConsentDateTime';
+  | 'ConsentDateTime'
+  | 'consent';
 
 /** Field types returned by the API */
-export type FormFieldType = 'string' | 'number' | 'float';
+export type FormFieldType = 'string' | 'number' | 'float' | 'boolean';
 
 /** Dynamic form field structure from API */
 export interface FormField {
@@ -173,10 +178,12 @@ export interface CreateLeadResponse {
 
 /** Form data structure for UI state (values as stored in form) */
 export interface LeadFormData {
-  /** Full name or first name */
+  /** Full name */
   name: string;
   /** Mobile number */
   mobile: string;
+  /** Phone number (alternative to mobile) */
+  phone?: string;
   /** DD-MM-YYYY format */
   dob: string;
   /** Email address */
@@ -191,6 +198,12 @@ export interface LeadFormData {
   employmentType: string;
   /** Numeric string (may include commas) */
   salary: string;
+  /** Monthly income */
+  monthlyIncome?: string;
+  /** Declared income */
+  declaredIncome?: string;
+  /** Loan amount */
+  loanAmount?: string;
   /** Lowercase: single, married */
   maritalStatus: string;
   /** Lowercase: current, permanent */
@@ -209,6 +222,8 @@ export interface LeadFormData {
   ConsentIp: string;
   /** Consent timestamp (auto-filled) */
   ConsentDateTime: string;
+  /** Consent checkbox value */
+  consent?: string;
 }
 
 /** Form validation errors */

@@ -1,6 +1,7 @@
 /**
  * Custom hook for lead form state management
  * Handles form values, validation, and step navigation
+ * Dynamically renders fields based on API response
  */
 
 import { useState, useCallback, useEffect } from 'react';
@@ -12,34 +13,30 @@ interface WizardStep {
   fieldKeys: FormFieldKey[];
 }
 
-const WIZARD_STEPS: WizardStep[] = [
-  { 
-    stepNumber: 1, 
-    title: 'Personal Information', 
-    fieldKeys: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'] 
-  },
-  { 
-    stepNumber: 2, 
-    title: 'Address Information', 
-    fieldKeys: ['addressType', 'permanentAddress', 'pincode'] 
-  },
-  { 
-    stepNumber: 3, 
-    title: 'Employment & Income', 
-    fieldKeys: ['employmentType', 'salary', 'companyAddress', 'companyPincode', 'companyName', 'modeOfSalary'] 
-  },
-  { 
-    stepNumber: 4, 
-    title: 'Identity Verification', 
-    fieldKeys: ['pan'] 
-  }
-];
+/** Step configuration - maps step numbers to field keys */
+const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
+  1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
+  2: ['addressType', 'permanentAddress', 'pincode'],
+  3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
+  4: ['pan', 'consent'],
+};
+
+/** Hidden fields - auto-filled, never shown in UI */
+const HIDDEN_FIELDS: FormFieldKey[] = ['ConsentIp', 'ConsentDateTime'];
+
+/** Fields that require format validation */
+const VALIDATION_PATTERNS: Record<string, RegExp> = {
+  mobile: /^[0-9]{10}$/,
+  phone: /^[0-9]{10}$/,
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  pincode: /^[0-9]{6}$/,
+  companyPincode: /^[0-9]{6}$/,
+  pan: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+};
 
 interface UseLeadFormReturn {
   // State
   currentStep: number;
-  firstName: string;
-  lastName: string;
   formValues: Record<string, string>;
   formErrors: Record<string, string>;
   
@@ -50,36 +47,58 @@ interface UseLeadFormReturn {
   canGoNext: boolean;
   
   // Actions
-  setFirstName: (value: string) => void;
-  setLastName: (value: string) => void;
   handleFieldChange: (key: string, value: string) => void;
   handleNext: () => void;
   handleBack: () => void;
   validateCurrentStep: () => boolean;
+  validateField: (fieldKey: string) => void;
   initializeFormValues: (fields: FormField[], userIp: string) => void;
 }
 
 export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
 
+  /**
+   * Get current step configuration
+   */
   const getCurrentStepConfig = useCallback((): WizardStep => {
-    return WIZARD_STEPS[currentStep - 1];
+    const fieldKeys = STEP_FIELD_MAPPING[currentStep] || [];
+    const titles: Record<number, string> = {
+      1: 'Personal Information',
+      2: 'Address Information',
+      3: 'Employment & Income',
+      4: 'Identity Verification',
+    };
+    
+    return {
+      stepNumber: currentStep,
+      title: titles[currentStep] || `Step ${currentStep}`,
+      fieldKeys,
+    };
   }, [currentStep]);
 
+  /**
+   * Get fields for current step, filtered and sorted
+   */
   const getCurrentStepFields = useCallback((): FormField[] => {
     const step = getCurrentStepConfig();
-    return fields
-      .filter(f => step.fieldKeys.includes(f.key))
+    const stepFields = fields
+      .filter(f => step.fieldKeys.includes(f.key) && !HIDDEN_FIELDS.includes(f.key))
       .sort((a, b) => a.order - b.order);
+    
+    return stepFields;
   }, [currentStep, fields, getCurrentStepConfig]);
 
+  /**
+   * Handle field value change
+   */
   const handleFieldChange = useCallback((key: string, value: string): void => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
     
+    // Clear error for this field when user starts typing
     if (formErrors[key]) {
       setFormErrors((prev) => {
         const newErrors = { ...prev };
@@ -89,85 +108,234 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
     }
   }, [formErrors]);
 
+  /**
+   * Get format validation error for a field
+   */
+  const getFieldFormatError = useCallback((fieldKey: string, value: string): string => {
+    const pattern = VALIDATION_PATTERNS[fieldKey];
+    if (!pattern) return '';
+
+    if (fieldKey === 'pan' && !pattern.test(value.toUpperCase())) {
+      return 'Please enter a valid PAN number (e.g., ABCDE1234F)';
+    }
+    
+    if (pattern && !pattern.test(value)) {
+      switch (fieldKey) {
+        case 'mobile':
+        case 'phone':
+          return 'Please enter a valid 10-digit mobile number';
+        case 'email':
+          return 'Please enter a valid email address';
+        case 'pincode':
+        case 'companyPincode':
+          return 'Please enter a valid 6-digit pincode';
+        default:
+          return `Please enter a valid ${fieldKey}`;
+      }
+    }
+    
+    return '';
+  }, []);
+
+  /**
+   * Validate a single field on blur
+   */
+  const validateField = useCallback((fieldKey: string): void => {
+    const field = fields.find(f => f.key === fieldKey);
+    if (!field) return;
+
+    const value = formValues[fieldKey] || '';
+    let error = '';
+
+    // Required validation based on isMandatory
+    if (field.isMandatory && !value.trim()) {
+      error = `${field.title} is required`;
+    } else if (value.trim()) {
+      // Format validation for fields with patterns
+      error = getFieldFormatError(fieldKey, value);
+    }
+
+    if (error) {
+      setFormErrors((prev) => ({ ...prev, [fieldKey]: error }));
+    } else {
+      // Clear error if validation passes
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldKey];
+        return newErrors;
+      });
+    }
+  }, [formValues, fields, getFieldFormatError]);
+
+  /**
+   * Validate all fields in current step
+   */
   const validateCurrentStep = useCallback((): boolean => {
     const currentFields = getCurrentStepFields();
     const errors: Record<string, string> = {};
     
     currentFields.forEach((field) => {
-      if (field.key === 'name' && field.isMandatory) {
-        if (!firstName.trim()) {
-          errors['firstName'] = 'First Name is required';
-        }
-        if (!lastName.trim()) {
-          errors['lastName'] = 'Last Name is required';
-        }
-      } else if (field.isMandatory && !formValues[field.key]?.trim()) {
+      const value = formValues[field.key] || '';
+      
+      // Required validation
+      if (field.isMandatory && !value.trim()) {
         errors[field.key] = `${field.title} is required`;
+      } else if (value.trim()) {
+        // Format validation
+        const formatError = getFieldFormatError(field.key, value);
+        if (formatError) {
+          errors[field.key] = formatError;
+        }
       }
     });
     
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [getCurrentStepFields, formValues, firstName, lastName]);
+  }, [getCurrentStepFields, formValues, getFieldFormatError]);
 
+  /**
+   * Scroll to first error field
+   */
   const scrollToFirstError = useCallback((): void => {
-    const firstError = document.querySelector('.border-red-300');
+    const firstError = document.querySelector('.border-red-300, input:invalid');
     if (firstError) {
       firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, []);
 
+  /**
+   * Handle next step navigation
+   * Auto-skips empty steps
+   */
   const handleNext = useCallback((): void => {
     if (!validateCurrentStep()) {
       scrollToFirstError();
       return;
     }
-    setCurrentStep(prev => prev + 1);
-  }, [validateCurrentStep, scrollToFirstError]);
+    
+    // Auto-skip to next step if current step has no fields
+    const currentFields = getCurrentStepFields();
+    if (currentFields.length === 0 && currentStep < 4) {
+      setCurrentStep(prev => prev + 1);
+      return;
+    }
+    
+    setCurrentStep(prev => Math.min(prev + 1, 4));
+  }, [validateCurrentStep, scrollToFirstError, getCurrentStepFields, currentStep]);
 
+  /**
+   * Handle back step navigation
+   */
   const handleBack = useCallback((): void => {
-    setCurrentStep(prev => prev - 1);
+    setCurrentStep(prev => Math.max(prev - 1, 1));
     setFormErrors({});
   }, []);
 
+  /**
+   * Initialize form values from API fields
+   * Handles date conversion and special fields
+   */
   const initializeFormValues = useCallback((fields: FormField[], userIp: string): void => {
     const initialValues: Record<string, string> = {};
     
+    // Debug logging
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[useLeadForm] Initializing form values:', {
+        totalFields: fields.length,
+        userIp,
+        fields: fields.map(f => ({
+          key: f.key,
+          title: f.title,
+          type: f.type,
+          value: f.value || '(empty)',
+          isMandatory: f.isMandatory,
+        })),
+      });
+    }
+    
     fields.forEach((field) => {
+      // Handle hidden/auto-filled fields
       if (field.key === 'ConsentIp') {
         initialValues[field.key] = userIp;
-      } else if (field.key === 'name') {
-        const fullName = field.value?.trim() || '';
-        if (fullName) {
-          const nameParts = fullName.split(' ');
-          setFirstName(nameParts[0] || '');
-          setLastName(nameParts.slice(1).join(' ') || '');
-        }
-        initialValues[field.key] = fullName;
-      } else {
-        initialValues[field.key] = field.value?.trim() || '';
+        return;
       }
+      
+      if (field.key === 'ConsentDateTime') {
+        // Will be set on submit
+        return;
+      }
+      
+      // Handle date field - convert from DD-MM-YYYY to YYYY-MM-DD for native input
+      if (field.key === 'dob') {
+        const dateValue = field.value?.trim() || '';
+        if (dateValue && /^\d{2}-\d{2}-\d{4}$/.test(dateValue)) {
+          const [day, month, year] = dateValue.split('-');
+          initialValues[field.key] = `${year}-${month}-${day}`;
+        } else {
+          initialValues[field.key] = dateValue;
+        }
+        return;
+      }
+      
+      // Handle boolean fields
+      if (field.type === 'boolean') {
+        // Convert string value to boolean string representation
+        const boolValue = field.value?.toLowerCase() === 'true' || field.value === '1';
+        initialValues[field.key] = boolValue ? 'true' : 'false';
+        return;
+      }
+      
+      // Default: use field value as-is
+      initialValues[field.key] = field.value?.trim() || '';
     });
     
     setFormValues(initialValues);
   }, []);
 
+  // Reset to step 1 when fields are first loaded
+  useEffect(() => {
+    if (fields.length > 0 && !fieldsLoaded) {
+      setFieldsLoaded(true);
+      // Always start at step 1 when fields first load
+      setCurrentStep(1);
+    } else if (fields.length === 0) {
+      setFieldsLoaded(false);
+    }
+  }, [fields.length, fieldsLoaded]);
+
+  // Auto-skip empty steps only after fields have loaded
+  // This prevents skipping when fields are still loading (empty array)
+  useEffect(() => {
+    // Don't auto-skip if fields haven't loaded yet
+    if (!fieldsLoaded || fields.length === 0) {
+      return;
+    }
+    
+    const stepFields = getCurrentStepFields();
+    // Only skip if current step has no fields AND we're not on step 1
+    // Always show step 1 first, even if it has no fields
+    if (stepFields.length === 0 && currentStep < 4 && currentStep > 1) {
+      // Auto-advance to next step if current step has no fields
+      const timer = setTimeout(() => {
+        setCurrentStep(prev => Math.min(prev + 1, 4));
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, getCurrentStepFields, fieldsLoaded, fields.length]);
+
   return {
     currentStep,
-    firstName,
-    lastName,
     formValues,
     formErrors,
     currentStepConfig: getCurrentStepConfig(),
     currentStepFields: getCurrentStepFields(),
     canGoBack: currentStep > 1,
     canGoNext: currentStep < 4,
-    setFirstName,
-    setLastName,
     handleFieldChange,
     handleNext,
     handleBack,
     validateCurrentStep,
+    validateField,
     initializeFormValues,
   };
 };
