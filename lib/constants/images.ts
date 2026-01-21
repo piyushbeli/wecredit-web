@@ -49,6 +49,8 @@ export const IMAGES = {
     PARTNER_WITH_US: '/assets/images/partner-with-us.png', 
     CONTACT_US: '/assets/images/contact-us.png',
     PWS_SUCCESS: '/assets/images/pws-success.png',
+    GUARED: '/assets/images/guard.png',
+    THUMB_PRINT: '/assets/images/thumb-print.png',
   },
   PARTNERS: {
     BASE_PATH: '/assets/images/partners',

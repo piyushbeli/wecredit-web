@@ -6,10 +6,11 @@
  * Triggered by Apply Now and Start Loan Application buttons via store
  */
 
-import { JSX, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { JSX, useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getCookie } from 'cookies-next';
 import LeadFormModal from '@/components/forms/lead-form-modal';
+import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { useCheckDedupe } from '@/hooks/use-check-dedupe';
 import { useModal } from '@/hooks/use-modal';
 import { useAuthStore } from '@/stores/auth-store';
@@ -25,6 +26,7 @@ type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
  */
 export const PersonalLoanContent = (): JSX.Element => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isOpen: isLeadFormModalOpen, openModal: openLeadFormModal, closeModal: closeLeadFormModal } = useModal();
   const { isAuthenticated, openModal }: { isAuthenticated: boolean; openModal: () => void } = useAuthStore();
   const { triggerApply, resetTrigger } = useLoanApplicationStore();
@@ -32,6 +34,13 @@ export const PersonalLoanContent = (): JSX.Element => {
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);
   const didInitiateCheckOffers = useRef<boolean>(false);
+  
+  // State for auto-fill modal and fetchDetails
+  const [showAutoFillModal, setShowAutoFillModal] = useState<boolean>(false);
+  const [fetchDetails, setFetchDetails] = useState<boolean>(true);
+
+  // Debug mode: open AutoFillModal when ?debugAutoFill=true is in URL
+  const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
 
   const runCheckDedupeAfterAuth = useCallback(async (): Promise<void> => {
     const mobile = getCookie(STORAGE_MOBILE) as string;
@@ -50,13 +59,35 @@ export const PersonalLoanContent = (): JSX.Element => {
     }
     if (needsForm) {
       if (didInitiateCheckOffers.current) {
-        openLeadFormModal();
+        // Show auto-fill modal instead of directly opening lead form modal
+        setShowAutoFillModal(true);
       }
     } else {
       router.push('/offers');
     }
     didInitiateCheckOffers.current = false;
-  }, [needsForm, openLeadFormModal, isCheckingDedupe, response, router]);
+  }, [needsForm, isCheckingDedupe, response, router]);
+
+  /**
+   * Handle auto-fill modal proceed
+   * Sets fetchDetails value and opens the lead form modal
+   * In debug mode, only closes the modal without opening lead form
+   */
+  const handleAutoFillProceed = useCallback((shouldFetchDetails: boolean): void => {
+    setFetchDetails(shouldFetchDetails);
+    setShowAutoFillModal(false);
+    
+    // In debug mode, just close the modal without opening lead form
+    if (isDebugMode) {
+      console.log('[Debug] AutoFillModal closed with fetchDetails:', shouldFetchDetails);
+      return;
+    }
+    
+    // Open lead form modal after auto-fill modal closes
+    setTimeout(() => {
+      openLeadFormModal();
+    }, 300);
+  }, [openLeadFormModal, isDebugMode]);
 
   /**
    * Watch for authentication state change (user just completed login)
@@ -91,6 +122,16 @@ export const PersonalLoanContent = (): JSX.Element => {
   }, [triggerApply, resetTrigger]);
 
   /**
+   * Debug mode: Open AutoFillModal when ?debugAutoFill=true is in URL
+   * Useful for testing the modal UI without going through the full flow
+   */
+  useEffect(() => {
+    if (isDebugMode) {
+      setShowAutoFillModal(true);
+    }
+  }, [isDebugMode]);
+
+  /**
    * Handle "Check Offers Now" button click
    * Triggers auth/dedupe flow for offers
    */
@@ -114,11 +155,27 @@ export const PersonalLoanContent = (): JSX.Element => {
   };
 
   return (
-    <LeadFormModal
-      isOpen={isLeadFormModalOpen}
-      onClose={closeLeadFormModal}
-      lenderName=""
-      isAllLenders={true}
-    />
+    <>
+      {/* Auto-Fill Modal - shown before lead form modal */}
+      <AutoFillModal
+        isOpen={showAutoFillModal}
+        onProceed={handleAutoFillProceed}
+        onClose={() => {
+          setShowAutoFillModal(false);
+          // Reset fetchDetails to default when closing without proceeding
+          setFetchDetails(true);
+        }}
+        disableTimer={isDebugMode}
+      />
+
+      {/* Lead Form Modal */}
+      <LeadFormModal
+        isOpen={isLeadFormModalOpen}
+        onClose={closeLeadFormModal}
+        lenderName=""
+        isAllLenders={true}
+        fetchDetails={fetchDetails}
+      />
+    </>
   );
 };

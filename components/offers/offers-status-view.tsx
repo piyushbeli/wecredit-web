@@ -20,6 +20,7 @@ import { PageHeader } from '@/components/shared';
  */
 export const OffersStatusView = () => {
   const { statusOffers, isLoading, error, fetchOffers } = useOffers();
+
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
     if (!utmLink) {
@@ -34,7 +35,10 @@ export const OffersStatusView = () => {
       void updateUtmClicked(mobile, lenderName, token);
     }
     window.open(utmLink, '_blank'); 
-    fetchOffers();
+
+    setTimeout(() => {
+      fetchOffers();
+    }, 3000); // 3 seconds
   };
 
   const hasStatusOffers = statusOffers.length > 0;
@@ -51,6 +55,7 @@ export const OffersStatusView = () => {
               key={`${offer.lenderName}-${index}`}
               offer={offer}
               onClick={() => handleOfferClick(offer)}
+              variant="status"
             />
           ))}
         </div>

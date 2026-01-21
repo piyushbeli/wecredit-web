@@ -6,7 +6,12 @@ import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
-import { MOCK_CHECK_STATUS_RESPONSE, MOCK_REHIT_RESPONSE, simulateMockApiCall } from '@/lib/mock-data/offers';
+import { 
+  MOCK_CHECK_STATUS_RESPONSE, 
+  MOCK_REHIT_RESPONSE, 
+  MOCK_ALL_STATUSES_RESPONSE,
+  simulateMockApiCall 
+} from '@/lib/mock-data/offers';
 import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
 
 /** Polling constants */
@@ -110,7 +115,9 @@ export function useOffers(): UseOffersReturn {
     if (enableMockData) {
       console.info('[FeatureFlag] Using mock offers data');
       try {
-        const mockResponse = await simulateMockApiCall(MOCK_CHECK_STATUS_RESPONSE);
+        // Use MOCK_ALL_STATUSES_RESPONSE to test all status badges in UI
+        // Switch to MOCK_CHECK_STATUS_RESPONSE for normal testing
+        const mockResponse = await simulateMockApiCall(MOCK_ALL_STATUSES_RESPONSE);
         setOffers(mockResponse.lenders || []);
         setCanReHit(mockResponse.isRehitLenders === 0);
         setStatusCode(mockResponse.statusCode);

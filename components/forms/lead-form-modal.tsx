@@ -12,6 +12,7 @@ import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
 import { useCreateLead } from '@/hooks/use-create-lead';
 import { useLeadForm } from '@/hooks/use-lead-form';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
@@ -26,6 +27,7 @@ interface LeadFormModalProps {
   partnerCode?: string;
   onSuccess?: (leadId: string) => void;
   isAllLenders?: boolean;
+  fetchDetails?: boolean;
 }
 
 const PREFILL_QUERY_KEY = 'prefill';
@@ -83,6 +85,7 @@ const LeadFormModal = ({
   partnerCode = PARTNER_CODE,
   isAllLenders = false,
   onSuccess,
+  fetchDetails = true,
 }: LeadFormModalProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -123,11 +126,11 @@ const LeadFormModal = ({
     if (!isOpen) return;
     
     if (isAllLenders) {
-      fetchFields('', true);
+      fetchFields('', fetchDetails);
     } else if (lenderName) {
-      fetchFields(lenderName, true);
+      fetchFields(lenderName, fetchDetails);
     }
-  }, [isOpen, isAllLenders, lenderName, fetchFields]);
+  }, [isOpen, isAllLenders, lenderName, fetchDetails, fetchFields]);
 
   // Initialize form values from API response
   useEffect(() => {
@@ -136,6 +139,9 @@ const LeadFormModal = ({
       initializeFormValues(prefilledFields, userIp);
     }
   }, [fields, isPrefillEnabled, userIp, initializeFormValues]);
+
+  // Lock body scroll when modal is open
+  useBodyScrollLock(isOpen);
 
   const handleHeaderBackClick = useCallback((): void => {
     if (isFirstStep) {
@@ -407,7 +413,13 @@ const LeadFormModal = ({
                 <h3 className="lead-form-heading mb-2">Unable to load form</h3>
                 <p className="text-red-600 mb-6">{fieldsError}</p>
                 <Button
-                  onClick={() => fetchFields(lenderName, true)}
+                  onClick={() => {
+                    if (isAllLenders) {
+                      fetchFields('', fetchDetails);
+                    } else {
+                      fetchFields(lenderName, fetchDetails);
+                    }
+                  }}
                   variant="outline"
                   className="min-w-[140px]"
                 >

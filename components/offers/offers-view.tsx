@@ -58,6 +58,7 @@ export const OffersView = () => {
               key={`${offer.lenderName}-${index}`}
               offer={offer}
               onClick={() => handleOfferClick(offer)}
+              variant="explore"
             />
           ))}
         </div>
@@ -79,7 +80,9 @@ export const OffersView = () => {
     );
   }
 
-  if (exploreOffers.length === 0) {
+  // Only redirect if polling has completed and there are no explore offers
+  // This allows polling to complete before redirecting to status page
+  if (!isPolling && exploreOffers.length === 0) {
     redirect('/offers/status');
   }
 

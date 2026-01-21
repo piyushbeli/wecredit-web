@@ -113,10 +113,13 @@ export const selectFilteredOffers = (
 };
 
 /**
- * Selector: Get explore offers (INITIATED status - new offers to explore)
+ * Selector: Get explore offers (INITIATED and UTM_CLICKED status - new offers to explore)
+ * Includes clicked offers so they remain visible with updated CTA
  */
 export const selectExploreOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
-  return offers.filter((offer) => offer.wcStatus === 'INITIATED');
+  return offers.filter((offer) => 
+    offer.wcStatus === 'INITIATED' || offer.wcStatus === 'UTM_CLICKED'
+  );
 };
 
 /**
