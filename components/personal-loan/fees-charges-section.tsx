@@ -20,22 +20,22 @@ interface FeeRowProps {
  */
 const FeeRow = ({ fee, index }: FeeRowProps): JSX.Element => {
   return (
-    <motion.div
-      className="flex"
+    <motion.tr
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="border-b border-white"
     >
       {/* Label Column */}
-      <div className="w-32 shrink-0 bg-black/5 p-2">
+      <td className="w-32 bg-black/5 p-2 border-r border-white">
         <span className="text-gray-700 text-sm font-normal leading-5">{fee.label}</span>
-      </div>
+      </td>
       {/* Value Column */}
-      <div className="flex-1 bg-black/5 p-2">
+      <td className="bg-black/5 p-2">
         <span className="text-gray-500 text-sm font-normal leading-5">{fee.value}</span>
-      </div>
-    </motion.div>
+      </td>
+    </motion.tr>
   );
 };
 
@@ -62,10 +62,14 @@ const FeesAndChargesSection = (): JSX.Element => {
         <p className="text-sm text-gray-500 leading-5 mb-6">{FEES_CHARGES_INFO.description}</p>
 
         {/* Fees Table */}
-        <div className="rounded-lg overflow-hidden space-y-0.5">
-          {FEES_AND_CHARGES.map((fee, index) => (
-            <FeeRow key={fee.id} fee={fee} index={index} />
-          ))}
+        <div className="rounded-lg overflow-hidden">
+          <table className="w-full border-collapse">
+            <tbody>
+              {FEES_AND_CHARGES.map((fee, index) => (
+                <FeeRow key={fee.id} fee={fee} index={index} />
+              ))}
+            </tbody>
+          </table>
         </div>
       </motion.div>
     </section>

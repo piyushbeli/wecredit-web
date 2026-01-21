@@ -17,6 +17,7 @@ export { default as HowWeWorkSection } from './how-we-work-section';
 export { default as BeforeApplyingSection } from './before-applying-section';
 export { default as AfterClosureSection } from './after-closure-section';
 export { default as ExpertQuoteSection } from './expert-quote-section';
+export { default as FaqSection } from './faq-section';
 
 // Re-export constants for external use
 export * from './constants';

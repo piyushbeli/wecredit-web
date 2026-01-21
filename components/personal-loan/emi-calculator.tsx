@@ -469,12 +469,9 @@ const EmiCalculator = (): JSX.Element => {
         transition={{ duration: 0.5 }}
       >
         {/* Section Title */}
-        <h2 className="text-xl font-semibold text-center mb-2">
-          Personal Loan <span className="text-wc-blue-600">EMI Calculator</span>
+        <h2 className="text-xl font-semibold text-center mb-6">
+          Personal Loan EMI Calculator
         </h2>
-        <p className="text-sm text-gray-500 text-center mb-6">
-          Calculate your monthly EMI instantly
-        </p>
 
         {/* Calculator Card */}
         <div className="">
