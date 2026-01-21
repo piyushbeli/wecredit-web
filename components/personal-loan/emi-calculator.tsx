@@ -423,8 +423,12 @@ const EmiCalculator = (): JSX.Element => {
   const handleTenureModeChange = useCallback(
     (mode: TenureMode): void => {
       setTenureMode(mode);
+      // When switching to years mode, ensure minimum is 1 year (12 months)
+      if (mode === 'years' && tenureMonths < 12) {
+        setTenureMonths(12);
+      }
     },
-    []
+    [tenureMonths]
   );
 
   const handleInterestRateChange = useCallback((value: number): void => {
@@ -437,10 +441,18 @@ const EmiCalculator = (): JSX.Element => {
   );
 
   // Tenure values based on mode
-  const tenureValue = tenureMode === 'years' ? Math.round(tenureMonths / 12) : tenureMonths;
   const tenureMin = tenureMode === 'years' ? 1 : tenureConfig.minMonths;
   const tenureMax = tenureMode === 'years' ? 24 : tenureConfig.maxMonths;
+  const rawTenureValue = tenureMode === 'years' ? Math.round(tenureMonths / 12) : tenureMonths;
+  const tenureValue = Math.max(tenureMin, rawTenureValue);
   const tenureStep = 1;
+
+  // Sync tenureMonths when tenureValue is clamped to minimum in years mode
+  useEffect(() => {
+    if (tenureMode === 'years' && tenureMonths < 12) {
+      setTenureMonths(12);
+    }
+  }, [tenureMode, tenureMonths]);
   const tenureLabel = tenureMode === 'years' ? 'Tenure (Yearly)' : 'Tenure (Monthly)';
 
   // Format functions using helpers
