@@ -55,6 +55,113 @@ export const MOCK_OFFERS: LenderOfferStatus[] = [
 ];
 
 /**
+ * Mock offers with all status types for UI testing
+ * One offer for each possible wcStatus value
+ */
+export const MOCK_OFFERS_ALL_STATUSES: LenderOfferStatus[] = [
+  {
+    lenderName: 'CreditSea',
+    wcStatus: 'INITIATED',
+    utmLink: 'https://example.com/creditsea-apply',
+    loanAmount: '1 Lakh Rupee',
+    interestRate: '1.5',
+    tenure: '48',
+    logo: '/logos/creditsea.png',
+    approvalRate: 70,
+  },
+  {
+    lenderName: 'PhatkaPay',
+    wcStatus: 'UTM_CLICKED',
+    utmLink: 'https://example.com/phatkapay-apply',
+    loanAmount: '1 Lakh Rupee',
+    interestRate: '1.5',
+    tenure: '48',
+    logo: '/logos/phatkapay.png',
+    approvalRate: 75,
+  },
+  {
+    lenderName: 'Aditya Birla Capital',
+    wcStatus: 'JOURNEY_STARTED',
+    utmLink: 'https://example.com/aditya-birla-apply',
+    loanAmount: '2 Lakh Rupee',
+    interestRate: '2.0',
+    tenure: '36',
+    logo: '/logos/aditya-birla.png',
+    approvalRate: 65,
+  },
+  {
+    lenderName: 'KreditBee',
+    wcStatus: 'UNDER_REVIEW',
+    utmLink: 'https://example.com/kreditbee-apply',
+    loanAmount: '1.5 Lakh Rupee',
+    interestRate: '1.8',
+    tenure: '42',
+    logo: '/logos/kreditbee.png',
+    approvalRate: 60,
+  },
+  {
+    lenderName: 'Bajaj Finserv',
+    wcStatus: 'PENDING',
+    utmLink: 'https://example.com/bajaj-apply',
+    loanAmount: '2.5 Lakh Rupee',
+    interestRate: '2.2',
+    tenure: '48',
+    logo: '/logos/bajaj.png',
+    approvalRate: 55,
+  },
+  {
+    lenderName: 'Tata Capital',
+    wcStatus: 'APPROVED',
+    utmLink: 'https://example.com/tata-apply',
+    loanAmount: '3 Lakh Rupee',
+    interestRate: '1.9',
+    tenure: '60',
+    logo: '/logos/tata.png',
+    approvalRate: 80,
+  },
+  {
+    lenderName: 'HDFC Bank',
+    wcStatus: 'REJECTED',
+    utmLink: 'https://example.com/hdfc-apply',
+    loanAmount: '1 Lakh Rupee',
+    interestRate: '2.5',
+    tenure: '36',
+    logo: '/logos/hdfc.png',
+    approvalRate: 40,
+  },
+  {
+    lenderName: 'ICICI Bank',
+    wcStatus: 'DISBURSED',
+    utmLink: 'https://example.com/icici-apply',
+    loanAmount: '2 Lakh Rupee',
+    interestRate: '1.7',
+    tenure: '48',
+    logo: '/logos/icici.png',
+    approvalRate: 85,
+  },
+  {
+    lenderName: 'Axis Bank',
+    wcStatus: 'COMPLETED',
+    utmLink: 'https://example.com/axis-apply',
+    loanAmount: '1.5 Lakh Rupee',
+    interestRate: '2.0',
+    tenure: '42',
+    logo: '/logos/axis.png',
+    approvalRate: 90,
+  },
+  {
+    lenderName: 'SBI',
+    wcStatus: 'CANCELLED',
+    utmLink: 'https://example.com/sbi-apply',
+    loanAmount: '1 Lakh Rupee',
+    interestRate: '2.3',
+    tenure: '36',
+    logo: '/logos/sbi.png',
+    approvalRate: 50,
+  },
+];
+
+/**
  * Mock response for check-status-all API
  * Includes offers with re-hit capability
  */
@@ -62,6 +169,16 @@ export const MOCK_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
   statusCode: STATUS_CODES.OFFERS_FOUND,
   lenders: MOCK_OFFERS,
   isRehitLenders: 0, // More lenders available for re-hit
+};
+
+/**
+ * Mock response with all status types for UI testing
+ * Use this to test all status badges and CTA buttons
+ */
+export const MOCK_ALL_STATUSES_RESPONSE: CheckStatusAllResponse = {
+  statusCode: STATUS_CODES.OFFERS_FOUND,
+  lenders: MOCK_OFFERS_ALL_STATUSES,
+  isRehitLenders: 1, // All lenders checked
 };
 
 /**

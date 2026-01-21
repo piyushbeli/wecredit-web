@@ -11,19 +11,22 @@ import { PercentIcon, CalendarIcon } from '@/components/icons';
 import { ApprovalBadge } from './approval-badge';
 import { StatusBadge, getStatusCtaLabel } from './status-badge';
 import { ActionButton } from '../shared';
+import { cn } from '@/lib/utils';
 
 interface OfferCardProps {
   /** Lender offer data */
   offer: LenderOfferStatus;
   /** Click handler for the CTA button */
   onClick?: () => void;
+  /** Variant: 'explore' shows ApprovalBadge for INITIATED/UTM_CLICKED, 'status' shows StatusBadge for all */
+  variant?: 'explore' | 'status';
 }
 
 /**
  * Offer card component with approval chances badge
  * Matches trending card structure but shows approval percentage
  */
-export function OfferCard({ offer, onClick }: OfferCardProps) {
+export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProps) {
   const {
     lenderName,
     loanAmount,
@@ -32,9 +35,17 @@ export function OfferCard({ offer, onClick }: OfferCardProps) {
     logo,
     wcStatus
   } = offer;
-  const isNewOffer: boolean = wcStatus === 'INITIATED';
+  
+  // In explore screen: show ApprovalBadge for INITIATED and UTM_CLICKED
+  // In status screen: show StatusBadge for all statuses (including UTM_CLICKED)
+  const shouldShowApprovalBadge: boolean = 
+    variant === 'explore' && (wcStatus === 'INITIATED' || wcStatus === 'UTM_CLICKED');
+  const shouldShowStatusBadge: boolean = 
+    variant === 'status' || (variant === 'explore' && !shouldShowApprovalBadge);
+  
   const approvalChance: number = offer.approvalRate || 70;
-  const ctaLabel: string = getStatusCtaLabel(wcStatus);
+  const ctaLabel: string = variant === 'explore' ? getStatusCtaLabel(wcStatus) : 'Check Status';
+  const isClickedOffer: boolean = wcStatus === 'UTM_CLICKED';
   return (
     <div
       className="relative rounded-3xl overflow-hidden bg-white border border-gray-200"
@@ -49,16 +60,16 @@ export function OfferCard({ offer, onClick }: OfferCardProps) {
           background: 'linear-gradient(145deg, #D4E4FC 0%, #EEF4FF 50%, #FAFCFF 100%)',
         }}
       >
-        {/* Approval Badge - Only for new offers (INITIATED) */}
-        {isNewOffer && (
+        {/* Approval Badge - Only shown in explore screen for INITIATED and UTM_CLICKED */}
+        {shouldShowApprovalBadge && (
           <div className="absolute right-2 top-2">
             <ApprovalBadge percentage={approvalChance} size="sm" />
           </div>
         )}
-        {/* Status Badge - For non-INITIATED offers */}
-        {!isNewOffer && (
+        {/* Status Badge - Shown in status screen for all statuses, or in explore for other statuses */}
+        {shouldShowStatusBadge && (
           <div className="absolute right-3 top-3">
-            <StatusBadge status={wcStatus} showIcon />
+            <StatusBadge status={wcStatus} />
           </div>
         )}
 
@@ -115,7 +126,11 @@ export function OfferCard({ offer, onClick }: OfferCardProps) {
           type="button"
           onClick={onClick}
           fullWidth
-          className="text-xs font-medium rounded-full py-1 h-6"
+          className={cn(
+            "text-xs font-medium rounded-full py-1 h-6",
+            isClickedOffer && "bg-green-600 hover:bg-green-700 text-white",
+            variant === 'status' && "bg-blue-600 hover:bg-blue-700 text-white"
+          )}
         >
           {ctaLabel}
         </ActionButton>

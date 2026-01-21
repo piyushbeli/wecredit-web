@@ -58,6 +58,7 @@ export const OffersView = () => {
               key={`${offer.lenderName}-${index}`}
               offer={offer}
               onClick={() => handleOfferClick(offer)}
+              variant="explore"
             />
           ))}
         </div>

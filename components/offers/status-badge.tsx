@@ -26,87 +26,87 @@ interface StatusConfigItem {
 
 const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
   INITIATED: {
-    label: 'NEW',
-    bgColor: 'bg-blue-100',
-    textColor: 'text-blue-600',
+    label: 'INITIATED',
+    bgColor: 'bg-blue-500',
+    textColor: 'text-blue-700',
     iconChar: '★',
-    ctaLabel: 'Add to Status',
+    ctaLabel: 'Interested',
   },
   JOURNEY_STARTED: {
-    label: 'IN PROGRESS',
-    bgColor: 'bg-indigo-100',
-    textColor: 'text-indigo-600',
+    label: 'JOURNEY STARTED',
+    bgColor: 'bg-purple-200',
+    textColor: 'text-purple-500',
     iconChar: '→',
     ctaLabel: 'Continue Application',
   },
   UNDER_REVIEW: {
     label: 'UNDER REVIEW',
-    bgColor: 'bg-yellow-100',
-    textColor: 'text-yellow-600',
+    bgColor: 'bg-orange-200',
+    textColor: 'text-orange-500',
     iconChar: '⏳',
     ctaLabel: 'Check Status',
   },
   PENDING: {
     label: 'PENDING',
-    bgColor: 'bg-orange-100',
-    textColor: 'text-orange-600',
+    bgColor: 'bg-gray-200',
+    textColor: 'text-gray-500',
     iconChar: '⏱',
     ctaLabel: 'Check Status',
   },
   APPROVED: {
     label: 'APPROVED',
-    bgColor: 'bg-green-100',
-    textColor: 'text-green-600',
+    bgColor: 'bg-green-200',
+    textColor: 'text-green-500',
     iconChar: '✓',
     ctaLabel: 'Complete Setup',
   },
   REJECTED: {
     label: 'REJECTED',
-    bgColor: 'bg-red-100',
-    textColor: 'text-red-600',
+    bgColor: 'bg-red-200',
+    textColor: 'text-red-500',
     iconChar: '✕',
     ctaLabel: 'View Details',
   },
   DISBURSED: {
     label: 'DISBURSED',
-    bgColor: 'bg-purple-100',
-    textColor: 'text-purple-600',
+    bgColor: 'bg-blue-200',
+    textColor: 'text-blue-500',
     iconChar: '💰',
     ctaLabel: 'View Details',
   },
   COMPLETED: {
     label: 'COMPLETED',
-    bgColor: 'bg-gray-100',
-    textColor: 'text-gray-600',
+      bgColor: 'bg-green-200',
+    textColor: 'text-green-500',
     iconChar: '✔',
     ctaLabel: 'View Details',
   },
   CANCELLED: {
     label: 'CANCELLED',
-    bgColor: 'bg-gray-100',
+    bgColor: 'bg-gray-200',
     textColor: 'text-gray-500',
     iconChar: '⊘',
     ctaLabel: 'View Details',
   },
   UTM_CLICKED: {
     label: 'UTM CLICKED',
-    bgColor: 'bg-orange-100',
-    textColor: 'text-orange-600',
+    bgColor: 'bg-purple-200',
+    textColor: 'text-purple-500',
     iconChar: '!',
-    ctaLabel: 'View Details',
+    ctaLabel: 'Go to Status',
   },
 };
 
 /**
  * StatusBadge Component
  * 
- * Displays a color-coded badge for loan application status
- * Vertical layout with circular icon and label text below
+ * Displays a color-coded pill-shaped badge for loan application status
+ * Horizontal layout with rounded corners (pill shape)
  * 
  * @example
  * ```tsx
  * <StatusBadge status="APPROVED" />
- * <StatusBadge status="UTM_CLICKED" showIcon />
+ * <StatusBadge status="UTM_CLICKED" />
  * ```
  */
 export function StatusBadge({ status, className, showIcon = false }: StatusBadgeProps) {
@@ -117,28 +117,16 @@ export function StatusBadge({ status, className, showIcon = false }: StatusBadge
   }
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      {showIcon && (
-        <div
-          className={cn(
-            'w-8 h-8 rounded-full flex items-center justify-center',
-            config.bgColor
-          )}
-        >
-          <span className={cn('text-sm font-semibold', config.textColor)}>
-            {config.iconChar}
-          </span>
-        </div>
+    <div
+      className={cn(
+        'inline-flex items-center justify-center px-3 py-1 rounded-full',
+        config.bgColor,
+        config.textColor,
+        'text-xs font-medium',
+        className
       )}
-      <span
-        className={cn(
-          'text-[10px] font-semibold',
-          config.textColor,
-          showIcon && 'mt-1'
-        )}
-      >
-        {config.label}
-      </span>
+    >
+      <span>{config.label}</span>
     </div>
   );
 }

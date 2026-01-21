@@ -200,15 +200,22 @@ export async function checkStatusAll(
     partnerCode: wecreditConfig.partnerCode,
   };
   try {
+    // Build fetch options - only include signal if it's a valid AbortSignal
+    const fetchOptions: RequestInit = {
+      method: 'POST',
+      headers: buildHeaders({ mobile, authorization }),
+      body: JSON.stringify(requestBody),
+      cache: 'no-store',
+    };
+    
+    // Only add signal if it's defined and is a valid AbortSignal
+    if (signal instanceof AbortSignal) {
+      fetchOptions.signal = signal;
+    }
+    
     const data = await withApiLogging<CheckStatusAllResponse>(
       'checkStatusAll',
-      () => fetch(CHECK_STATUS_ALL_ENDPOINT, {
-        method: 'POST',
-        headers: buildHeaders({ mobile, authorization }),
-        body: JSON.stringify(requestBody),
-        cache: 'no-store',
-        signal, // Support for request timeout via AbortController
-      }),
+      () => fetch(CHECK_STATUS_ALL_ENDPOINT, fetchOptions),
       {
         method: 'POST',
         url: CHECK_STATUS_ALL_ENDPOINT,
