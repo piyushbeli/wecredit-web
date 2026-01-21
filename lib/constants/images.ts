@@ -45,6 +45,7 @@ export const IMAGES = {
     OTP: '/assets/svgs/otp.svg',
     WALLET: '/assets/svgs/wallet.svg',
     HOURGLASS: '/assets/svgs/hourglass.svg',
+    WECREDIT_HEART: '/assets/images/wecredit-heart.png',
   },
   PARTNERS: {
     BASE_PATH: '/assets/images/partners',

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { getStaticPageBySlug } from '@/lib/content';
-import StaticPageContent from '@/components/shared/StaticPageContent';
+import PageBanner from '@/components/shared/page-banner';
+import PrivacyPolicyContent from '@/components/shared/privacy-policy-content';
+import { IMAGES } from '@/lib/constants/images';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
@@ -11,33 +11,33 @@ export const revalidate = 3600; // 1 hour
  * Generates metadata for the Privacy Policy page
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getStaticPageBySlug('privacy-policy');
-  
-  if (!page) {
-    return {
-      title: 'Privacy Policy',
-    };
-  }
-  
   return {
-    title: page.seo?.metaTitle || page.title,
-    description: page.seo?.metaDescription,
-    keywords: page.seo?.keywords,
+    title: 'Privacy Policy | WeCredit',
+    description: 'Read our privacy policy to understand how we collect, use, and protect your personal information.',
+    keywords: 'privacy policy, data protection, security',
   };
 }
 
 /**
  * Privacy Policy page component
- * Content is loaded from /content/pages/privacy-policy.md
+ * Displays static privacy policy content with PageBanner
  */
-const PrivacyPolicyPage = async () => {
-  const page = await getStaticPageBySlug('privacy-policy');
-  
-  if (!page) {
-    notFound();
-  }
-  
-  return <StaticPageContent page={page} />;
+const PrivacyPolicyPage = (): React.ReactNode => {
+  return (
+    <div className="max-w-4xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-12">
+      {/* Page Banner */}
+      <div className="mb-8 flex justify-center">
+        <PageBanner 
+          title="PRIVACY POLICY" 
+          iconImage={IMAGES.ICONS.WECREDIT_HEART}
+          iconAlt="WeCredit Heart Icon"
+        />
+      </div>
+
+      {/* Privacy Policy Content */}
+      <PrivacyPolicyContent />
+    </div>
+  );
 };
 
 export default PrivacyPolicyPage;
