@@ -46,6 +46,9 @@ export const IMAGES = {
     WALLET: '/assets/svgs/wallet.svg',
     HOURGLASS: '/assets/svgs/hourglass.svg',
     WECREDIT_HEART: '/assets/images/wecredit-heart.png',
+    PARTNER_WITH_US: '/assets/images/partner-with-us.png', 
+    CONTACT_US: '/assets/images/contact-us.png',
+    PWS_SUCCESS: '/assets/images/pws-success.png',
   },
   PARTNERS: {
     BASE_PATH: '/assets/images/partners',

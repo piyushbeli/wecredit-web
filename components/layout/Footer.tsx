@@ -32,6 +32,7 @@ const leftColumnSections: FooterSection[] = [
       { label: 'Careers', href: '/careers' },
       { label: 'Blog', href: '/blog' },
       { label: 'Contact Us', href: '/contact-us' },
+      { label: 'Partner with us', href: '/partner-with-us' },
     ],
   },
   {
@@ -59,6 +60,7 @@ const rightColumnSections: FooterSection[] = [
     title: 'Support',
     links: [
       { label: 'Customer Support', href: '/support' },
+      { label: 'Grievance Redressal', href: '/grievance-redressal' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Report a Problem', href: '/report' },
       { label: 'Security & Privacy', href: '/security' },
@@ -69,8 +71,7 @@ const rightColumnSections: FooterSection[] = [
 /** Policy links at bottom */
 const policyLinks: FooterLinkItem[] = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Terms of Service', href: '/terms-of-service' },
 ];
 
 /** Social media icons */
@@ -110,6 +111,7 @@ const socialLinks: SocialLink[] = [
  * Site footer with WeCredit branding, social links, and organized link sections
  * Mobile-first design matching the 393px width layout
  * Includes bottom padding to account for sticky buttons (e.g., Apply Now button)
+ * Footer visibility is controlled by ConditionalFooter wrapper component
  */
 const Footer = () => {
   return (
