@@ -8,37 +8,32 @@ export const dynamic = 'force-static';
 export const revalidate = 3600; // 1 hour
 
 /**
- * Generates metadata for the Contact Us page
+ * Generates metadata for the Grievance Redressal page
  */
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Contact Us | WeCredit',
-    description: 'Get in touch with WeCredit customer services. Contact our grievance officer for assistance with your queries and complaints.',
-    keywords: 'contact us, customer service, support, help',
+    title: 'Grievance Redressal | WeCredit',
+    description: 'Contact our grievance officer to resolve your complaints and grievances. We are committed to resolving issues within a reasonable time frame.',
+    keywords: 'grievance redressal, customer service, complaints, contact',
   };
 }
 
 /**
- * Contact Us page component
+ * Grievance Redressal page component
  * Displays customer service information and grievance officer details
  */
-const ContactUsPage = (): React.ReactNode => {
+const GrievanceRedressalPage = (): React.ReactNode => {
   return (
     <div className="max-w-4xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-12">
-      {/* Page Banner with envelope icon */}
+      {/* Page Banner with shield+heart icon (default) */}
       <div className="mb-8 flex justify-center">
-        <PageBanner 
-          title="CONTACT US" 
-          iconImage={IMAGES.ICONS.CONTACT_US}
-          iconAlt="Contact Us Icon"
-        />
+        <PageBanner title="GRIEVANCE REDRESSAL"  iconImage={IMAGES.ICONS.WECREDIT_HEART} />
       </div>
 
-      {/* Contact Content */}
+      {/* Grievance Content */}
       <GrievanceContactContent />
     </div>
   );
 };
 
-export default ContactUsPage;
-
+export default GrievanceRedressalPage;

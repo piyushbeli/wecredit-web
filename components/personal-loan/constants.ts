@@ -146,7 +146,7 @@ export const SELF_EMPLOYED_DOCUMENTS: DocumentItem[] = [
   {
     id: 'income',
     title: 'Income Proof:',
-    description: 'Last 2 years ITR and business proof',
+    description: 'Last 2–3 years ITR, GST Certificate, and 6-months bank statement',
   },
 ];
 
@@ -396,38 +396,53 @@ export interface FaqItem {
 export const PERSONAL_LOAN_FAQS: FaqItem[] = [
   {
     id: 'faq-1',
-    question: 'What is a personal loan?',
-    answer: 'A personal loan is an unsecured loan that you can use for various personal expenses such as medical emergencies, home renovation, travel, wedding, or debt consolidation. Unlike secured loans, personal loans do not require any collateral.',
+    question: 'What is a personal loan and how does it work?',
+    answer: 'A personal loan is an unsecured loan that can be used for any personal need. The approved amount is repaid in fixed monthly EMIs over a chosen tenure.',
   },
   {
     id: 'faq-2',
-    question: 'What is the maximum loan amount I can get?',
-    answer: 'Through WeCredit, you can get personal loans ranging from ₹5,000 to ₹15,00,000 depending on your income, credit score, and the lender you choose. The exact amount will be determined based on your eligibility.',
+    question: 'What credit score is required for a personal loan?',
+    answer: 'Most lenders prefer a credit score of 720 or above. A higher score improves approval chances and may help get better interest rates.',
   },
   {
     id: 'faq-3',
-    question: 'What are the interest rates for personal loans?',
-    answer: 'Interest rates for personal loans through WeCredit range from 9.9% to 36% per annum, depending on the lender, your credit profile, and loan amount. We help you compare offers from 30+ lenders to find the best rate.',
+    question: 'How much personal loan amount can be availed?',
+    answer: 'The loan amount depends on income, credit profile, existing liabilities, and lender policy. On WeCredit, offers may range from ₹5,000 to ₹15 lakh.',
   },
   {
     id: 'faq-4',
-    question: 'How quickly can I get the loan disbursed?',
-    answer: 'Once your loan is approved, the amount can be disbursed to your bank account within 5 minutes to 24 hours, depending on the lender. Most of our partner lenders offer same-day disbursal.',
+    question: 'How are personal loan interest rates decided?',
+    answer: 'Interest rates are based on factors like credit score, income stability, loan amount, tenure, and the lender\'s internal policy.',
   },
   {
     id: 'faq-5',
-    question: 'What documents are required for a personal loan?',
-    answer: 'Basic documents required include: Identity proof (Aadhaar/PAN), Address proof, Income proof (salary slips or bank statements), and a photograph. Some lenders may have additional requirements based on the loan amount.',
+    question: 'What documents are required to apply for a personal loan?',
+    answer: 'Basic documents usually include identity proof, address proof, income proof, and bank statements. Requirements may vary by lender.',
   },
   {
     id: 'faq-6',
-    question: 'Can I prepay my personal loan?',
-    answer: 'Yes, most lenders allow prepayment of personal loans. However, some may charge a prepayment penalty (usually 2-5% of the outstanding amount). Check with your lender for specific prepayment terms.',
+    question: 'How long does personal loan approval and disbursal take?',
+    answer: 'Approval timelines vary by lender, but many personal loans are approved within minutes and disbursed shortly after verification.',
   },
   {
     id: 'faq-7',
-    question: 'What happens if I miss an EMI payment?',
-    answer: 'Missing an EMI payment can result in late payment fees, increased interest charges, and negatively impact your credit score. If you anticipate difficulty in making payments, contact your lender immediately to discuss options.',
+    question: 'Does applying for a personal loan affect credit score?',
+    answer: 'Yes. Each application may result in a credit enquiry, which can slightly impact the credit score. Comparing offers on a single platform helps reduce multiple enquiries.',
+  },
+  {
+    id: 'faq-8',
+    question: 'Can a personal loan be repaid before tenure completion?',
+    answer: 'Yes, most lenders allow prepayment or foreclosure, but charges may apply depending on lender terms and loan duration.',
+  },
+  {
+    id: 'faq-9',
+    question: 'What happens if an EMI is missed?',
+    answer: 'Missing an EMI can attract late payment charges and negatively impact the credit score. Repeated delays may affect future loan eligibility.',
+  },
+  {
+    id: 'faq-10',
+    question: 'Is collateral required for a personal loan?',
+    answer: 'No. Personal loans are unsecured and do not require any collateral or security.',
   },
 ];
 
@@ -468,7 +483,7 @@ export const FEES_AND_CHARGES: FeeChargeItem[] = [
   {
     id: 'loan-cancellation',
     label: 'Loan Cancellation',
-    value: '₹300 to ₹1,500 per bounce depending on policy',
+    value: 'Nil to ₹1,000 (post-sanction)',
   },
   {
     id: 'statement-fees',

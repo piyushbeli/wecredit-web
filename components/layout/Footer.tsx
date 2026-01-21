@@ -23,8 +23,8 @@ interface SocialLink {
   icon: React.ReactNode;
 }
 
-/** Hardcoded footer sections matching the design */
-const footerSections: FooterSection[] = [
+/** Footer sections organized for two-column layout: left column (About, Products) and right column (Resources, Support) */
+const leftColumnSections: FooterSection[] = [
   {
     title: 'About',
     links: [
@@ -32,15 +32,7 @@ const footerSections: FooterSection[] = [
       { label: 'Careers', href: '/careers' },
       { label: 'Blog', href: '/blog' },
       { label: 'Contact Us', href: '/contact-us' },
-    ],
-  },
-  {
-    title: 'Resources',
-    links: [
-      { label: 'Help Center', href: '/help' },
-      { label: 'API Documentation', href: '/api-docs' },
-      { label: 'Community', href: '/community' },
-      { label: 'Partners', href: '/partners' },
+      { label: 'Partner with us', href: '/partner-with-us' },
     ],
   },
   {
@@ -52,10 +44,23 @@ const footerSections: FooterSection[] = [
       { label: 'Integrations', href: '/integrations' },
     ],
   },
+];
+
+const rightColumnSections: FooterSection[] = [
+  {
+    title: 'Resources',
+    links: [
+      { label: 'Help Center', href: '/help' },
+      { label: 'API Documentation', href: '/api-docs' },
+      { label: 'Community', href: '/community' },
+      { label: 'Partners', href: '/partners' },
+    ],
+  },
   {
     title: 'Support',
     links: [
       { label: 'Customer Support', href: '/support' },
+      { label: 'Grievance Redressal', href: '/grievance-redressal' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Report a Problem', href: '/report' },
       { label: 'Security & Privacy', href: '/security' },
@@ -66,8 +71,7 @@ const footerSections: FooterSection[] = [
 /** Policy links at bottom */
 const policyLinks: FooterLinkItem[] = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Terms of Service', href: '/terms-of-service' },
 ];
 
 /** Social media icons */
@@ -95,51 +99,52 @@ const InstagramIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/** Social links configuration */
+/** Social links configuration with blue-700 colored icons */
 const socialLinks: SocialLink[] = [
-  { platform: 'X', href: EXTERNAL_LINKS.SOCIAL.X, icon: <XIcon className="w-5 h-5" /> },
-  { platform: 'LinkedIn', href: EXTERNAL_LINKS.SOCIAL.LINKEDIN, icon: <LinkedInIcon className="w-5 h-5" /> },
-  { platform: 'Facebook', href: EXTERNAL_LINKS.SOCIAL.FACEBOOK, icon: <FacebookIcon className="w-5 h-5" /> },
-  { platform: 'Instagram', href: EXTERNAL_LINKS.SOCIAL.INSTAGRAM, icon: <InstagramIcon className="w-5 h-5" /> },
+  { platform: 'X', href: EXTERNAL_LINKS.SOCIAL.X, icon: <XIcon className="w-6 h-6" /> },
+  { platform: 'LinkedIn', href: EXTERNAL_LINKS.SOCIAL.LINKEDIN, icon: <LinkedInIcon className="w-6 h-6" /> },
+  { platform: 'Facebook', href: EXTERNAL_LINKS.SOCIAL.FACEBOOK, icon: <FacebookIcon className="w-6 h-6" /> },
+  { platform: 'Instagram', href: EXTERNAL_LINKS.SOCIAL.INSTAGRAM, icon: <InstagramIcon className="w-6 h-6" /> },
 ];
 
 /**
  * Site footer with WeCredit branding, social links, and organized link sections
+ * Mobile-first design matching the 393px width layout
+ * Includes bottom padding to account for sticky buttons (e.g., Apply Now button)
+ * Footer visibility is controlled by ConditionalFooter wrapper component
  */
 const Footer = () => {
   return (
     <footer className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-        {/* Top Section - Logo and Social Links */}
-        <div className="mb-8 sm:mb-10">
+      <div className="px-4 pt-8 pb-[100px]">
+        {/* Top Section - Logo, Tagline, and Social Links */}
+        <div className="mb-10">
           {/* Logo */}
-          <Link href="/" className="inline-block mb-3">
+          <Link href="/" className="inline-block mb-4">
             <Image
               src={IMAGES.LOGOS.TRANSPARENT}
-              alt={'WeCredit'}
-              width={120}
-              height={32}
-              className={cn(
-                'h-8 w-auto transition-opacity duration-300'
-              )}
+              alt="WeCredit"
+              width={106}
+              height={24}
+              className="h-6 w-auto transition-opacity duration-300"
               priority
             />
           </Link>
 
           {/* Tagline */}
-          <p className="text-sm sm:text-base text-gray-600 mb-5 max-w-md">
+          <p className="text-sm text-gray-500 font-normal leading-5 mb-6">
             Check your credit score, compare loans, and choose the right lender.
           </p>
 
           {/* Social Links */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             {socialLinks.map((social) => (
               <a
                 key={social.platform}
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-md text-brand-primary transition-colors"
+                className="w-6 h-6 flex items-center justify-center text-brand-primary transition-colors"
                 aria-label={social.platform}
               >
                 {social.icon}
@@ -148,38 +153,64 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Link Sections Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10">
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h3 className="font-medium  mb-3 sm:mb-4">
-                {section.title}
-              </h3>
-              <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        {/* Navigation Links - Two Column Layout */}
+        <div className="grid grid-cols-2 gap-x-12 mb-4">
+          {/* Left Column - About and Products */}
+          <div className="space-y-8">
+            {leftColumnSections.map((section) => (
+              <div key={section.title}>
+                <h3 className="text-sm font-medium leading-5 text-gray-900 mb-2">
+                  {section.title}
+                </h3>
+                <ul className="space-y-1">
+                  {section.links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        className="text-sm font-normal leading-5 text-gray-500 hover:text-gray-900 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Right Column - Resources and Support */}
+          <div className="space-y-8">
+            {rightColumnSections.map((section) => (
+              <div key={section.title}>
+                <h3 className="text-sm font-medium leading-5 text-gray-900 mb-2">
+                  {section.title}
+                </h3>
+                <ul className="space-y-1">
+                  {section.links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        className="text-sm font-normal leading-5 text-gray-500 hover:text-gray-900 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Bottom Section - Policy Links and Copyright */}
-        <div className="border-t border-gray-200 pt-6 sm:pt-8">
+        {/* Bottom Section - Divider, Policy Links, and Copyright */}
+        <div className="border-t border-stone-300 pt-4">
           {/* Policy Links */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-8 mb-4">
+          <div className="flex items-center gap-8 mb-2 w-full justify-between">
             {policyLinks.map((link, index) => (
               <Link
                 key={`${link.label}-${index}`}
                 href={link.href}
-                className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-sm font-normal leading-6 text-gray-700 transition-colors"
               >
                 {link.label}
               </Link>
@@ -187,10 +218,10 @@ const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <p className="text-sm text-gray-400 text-center sm:text-left">
+          <p className="text-xs font-normal leading-4 text-gray-500 text-center">
             © 2023 Quantum X Global Private Limited.
-            <br className="sm:hidden" />
-            <span className="sm:ml-1">All Rights Reserved.</span>
+            <br />
+            All Rights Reserved.
           </p>
         </div>
       </div>

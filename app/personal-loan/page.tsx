@@ -18,10 +18,12 @@ import HowWeWorkSection from '@/components/personal-loan/how-we-work-section';
 import BeforeApplyingSection from '@/components/personal-loan/before-applying-section';
 import AfterClosureSection from '@/components/personal-loan/after-closure-section';
 import ExpertQuoteSection from '@/components/personal-loan/expert-quote-section';
+import FaqSection from '@/components/personal-loan/faq-section';
 import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-content';
+import StickyApplyButton from '@/components/personal-loan/sticky-apply-button';
 import TestimonialsSection from '@/components/home/testimonials-section';
 import PartnersSection from '@/components/home/partners-section';
-import { FaqSection, TrendingOffersClient } from '@/components/home';
+import { TrendingOffersClient } from '@/components/home';
 
 /**
  * Personal Loan Page - Server Component
@@ -37,7 +39,6 @@ const PersonalLoanPage = (): React.ReactNode => {
       <EmiCalculator />
 
       <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
-
 
       {/* Video Section */}
       <VideoSection />
@@ -85,6 +86,9 @@ const PersonalLoanPage = (): React.ReactNode => {
 
       {/* Client Component: Modal and Auth Flow Logic */}
       <PersonalLoanContent />
+
+      {/* Sticky Apply Button - Fixed at bottom, visible during scrolling */}
+      <StickyApplyButton />
     </div>
   );
 };

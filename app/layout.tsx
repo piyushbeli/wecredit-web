@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 import './globals.css';
 import ConditionalMobileHeader from '@/components/layout/conditional-mobile-header';
-import Footer from '@/components/layout/Footer';
+import ConditionalFooter from '@/components/layout/conditional-footer';
 import { AuthModal } from '@/components/auth';
 import { AuthProvider } from '@/providers/auth-provider';
 import { ToastProvider } from '@/providers/toast-provider';
@@ -62,7 +62,7 @@ export default async function RootLayout({
                 siteName={globalData.siteName}
               />
               <main className="flex-1">{children}</main>
-              <Footer />
+              <ConditionalFooter />
               <AuthModal />
               <LoadingScreen />
             </AuthProvider>
