@@ -149,7 +149,8 @@ export async function getAllPages(): Promise<Page[]> {
     populate: PAGE_POPULATE_CONFIG,
     sort: ['order:asc', 'title:asc'],
     pagination: { pageSize: 1000 },
-    revalidate: 60,
+    // No caching: always fetch latest CMS content.
+    revalidate: 0,
   });
 
   return response.data;
@@ -164,7 +165,8 @@ export async function getAllPagePaths(): Promise<string[]> {
     const response = await fetchFromStrapi<StrapiResponse<{ fullPath: string }[]>>('pages', {
       fields: ['fullPath'],
       pagination: { pageSize: 1000 },
-      revalidate: 3600, // 1 hour
+      // No caching: always fetch latest CMS content.
+      revalidate: 0,
     });
     return response.data
       .map((page) => page.fullPath)

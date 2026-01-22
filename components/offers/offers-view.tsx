@@ -42,8 +42,10 @@ export const OffersView = () => {
     if (lenderName && mobile) {
       void updateUtmClicked(mobile, lenderName, token);
     }
-    window.open(utmLink, '_blank'); 
-    fetchOffers();
+    window.open(utmLink, '_blank');
+    setTimeout(() => {
+      fetchOffers();
+    }, 2000);
   };
   const handleCheckStatus = (): void => {
     router.push('/offers/status');

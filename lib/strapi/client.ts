@@ -38,7 +38,8 @@ export async function fetchStrapi<T>(
   endpoint: string,
   options: FetchStrapiOptions = {}
 ): Promise<T> {
-  const { revalidate, params, status = 'published' } = options;
+  // No FE caching: default revalidate to 0 so Next does not cache Strapi responses.
+  const { revalidate = 0, params, status = 'published' } = options;
   const allParams = { ...params, status };
   const url = buildUrl(endpoint, allParams);
   const headers = buildHeaders();

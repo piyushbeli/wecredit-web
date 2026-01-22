@@ -89,11 +89,11 @@ const LeadFormModal = ({
 }: LeadFormModalProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields } = useFetchFormFields();
+  const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const ipFetched = useRef(false);
+  const isIpFetchInFlight = useRef(false);
 
   const {
     currentStep,
@@ -113,24 +113,42 @@ const LeadFormModal = ({
   const isPrefillEnabled = process.env.NODE_ENV !== 'production'
     && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE;
 
-  // Fetch user IP on mount
+  // Reset any retained state on close (component stays mounted even when hidden).
   useEffect(() => {
-    if (isOpen && !ipFetched.current) {
-      ipFetched.current = true;
-      fetchUserIp().then(setUserIp);
-    }
-  }, [isOpen]);
+    if (isOpen) return;
+    setShowSuccess(false);
+    setUserIp('');
+    isIpFetchInFlight.current = false;
+    resetFields();
+  }, [isOpen, resetFields]);
 
-  // Fetch form fields when modal opens
+  // Fetch user IP on every open (no FE caching).
   useEffect(() => {
     if (!isOpen) return;
+    // Guard: avoid duplicate calls due to rapid toggles/renders.
+    if (isIpFetchInFlight.current) return;
+    isIpFetchInFlight.current = true;
+    fetchUserIp()
+      .then((ip) => {
+        setUserIp(ip);
+      })
+      .finally(() => {
+        isIpFetchInFlight.current = false;
+      });
+  }, [isOpen]);
+
+  // Fetch form fields when modal opens (no FE caching).
+  useEffect(() => {
+    if (!isOpen) return;
+    // Reset first to avoid briefly showing previous lender's fields while the fresh call is in flight.
+    resetFields();
     
     if (isAllLenders) {
       fetchFields('', fetchDetails);
     } else if (lenderName) {
       fetchFields(lenderName, fetchDetails);
     }
-  }, [isOpen, isAllLenders, lenderName, fetchDetails, fetchFields]);
+  }, [isOpen, isAllLenders, lenderName, fetchDetails, fetchFields, resetFields]);
 
   // Initialize form values from API response
   useEffect(() => {
