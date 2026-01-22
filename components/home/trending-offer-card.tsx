@@ -74,11 +74,11 @@ const TrendingOfferCard = ({
         });
         return;
       }
-
+      console.log('href', lenderName);
       // PDF Step 5B: User Logged In → Proceed directly
       // TODO: Will add Check Status API call here (Step 6)
-      alert('Coming Soon');
-      // router.push(href);
+      // alert('Coming Soon');
+      router.push(`/personal-loan/lender/${lenderName}`);
     },
     [isAuthenticated, openAuthModalWithAction, id, lenderName, href, router]
   );

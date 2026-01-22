@@ -37,15 +37,37 @@ export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProp
   } = offer;
   
   // In explore screen: show ApprovalBadge for INITIATED and UTM_CLICKED
+  // In explore screen: never show StatusBadge (only show approval percentage)
   // In status screen: show StatusBadge for all statuses (including UTM_CLICKED)
-  const shouldShowApprovalBadge: boolean = 
-    variant === 'explore' && (wcStatus === 'INITIATED' || wcStatus === 'UTM_CLICKED');
-  const shouldShowStatusBadge: boolean = 
-    variant === 'status' || (variant === 'explore' && !shouldShowApprovalBadge);
+  const shouldShowApprovalBadge: boolean = variant === 'explore';
+  const shouldShowStatusBadge: boolean = variant === 'status';
   
-  const approvalChance: number = offer.approvalRate || 70;
-  const ctaLabel: string = variant === 'explore' ? getStatusCtaLabel(wcStatus) : 'Check Status';
+  const approvalChance: number = offer.approvalRate || 0;
+  
+  /**
+   * Determines the CTA label based on variant and offer status
+   * - Status variant: always shows 'Apply Now'
+   * - Explore variant with INITIATED: shows status-specific label (e.g., 'Interested')
+   * - Explore variant with non-INITIATED: shows 'Go to Status'
+   */
+  const getCtaLabel = (): string => {
+    if (variant === 'status') {
+      return 'Apply Now';
+    }
+    // For explore variant, show 'Interested' only for INITIATED status
+    // All other statuses show 'Go to Status'
+    if (wcStatus === 'INITIATED') {
+      return getStatusCtaLabel(wcStatus);
+    }
+    return 'Go to Status';
+  };
+  
+  const ctaLabel: string = getCtaLabel();
   const isClickedOffer: boolean = wcStatus === 'UTM_CLICKED';
+  // For explore variant with non-INITIATED status, show green background
+  const shouldShowGreenButton: boolean = 
+    variant === 'explore' && wcStatus !== 'INITIATED';
+  
   return (
     <div
       className="relative rounded-3xl overflow-hidden bg-white border border-gray-200"
@@ -128,7 +150,7 @@ export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProp
           fullWidth
           className={cn(
             "text-xs font-medium rounded-full py-1 h-6",
-            isClickedOffer && "bg-green-600 hover:bg-green-700 text-white",
+            (isClickedOffer || shouldShowGreenButton) && "bg-green-600 hover:bg-green-700 text-white",
             variant === 'status' && "bg-blue-600 hover:bg-blue-700 text-white"
           )}
         >
