@@ -36,7 +36,7 @@ const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   name: 'Test User',
   mobile: '9876543210',
   phone: '9876543210',
-  dob: '01-01-1990',
+  dob: '05-05-1999',
   email: 'test.user@example.com',
   pan: 'ABCDE1234F',
   pincode: '560001',
@@ -142,7 +142,7 @@ const LeadFormModal = ({
     if (!isOpen) return;
     // Reset first to avoid briefly showing previous lender's fields while the fresh call is in flight.
     resetFields();
-    
+
     if (isAllLenders) {
       fetchFields('', fetchDetails);
     } else if (lenderName) {
@@ -171,10 +171,10 @@ const LeadFormModal = ({
 
   const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
-    
+
     // Check consent - only block if consent field is mandatory AND not checked
     const consentField = fields.find(f => f.key === 'consent');
-    
+
     // If consent field exists in API and is mandatory, check if it's checked
     if (consentField?.isMandatory) {
       const hasConsent = formValues.consent === 'true';
@@ -220,9 +220,9 @@ const LeadFormModal = ({
       ConsentDateTime: getCurrentDateTime(),
       consent: formValues.consent || 'false',
     };
-    
+
     const success = await createLead(formData, partnerCode, lenderName);
-    
+
     if (success) {
       setShowSuccess(true);
       setTimeout(() => {
@@ -274,7 +274,7 @@ const LeadFormModal = ({
     const consentField = fields.find(f => f.key === 'consent');
     const isConsentRequired = consentField?.isMandatory ?? false;
     const hasConsent = formValues.consent === 'true';
-    
+
     // Only disable submit if consent is mandatory AND not checked
     const isSubmitDisabled = isConsentRequired && !hasConsent;
 
@@ -340,7 +340,7 @@ const LeadFormModal = ({
               hasError: !!formErrors[field.key],
             });
           }
-          
+
           return (
             <DynamicField
               key={field.key}

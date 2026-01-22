@@ -90,9 +90,9 @@ export const OffersView = () => {
 
   // Only redirect if polling has completed and there are no explore offers
   // This allows polling to complete before redirecting to status page
-  if (!isPolling && exploreOffers.length === 0) {
-    redirect('/offers/status');
-  }
+  // if (!isPolling && exploreOffers.length === 0) {
+  //   redirect('/offers/status');
+  // }
 
   return (
     <div className="min-h-screen ">

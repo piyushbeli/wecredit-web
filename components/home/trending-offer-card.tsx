@@ -59,17 +59,17 @@ const TrendingOfferCard = ({
 }: TrendingOfferCardProps): React.ReactNode => {
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithAction } = useAuth();
-  
+
   // State for eligibility check loading (UI remains unchanged, only button disabled during check)
   const [isCheckingEligibility, setIsCheckingEligibility] = useState<boolean>(false);
-  
+
   // Track component mount status to prevent state updates after unmount
   // This prevents memory leaks and React warnings when async operations complete
   const isMountedRef = useRef<boolean>(true);
-  
+
   // AbortController for canceling API calls on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
-  
+
   // Cleanup on unmount: cancel any pending API calls and mark component as unmounted
   useEffect(() => {
     isMountedRef.current = true;
@@ -97,15 +97,15 @@ const TrendingOfferCard = ({
       if (!lenders || lenders.length === 0) {
         return null;
       }
-      
+
       // Guard: Return null if lenderName is empty, null, or undefined
       if (!searchName || typeof searchName !== 'string') {
         return null;
       }
-      
+
       // Case-insensitive search: normalize both names to lowercase
       const normalizedSearchName = searchName.toLowerCase().trim();
-      
+
       // Find first matching lender
       const matchedLender = lenders.find((lender) => {
         // Guard: Skip lenders with missing or invalid lenderName
@@ -114,7 +114,7 @@ const TrendingOfferCard = ({
         }
         return lender.lenderName.toLowerCase().trim() === normalizedSearchName;
       });
-      
+
       return matchedLender || null;
     },
     []
@@ -162,7 +162,7 @@ const TrendingOfferCard = ({
 
       // Get mobile number from cookie - required for API call
       const mobile = getCookie(STORAGE_MOBILE) as string | undefined;
-      
+
       // Guard: Early return if mobile number is missing
       // This shouldn't happen if user is authenticated, but we guard against it
       if (!mobile || typeof mobile !== 'string') {
@@ -222,7 +222,7 @@ const TrendingOfferCard = ({
         if (matchedLender) {
           // Lender found: User is already a lead for this lender
           // Navigate to offers status page instead of lender form
-          router.push('/offers/status');
+          router.push('/offers/');
         } else {
           // Lender not found: User hasn't applied to this lender yet
           // Proceed with normal flow (navigate to lender page)
@@ -244,10 +244,10 @@ const TrendingOfferCard = ({
         const errorMessage = error instanceof Error
           ? error.message
           : 'An unexpected error occurred';
-        
+
         console.error('[TrendingOfferCard] Error checking eligibility:', errorMessage);
         setIsCheckingEligibility(false);
-        
+
         // Fallback: Never block user - allow normal navigation on error
         router.push(`/personal-loan/lender/${lenderName}`);
       } finally {
