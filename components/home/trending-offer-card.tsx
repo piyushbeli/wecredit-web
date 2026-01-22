@@ -77,7 +77,8 @@ const TrendingOfferCard = ({
 
       // PDF Step 5B: User Logged In → Proceed directly
       // TODO: Will add Check Status API call here (Step 6)
-      router.push(href);
+      alert('Coming Soon');
+      // router.push(href);
     },
     [isAuthenticated, openAuthModalWithAction, id, lenderName, href, router]
   );
