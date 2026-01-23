@@ -3,10 +3,11 @@
 /**
  * UnmatchedOffersSection Component
  *
- * Static informational section explaining why some lenders may not show offers.
- * Displays explanatory bullet points and a carousel of unmatched lenders.
+ * Displays eligibility rejected offers (wcStatus === 'ELIGIBILITY_REJECTED') with explanatory content
+ * about why some lenders may not show offers. Shows a carousel of rejected lenders.
  */
 
+import { useMemo } from 'react';
 import Image from 'next/image';
 import {
   Carousel,
@@ -14,44 +15,8 @@ import {
   CarouselSlide,
   CarouselDots,
 } from '@/components/ui/carousel';
-
-/** Unmatched lender data */
-interface UnmatchedLender {
-  name: string;
-  logo: string;
-}
-
-/** Static list of unmatched lenders */
-const UNMATCHED_LENDERS: UnmatchedLender[] = [
-  {
-    name: 'UNITY',
-    logo: 'https://wcstaticasset.blob.core.windows.net/assets/unity_logo.png',
-  },
-  {
-    name: 'KREDITO',
-    logo: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/kredito.jpeg',
-  },
-  {
-    name: 'ABFL BL',
-    logo: 'https://wcstaticasset.blob.core.windows.net/assets/abcf_logo.png',
-  },
-  {
-    name: 'ABFL',
-    logo: 'https://wcstaticasset.blob.core.windows.net/assets/abcf_logo.png',
-  },
-  {
-    name: 'PREFR',
-    logo: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/prefr-1.png',
-  },
-  {
-    name: 'BRANCH',
-    logo: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/unnamed.jpg',
-  },
-  {
-    name: 'INSTAMONEY',
-    logo: 'https://wcstaticasset.blob.core.windows.net/assets/InstaMoney-Logo.png',
-  },
-];
+import { useOfferStore } from '@/stores/offer-store';
+import type { LenderOfferStatus } from '@/types/wecredit';
 
 const UNMATCHED_REASONS = [
   "You don't meet the lenders eligibility criteria.",
@@ -60,28 +25,59 @@ const UNMATCHED_REASONS = [
 ] as const;
 
 /**
- * Individual lender card showing "Not Eligible" status
+ * Individual lender card showing "Not Eligible" status for rejected offers
+ * Handles missing logos by showing lender name initial as fallback
  */
-const UnmatchedLenderCard = ({ lender }: { lender: UnmatchedLender }) => {
+const UnmatchedLenderCard = ({ offer }: { offer: LenderOfferStatus }) => {
+  const lenderName = offer.lenderName || 'Unknown Lender';
+  const logo = offer.logo;
+  const hasLogo = Boolean(logo);
+
   return (
     <div className="bg-white rounded-md p-3 flex flex-col items-center justify-center min-h-[60px]">
-      <Image
-        src={lender.logo}
-        alt={lender.name}
-        width={34}
-        height={15}
-        className="object-contain h-4 w-auto mb-1"
-      />
-      <span className="text-[10px] text-gray-500 font-normal">{lender.name}</span>
+      {hasLogo ? (
+        <Image
+          src={logo!}
+          alt={lenderName}
+          width={34}
+          height={15}
+          className="object-contain h-4 w-auto mb-1"
+        />
+      ) : (
+        // Fallback: Show lender initial when logo is missing
+        <div className="w-8 h-6 mb-1 flex items-center justify-center bg-gray-100 rounded">
+          <span className="text-[10px] font-semibold text-gray-600">
+            {lenderName.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      )}
+      <span className="text-[10px] text-gray-500 font-normal">{lenderName}</span>
       <span className="text-[10px] text-gray-500 font-normal">Not Eligible</span>
     </div>
   );
 };
 
 /**
- * Displays explanatory content about unmatched offers with lender carousel
+ * Displays explanatory content about unmatched offers with carousel of rejected lenders
+ * Only renders when there are rejected offers in the store
  */
 export const UnmatchedOffersSection = () => {
+  // Get all offers from store (stable reference)
+  const offers = useOfferStore((state) => state.offers);
+
+  // Memoize filtered eligibility rejected offers to prevent infinite loop
+  // Only recalculates when offers array changes
+  // Filter for ELIGIBILITY_REJECTED status (lender rejected due to eligibility criteria)
+  const rejectedOffers = useMemo(
+    () => offers.filter((offer) => offer.wcStatus === 'ELIGIBILITY_REJECTED'),
+    [offers]
+  );
+
+  // Early return: Don't render section if no rejected offers exist
+  if (rejectedOffers.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="rounded-lg p-4 overflow-hidden"
@@ -108,16 +104,16 @@ export const UnmatchedOffersSection = () => {
         ))}
       </ul>
 
-      {/* Lender Carousel */}
+      {/* Lender Carousel - Display rejected offers */}
       <Carousel options={{ loop: false, align: 'center' }}>
         <CarouselContent className="-ml-2">
-          {UNMATCHED_LENDERS.map((lender, index) => (
+          {rejectedOffers.map((offer, index) => (
             <CarouselSlide
-              key={lender.name}
+              key={`${offer.lenderName}-${index}`}
               index={index}
               className="basis-full pl-2"
             >
-              <UnmatchedLenderCard lender={lender} />
+              <UnmatchedLenderCard offer={offer} />
             </CarouselSlide>
           ))}
         </CarouselContent>

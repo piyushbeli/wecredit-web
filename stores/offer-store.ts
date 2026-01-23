@@ -137,16 +137,18 @@ export const selectStatusCounts = (
 ): Record<StatusFilter, number> => {
   return {
     ALL: offers.length,
+    NOT_PROCESSED: offers.filter((o) => o.wcStatus === 'NOT_PROCESSED').length,
     INITIATED: offers.filter((o) => o.wcStatus === 'INITIATED').length,
+    ELIGIBILITY_REJECTED: offers.filter((o) => o.wcStatus === 'ELIGIBILITY_REJECTED').length,
+    UTM_CLICKED: offers.filter((o) => o.wcStatus === 'UTM_CLICKED').length,
     JOURNEY_STARTED: offers.filter((o) => o.wcStatus === 'JOURNEY_STARTED').length,
+    UNDER_REVIEW: offers.filter((o) => o.wcStatus === 'UNDER_REVIEW').length,
     PENDING: offers.filter((o) => o.wcStatus === 'PENDING').length,
     APPROVED: offers.filter((o) => o.wcStatus === 'APPROVED').length,
     REJECTED: offers.filter((o) => o.wcStatus === 'REJECTED').length,
     DISBURSED: offers.filter((o) => o.wcStatus === 'DISBURSED').length,
     COMPLETED: offers.filter((o) => o.wcStatus === 'COMPLETED').length,
     CANCELLED: offers.filter((o) => o.wcStatus === 'CANCELLED').length,
-    UNDER_REVIEW: offers.filter((o) => o.wcStatus === 'UNDER_REVIEW').length,
-    UTM_CLICKED: offers.filter((o) => o.wcStatus === 'UTM_CLICKED').length,
   };
 };
 

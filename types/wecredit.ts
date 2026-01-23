@@ -49,16 +49,18 @@ export interface Partner {
  * Per PDF Step 7 - Clicked Lender Handling
  */
 export type WcStatus =
-  | 'INITIATED'        // Loan application just started
-  | 'JOURNEY_STARTED'  // User started the journey on lender site
-  | 'UNDER_REVIEW'     // Application under review
-  | 'PENDING'          // Waiting for processing
-  | 'APPROVED'         // Loan approved
-  | 'REJECTED'         // Loan rejected
-  | 'DISBURSED'        // Loan disbursed
-  | 'COMPLETED'        // Loan completed
-  | 'CANCELLED'        // Loan cancelled
-  | 'UTM_CLICKED';     // Lender link clicked
+  | 'NOT_PROCESSED'           // Offer not yet processed
+  | 'INITIATED'               // Loan application just started
+  | 'ELIGIBILITY_REJECTED'    // Lender rejected due to eligibility criteria
+  | 'UTM_CLICKED'             // Lender link clicked
+  | 'JOURNEY_STARTED'         // User started the journey on lender site
+  | 'UNDER_REVIEW'            // Application under review
+  | 'PENDING'                 // Waiting for processing
+  | 'APPROVED'                 // Loan approved
+  | 'REJECTED'                // Loan rejected
+  | 'DISBURSED'               // Loan disbursed
+  | 'COMPLETED'               // Loan completed
+  | 'CANCELLED';              // Loan cancelled
 
 /**
  * Individual lender offer status in check-status-all response

@@ -25,12 +25,33 @@ interface StatusConfigItem {
 }
 
 const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
+  NOT_PROCESSED: {
+    label: 'NOT PROCESSED',
+    bgColor: 'bg-gray-200',
+    textColor: 'text-gray-600',
+    iconChar: '○',
+    ctaLabel: 'Check Status',
+  },
   INITIATED: {
     label: 'INITIATED',
     bgColor: 'bg-blue-500',
     textColor: 'text-blue-700',
     iconChar: '★',
     ctaLabel: 'Interested',
+  },
+  ELIGIBILITY_REJECTED: {
+    label: 'ELIGIBILITY REJECTED',
+    bgColor: 'bg-red-200',
+    textColor: 'text-red-500',
+    iconChar: '✕',
+    ctaLabel: 'View Details',
+  },
+  UTM_CLICKED: {
+    label: 'UTM CLICKED',
+    bgColor: 'bg-purple-200',
+    textColor: 'text-purple-500',
+    iconChar: '!',
+    ctaLabel: 'Go to Status',
   },
   JOURNEY_STARTED: {
     label: 'JOURNEY STARTED',
@@ -87,13 +108,6 @@ const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
     textColor: 'text-gray-500',
     iconChar: '⊘',
     ctaLabel: 'View Details',
-  },
-  UTM_CLICKED: {
-    label: 'UTM CLICKED',
-    bgColor: 'bg-purple-200',
-    textColor: 'text-purple-500',
-    iconChar: '!',
-    ctaLabel: 'Go to Status',
   },
 };
 
