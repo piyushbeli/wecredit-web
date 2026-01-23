@@ -7,7 +7,7 @@ import ToolsCalculatorsSection from './tools-calculators-section';
 import TestimonialsSection from './testimonials-section';
 import PartnersSection from './partners-section';
 import CertificationsSection from './certifications-section';
-import FaqSection from './faq-section';
+import { FaqSection } from '@/components/shared';
 import BlogSection from './blog-section';
 import AppDownloadSection from './app-download-section';
 import DreamsSection from './dreams-section';

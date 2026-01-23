@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
 import { IMAGES } from '@/lib/constants/images';
 import { EXTERNAL_LINKS } from '@/lib/constants/links';
 
@@ -23,55 +22,38 @@ interface SocialLink {
   icon: React.ReactNode;
 }
 
-/** Footer sections organized for two-column layout: left column (About, Products) and right column (Resources, Support) */
-const leftColumnSections: FooterSection[] = [
+/** Footer sections organized for mobile-first single-column layout */
+const footerSections: FooterSection[] = [
   {
-    title: 'About',
+    title: 'Company',
     links: [
-      { label: 'Our story', href: '/about-us' },
-      { label: 'Careers', href: '/careers' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Contact Us', href: '/contact-us' },
-      { label: 'Partner with us', href: '/partner-with-us' },
+      { label: 'About Us', href: '/about-us' },
+      { label: 'Partner with Us', href: '/partner-with-us' },
     ],
   },
   {
-    title: 'Products',
+    title: 'Legal',
     links: [
-      { label: 'For Personal', href: '/personal-loan' },
-      { label: 'For Business', href: '/business-loan' },
-      { label: 'Payment Solutions', href: '/payments' },
-      { label: 'Integrations', href: '/integrations' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Use', href: '/terms-of-service' },
+      { label: 'Grievance Redressals', href: '/grievance-redressal' },
     ],
   },
-];
-
-const rightColumnSections: FooterSection[] = [
   {
     title: 'Resources',
     links: [
-      { label: 'Help Center', href: '/help' },
-      { label: 'API Documentation', href: '/api-docs' },
-      { label: 'Community', href: '/community' },
-      { label: 'Partners', href: '/partners' },
+      { label: 'Calculators', href: '/calculators/emi' },
+      { label: 'Our Partners', href: '/our-partners' },
+      { label: 'Blog', href: '/blog' },
     ],
   },
   {
     title: 'Support',
     links: [
-      { label: 'Customer Support', href: '/support' },
-      { label: 'Grievance Redressal', href: '/grievance-redressal' },
+      { label: 'Contact Us', href: '/contact-us' },
       { label: 'FAQ', href: '/faq' },
-      { label: 'Report a Problem', href: '/report' },
-      { label: 'Security & Privacy', href: '/security' },
     ],
   },
-];
-
-/** Policy links at bottom */
-const policyLinks: FooterLinkItem[] = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms of Service', href: '/terms-of-service' },
 ];
 
 /** Social media icons */
@@ -99,11 +81,18 @@ const InstagramIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const YouTubeIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+  </svg>
+);
+
 /** Social links configuration with blue-700 colored icons */
 const socialLinks: SocialLink[] = [
   { platform: 'X', href: EXTERNAL_LINKS.SOCIAL.X, icon: <XIcon className="w-6 h-6" /> },
   { platform: 'LinkedIn', href: EXTERNAL_LINKS.SOCIAL.LINKEDIN, icon: <LinkedInIcon className="w-6 h-6" /> },
   { platform: 'Facebook', href: EXTERNAL_LINKS.SOCIAL.FACEBOOK, icon: <FacebookIcon className="w-6 h-6" /> },
+  { platform: 'YouTube', href: EXTERNAL_LINKS.SOCIAL.YOUTUBE, icon: <YouTubeIcon className="w-6 h-6" /> },
   { platform: 'Instagram', href: EXTERNAL_LINKS.SOCIAL.INSTAGRAM, icon: <InstagramIcon className="w-6 h-6" /> },
 ];
 
@@ -132,7 +121,7 @@ const Footer = () => {
           </Link>
 
           {/* Tagline */}
-          <p className="text-sm text-gray-500 font-normal leading-5 mb-6">
+          <p className="text-sm text-zinc-500 font-normal font-['Poppins'] leading-5 mb-6">
             Check your credit score, compare loans, and choose the right lender.
           </p>
 
@@ -144,7 +133,7 @@ const Footer = () => {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-6 h-6 flex items-center justify-center text-brand-primary transition-colors"
+                className="w-6 h-6 flex items-center justify-center text-blue-700 transition-colors"
                 aria-label={social.platform}
               >
                 {social.icon}
@@ -153,75 +142,34 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Navigation Links - Two Column Layout */}
-        <div className="grid grid-cols-2 gap-x-12 mb-4">
-          {/* Left Column - About and Products */}
-          <div className="space-y-8">
-            {leftColumnSections.map((section) => (
-              <div key={section.title}>
-                <h3 className="text-sm font-medium leading-5 text-gray-900 mb-2">
-                  {section.title}
-                </h3>
-                <ul className="space-y-1">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="text-sm font-normal leading-5 text-gray-500 hover:text-gray-900 transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Right Column - Resources and Support */}
-          <div className="space-y-8">
-            {rightColumnSections.map((section) => (
-              <div key={section.title}>
-                <h3 className="text-sm font-medium leading-5 text-gray-900 mb-2">
-                  {section.title}
-                </h3>
-                <ul className="space-y-1">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="text-sm font-normal leading-5 text-gray-500 hover:text-gray-900 transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+        {/* Navigation Links - Single Column Mobile Layout */}
+        <div className="space-y-6 mb-4">
+          {footerSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="text-sm font-medium font-['Poppins'] leading-5 text-zinc-800 mb-2">
+                {section.title}
+              </h3>
+              <ul className="space-y-1">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm font-normal font-['Poppins'] leading-5 text-zinc-500 hover:text-zinc-800 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Bottom Section - Divider, Policy Links, and Copyright */}
+        {/* Bottom Section - Divider and Copyright */}
         <div className="border-t border-stone-300 pt-4">
-          {/* Policy Links */}
-          <div className="flex items-center gap-8 mb-2 w-full justify-between">
-            {policyLinks.map((link, index) => (
-              <Link
-                key={`${link.label}-${index}`}
-                href={link.href}
-                className="text-sm font-normal leading-6 text-gray-700 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
           {/* Copyright */}
-          <p className="text-xs font-normal leading-4 text-gray-500 text-center">
-            © 2023 Quantum X Global Private Limited.
-            <br />
-            All Rights Reserved.
+          <p className="text-xs font-normal font-['Poppins'] leading-4 text-zinc-500 text-center">
+            © 2026 Quantum X Global Private Limited. All Rights Reserved.
           </p>
         </div>
       </div>

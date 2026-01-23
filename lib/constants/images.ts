@@ -51,6 +51,7 @@ export const IMAGES = {
     PWS_SUCCESS: '/assets/images/pws-success.png',
     GUARED: '/assets/images/guard.png',
     THUMB_PRINT: '/assets/images/thumb-print.png',
+    TERMS_OF_SERVICE: '/assets/images/terms-of-service.png',
   },
   PARTNERS: {
     BASE_PATH: '/assets/images/partners',

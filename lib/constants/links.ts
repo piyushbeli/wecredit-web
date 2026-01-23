@@ -14,5 +14,6 @@ export const EXTERNAL_LINKS = {
 		INSTAGRAM: "https://instagram.com/wecredit",
 		X: "https://x.com/wecredit",
 		LINKEDIN: "https://linkedin.com/company/wecredit",
+		YOUTUBE: "https://youtube.com/@wecredit",
 	},
 } as const;
