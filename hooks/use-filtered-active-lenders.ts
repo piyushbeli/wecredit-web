@@ -1,3 +1,4 @@
+'use client'
 /**
  * Hook to fetch and filter active lenders
  * Provides a clean interface for components that need filtered lender data

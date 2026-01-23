@@ -25,6 +25,12 @@ export const OffersView = () => {
   const router = useRouter();
   const { exploreOffers, isLoading, isPolling, error, fetchOffers } = useOffers();
   const handleOfferClick = (offer: LenderOfferStatus): void => {
+    // For non-INITIATED offers in explore screen, navigate to status page
+    if (offer.wcStatus !== 'INITIATED') {
+      router.push('/offers/status');
+      return;
+    }
+    // For INITIATED offers, open UTM link
     const utmLink: string | undefined = offer.utmLink;
     if (!utmLink) {
       return;
@@ -32,12 +38,14 @@ export const OffersView = () => {
     const lenderName: string = offer.lenderName || '';
     const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
     const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
-    const isUtmClicked: boolean = offer.wcStatus === 'UTM_CLICKED';
-    if (lenderName && mobile && !isUtmClicked) {
+    // Update UTM clicked status for INITIATED offers
+    if (lenderName && mobile) {
       void updateUtmClicked(mobile, lenderName, token);
     }
-    window.open(utmLink, '_blank'); 
-    fetchOffers();
+    window.open(utmLink, '_blank');
+    setTimeout(() => {
+      fetchOffers();
+    }, 2000);
   };
   const handleCheckStatus = (): void => {
     router.push('/offers/status');
@@ -82,9 +90,9 @@ export const OffersView = () => {
 
   // Only redirect if polling has completed and there are no explore offers
   // This allows polling to complete before redirecting to status page
-  if (!isPolling && exploreOffers.length === 0) {
-    redirect('/offers/status');
-  }
+  // if (!isPolling && exploreOffers.length === 0) {
+  //   redirect('/offers/status');
+  // }
 
   return (
     <div className="min-h-screen ">

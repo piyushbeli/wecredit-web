@@ -251,7 +251,7 @@ export function useOffers(): UseOffersReturn {
   /**
    * Derived arrays for different offer categories
    */
-  const exploreOffers = selectExploreOffers(offers);
+  const exploreOffers = (offers);
   const statusOffers = selectStatusOffers(offers);
 
   /**

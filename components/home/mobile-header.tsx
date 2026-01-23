@@ -1,15 +1,15 @@
 'use client';
 
-import { JSX, useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect, useCallback, JSX } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { Menu, X, User, LogOut } from 'lucide-react';
 import type { GlobalLink, StrapiMedia } from '@/types/strapi';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
-import { IMAGES } from '@/lib/constants/images';
+import { useAuthCookies } from '@/hooks/use-auth-cookies';
+import { HeaderLogo } from './mobile-header-components/header-logo';
+import { UserButton } from './mobile-header-components/user-button';
+import { MenuButton } from './mobile-header-components/menu-button';
+import { MobileMenuDrawer } from './mobile-header-components/mobile-menu-drawer';
 
 /** Scroll threshold in pixels to trigger header style change */
 const SCROLL_THRESHOLD = 50;
@@ -20,42 +20,6 @@ interface MobileHeaderProps {
   logo: StrapiMedia | null;
   siteName: string;
 }
-
-/** Menu item animation variants */
-const menuItemVariants: Variants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.3,
-      ease: 'easeOut',
-    },
-  }),
-  exit: { opacity: 0, x: -20 },
-};
-
-/** Drawer animation variants */
-const drawerVariants: Variants = {
-  hidden: { x: '-100%' },
-  visible: {
-    x: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-  exit: {
-    x: '-100%',
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-};
 
 /**
  * Mobile-first sticky header with scroll-aware styling and slide-out menu drawer.
@@ -106,273 +70,37 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
           )}
         >
           {/* Logo - switches between light and dark variants based on header state */}
-          <Link href="/" className="flex items-center relative">
-            {/* Light logo (for transparent header on blue background) */}
-            <Image
-              src={IMAGES.LOGOS.DEFAULT}
-              alt={siteName || 'WeCredit'}
-              width={120}
-              height={32}
-              className={cn(
-                'h-8 w-auto transition-opacity duration-300',
-                showSolidHeader ? 'opacity-0 absolute' : 'opacity-100'
-              )}
-              priority
-            />
-            {/* Dark logo (for white solid header) */}
-            <Image
-              src={IMAGES.LOGOS.TRANSPARENT}
-              alt={siteName || 'WeCredit'}
-              width={120}
-              height={32}
-              className={cn(
-                'h-8 w-auto transition-opacity duration-300',
-                showSolidHeader ? 'opacity-100' : 'opacity-0 absolute'
-              )}
-              priority
-            />
-          </Link>
+          <HeaderLogo siteName={siteName} showSolidHeader={showSolidHeader} />
 
           {/* Right side buttons */}
           <div className="flex items-center gap-2">
             {/* Login/User Button */}
-            {isAuthenticated ? (
-              <motion.button
-                type="button"
-                onClick={toggleMenu}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-md transition-all duration-300 text-sm font-medium',
-                  showSolidHeader
-                    ? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
-                    : 'wc-menu-btn-glass text-white'
-                )}
-                whileTap={{ scale: 0.95 }}
-              >
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline max-w-[80px] truncate">
-                  {user?.name || 'Account'}
-                </span>
-              </motion.button>
-            ) : (
-              <motion.button
-                type="button"
-                onClick={openAuthModal}
-                className={cn(
-                  'px-4 py-2 rounded-md transition-all duration-300 text-sm font-semibold',
-                  showSolidHeader
-                    ? 'bg-wc-blue-600 text-white hover:bg-wc-blue-700'
-                    : 'bg-white text-wc-blue-600 hover:bg-white/90'
-                )}
-                whileTap={{ scale: 0.95 }}
-              >
-                Login
-              </motion.button>
-            )}
+            <UserButton
+              isAuthenticated={isAuthenticated}
+              user={user}
+              showSolidHeader={showSolidHeader}
+              toggleMenu={toggleMenu}
+              openAuthModal={openAuthModal}
+            />
 
             {/* Hamburger Menu Button */}
-            <motion.button
-              type="button"
-              onClick={toggleMenu}
-              className={cn(
-                'p-2.5 rounded-md transition-all duration-300',
-                showSolidHeader
-                  ? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
-                  : 'wc-menu-btn-glass text-wc-blue-600'
-              )}
-              aria-label="Open menu"
-              whileTap={{ scale: 0.95 }}
-            >
-              <Menu className={cn("w-5 h-5", showSolidHeader ? 'text-wc-blue-600' : 'text-white')} />
-            </motion.button>
+            <MenuButton toggleMenu={toggleMenu} showSolidHeader={showSolidHeader} />
           </div>
         </div>
       </header>
 
       {/* Menu Drawer */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 wc-menu-overlay"
-              onClick={closeMenu}
-            />
-
-            {/* Drawer */}
-            <motion.div
-              variants={drawerVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed top-0 left-0 bottom-0 w-[280px] z-50 bg-wc-dark shadow-2xl"
-            >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/10">
-                <Link href="/" onClick={closeMenu} className="flex items-center">
-                  <Image
-                    src={IMAGES.LOGOS.DEFAULT}
-                    alt={siteName || 'WeCredit'}
-                    width={100}
-                    height={28}
-                    className="h-7 w-auto"
-                  />
-                </Link>
-                <motion.button
-                  type="button"
-                  onClick={closeMenu}
-                  className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-                  aria-label="Close menu"
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <X className="w-5 h-5" />
-                </motion.button>
-              </div>
-
-              {/* User Section */}
-              <div className="p-4 border-b border-white/10">
-                {isAuthenticated ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-wc-blue-500 flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">
-                          {user?.name || 'User'}
-                        </p>
-                        <p className="text-white/60 text-sm">
-                          +91 {user?.phoneNumber}
-                        </p>
-                      </div>
-                    </div>
-                    <motion.button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        closeMenu();
-                      }}
-                      className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-                      aria-label="Logout"
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <LogOut className="w-5 h-5" />
-                    </motion.button>
-                  </div>
-                ) : (
-                  <motion.button
-                    type="button"
-                    onClick={() => {
-                      openAuthModal();
-                      closeMenu();
-                    }}
-                    className="w-full py-3 bg-wc-blue-500 text-white rounded-lg font-semibold hover:bg-wc-blue-600 transition-colors"
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Login / Sign Up
-                  </motion.button>
-                )}
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="p-4">
-                <ul className="space-y-1">
-                  {headerLinks.map((link, index) => (
-                    <motion.li
-                      key={link.id}
-                      custom={index}
-                      variants={menuItemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                    >
-                      <MenuLink link={link} onNavigate={closeMenu} />
-                    </motion.li>
-                  ))}
-                </ul>
-              </nav>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <MobileMenuDrawer
+        isMenuOpen={isMenuOpen}
+        closeMenu={closeMenu}
+        siteName={siteName}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        logout={logout}
+        openAuthModal={openAuthModal}
+        headerLinks={headerLinks}
+      />
     </>
-  );
-};
-
-/** Props for MenuLink component */
-interface MenuLinkProps {
-  link: GlobalLink;
-  onNavigate: () => void;
-}
-
-/**
- * Individual menu link with optional children expansion
- */
-const MenuLink = ({ link, onNavigate }: MenuLinkProps): JSX.Element => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const hasChildren = link.children && link.children.length > 0;
-
-  if (hasChildren) {
-    return (
-      <div>
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-between px-3 py-3 text-white/90 hover:text-white hover:bg-white/5 rounded-lg font-medium transition-colors"
-        >
-          <span>{link.label}</span>
-          <motion.svg
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </motion.svg>
-        </button>
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.ul
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="ml-4 mt-1 space-y-1 overflow-hidden"
-            >
-              {link.children.map((child) => (
-                <li key={child.id}>
-                  <Link
-                    href={child.url}
-                    target={child.openInNewTab ? '_blank' : undefined}
-                    rel={child.openInNewTab ? 'noopener noreferrer' : undefined}
-                    className="block px-3 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                    onClick={onNavigate}
-                  >
-                    {child.label}
-                  </Link>
-                </li>
-              ))}
-            </motion.ul>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href={link.url}
-      target={link.openInNewTab ? '_blank' : undefined}
-      rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
-      className="block px-3 py-3 text-white/90 hover:text-white hover:bg-white/5 rounded-lg font-medium transition-colors"
-      onClick={onNavigate}
-    >
-      {link.label}
-    </Link>
   );
 };
 
