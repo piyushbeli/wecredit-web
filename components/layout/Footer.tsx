@@ -43,7 +43,7 @@ const footerSections: FooterSection[] = [
     title: 'Resources',
     links: [
       { label: 'Calculators', href: '/calculators/emi' },
-      { label: 'Our Partners', href: '/#partners' },
+      { label: 'Our Partners', href: '/our-partners' },
       { label: 'Blog', href: '/blog' },
     ],
   },
