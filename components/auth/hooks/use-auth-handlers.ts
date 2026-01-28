@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { authService, setAuthToken, setMobile } from '@/lib/api';
+import { useLoading } from '@/hooks/use-loading';
 
 /**
  * Return type for useAuthHandlers hook
@@ -36,6 +37,7 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
     setLoading,
     setError,
   } = useAuthStore();
+  const { showLoading, hideLoading } = useLoading();
 
   const [otpValue, setOtpValue] = useState('');
   const isVerifyingOtpRef = useRef<boolean>(false);
@@ -57,12 +59,17 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
     if (!isPhoneValid || isLoading) return;
     setLoading(true);
     setError(null);
-    const result = await authService.sendOtp(phoneNumber);
-    if (result.success) {
-      setStep('otp');
-      setLoading(false);
-    } else {
-      setError(result.error || 'Failed to send OTP. Please try again.');
+    showLoading('Sending OTP...', 'We are verifying your phone number.');
+    try {
+      const result = await authService.sendOtp(phoneNumber);
+      if (result.success) {
+        setStep('otp');
+        setLoading(false);
+      } else {
+        setError(result.error || 'Failed to send OTP. Please try again.');
+      }
+    } finally {
+      hideLoading();
     }
   };
 
@@ -80,6 +87,7 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
     setLoading(true);
     setError(null);
     try {
+      showLoading('Please wait...', 'We&apos;re preparing your WeCredit experience.');
       const result = await authService.verifyOtp(phoneNumber, otpToVerify);
       if (result.success && result.data) {
         setAuthToken(result.data.token);
@@ -91,6 +99,7 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
       setError(result.error || 'Invalid OTP. Please try again.');
     } finally {
       isVerifyingOtpRef.current = false;
+      hideLoading();
     }
   };
 
@@ -98,9 +107,14 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
   const handleResendOtp = async (): Promise<void> => {
     setError(null);
     setOtpValue('');
-    const result = await authService.resendOtp(phoneNumber);
-    if (!result.success) {
-      setError(result.error || 'Failed to resend OTP. Please try again.');
+    showLoading('Resending OTP...', 'Please wait a moment.');
+    try {
+      const result = await authService.resendOtp(phoneNumber);
+      if (!result.success) {
+        setError(result.error || 'Failed to resend OTP. Please try again.');
+      }
+    } finally {
+      hideLoading();
     }
   };
 

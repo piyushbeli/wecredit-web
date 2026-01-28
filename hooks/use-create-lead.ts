@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react';
 import { leadService } from '@/lib/api/lead-service';
 import type { LeadFormData } from '@/types/lead';
+import { useLoading } from '@/hooks/use-loading';
 
 /** Return type for useCreateLead hook */
 interface UseCreateLeadReturn {
@@ -49,6 +50,7 @@ export function useCreateLead(): UseCreateLeadReturn {
   const [isCreated, setIsCreated] = useState(false);
   const [leadId, setLeadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { showLoading, hideLoading } = useLoading();
 
   const createLead = useCallback(async (
     formData: LeadFormData,
@@ -59,16 +61,21 @@ export function useCreateLead(): UseCreateLeadReturn {
     setIsCreated(false);
     setError(null);
     setLeadId(null);
-    const result = await leadService.createLead(formData, partnerCode, lenderName);
-    setIsLoading(false);
-    if (result.success && result.data) {
-      setLeadId(result.data.leadId);
-      setIsCreated(true);
-      return true;
+    showLoading('Submitting application...', 'Please wait while we process your details.');
+    try {
+      const result = await leadService.createLead(formData, partnerCode, lenderName);
+      if (result.success && result.data) {
+        setLeadId(result.data.leadId);
+        setIsCreated(true);
+        return true;
+      }
+      setError(result.error || 'Failed to create lead');
+      return false;
+    } finally {
+      setIsLoading(false);
+      hideLoading();
     }
-    setError(result.error || 'Failed to create lead');
-    return false;
-  }, []);
+  }, [hideLoading, showLoading]);
 
   const reset = useCallback((): void => {
     setIsLoading(false);
