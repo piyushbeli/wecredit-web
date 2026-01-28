@@ -100,6 +100,7 @@ export function useOffers(): UseOffersReturn {
   
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pollStartTimeRef = useRef<number | null>(null);
+  const didInitialFetchRef = useRef(false);
 
   /**
    * Fetch offers from API or mock data
@@ -327,12 +328,13 @@ export function useOffers(): UseOffersReturn {
     };
   }, [isPolling, executePoll, pollTick]);
 
-  // Initial fetch (Case B: No polling, or Case A: First attempt)
+  // Initial fetch on mount (always refresh store, even if offers already exist)
   useEffect(() => {
-    if (!isPolling && offers.length === 0 && !error) {
-       fetchOffers();
-    }
-  }, [fetchOffers, isPolling, offers.length, error]);
+    if (didInitialFetchRef.current) return;
+    if (isPolling || error) return;
+    didInitialFetchRef.current = true;
+    fetchOffers();
+  }, [fetchOffers, isPolling, error]);
 
   return {
     offers,
