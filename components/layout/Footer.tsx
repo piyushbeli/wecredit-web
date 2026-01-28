@@ -42,7 +42,7 @@ const footerSections: FooterSection[] = [
   {
     title: 'Resources',
     links: [
-      { label: 'Calculators', href: '/calculators/emi' },
+      { label: 'Calculators', href: '/personal-loan-calculator' },
       { label: 'Our Partners', href: '/our-partners' },
       { label: 'Blog', href: '/blog' },
     ],
