@@ -11,6 +11,7 @@
 import { useState, useCallback } from 'react';
 import { leadService } from '@/lib/api/lead-service';
 import type { FormField } from '@/types/lead';
+import { useLoading } from '@/hooks/use-loading';
 
 /** Return type for useFetchFormFields hook */
 interface UseFetchFormFieldsReturn {
@@ -54,6 +55,7 @@ export function useFetchFormFields(): UseFetchFormFieldsReturn {
   const [fields, setFields] = useState<FormField[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showLoading, hideLoading } = useLoading();
 
   const fetchFields = useCallback(async (
     lenderName: string,
@@ -62,17 +64,21 @@ export function useFetchFormFields(): UseFetchFormFieldsReturn {
     // Always fetch from API (no FE caching) to guarantee fresh values.
     setIsLoading(true);
     setError(null);
-    
-    const result = await leadService.fetchFormFields(lenderName, fetchDetails);
-    
-    if (result.success && result.data) {
-      setFields(result.data);
-    } else {
-      setError(result.error || 'Failed to fetch form fields');
+
+    showLoading('Loading form...', 'Preparing your application.');
+    try {
+      const result = await leadService.fetchFormFields(lenderName, fetchDetails);
+
+      if (result.success && result.data) {
+        setFields(result.data);
+      } else {
+        setError(result.error || 'Failed to fetch form fields');
+      }
+    } finally {
+      setIsLoading(false);
+      hideLoading();
     }
-    
-    setIsLoading(false);
-  }, []);
+  }, [hideLoading, showLoading]);
 
   const reset = useCallback((): void => {
     setFields([]);
