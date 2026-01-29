@@ -11,6 +11,7 @@ export const DEFAULT_FEATURE_FLAGS = {
   enableOfferMockData: false,
   showPreAuthFlow: true,
   bypassDedupeCheck: false,
+  enableBusinessLoanPrefill: false,
 } as const;
 
 /**
@@ -70,6 +71,13 @@ export const FEATURE_FLAG_METADATA: Record<FeatureFlagName, FeatureFlagMetadata>
     description: 'Skip duplicate lead validation for testing',
     category: 'data',
     defaultValue: DEFAULT_FEATURE_FLAGS.bypassDedupeCheck,
+  },
+  enableBusinessLoanPrefill: {
+    name: 'enableBusinessLoanPrefill',
+    label: 'Prefill Business Loan Form',
+    description: 'Prefill business loan form with test data for testing',
+    category: 'forms',
+    defaultValue: DEFAULT_FEATURE_FLAGS.enableBusinessLoanPrefill,
   },
 };
 
