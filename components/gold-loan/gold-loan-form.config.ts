@@ -38,12 +38,18 @@ const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 /**
  * Validate DOB in YYYY-MM-DD format (native date input).
- * Same format as Lead form; day/month/year bounds checked.
+ * Also accepts DD-MM-YYYY and DD/MM/YYYY for manual typing fallback.
  */
 function isValidDobFormat(value: string): boolean {
   const trimmed = value.trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return false;
-  const [y, m, d] = trimmed.split('-').map((x) => parseInt(x ?? '0', 10));
+  const isNative = /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
+  const isSlash = /^\d{2}\/\d{2}\/\d{4}$/.test(trimmed);
+  const isDash = /^\d{2}-\d{2}-\d{4}$/.test(trimmed);
+  if (!isNative && !isSlash && !isDash) return false;
+  const normalized = isNative
+    ? trimmed
+    : trimmed.replace(/\//g, '-').split('-').reverse().join('-');
+  const [y, m, d] = normalized.split('-').map((x) => parseInt(x ?? '0', 10));
   if (d < 1 || d > 31) return false;
   if (m < 1 || m > 12) return false;
   if (y < 1900 || y > 2099) return false;
@@ -60,6 +66,9 @@ export const formatDobForApi = (dateStr: string): string => {
     const [year, month, day] = dateStr.split('-');
     return `${day}-${month}-${year}`;
   }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    return dateStr.replace(/\//g, '-');
+  }
   return dateStr;
 };
 
@@ -69,6 +78,10 @@ export const formatDobForApi = (dateStr: string): string => {
  */
 export const dobToNativeFormat = (dateStr: string): string => {
   if (!dateStr?.trim()) return '';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    const [day, month, year] = dateStr.split('/');
+    return `${year}-${month}-${day}`;
+  }
   if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
     const [day, month, year] = dateStr.split('-');
     return `${year}-${month}-${day}`;

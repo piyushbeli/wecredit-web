@@ -1,7 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Home, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ActionButton } from '@/components/shared';
 import HomeLoanFields from './home-loan-fields';
 import { useHomeLoanForm } from './use-home-loan-form';
@@ -11,29 +10,26 @@ interface HomeLoanFormProps {
   onClose?: () => void;
   /** When true, form is embedded in modal; root uses flex-1 min-h-0 and back calls onClose */
   isModal?: boolean;
+  /** Called when the API submit succeeds so the parent can show success state. */
+  onSuccess?: () => void;
 }
 
-const HomeLoanForm = ({ onClose, isModal = false }: HomeLoanFormProps): React.ReactNode => {
+const HomeLoanForm = ({
+  onClose,
+  isModal = false,
+  onSuccess,
+}: HomeLoanFormProps): React.ReactNode => {
   const {
     formValues,
     formErrors,
     handleFieldChange,
     handleSubmit,
     isSubmitting,
-    showSuccess,
     canSubmit,
-  } = useHomeLoanForm();
+  } = useHomeLoanForm({ onSuccess });
   const router = useRouter();
 
   const handleHeaderBackClick = (): void => {
-    if (onClose) {
-      onClose();
-    } else {
-      router.push('/');
-    }
-  };
-
-  const handleContinueToHomepage = (): void => {
     if (onClose) {
       onClose();
     } else {
@@ -49,51 +45,6 @@ const HomeLoanForm = ({ onClose, isModal = false }: HomeLoanFormProps): React.Re
   const rootClassName = isModal
     ? 'flex flex-col flex-1 min-h-0 bg-white'
     : 'bg-white h-screen flex flex-col';
-
-  // Success screen: full-screen replacement with illustration, message, and CTA.
-  if (showSuccess) {
-    return (
-      <div className={rootClassName}>
-        <AnimatePresence>
-          <motion.div
-            className="flex flex-col flex-1 min-h-0 items-center justify-center p-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <motion.div
-              className="flex flex-col items-center text-center max-w-md"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="rounded-full bg-blue-50 p-4">
-                  <Home className="w-12 h-12 text-blue-600" />
-                </div>
-                <CheckCircle2 className="w-10 h-10 text-green-500" />
-              </div>
-              <h2 className="text-lg font-bold text-blue-600 uppercase tracking-wide mb-3">
-                THANK YOU FOR SUBMITTING YOUR HOME LOAN REQUEST!
-              </h2>
-              <p className="text-sm text-gray-600 mb-8">
-                We&apos;ll get in touch with you shortly to guide you through the next steps.
-              </p>
-              <ActionButton
-                type="button"
-                onClick={handleContinueToHomepage}
-                fullWidth
-                className="h-14 text-base"
-              >
-                Continue to Homepage
-              </ActionButton>
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    );
-  }
 
   return (
     <div className={rootClassName}>

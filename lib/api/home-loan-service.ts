@@ -14,13 +14,24 @@ const HOME_LOAN_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 interface HomeLoanSubmitRequestBody {
   endpoint: string;
   partnerCode: string;
-  name: string;
+  fullName: string;
   phoneNumber: number;
   permanentPincode: string;
   propertyPincode: string;
   employmentType: string;
   loanAmount: number;
   consent: boolean;
+}
+
+interface HomeLoanStatusRequestBody {
+  endpoint: string;
+  partnerCode: string;
+}
+
+interface HomeLoanStatusResult {
+  hasExistingLead: boolean;
+  data?: unknown;
+  error?: string;
 }
 
 function buildDefaultHeaders(): Record<string, string> {
@@ -42,6 +53,102 @@ function buildHomeLoanHeaders(mobile: string): Record<string, string> {
   return headers;
 }
 
+export async function fetchHomeLoanStatus(
+  mobile: string,
+  signal?: AbortSignal
+): Promise<HomeLoanStatusResult> {
+  const phoneDigits = mobile.replace(/\D/g, '');
+  if (!/^[0-9]{10}$/.test(phoneDigits)) {
+    // Validation guard to avoid unnecessary backend calls for invalid inputs.
+    return { hasExistingLead: false, error: 'Invalid mobile number' };
+  }
+
+  const requestBody: HomeLoanStatusRequestBody = {
+    endpoint: 'fetch-hl-lead',
+    partnerCode: PARTNER_CODE,
+  };
+
+  const url = new URL(HOME_LOAN_ENDPOINT);
+  // Home loan status API expects mobileNumber in query params.
+  url.searchParams.set('mobileNumber', phoneDigits);
+
+  try {
+    const response = await fetch(url.toString(), {
+      method: 'POST',
+      headers: buildHomeLoanHeaders(phoneDigits),
+      body: JSON.stringify(requestBody),
+      signal,
+    });
+
+    let responseData: unknown = undefined;
+    try {
+      responseData = await response.json();
+    } catch {
+      // Response body might be empty or non-JSON on some failures.
+    }
+
+    const responseMessage =
+      typeof responseData === 'object' && responseData
+        ? (responseData as { message?: string; error?: string; statusMessage?: string }).message ||
+          (responseData as { message?: string; error?: string; statusMessage?: string }).error ||
+          (responseData as { message?: string; error?: string; statusMessage?: string }).statusMessage
+        : undefined;
+    const responseStatus =
+      typeof responseData === 'object' && responseData
+        ? (responseData as { status?: number }).status
+        : undefined;
+    const loanFormStatus =
+      typeof responseData === 'object' && responseData
+        ? (responseData as { loan_form_status?: unknown; loanFormStatus?: unknown }).loan_form_status ??
+          (responseData as { loan_form_status?: unknown; loanFormStatus?: unknown }).loanFormStatus
+        : undefined;
+    if (loanFormStatus !== undefined) {
+      // Some status APIs return a dedicated loan_form_status field instead of HTTP 404/200.
+      const normalizedStatus =
+        typeof loanFormStatus === 'string' ? loanFormStatus.trim().toLowerCase() : loanFormStatus;
+      const hasSuccessStatus =
+        normalizedStatus === true ||
+        normalizedStatus === 1 ||
+        normalizedStatus === 'success' ||
+        normalizedStatus === 'submitted' ||
+        normalizedStatus === 'approved' ||
+        normalizedStatus === 'completed';
+      return { hasExistingLead: hasSuccessStatus, data: responseData };
+    }
+
+    // "Lead Not Found" is the expected response when the user has not submitted.
+    if (
+      response.status === 404 ||
+      responseStatus === 404 ||
+      responseMessage?.toLowerCase().includes('lead not found')
+    ) {
+      return { hasExistingLead: false, data: responseData };
+    }
+
+    if (response.ok) {
+      return { hasExistingLead: true, data: responseData };
+    }
+
+    const errorMessage =
+      responseMessage || `Request failed with status ${response.status}`;
+    toast.error(errorMessage, {
+      description: 'Unable to check your previous submission.',
+    });
+    return { hasExistingLead: false, error: errorMessage, data: responseData };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      // Silent abort to avoid confusing users during route changes.
+      return { hasExistingLead: false };
+    }
+    const errorMessage =
+      error instanceof Error ? error.message : 'Network error occurred';
+    toast.error(errorMessage, {
+      description: 'Failed to check your submission. Please try again.',
+    });
+    return { hasExistingLead: false, error: errorMessage };
+  }
+}
+
 export async function submitHomeLoanEnquiry(
   payload: HomeLoanEnquiryPayload
 ): Promise<boolean> {
@@ -56,7 +163,7 @@ export async function submitHomeLoanEnquiry(
   const requestBody: HomeLoanSubmitRequestBody = {
     endpoint: 'hl-leads',
     partnerCode: PARTNER_CODE,
-    name: payload.name,
+    fullName: payload.name,
     phoneNumber: Number(phoneDigits),
     permanentPincode: payload.permanentPincode,
     propertyPincode: payload.propertyPincode,

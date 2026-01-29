@@ -5,7 +5,9 @@ import MobileHeader from '@/components/home/mobile-header';
 import type { GlobalLink, StrapiMedia } from '@/types/strapi';
 
 /** Routes where MobileHeader should NOT be displayed */
-const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/', '/business-loan/'];
+const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/', '/business-loan/', '/gold-loan/', '/car-loan/', 
+  '/home-loan/', '/business-loan/' 
+];
 
 interface ConditionalMobileHeaderProps {
   headerLinks: GlobalLink[];

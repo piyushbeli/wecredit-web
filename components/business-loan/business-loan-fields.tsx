@@ -179,6 +179,8 @@ const BusinessLoanFields = ({
             value={formValues.companyType}
             onChange={(value) => handleFieldChange('companyType', value)}
             error={formErrors.companyType}
+            className="flex-wrap"
+            buttonClassName="min-w-[92px] flex-none"
           />
         </div>
 

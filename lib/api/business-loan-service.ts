@@ -39,7 +39,7 @@ interface BusinessLoanSubmitRequestBody {
   annualTurnover: number;
   companyType: CompanyType;
   gender: Gender;
-  pincode: string;
+  pincode: number;
   requiredLoanAmount: number;
   hasGst: boolean;
   businessNature: string;
@@ -128,6 +128,24 @@ export async function fetchBusinessLoanStatus(
       typeof responseData === 'object' && responseData
         ? (responseData as { status?: number }).status
         : undefined;
+    const loanFormStatus =
+      typeof responseData === 'object' && responseData
+        ? (responseData as { loan_form_status?: unknown; loanFormStatus?: unknown }).loan_form_status ??
+          (responseData as { loan_form_status?: unknown; loanFormStatus?: unknown }).loanFormStatus
+        : undefined;
+    if (loanFormStatus !== undefined) {
+      // Some status APIs return a dedicated loan_form_status field instead of HTTP 404/200.
+      const normalizedStatus =
+        typeof loanFormStatus === 'string' ? loanFormStatus.trim().toLowerCase() : loanFormStatus;
+      const hasSuccessStatus =
+        normalizedStatus === true ||
+        normalizedStatus === 1 ||
+        normalizedStatus === 'success' ||
+        normalizedStatus === 'submitted' ||
+        normalizedStatus === 'approved' ||
+        normalizedStatus === 'completed';
+      return { hasExistingLead: hasSuccessStatus, data: responseData };
+    }
 
     // "BL Lead Not Found" is the expected response when the user has not submitted.
     if (
@@ -166,7 +184,7 @@ export async function submitBusinessLoanEnquiry(
 ): Promise<boolean> {
   const phoneDigits = payload.mobile.replace(/\D/g, '');
   if (!/^[0-9]{10}$/.test(phoneDigits)) {
-    toast.error('Invalid mobile number', {
+    toast.error('Invalid mobile number', {  
       description: 'Please enter a valid 10-digit mobile number.',
     });
     return false;
@@ -181,14 +199,13 @@ export async function submitBusinessLoanEnquiry(
     annualTurnover: payload.annualTurnover,
     companyType: payload.companyType,
     gender: payload.gender,
-    pincode: payload.pincode,
+    pincode: Number(payload.pincode),
     requiredLoanAmount: payload.requiredLoanAmount,
     hasGst: payload.hasGst,
     businessNature: payload.businessNature,
   };
 
   console.log('requestBody', requestBody);
-  debugger;
   try {
     const response = await fetch(BUSINESS_LOAN_ENDPOINT, {
       method: 'POST',

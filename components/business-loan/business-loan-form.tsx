@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
-import { ActionButton } from '@/components/shared';
+import { ArrowLeft, Briefcase, CheckCircle2 } from 'lucide-react';
+import { ActionButton, SuccessScreen } from '@/components/shared';
 import BusinessLoanFields from './business-loan-fields';
 import { useBusinessLoanForm } from './use-business-loan-form';
 import { useRouter } from 'next/navigation';
@@ -32,12 +32,6 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
   } = useBusinessLoanForm();
   const router = useRouter();
 
-  const successNotice = showSuccess ? (
-    <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-      Your details have been submitted successfully. Our team will connect with you shortly.
-    </div>
-  ) : null;
-
   const handleHeaderBackClick = (): void => {
     if (isFirstStep) {
       if (onClose) {
@@ -48,6 +42,14 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
       return;
     }
     handleBack();
+  };
+
+  const handleContinueToHomepage = (): void => {
+    if (onClose) {
+      onClose();
+    } else {
+      router.push('/');
+    }
   };
 
   const onFormSubmit = (e: React.FormEvent): void => {
@@ -80,6 +82,27 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
     ? 'flex flex-col flex-1 min-h-0 bg-white'
     : 'bg-white h-screen flex flex-col';
 
+  // Success screen: full-screen replacement with message and CTA.
+  if (showSuccess) {
+    return (
+      <div className={rootClassName}>
+        <SuccessScreen
+          title="THANK YOU FOR SUBMITTING YOUR BUSINESS LOAN REQUEST!"
+          description="We'll get in touch with you shortly to guide you through the next steps."
+          ctaLabel="Continue to Homepage"
+          onCtaClick={handleContinueToHomepage}
+          variant="sticky"
+          primaryIcon={
+            <div className="rounded-full bg-blue-50 p-4">
+              <Briefcase className="w-12 h-12 text-blue-600" />
+            </div>
+          }
+          secondaryIcon={<CheckCircle2 className="w-10 h-10 text-green-500" />}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={rootClassName}>
       {/* Step header */}
@@ -98,8 +121,6 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
       </div>
 
       <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">
-        {successNotice}
-
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
             <h2 className="lead-form-heading">{currentStepConfig.title}</h2>

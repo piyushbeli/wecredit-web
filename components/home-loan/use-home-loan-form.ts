@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { submitHomeLoanEnquiry } from '@/lib/api/home-loan-service';
+import { useLoadingStore } from '@/stores/loading-store';
 import {
   DEFAULT_HOME_LOAN_FORM_STATE,
   buildHomeLoanPayload,
@@ -16,8 +17,12 @@ interface UseHomeLoanFormReturn {
   handleFieldChange: (key: keyof HomeLoanFormState, value: string | boolean) => void;
   handleSubmit: () => Promise<void>;
   isSubmitting: boolean;
-  showSuccess: boolean;
   canSubmit: boolean;
+}
+
+interface UseHomeLoanFormOptions {
+  /** Called when the API submit succeeds so the parent can show success state. */
+  onSuccess?: () => void;
 }
 
 function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
@@ -28,12 +33,15 @@ function splitFullName(fullName: string | undefined): { firstName: string; lastN
   return { firstName, lastName };
 }
 
-export const useHomeLoanForm = (): UseHomeLoanFormReturn => {
+export const useHomeLoanForm = (
+  options: UseHomeLoanFormOptions = {}
+): UseHomeLoanFormReturn => {
   const { isAuthenticated, user } = useAuth();
+  const { onSuccess } = options;
+  const { show: showLoading, hide: hideLoading } = useLoadingStore();
   const [formValues, setFormValues] = useState<HomeLoanFormState>(DEFAULT_HOME_LOAN_FORM_STATE);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const hasPrefilledRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -65,13 +73,19 @@ export const useHomeLoanForm = (): UseHomeLoanFormReturn => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    showLoading({
+      message: 'Submitting your home loan request...',
+      subtext: 'This will only take a moment.',
+    });
     try {
       const payload = buildHomeLoanPayload(formValues);
       const success = await submitHomeLoanEnquiry(payload);
 
       if (!isMountedRef.current) return;
       if (success) {
-        setShowSuccess(true);
+        if (onSuccess) {
+          onSuccess();
+        }
         setFormValues(DEFAULT_HOME_LOAN_FORM_STATE);
         setFormErrors({});
       }
@@ -79,8 +93,9 @@ export const useHomeLoanForm = (): UseHomeLoanFormReturn => {
       if (isMountedRef.current) {
         setIsSubmitting(false);
       }
+      hideLoading();
     }
-  }, [formValues, isSubmitting, validateForm]);
+  }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
 
   const canSubmit = useMemo((): boolean => {
     if (!formValues.consent) return false;
@@ -108,7 +123,6 @@ export const useHomeLoanForm = (): UseHomeLoanFormReturn => {
     handleFieldChange,
     handleSubmit,
     isSubmitting,
-    showSuccess,
     canSubmit,
   };
 };

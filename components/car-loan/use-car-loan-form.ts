@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { submitCarLoanEnquiry } from '@/lib/api/car-loan-service';
+import { useLoadingStore } from '@/stores/loading-store';
 import {
   DEFAULT_CAR_LOAN_FORM_STATE,
   buildCarLoanPayload,
@@ -16,8 +17,12 @@ interface UseCarLoanFormReturn {
   handleFieldChange: (key: keyof CarLoanFormState, value: string | boolean) => void;
   handleSubmit: () => Promise<void>;
   isSubmitting: boolean;
-  showSuccess: boolean;
   canSubmit: boolean;
+}
+
+interface UseCarLoanFormOptions {
+  /** Called when the API submit succeeds so the parent can show success state. */
+  onSuccess?: () => void;
 }
 
 function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
@@ -28,12 +33,15 @@ function splitFullName(fullName: string | undefined): { firstName: string; lastN
   return { firstName, lastName };
 }
 
-export const useCarLoanForm = (): UseCarLoanFormReturn => {
+export const useCarLoanForm = (
+  options: UseCarLoanFormOptions = {}
+): UseCarLoanFormReturn => {
   const { isAuthenticated, user } = useAuth();
+  const { onSuccess } = options;
+  const { show: showLoading, hide: hideLoading } = useLoadingStore();
   const [formValues, setFormValues] = useState<CarLoanFormState>(DEFAULT_CAR_LOAN_FORM_STATE);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const hasPrefilledRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -65,13 +73,19 @@ export const useCarLoanForm = (): UseCarLoanFormReturn => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    showLoading({
+      message: 'Submitting your car loan request...',
+      subtext: 'This will only take a moment.',
+    });
     try {
       const payload = buildCarLoanPayload(formValues);
       const success = await submitCarLoanEnquiry(payload);
 
       if (!isMountedRef.current) return;
       if (success) {
-        setShowSuccess(true);
+        if (onSuccess) {
+          onSuccess();
+        }
         setFormValues(DEFAULT_CAR_LOAN_FORM_STATE);
         setFormErrors({});
       }
@@ -79,12 +93,14 @@ export const useCarLoanForm = (): UseCarLoanFormReturn => {
       if (isMountedRef.current) {
         setIsSubmitting(false);
       }
+      hideLoading();
     }
-  }, [formValues, isSubmitting, validateForm]);
+  }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
 
   const canSubmit = useMemo((): boolean => {
     if (!formValues.consent) return false;
     const errors = validateCarLoanForm(formValues);
+    console.log('Can submit errors', errors);
     return Object.keys(errors).length === 0;
   }, [formValues]);
 
@@ -108,7 +124,6 @@ export const useCarLoanForm = (): UseCarLoanFormReturn => {
     handleFieldChange,
     handleSubmit,
     isSubmitting,
-    showSuccess,
     canSubmit,
   };
 };
