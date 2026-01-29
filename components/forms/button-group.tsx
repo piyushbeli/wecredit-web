@@ -16,6 +16,8 @@ interface ButtonGroupProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   error?: string;
+  className?: string;
+  buttonClassName?: string;
 }
 
 const ButtonGroup = ({ 
@@ -23,11 +25,13 @@ const ButtonGroup = ({
   value, 
   onChange, 
   disabled,
-  error 
+  error,
+  className,
+  buttonClassName,
 }: ButtonGroupProps) => {
   return (
     <div>
-      <div className="flex gap-2">
+      <div className={cn('flex gap-2', className)}>
         {options.map((option) => (
           <button
             key={option.value}
@@ -39,7 +43,8 @@ const ButtonGroup = ({
               value === option.value
                 ? 'bg-blue-50 border-blue-600 text-blue-600'
                 : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400',
-              disabled && 'opacity-50 cursor-not-allowed'
+              disabled && 'opacity-50 cursor-not-allowed',
+              buttonClassName
             )}
           >
             {option.label}

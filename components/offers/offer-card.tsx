@@ -47,17 +47,17 @@ export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProp
   /**
    * Determines the CTA label based on variant and offer status
    * - Status variant: always shows 'Apply Now'
-   * - Explore variant with INITIATED: shows status-specific label (e.g., 'Interested')
+   * - Explore variant with INITIATED: shows 'Apply Now'
    * - Explore variant with non-INITIATED: shows 'Go to Status'
    */
   const getCtaLabel = (): string => {
     if (variant === 'status') {
-      return 'Apply Now';
+      return 'View Details';
     }
-    // For explore variant, show 'Interested' only for INITIATED status
+    // For explore variant, show 'Apply Now' for INITIATED status
     // All other statuses show 'Go to Status'
     if (wcStatus === 'INITIATED') {
-      return getStatusCtaLabel(wcStatus);
+      return 'Apply Now';
     }
     return 'Go to Status';
   };

@@ -12,12 +12,14 @@ interface InputFieldProps {
   onBlur?: () => void;
   error?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   placeholder?: string;
   helperText?: string;
   type?: string;
   inputMode?: 'text' | 'numeric' | 'email' | 'tel';
   maxLength?: number;
   required?: boolean;
+  autoComplete?: string;
 }
 
 const InputField = ({
@@ -27,12 +29,14 @@ const InputField = ({
   onBlur,
   error,
   disabled,
+  readOnly,
   placeholder,
   helperText,
   type = 'text',
   inputMode = 'text',
   maxLength,
   required,
+  autoComplete,
 }: InputFieldProps) => {
   return (
     <div className="space-y-2">
@@ -47,15 +51,17 @@ const InputField = ({
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         disabled={disabled}
+        readOnly={readOnly}
         placeholder={placeholder}
         maxLength={maxLength}
+        autoComplete={autoComplete}
         className={cn(
           'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
           // Hide number input spinners
           '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
           error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
-          disabled && 'opacity-50 cursor-not-allowed'
+          (disabled || readOnly) && 'opacity-50'
         )}
       />
 

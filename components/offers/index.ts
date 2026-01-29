@@ -9,3 +9,4 @@ export * from './offers-status-view';
 export * from './approval-badge';
 export * from './status-badge';
 export * from './unmatched-offers-section';
+export * from './recently-clicked-offers-carousel';

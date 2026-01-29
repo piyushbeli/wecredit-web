@@ -10,6 +10,7 @@ import {
   ErrorState,
   PollingState,
   EmptyState,
+  RecentlyClickedOffersCarousel,
 } from '@/components/offers';
 import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
@@ -23,7 +24,7 @@ import { ActionButton, PageHeader } from '@/components/shared';
  */
 export const OffersView = () => {
   const router = useRouter();
-  const { exploreOffers, isLoading, isPolling, error, fetchOffers } = useOffers();
+  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers } = useOffers();
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     // For non-INITIATED offers in explore screen, navigate to status page
     if (offer.wcStatus !== 'INITIATED') {
@@ -43,14 +44,23 @@ export const OffersView = () => {
       void updateUtmClicked(mobile, lenderName, token);
     }
     window.open(utmLink, '_blank');
+    // Refresh offers after 2 seconds to reflect status change
     setTimeout(() => {
       fetchOffers();
     }, 2000);
   };
+
+  const handleRecentlyClickedOfferClick = (offer: LenderOfferStatus): void => {
+    // For recently clicked offers, navigate to status page
+    router.push('/offers/status');
+  };
   const handleCheckStatus = (): void => {
     router.push('/offers/status');
   };
-  const hasOffers = exploreOffers.length > 0;
+
+  // Calculate total offers including recently clicked
+  const totalOffers = statusOffers.length + exploreOffers.length;
+  const hasOffers = totalOffers > 0;
   const showPolling = isPolling && !hasOffers;
   const showEmpty = !isPolling && !hasOffers;
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
@@ -96,8 +106,25 @@ export const OffersView = () => {
 
   return (
     <div className="min-h-screen ">
-      <PageHeader title="Loan offers" />
-      <OffersHero eligibleAmount="₹1,00,000" offerCount={exploreOffers.length} />
+      <PageHeader title="Offers for you" />
+      
+      {/* Recently Clicked Offers Carousel - At the top */}
+      {statusOffers.length > 0 && (
+        <RecentlyClickedOffersCarousel 
+          offers={statusOffers} 
+          onOfferClick={handleRecentlyClickedOfferClick}
+        />
+      )}
+
+      {/* Congratulations message */}
+      {hasOffers && (
+        <div className="px-4 mb-4">
+          <p className="text-blue-600 text-sm font-medium">
+            Congratulations! You are eligible for a loan of upto ₹1,00,000
+          </p>
+        </div>
+      )}
+
       <div className="px-4 pb-4">
         {showPolling && <PollingState />}
         {showEmpty && <EmptyState />}
