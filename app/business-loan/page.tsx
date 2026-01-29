@@ -1,13 +1,11 @@
 import React, { Suspense } from 'react';
-import BusinessLoanForm from '@/components/business-loan/business-loan-form';
+import BusinessLoanPageContent from '@/components/business-loan/business-loan-page-content';
 
 const BusinessLoanPage = (): React.ReactNode => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Suspense fallback={null}>
-        <BusinessLoanForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={null}>
+      <BusinessLoanPageContent />
+    </Suspense>
   );
 };
 

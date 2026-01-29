@@ -5,22 +5,32 @@ import { ArrowLeft } from 'lucide-react';
 import { ActionButton } from '@/components/shared';
 import BusinessLoanFields from './business-loan-fields';
 import { useBusinessLoanForm } from './use-business-loan-form';
+import { useRouter } from 'next/navigation';
 
-const BusinessLoanForm = (): React.ReactNode => {
+interface BusinessLoanFormProps {
+  onClose?: () => void;
+  /** When true, form is embedded in modal; root uses flex-1 min-h-0 and back on step 1 calls onClose */
+  isModal?: boolean;
+}
+
+const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): React.ReactNode => {
   const {
-    formik,
-    isSubmitting,
-    showSuccess,
-    canSubmit,
-    getFieldError,
+    formValues,
+    formErrors,
+    handleFieldChange,
+    handleNext,
+    handleBack,
+    handleSubmit,
     currentStep,
     totalSteps,
     currentStepConfig,
-    handleNext,
-    handleBack,
     isFirstStep,
     isLastStep,
+    isSubmitting,
+    showSuccess,
+    canSubmit,
   } = useBusinessLoanForm();
+  const router = useRouter();
 
   const successNotice = showSuccess ? (
     <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
@@ -30,10 +40,19 @@ const BusinessLoanForm = (): React.ReactNode => {
 
   const handleHeaderBackClick = (): void => {
     if (isFirstStep) {
-      // Standalone page: no-op or could navigate away if desired.
+      if (onClose) {
+        onClose();
+      } else {
+        router.push('/');
+      }
       return;
     }
     handleBack();
+  };
+
+  const onFormSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
+    handleSubmit();
   };
 
   const renderFooterButton = (): React.ReactNode => {
@@ -57,8 +76,12 @@ const BusinessLoanForm = (): React.ReactNode => {
     );
   };
 
+  const rootClassName = isModal
+    ? 'flex flex-col flex-1 min-h-0 bg-white'
+    : 'bg-white h-screen flex flex-col';
+
   return (
-    <div className="bg-white min-h-screen flex flex-col">
+    <div className={rootClassName}>
       {/* Step header */}
       <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
         <button
@@ -74,7 +97,7 @@ const BusinessLoanForm = (): React.ReactNode => {
         </h1>
       </div>
 
-      <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0">
+      <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">
         {successNotice}
 
         <div className="flex-1 overflow-y-auto">
@@ -92,8 +115,9 @@ const BusinessLoanForm = (): React.ReactNode => {
               >
                 <BusinessLoanFields
                   stepNumber={currentStep}
-                  formik={formik}
-                  getFieldError={getFieldError}
+                  formValues={formValues}
+                  formErrors={formErrors}
+                  handleFieldChange={handleFieldChange}
                 />
               </motion.div>
             </AnimatePresence>

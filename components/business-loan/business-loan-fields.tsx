@@ -12,14 +12,14 @@ import {
   type BusinessLoanFormState,
   type HasGstValue,
 } from './business-loan-form.config';
-import type { FormikProps } from 'formik';
 
 const PAN_HINT = 'As per PAN card';
 
 interface BusinessLoanFieldsProps {
   stepNumber: number;
-  formik: FormikProps<BusinessLoanFormState>;
-  getFieldError: (field: keyof BusinessLoanFormState) => string | undefined;
+  formValues: BusinessLoanFormState;
+  formErrors: Record<string, string>;
+  handleFieldChange: (key: keyof BusinessLoanFormState, value: string | boolean) => void;
 }
 
 const inputBaseClass = cn(
@@ -49,19 +49,16 @@ const businessNatureOptionElements = BUSINESS_NATURE_CATEGORIES.map((category) =
 
 const BusinessLoanFields = ({
   stepNumber,
-  formik,
-  getFieldError,
+  formValues,
+  formErrors,
+  handleFieldChange,
 }: BusinessLoanFieldsProps): React.ReactNode => {
-  const touchField = (field: keyof BusinessLoanFormState) => (): void => {
-    formik.setFieldTouched(field, true, false);
-  };
-
-  const businessNatureError = getFieldError('businessNature');
+  const businessNatureError = formErrors.businessNature;
   const businessNatureClassName = cn(
     inputBaseClass,
     businessNatureError ? 'border-red-300 bg-red-50' : 'border-gray-300'
   );
-  const consentError = getFieldError('consent');
+  const consentError = formErrors.consent;
 
   // Step 1: Personal Information
   if (stepNumber === 1) {
@@ -74,11 +71,10 @@ const BusinessLoanFields = ({
             </label>
             <InputField
               label="First Name"
-              value={formik.values.firstName}
-              onChange={(value) => formik.setFieldValue('firstName', value)}
-              onBlur={touchField('firstName')}
+              value={formValues.firstName}
+              onChange={(value) => handleFieldChange('firstName', value)}
               placeholder="First Name"
-              error={getFieldError('firstName')}
+              error={formErrors.firstName}
               required
               autoComplete="given-name"
             />
@@ -90,11 +86,10 @@ const BusinessLoanFields = ({
             </label>
             <InputField
               label="Last Name"
-              value={formik.values.lastName}
-              onChange={(value) => formik.setFieldValue('lastName', value)}
-              onBlur={touchField('lastName')}
+              value={formValues.lastName}
+              onChange={(value) => handleFieldChange('lastName', value)}
               placeholder="Last Name"
-              error={getFieldError('lastName')}
+              error={formErrors.lastName}
               required
               autoComplete="family-name"
             />
@@ -108,11 +103,10 @@ const BusinessLoanFields = ({
           </label>
           <InputField
             label="Phone Number"
-            value={formik.values.mobile}
-            onChange={(value) => formik.setFieldValue('mobile', sanitizeNumericInput(value, 10))}
-            onBlur={touchField('mobile')}
+            value={formValues.mobile}
+            onChange={(value) => handleFieldChange('mobile', sanitizeNumericInput(value, 10))}
             placeholder="Phone Number"
-            error={getFieldError('mobile')}
+            error={formErrors.mobile}
             type="tel"
             inputMode="numeric"
             maxLength={10}
@@ -128,11 +122,10 @@ const BusinessLoanFields = ({
           </label>
           <InputField
             label="Personal Email ID"
-            value={formik.values.email}
-            onChange={(value) => formik.setFieldValue('email', value)}
-            onBlur={touchField('email')}
+            value={formValues.email}
+            onChange={(value) => handleFieldChange('email', value)}
             placeholder="Personal Email ID"
-            error={getFieldError('email')}
+            error={formErrors.email}
             type="email"
             inputMode="email"
             required
@@ -146,9 +139,9 @@ const BusinessLoanFields = ({
           </label>
           <ButtonGroup
             options={genderOptions}
-            value={formik.values.gender}
-            onChange={(value) => formik.setFieldValue('gender', value)}
-            error={getFieldError('gender')}
+            value={formValues.gender}
+            onChange={(value) => handleFieldChange('gender', value)}
+            error={formErrors.gender}
           />
         </div>
 
@@ -158,11 +151,10 @@ const BusinessLoanFields = ({
           </label>
           <InputField
             label="Enter Your Pincode"
-            value={formik.values.pincode}
-            onChange={(value) => formik.setFieldValue('pincode', sanitizeNumericInput(value, 6))}
-            onBlur={touchField('pincode')}
+            value={formValues.pincode}
+            onChange={(value) => handleFieldChange('pincode', sanitizeNumericInput(value, 6))}
             placeholder="Enter Your Pincode"
-            error={getFieldError('pincode')}
+            error={formErrors.pincode}
             type="text"
             inputMode="numeric"
             maxLength={6}
@@ -184,9 +176,9 @@ const BusinessLoanFields = ({
           </label>
           <ButtonGroup
             options={companyTypeOptions}
-            value={formik.values.companyType}
-            onChange={(value) => formik.setFieldValue('companyType', value)}
-            error={getFieldError('companyType')}
+            value={formValues.companyType}
+            onChange={(value) => handleFieldChange('companyType', value)}
+            error={formErrors.companyType}
           />
         </div>
 
@@ -197,9 +189,8 @@ const BusinessLoanFields = ({
           <input
             type="text"
             list="business-nature-categories"
-            value={formik.values.businessNature}
-            onChange={(event) => formik.setFieldValue('businessNature', event.target.value)}
-            onBlur={touchField('businessNature')}
+            value={formValues.businessNature}
+            onChange={(event) => handleFieldChange('businessNature', event.target.value)}
             placeholder="Nature of Business"
             className={businessNatureClassName}
           />
@@ -211,10 +202,9 @@ const BusinessLoanFields = ({
 
         <SelectField
           label="Is your business registered under GST?"
-          value={formik.values.hasGst}
-          onChange={(value) => formik.setFieldValue('hasGst', value as HasGstValue)}
-          onBlur={touchField('hasGst')}
-          error={getFieldError('hasGst')}
+          value={formValues.hasGst}
+          onChange={(value) => handleFieldChange('hasGst', value as HasGstValue)}
+          error={formErrors.hasGst}
           placeholder="Yes / No"
           required
           options={gstOptions}
@@ -232,11 +222,10 @@ const BusinessLoanFields = ({
         </label>
         <InputField
           label="Annual Turnover"
-          value={formik.values.annualTurnover}
-          onChange={(value) => formik.setFieldValue('annualTurnover', sanitizeNumericInput(value))}
-          onBlur={touchField('annualTurnover')}
+          value={formValues.annualTurnover}
+          onChange={(value) => handleFieldChange('annualTurnover', sanitizeNumericInput(value))}
           placeholder="Enter Your Annual Turnover"
-          error={getFieldError('annualTurnover')}
+          error={formErrors.annualTurnover}
           type="text"
           inputMode="numeric"
           required
@@ -249,13 +238,12 @@ const BusinessLoanFields = ({
         </label>
         <InputField
           label="Loan Amount"
-          value={formik.values.requiredLoanAmount}
+          value={formValues.requiredLoanAmount}
           onChange={(value) =>
-            formik.setFieldValue('requiredLoanAmount', sanitizeNumericInput(value))
+            handleFieldChange('requiredLoanAmount', sanitizeNumericInput(value))
           }
-          onBlur={touchField('requiredLoanAmount')}
           placeholder="Enter Required Loan Amount"
-          error={getFieldError('requiredLoanAmount')}
+          error={formErrors.requiredLoanAmount}
           type="text"
           inputMode="numeric"
           required
@@ -267,11 +255,8 @@ const BusinessLoanFields = ({
           <input
             type="checkbox"
             id="business-loan-consent"
-            checked={formik.values.consent}
-            onChange={(event) => {
-              formik.setFieldValue('consent', event.target.checked);
-              formik.setFieldTouched('consent', true, false);
-            }}
+            checked={formValues.consent}
+            onChange={(event) => handleFieldChange('consent', event.target.checked)}
             className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
           />
           <label htmlFor="business-loan-consent" className="text-sm text-gray-700">

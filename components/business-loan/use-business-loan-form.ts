@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useFormik, type FormikProps } from 'formik';
 import { useAuth } from '@/hooks/use-auth';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { fetchBusinessLoanStatus, submitBusinessLoanEnquiry } from '@/lib/api/business-loan-service';
@@ -22,21 +21,24 @@ export interface BusinessLoanStepConfig {
   fieldKeys: BusinessLoanStepFieldKey[];
 }
 
-interface BusinessLoanFormStateResult {
-  formik: FormikProps<BusinessLoanFormState>;
-  isSubmitting: boolean;
-  showSuccess: boolean;
-  canSubmit: boolean;
+interface UseBusinessLoanFormReturn {
+  formValues: BusinessLoanFormState;
+  formErrors: Record<string, string>;
+  handleFieldChange: (key: keyof BusinessLoanFormState, value: string | boolean) => void;
   getFieldError: (field: keyof BusinessLoanFormState) => string | undefined;
+  validateCurrentStep: () => boolean;
+  handleNext: () => void;
+  handleBack: () => void;
+  handleSubmit: () => Promise<void>;
   currentStep: number;
   totalSteps: number;
   currentStepConfig: BusinessLoanStepConfig;
   currentStepFields: BusinessLoanStepFieldKey[];
-  handleNext: () => void;
-  handleBack: () => void;
-  validateCurrentStep: () => boolean;
   isFirstStep: boolean;
   isLastStep: boolean;
+  isSubmitting: boolean;
+  showSuccess: boolean;
+  canSubmit: boolean;
 }
 
 /** Derive firstName and lastName from a single name string (e.g. from auth user). */
@@ -51,10 +53,12 @@ function splitFullName(fullName: string | undefined): { firstName: string; lastN
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
 
-export const useBusinessLoanForm = (): BusinessLoanFormStateResult => {
+export const useBusinessLoanForm = (): UseBusinessLoanFormReturn => {
   const { isAuthenticated, user } = useAuth();
   const searchParams = useSearchParams();
   const enableBusinessLoanPrefill = useFeatureFlag('enableBusinessLoanPrefill');
+  const [formValues, setFormValues] = useState<BusinessLoanFormState>(DEFAULT_FORM_STATE);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -63,80 +67,118 @@ export const useBusinessLoanForm = (): BusinessLoanFormStateResult => {
   const isMountedRef = useRef(true);
   const hasCheckedStatusRef = useRef(false);
 
-  // Prefill enabled by feature flag or by ?prefill=1 in non-production (testing only).
   const isPrefillEnabled =
     enableBusinessLoanPrefill ||
     (process.env.NODE_ENV !== 'production' && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE);
 
-  // Prevent state updates after unmount during async submit.
   useEffect(() => () => {
     isMountedRef.current = false;
   }, []);
 
-  const initialValues = useMemo<BusinessLoanFormState>(() => {
-    const { firstName, lastName } = splitFullName(user?.name);
-    return {
-      ...DEFAULT_FORM_STATE,
-      mobile: user?.phoneNumber || '',
-      email: user?.email || '',
-      firstName: firstName || DEFAULT_FORM_STATE.firstName,
-      lastName: lastName || DEFAULT_FORM_STATE.lastName,
-    };
-  }, [user]);
+  const handleFieldChange = useCallback((key: keyof BusinessLoanFormState, value: string | boolean): void => {
+    setFormValues((prev) => ({ ...prev, [key]: value }));
+    setFormErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }, []);
 
-  const formik = useFormik<BusinessLoanFormState>({
-    initialValues,
-    enableReinitialize: false,
-    validateOnMount: true,
-    validate: validateBusinessLoanForm,
-    onSubmit: async (values, helpers) => {
-      if (isSubmitting) return;
-      setIsSubmitting(true);
+  const currentStepConfig: BusinessLoanStepConfig = useMemo(
+    () => ({
+      stepNumber: currentStep,
+      title: BUSINESS_LOAN_STEP_TITLES[currentStep] ?? `Step ${currentStep}`,
+      fieldKeys: BUSINESS_LOAN_STEP_FIELD_MAPPING[currentStep] ?? [],
+    }),
+    [currentStep]
+  );
 
-      const payload = buildBusinessLoanPayload(values);
+  const currentStepFields = currentStepConfig.fieldKeys;
+
+  const validateCurrentStep = useCallback((): boolean => {
+    const errors = validateBusinessLoanForm(formValues);
+    const stepKeys = currentStepConfig.fieldKeys;
+    const stepErrors: Record<string, string> = {};
+    stepKeys.forEach((key) => {
+      if (errors[key]) {
+        stepErrors[key] = errors[key];
+      }
+    });
+    setFormErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
+  }, [formValues, currentStepConfig.fieldKeys]);
+
+  const handleNext = useCallback((): void => {
+    if (!validateCurrentStep()) return;
+    setCurrentStep((prev) => Math.min(BUSINESS_LOAN_TOTAL_STEPS, prev + 1));
+  }, [validateCurrentStep]);
+
+  const handleBack = useCallback((): void => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+    setFormErrors({});
+  }, []);
+
+  const handleSubmit = useCallback(async (): Promise<void> => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const payload = buildBusinessLoanPayload(formValues);
       const success = await submitBusinessLoanEnquiry(payload);
 
       if (!isMountedRef.current) return;
-      setIsSubmitting(false);
-
       if (success) {
         setShowSuccess(true);
         setCurrentStep(1);
-        helpers.resetForm({ values: DEFAULT_FORM_STATE });
+        setFormValues(DEFAULT_FORM_STATE);
+        setFormErrors({});
       }
-    },
-  });
+    } finally {
+      if (isMountedRef.current) {
+        setIsSubmitting(false);
+      }
+    }
+  }, [formValues, isSubmitting]);
 
+  const getFieldError = useCallback(
+    (field: keyof BusinessLoanFormState): string | undefined => formErrors[field] ?? undefined,
+    [formErrors]
+  );
+
+  const step3Keys = BUSINESS_LOAN_STEP_FIELD_MAPPING[3] ?? [];
+  const canSubmit = useMemo((): boolean => {
+    if (!formValues.consent) return false;
+    const errors = validateBusinessLoanForm(formValues);
+    const hasStep3Error = step3Keys.some((key) => errors[key]);
+    return !hasStep3Error;
+  }, [formValues, step3Keys]);
+
+  // Auth prefill: set firstName, lastName, mobile, email from user once when available.
   useEffect(() => {
-    // Prefill once to avoid overwriting user edits when auth state changes.
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
     hasPrefilledRef.current = true;
 
     const { firstName, lastName } = splitFullName(user.name);
-    if (!formik.values.firstName && firstName) {
-      formik.setFieldValue('firstName', firstName, false);
-    }
-    if (!formik.values.lastName && lastName) {
-      formik.setFieldValue('lastName', lastName, false);
-    }
-    if (!formik.values.mobile && user.phoneNumber) {
-      formik.setFieldValue('mobile', user.phoneNumber, false);
-    }
-    if (!formik.values.email && user.email) {
-      formik.setFieldValue('email', user.email, false);
-    }
-  }, [isAuthenticated, user, formik]);
+    setFormValues((prev) => ({
+      ...prev,
+      ...(firstName && !prev.firstName ? { firstName } : {}),
+      ...(lastName && !prev.lastName ? { lastName } : {}),
+      ...(user.phoneNumber && !prev.mobile ? { mobile: user.phoneNumber } : {}),
+      ...(user.email && !prev.email ? { email: user.email } : {}),
+    }));
+  }, [isAuthenticated, user]);
 
-  // One-time test prefill: apply only when enabled, in non-production, and not yet applied (avoids overwriting user edits).
-  // Pass validate=true so Formik re-runs validation and updates isValid, enabling the Apply button.
+  // Test prefill: apply when ?prefill=1 in non-production.
   useEffect(() => {
     if (!isPrefillEnabled || process.env.NODE_ENV === 'production' || hasTestPrefilledRef.current) return;
     hasTestPrefilledRef.current = true;
-    formik.setValues(BUSINESS_LOAN_PREFILL_TEST_VALUES, true);
-  }, [isPrefillEnabled, formik]);
+    setFormValues(BUSINESS_LOAN_PREFILL_TEST_VALUES);
+    setFormErrors({});
+  }, [isPrefillEnabled]);
 
+  // Check existing lead once on page load.
   useEffect(() => {
-    // Check existing lead once on page load to avoid duplicate submissions.
     if (!isAuthenticated || !user?.phoneNumber || hasCheckedStatusRef.current) return;
     hasCheckedStatusRef.current = true;
 
@@ -153,64 +195,30 @@ export const useBusinessLoanForm = (): BusinessLoanFormStateResult => {
     checkStatus();
 
     return () => {
-      // Ensure in-flight check doesn't update state after unmount.
       controller.abort();
     };
   }, [isAuthenticated, user?.phoneNumber]);
-
-  const getFieldError = (field: keyof BusinessLoanFormState): string | undefined => {
-    if (!formik.touched[field]) return undefined;
-    return formik.errors[field];
-  };
-
-  const currentStepConfig: BusinessLoanStepConfig = useMemo(
-    () => ({
-      stepNumber: currentStep,
-      title: BUSINESS_LOAN_STEP_TITLES[currentStep] ?? `Step ${currentStep}`,
-      fieldKeys: BUSINESS_LOAN_STEP_FIELD_MAPPING[currentStep] ?? [],
-    }),
-    [currentStep]
-  );
-
-  const currentStepFields = currentStepConfig.fieldKeys;
-
-  const validateCurrentStep = useCallback((): boolean => {
-    const errors = validateBusinessLoanForm(formik.values);
-    const stepKeys = currentStepConfig.fieldKeys;
-    const hasStepError = stepKeys.some((key) => errors[key]);
-    if (hasStepError) {
-      stepKeys.forEach((key) => formik.setFieldTouched(key, true, false));
-      return false;
-    }
-    return true;
-  }, [formik, currentStepConfig.fieldKeys]);
-
-  const handleNext = useCallback((): void => {
-    if (!validateCurrentStep()) return;
-    setCurrentStep((prev) => Math.min(BUSINESS_LOAN_TOTAL_STEPS, prev + 1));
-  }, [validateCurrentStep]);
-
-  const handleBack = useCallback((): void => {
-    setCurrentStep((prev) => Math.max(1, prev - 1));
-  }, []);
 
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === BUSINESS_LOAN_TOTAL_STEPS;
 
   return {
-    formik,
-    isSubmitting,
-    showSuccess,
-    canSubmit: formik.values.consent && formik.isValid,
+    formValues,
+    formErrors,
+    handleFieldChange,
     getFieldError,
+    validateCurrentStep,
+    handleNext,
+    handleBack,
+    handleSubmit,
     currentStep,
     totalSteps: BUSINESS_LOAN_TOTAL_STEPS,
     currentStepConfig,
     currentStepFields,
-    handleNext,
-    handleBack,
-    validateCurrentStep,
     isFirstStep,
     isLastStep,
+    isSubmitting,
+    showSuccess,
+    canSubmit,
   };
 };

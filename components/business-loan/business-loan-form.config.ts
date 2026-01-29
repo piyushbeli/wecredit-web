@@ -1,4 +1,3 @@
-import type { FormikErrors } from 'formik';
 import type { BusinessLoanEnquiryPayload, CompanyType, Gender } from '@/lib/api/business-loan-service';
 import { BUSINESS_NATURE_CATEGORIES } from '@/lib/constants/business-loan';
 
@@ -113,8 +112,8 @@ export const getCanonicalBusinessNature = (value: string): string => {
 
 export const validateBusinessLoanForm = (
   values: BusinessLoanFormState
-): FormikErrors<BusinessLoanFormState> => {
-  const nextErrors: FormikErrors<BusinessLoanFormState> = {};
+): Record<string, string> => {
+  const nextErrors: Record<string, string> = {};
 
   if (!values.firstName.trim()) {
     nextErrors.firstName = 'First name is required';
