@@ -37,7 +37,7 @@ const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
     bgColor: 'bg-blue-500',
     textColor: 'text-blue-700',
     iconChar: '★',
-    ctaLabel: 'Interested',
+    ctaLabel: 'Apply Now',
   },
   ELIGIBILITY_REJECTED: {
     label: 'ELIGIBILITY REJECTED',
