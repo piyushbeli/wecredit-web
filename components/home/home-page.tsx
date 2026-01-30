@@ -48,7 +48,7 @@ const HomePage = (): React.ReactNode => {
       <CertificationsSection />
       
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
 
       {/* Our Partners Section */}
       <PartnersSection />

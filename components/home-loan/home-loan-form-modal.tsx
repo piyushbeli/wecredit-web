@@ -22,14 +22,7 @@ const HomeLoanFormModal = ({ onClose }: HomeLoanFormModalProps): React.ReactNode
   const { isAuthenticated, user } = useAuth();
   const { show: showLoading, hide: hideLoading } = useLoadingStore();
   const [showSuccess, setShowSuccess] = useState(false);
-  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    // Track unmount to avoid state updates after component unmounts.
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
   // Check loan status when user is authenticated (runs on mount and when auth/phone change)
   useEffect(() => {
@@ -43,18 +36,33 @@ const HomeLoanFormModal = ({ onClose }: HomeLoanFormModalProps): React.ReactNode
         message: 'Checking your home loan status...',
         subtext: 'Please wait while we fetch your details.',
       });
-      const result = await fetchHomeLoanStatus(user.phoneNumber, controller.signal);
-      if (!isMountedRef.current) return;
-      if (result.hasExistingLead) {
-        setShowSuccess(true);
+
+      try {
+        const result = await fetchHomeLoanStatus(user.phoneNumber, controller.signal);
+
+        if (result.hasExistingLead) {
+          setShowSuccess(true);
+        }
+      } catch (error) {
+        // Log error for debugging while allowing users to proceed with the form
+        console.error('Failed to check home loan status:', error);
+
+
+        // Fall back to showing the form so users can still submit their request
+        setShowSuccess(false);
+      } finally {
+        // Ensure loading state is always cleaned up
+        hideLoading();
+
       }
-      hideLoading();
     };
 
     checkStatus();
 
     return () => {
+      // Cleanup: abort ongoing request and hide loading if still shown
       controller.abort();
+      hideLoading();
     };
   }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
 

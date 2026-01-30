@@ -17,6 +17,7 @@ interface HomeLoanFieldsProps {
   formValues: HomeLoanFormState;
   formErrors: Record<string, string>;
   handleFieldChange: (key: keyof HomeLoanFormState, value: string | boolean) => void;
+  handleFieldBlur: (key: keyof HomeLoanFormState) => void;
 }
 
 const incomeSourceOptions = HOME_LOAN_INCOME_SOURCE_OPTIONS.map((option) => ({
@@ -28,6 +29,7 @@ const HomeLoanFields = ({
   formValues,
   formErrors,
   handleFieldChange,
+  handleFieldBlur,
 }: HomeLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
 
@@ -42,6 +44,7 @@ const HomeLoanFields = ({
             label="First Name"
             value={formValues.firstName}
             onChange={(value) => handleFieldChange('firstName', value)}
+            onBlur={() => handleFieldBlur('firstName')}
             placeholder="First Name"
             error={formErrors.firstName}
             required
@@ -57,6 +60,7 @@ const HomeLoanFields = ({
             label="Last Name"
             value={formValues.lastName}
             onChange={(value) => handleFieldChange('lastName', value)}
+            onBlur={() => handleFieldBlur('lastName')}
             placeholder="Last Name"
             error={formErrors.lastName}
             required
@@ -74,6 +78,7 @@ const HomeLoanFields = ({
           label="PAN Number"
           value={formValues.panNumber}
           onChange={(value) => handleFieldChange('panNumber', normalizePan(value))}
+          onBlur={() => handleFieldBlur('panNumber')}
           placeholder="e.g. ABCDE1234F"
           error={formErrors.panNumber}
           type="text"
@@ -98,6 +103,7 @@ const HomeLoanFields = ({
               : dobToNativeFormat(formValues.dob)
           }
           onChange={(e) => handleFieldChange('dob', e.target.value)}
+          onBlur={() => handleFieldBlur('dob')}
           required
           className={cn(
             'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
@@ -120,6 +126,7 @@ const HomeLoanFields = ({
           label="Phone Number"
           value={formValues.mobile}
           onChange={(value) => handleFieldChange('mobile', sanitizeNumericInput(value, 10))}
+          onBlur={() => handleFieldBlur('mobile')}
           placeholder="Phone Number"
           error={formErrors.mobile}
           type="tel"
@@ -140,6 +147,7 @@ const HomeLoanFields = ({
           onChange={(value) =>
             handleFieldChange('permanentPincode', sanitizeNumericInput(value, 6))
           }
+          onBlur={() => handleFieldBlur('permanentPincode')}
           placeholder="Enter Your Pincode"
           error={formErrors.permanentPincode}
           type="text"
@@ -159,6 +167,7 @@ const HomeLoanFields = ({
           onChange={(value) =>
             handleFieldChange('propertyPincode', sanitizeNumericInput(value, 6))
           }
+          onBlur={() => handleFieldBlur('propertyPincode')}
           placeholder="Enter Your Pincode"
           error={formErrors.propertyPincode}
           type="text"
@@ -190,6 +199,7 @@ const HomeLoanFields = ({
           label="Loan Amount"
           value={formValues.loanAmount}
           onChange={(value) => handleFieldChange('loanAmount', sanitizeNumericInput(value))}
+          onBlur={() => handleFieldBlur('loanAmount')}
           placeholder="Enter Required Loan Amount"
           error={formErrors.loanAmount}
           type="text"

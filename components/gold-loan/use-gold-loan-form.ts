@@ -15,6 +15,7 @@ interface UseGoldLoanFormReturn {
   formValues: GoldLoanFormState;
   formErrors: Record<string, string>;
   handleFieldChange: (key: keyof GoldLoanFormState, value: string | boolean) => void;
+  handleFieldBlur: (key: keyof GoldLoanFormState) => void;
   handleSubmit: () => Promise<void>;
   isSubmitting: boolean;
   canSubmit: boolean;
@@ -44,6 +45,8 @@ export const useGoldLoanForm = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasPrefilledRef = useRef(false);
   const isMountedRef = useRef(true);
+  const formValuesRef = useRef(formValues);
+  formValuesRef.current = formValues;
 
   useEffect(() => () => {
     isMountedRef.current = false;
@@ -68,35 +71,19 @@ export const useGoldLoanForm = (
     return Object.keys(errors).length === 0;
   }, [formValues]);
 
-  useEffect(() => {
-    // Provide immediate feedback for PAN/DOB formatting without blocking CTA enablement.
+  /** Validates a single field on blur and updates its error so inline feedback shows immediately. */
+  const handleFieldBlur = useCallback((key: keyof GoldLoanFormState): void => {
+    const errors = validateGoldLoanForm(formValuesRef.current);
+    const message = errors[key];
     setFormErrors((prev) => {
-      const nextErrors = { ...prev };
-      const validationErrors = validateGoldLoanForm(formValues);
-
-      if (formValues.pan.trim()) {
-        if (validationErrors.pan) {
-          nextErrors.pan = validationErrors.pan;
-        } else if (nextErrors.pan) {
-          delete nextErrors.pan;
-        }
-      } else if (nextErrors.pan) {
-        delete nextErrors.pan;
+      if (message) {
+        return { ...prev, [key]: message };
       }
-
-      if (formValues.dob.trim()) {
-        if (validationErrors.dob) {
-          nextErrors.dob = validationErrors.dob;
-        } else if (nextErrors.dob) {
-          delete nextErrors.dob;
-        }
-      } else if (nextErrors.dob) {
-        delete nextErrors.dob;
-      }
-
-      return nextErrors;
+      const next = { ...prev };
+      delete next[key];
+      return next;
     });
-  }, [formValues.dob, formValues.pan]);
+  }, []);
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
@@ -127,21 +114,12 @@ export const useGoldLoanForm = (
     }
   }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
 
+  /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
     if (!formValues.consent) return false;
-    // Keep the CTA enabled once required fields are present; format validation runs on submit.
-    const requiredFieldsFilled =
-      formValues.firstName.trim() &&
-      formValues.lastName.trim() &&
-      formValues.mobile.trim() &&
-      formValues.dob.trim() &&
-      formValues.pan.trim() &&
-      formValues.state.trim() &&
-      formValues.city.trim() &&
-      formValues.loanAmount.trim();
-    console.log('Can submit requiredFieldsFilled', requiredFieldsFilled);
-    return Boolean(requiredFieldsFilled);
-  }, [formValues]);
+    if (isSubmitting) return false;
+    return true;
+  }, [formValues.consent, isSubmitting]);
 
   useEffect(() => {
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
@@ -160,6 +138,7 @@ export const useGoldLoanForm = (
     formValues,
     formErrors,
     handleFieldChange,
+    handleFieldBlur,
     handleSubmit,
     isSubmitting,
     canSubmit,

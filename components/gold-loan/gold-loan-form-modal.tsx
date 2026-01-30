@@ -26,7 +26,7 @@ const GoldLoanFormModal = ({ onClose }: GoldLoanFormModalProps): React.ReactNode
     const controller = new AbortController();
 
     const checkStatus = async (): Promise<void> => {
-      // Avoid showing the form if a lead already exists for this user.
+      // Gate the form with a status check to avoid showing it when a lead exists.
       showLoading({
         message: 'Checking your gold loan status...',
         subtext: 'Please wait while we fetch your details.',
@@ -34,21 +34,30 @@ const GoldLoanFormModal = ({ onClose }: GoldLoanFormModalProps): React.ReactNode
 
       try {
         const result = await fetchGoldLoanStatus(user.phoneNumber, controller.signal);
+
         if (result.hasExistingLead) {
           setShowSuccess(true);
         }
       } catch (error) {
-        // If the status check fails, fall back to the form so users can proceed.
+        // Log error for debugging while allowing users to proceed with the form
+        console.error('Failed to check gold loan status:', error);
+
+
+        // Fall back to showing the form so users can still submit their request
         setShowSuccess(false);
       } finally {
+        // Ensure loading state is always cleaned up
         hideLoading();
+
       }
     };
 
     checkStatus();
 
     return () => {
+      // Cleanup: abort ongoing request and hide loading if still shown
       controller.abort();
+      hideLoading();
     };
   }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
 

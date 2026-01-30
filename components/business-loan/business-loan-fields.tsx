@@ -1,6 +1,5 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import InputField from '@/components/forms/input-field';
 import ButtonGroup from '@/components/forms/button-group';
 import SelectField from '@/components/forms/select-field';
@@ -22,12 +21,6 @@ interface BusinessLoanFieldsProps {
   handleFieldChange: (key: keyof BusinessLoanFormState, value: string | boolean) => void;
 }
 
-const inputBaseClass = cn(
-  'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
-  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-  '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
-);
-
 const companyTypeOptions = COMPANY_TYPE_OPTIONS.map((option) => ({
   value: option,
   label: option,
@@ -43,9 +36,10 @@ const gstOptions = [
   { value: 'false', label: 'No' },
 ];
 
-const businessNatureOptionElements = BUSINESS_NATURE_CATEGORIES.map((category) => (
-  <option key={category} value={category} />
-));
+const businessNatureOptions = BUSINESS_NATURE_CATEGORIES.map((category) => ({
+  value: category,
+  label: category,
+}));
 
 const BusinessLoanFields = ({
   stepNumber,
@@ -53,11 +47,6 @@ const BusinessLoanFields = ({
   formErrors,
   handleFieldChange,
 }: BusinessLoanFieldsProps): React.ReactNode => {
-  const businessNatureError = formErrors.businessNature;
-  const businessNatureClassName = cn(
-    inputBaseClass,
-    businessNatureError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-  );
   const consentError = formErrors.consent;
 
   // Step 1: Personal Information
@@ -184,23 +173,15 @@ const BusinessLoanFields = ({
           />
         </div>
 
-        <div>
-          <label className="lead-form-label">
-            Nature of Business <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            list="business-nature-categories"
-            value={formValues.businessNature}
-            onChange={(event) => handleFieldChange('businessNature', event.target.value)}
-            placeholder="Nature of Business"
-            className={businessNatureClassName}
-          />
-          <datalist id="business-nature-categories">{businessNatureOptionElements}</datalist>
-          {businessNatureError && (
-            <p className="text-xs text-red-600 mt-1">{businessNatureError}</p>
-          )}
-        </div>
+        <SelectField
+          label="Nature of Business"
+          value={formValues.businessNature}
+          onChange={(value) => handleFieldChange('businessNature', value)}
+          error={formErrors.businessNature}
+          placeholder="Select nature of business"
+          required
+          options={businessNatureOptions}
+        />
 
         <SelectField
           label="Is your business registered under GST?"
