@@ -84,7 +84,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     titleWhite: "Find the Card",
     titleGradient: "That Fits You",
     ctaText: "Get Your Card",
-    ctaLink: "/credit-card",
+    ctaLink: "/credit-cards",
   },
   {
     id: "slide-3",
