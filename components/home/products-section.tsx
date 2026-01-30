@@ -25,6 +25,13 @@ const products: Product[] = [
     imagePath: IMAGES.ICONS.PERSONAL_LOAN,
   },
   {
+    id: 'credit-cards',
+    label: 'Credit\nCards',
+    href: '/credit-cards',
+    icon: CreditCard,
+    imagePath: IMAGES.ICONS.CREDIT_CARD,
+  },
+  {
     id: 'business-loan',
     label: 'Business\nLoan',
     href: '/business-loan',
@@ -39,32 +46,25 @@ const products: Product[] = [
   //   imagePath: IMAGES.ICONS.PL_BY_ONDC,
   // },
   {
-    id: 'home-loan',
-    label: 'Home\nLoan',
-    href: '/home-loan',
-    icon: Home,
-    imagePath: IMAGES.ICONS.CREDIT_CARD,
-  },
-  {
     id: 'car-loan',
     label: 'Car\nLoan',
     href: '/car-loan',
     icon: ShoppingBag,
-    imagePath: IMAGES.ICONS.CREDIT_CARD,
+    imagePath: IMAGES.LOAN_ICONS.CAR_LOAN,
+  },
+  {
+    id: 'home-loan',
+    label: 'Home\nLoan',
+    href: '/home-loan',
+    icon: Home,
+    imagePath: IMAGES.LOAN_ICONS.HOME_LOAN,
   },
   {
     id: 'gold-loan',
     label: 'Gold\nLoan',
     href: '/gold-loan',
     icon: BriefcaseBusiness,
-    imagePath: IMAGES.ICONS.CREDIT_CARD,
-  },
-  {
-    id: 'credit-cards',
-    label: 'Credit\nCards',
-    href: '/credit-cards',
-    icon: CreditCard,
-    imagePath: IMAGES.ICONS.CREDIT_CARD,
+    imagePath: IMAGES.LOAN_ICONS.GOLD_LOAN,
   },
 ];
 
