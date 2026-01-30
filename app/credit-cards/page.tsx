@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import CreditCardsPageContent from '@/components/credit-cards/credit-cards-page-content';
+import { PageLoader } from '@/components/shared/page-loader';
 
 export const metadata: Metadata = {
   title: 'Best Credit Cards Schemes and Offers | WeCredit',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 const CreditCardsPage = (): React.ReactNode => {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PageLoader />}>
       <CreditCardsPageContent />
     </Suspense>
   );

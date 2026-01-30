@@ -1,9 +1,10 @@
 import React, { Suspense } from 'react';
 import HomeLoanPageContent from '@/components/home-loan/home-loan-page-content';
+import { PageLoader } from '@/components/shared/page-loader';
 
 const HomeLoanPage = (): React.ReactNode => {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PageLoader />}>
       <HomeLoanPageContent />
     </Suspense>
   );
