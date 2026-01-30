@@ -25,12 +25,14 @@ interface CarLoanFieldsProps {
   formValues: CarLoanFormState;
   formErrors: Record<string, string>;
   handleFieldChange: (key: keyof CarLoanFormState, value: string | boolean) => void;
+  handleFieldBlur: (key: keyof CarLoanFormState) => void;
 }
 
 const CarLoanFields = ({
   formValues,
   formErrors,
   handleFieldChange,
+  handleFieldBlur,
 }: CarLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
 
@@ -45,6 +47,7 @@ const CarLoanFields = ({
             label="First Name"
             value={formValues.firstName}
             onChange={(value) => handleFieldChange('firstName', value)}
+            onBlur={() => handleFieldBlur('firstName')}
             placeholder="First Name"
             error={formErrors.firstName}
             required
@@ -60,6 +63,7 @@ const CarLoanFields = ({
             label="Last Name"
             value={formValues.lastName}
             onChange={(value) => handleFieldChange('lastName', value)}
+            onBlur={() => handleFieldBlur('lastName')}
             placeholder="Last Name"
             error={formErrors.lastName}
             required
@@ -77,6 +81,7 @@ const CarLoanFields = ({
           label="Phone Number"
           value={formValues.mobile}
           onChange={(value) => handleFieldChange('mobile', sanitizeNumericInput(value, 10))}
+          onBlur={() => handleFieldBlur('mobile')}
           placeholder="Phone Number"
           error={formErrors.mobile}
           type="tel"
@@ -95,6 +100,7 @@ const CarLoanFields = ({
           label="Personal Email ID"
           value={formValues.email}
           onChange={(value) => handleFieldChange('email', value)}
+          onBlur={() => handleFieldBlur('email')}
           placeholder="Enter your Email ID"
           error={formErrors.email}
           type="email"
@@ -124,6 +130,7 @@ const CarLoanFields = ({
           label="State"
           value={formValues.state}
           onChange={(value) => handleFieldChange('state', value)}
+          onBlur={() => handleFieldBlur('state')}
           placeholder="Enter State"
           error={formErrors.state}
           required
@@ -138,6 +145,7 @@ const CarLoanFields = ({
           label="Pincode"
           value={formValues.pincode}
           onChange={(value) => handleFieldChange('pincode', sanitizeNumericInput(value, 6))}
+          onBlur={() => handleFieldBlur('pincode')}
           placeholder="Enter Pincode"
           error={formErrors.pincode}
           type="text"
@@ -169,6 +177,7 @@ const CarLoanFields = ({
           label="Car Model"
           value={formValues.carModel}
           onChange={(value) => handleFieldChange('carModel', value)}
+          onBlur={() => handleFieldBlur('carModel')}
           placeholder="Enter Car Model"
           error={formErrors.carModel}
           required

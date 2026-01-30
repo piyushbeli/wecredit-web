@@ -24,6 +24,7 @@ const CarLoanForm = ({
     formValues,
     formErrors,
     handleFieldChange,
+    handleFieldBlur,
     handleSubmit,
     isSubmitting,
     canSubmit,
@@ -73,6 +74,7 @@ const CarLoanForm = ({
               formValues={formValues}
               formErrors={formErrors}
               handleFieldChange={handleFieldChange}
+              handleFieldBlur={handleFieldBlur}
             />
           </div>
         </div>

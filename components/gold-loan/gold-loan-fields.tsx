@@ -15,12 +15,14 @@ interface GoldLoanFieldsProps {
   formValues: GoldLoanFormState;
   formErrors: Record<string, string>;
   handleFieldChange: (key: keyof GoldLoanFormState, value: string | boolean) => void;
+  handleFieldBlur: (key: keyof GoldLoanFormState) => void;
 }
 
 const GoldLoanFields = ({
   formValues,
   formErrors,
   handleFieldChange,
+  handleFieldBlur,
 }: GoldLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
 
@@ -35,6 +37,7 @@ const GoldLoanFields = ({
             label="First Name"
             value={formValues.firstName}
             onChange={(value) => handleFieldChange('firstName', value)}
+            onBlur={() => handleFieldBlur('firstName')}
             placeholder="First Name"
             error={formErrors.firstName}
             required
@@ -50,6 +53,7 @@ const GoldLoanFields = ({
             label="Last Name"
             value={formValues.lastName}
             onChange={(value) => handleFieldChange('lastName', value)}
+            onBlur={() => handleFieldBlur('lastName')}
             placeholder="Last Name"
             error={formErrors.lastName}
             required
@@ -67,6 +71,7 @@ const GoldLoanFields = ({
           label="Phone Number"
           value={formValues.mobile}
           onChange={(value) => handleFieldChange('mobile', sanitizeNumericInput(value, 10))}
+          onBlur={() => handleFieldBlur('mobile')}
           placeholder="Phone Number"
           error={formErrors.mobile}
           type="tel"
@@ -87,6 +92,7 @@ const GoldLoanFields = ({
           type="date"
           value={/^\d{4}-\d{2}-\d{2}$/.test(formValues.dob) ? formValues.dob : dobToNativeFormat(formValues.dob)}
           onChange={(e) => handleFieldChange('dob', e.target.value)}
+          onBlur={() => handleFieldBlur('dob')}
           required
           className={cn(
             'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
@@ -111,6 +117,7 @@ const GoldLoanFields = ({
           onChange={(value) =>
             handleFieldChange('pan', value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 10))
           }
+          onBlur={() => handleFieldBlur('pan')}
           placeholder="Enter 10 Digit PAN Number"
           error={formErrors.pan}
           type="text"
@@ -128,6 +135,7 @@ const GoldLoanFields = ({
           label="State"
           value={formValues.state}
           onChange={(value) => handleFieldChange('state', value)}
+          onBlur={() => handleFieldBlur('state')}
           placeholder="Enter State"
           error={formErrors.state}
           required
@@ -142,6 +150,7 @@ const GoldLoanFields = ({
           label="City"
           value={formValues.city}
           onChange={(value) => handleFieldChange('city', value)}
+          onBlur={() => handleFieldBlur('city')}
           placeholder="Enter City"
           error={formErrors.city}
           required
@@ -156,6 +165,7 @@ const GoldLoanFields = ({
           label="Loan Amount"
           value={formValues.loanAmount}
           onChange={(value) => handleFieldChange('loanAmount', sanitizeNumericInput(value))}
+          onBlur={() => handleFieldBlur('loanAmount')}
           placeholder="Enter Required Loan Amount"
           error={formErrors.loanAmount}
           type="text"

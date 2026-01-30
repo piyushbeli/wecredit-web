@@ -10,7 +10,7 @@ import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import BusinessLoanForm from './business-loan-form';
 import { useLoadingStore } from '@/stores/loading-store';
 import { useAuth } from '@/hooks/use-auth';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { fetchCarLoanStatus } from '@/lib/api/car-loan-service';
 import { fetchBusinessLoanStatus } from '@/lib/api/business-loan-service';
 import { CheckCircle2 } from 'lucide-react';
@@ -25,7 +25,7 @@ const BusinessLoanFormModal = ({ onClose }: BusinessLoanFormModalProps): React.R
   const { isAuthenticated, user } = useAuth();
   const [showSuccess, setShowSuccess] = useState(false);
 
-    // Check loan status when user is authenticated (runs on mount and when auth/phone change)
+  // Check loan status when user is authenticated (runs on mount and when auth/phone change)
   useEffect(() => {
     if (!isAuthenticated || !user?.phoneNumber) return;
 
@@ -37,17 +37,33 @@ const BusinessLoanFormModal = ({ onClose }: BusinessLoanFormModalProps): React.R
         message: 'Checking your business loan status...',
         subtext: 'Please wait while we fetch your details.',
       });
-      const result = await fetchBusinessLoanStatus(user.phoneNumber, controller.signal);
-      if (result.hasExistingLead) {
-        setShowSuccess(true);
+
+      try {
+        const result = await fetchBusinessLoanStatus(user.phoneNumber, controller.signal);
+        
+
+        if (result.hasExistingLead) {
+          setShowSuccess(true);
+        }
+      } catch (error) {
+        // Log error for debugging while allowing users to proceed with the form
+        console.error('Failed to check business loan status:', error);
+
+        // Fall back to showing the form so users can still submit their request
+        setShowSuccess(false);
+      } finally {
+        // Ensure loading state is always cleaned up
+          hideLoading();
+      
       }
-      hideLoading();
     };
 
     checkStatus();
 
     return () => {
+      // Cleanup: abort ongoing request and hide loading if still shown
       controller.abort();
+      hideLoading();
     };
   }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
 

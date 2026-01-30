@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { getStaticPageBySlug } from '@/lib/content';
-import StaticPageContent from '@/components/shared/StaticPageContent';
-import DebugData from '@/components/shared/DebugData';
+import { IMAGES } from '@/lib/constants/images';
+import PageBanner from '@/components/shared/page-banner';
+import AboutUsContent from '@/components/shared/about-us-content';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
@@ -12,36 +11,33 @@ export const revalidate = 3600; // 1 hour
  * Generates metadata for the About Us page
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getStaticPageBySlug('about-us');
-
-  if (!page) {
-    return {
-      title: 'About Us',
-    };
-  }
-
   return {
-    title: page.seo?.metaTitle || page.title,
-    description: page.seo?.metaDescription,
-    keywords: page.seo?.keywords,
+    title: 'About Us - WeCredit',
+    description: 'Learn about WeCredit\'s mission to make personal finance easy, convenient, and transparent. Discover our brands and how we help people across India with loans.',
+    keywords: 'WeCredit, about us, personal loans, business loans, financial services, loan comparison',
   };
 }
 
 /**
  * About Us page component
- * Content is loaded from /content/pages/about-us.md
+ * Displays company information, mission, brands, and value propositions
  */
-const AboutUsPage = async () => {
-  const page = await getStaticPageBySlug('about-us');
+const AboutUsPage = () => {
+  return (
+    <div className="max-w-4xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-12">
+      {/* Page Banner */}
+      <div className="mb-8 flex justify-center">
+        <PageBanner
+          title="ABOUT US"
+          iconImage={IMAGES.ICONS.WECREDIT_HEART}
+          iconAlt="WeCredit Heart Icon"
+        />
+      </div>
 
-  if (!page) {
-    notFound();
-  }
-
-  return <>
-    <DebugData data={page} title="About Us Page" />
-    <StaticPageContent page={page} />
-  </>;
+      {/* About Us Content */}
+      <AboutUsContent />
+    </div>
+  );
 };
 
 export default AboutUsPage;

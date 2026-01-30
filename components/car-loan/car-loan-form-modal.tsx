@@ -36,17 +36,32 @@ const CarLoanFormModal = ({ onClose }: CarLoanFormModalProps): React.ReactNode =
         message: 'Checking your car loan status...',
         subtext: 'Please wait while we fetch your details.',
       });
-      const result = await fetchCarLoanStatus(user.phoneNumber, controller.signal);
-      if (result.hasExistingLead) {
-        setShowSuccess(true);
+
+      try {
+        const result = await fetchCarLoanStatus(user.phoneNumber, controller.signal);
+
+        if (result.hasExistingLead) {
+          setShowSuccess(true);
+        }
+      } catch (error) {
+        // Log error for debugging while allowing users to proceed with the form
+        console.error('Failed to check car loan status:', error);
+
+        // Fall back to showing the form so users can still submit their request
+        setShowSuccess(false);
+      } finally {
+        // Ensure loading state is always cleaned up
+        hideLoading();
+
       }
-      hideLoading();
     };
 
     checkStatus();
 
     return () => {
+      // Cleanup: abort ongoing request and hide loading if still shown
       controller.abort();
+      hideLoading();
     };
   }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
 
