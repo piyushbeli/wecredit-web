@@ -5,6 +5,7 @@ import { ActionButton } from '@/components/shared';
 import HomeLoanFields from './home-loan-fields';
 import { useHomeLoanForm } from './use-home-loan-form';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 interface HomeLoanFormProps {
   onClose?: () => void;
@@ -28,6 +29,7 @@ const HomeLoanForm = ({
     canSubmit,
   } = useHomeLoanForm({ onSuccess });
   const router = useRouter();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -39,6 +41,10 @@ const HomeLoanForm = ({
 
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
     handleSubmit();
   };
 

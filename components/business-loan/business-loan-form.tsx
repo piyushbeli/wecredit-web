@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/shared';
 import BusinessLoanFields from './business-loan-fields';
 import { useBusinessLoanForm } from './use-business-loan-form';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 interface BusinessLoanFormProps {
   onClose?: () => void;
@@ -32,6 +33,7 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
     canSubmit,
   } = useBusinessLoanForm({ onSuccess });
   const router = useRouter();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (isFirstStep) {
@@ -47,6 +49,10 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
 
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
     handleSubmit();
   };
 
