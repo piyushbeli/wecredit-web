@@ -8,16 +8,48 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import BusinessLoanForm from './business-loan-form';
+import { useLoadingStore } from '@/stores/loading-store';
+import { useAuth } from '@/hooks/use-auth';
+import { useEffect, useState } from 'react';
+import { fetchCarLoanStatus } from '@/lib/api/car-loan-service';
+import { fetchBusinessLoanStatus } from '@/lib/api/business-loan-service';
+import { CheckCircle2 } from 'lucide-react';
+import SuccessScreen from '../shared/success-screen';
 
 interface BusinessLoanFormModalProps {
-  isOpen: boolean;
   onClose: () => void;
 }
 
-const BusinessLoanFormModal = ({ isOpen, onClose }: BusinessLoanFormModalProps): React.ReactNode => {
-  useBodyScrollLock(isOpen);
+const BusinessLoanFormModal = ({ onClose }: BusinessLoanFormModalProps): React.ReactNode => {
+  const { show: showLoading, hide: hideLoading } = useLoadingStore();
+  const { isAuthenticated, user } = useAuth();
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  if (!isOpen) return null;
+    // Check loan status when user is authenticated (runs on mount and when auth/phone change)
+  useEffect(() => {
+    if (!isAuthenticated || !user?.phoneNumber) return;
+
+    const controller = new AbortController();
+
+    const checkStatus = async (): Promise<void> => {
+      // Gate the form with a status check to avoid showing it when a lead exists.
+      showLoading({
+        message: 'Checking your business loan status...',
+        subtext: 'Please wait while we fetch your details.',
+      });
+      const result = await fetchBusinessLoanStatus(user.phoneNumber, controller.signal);
+      if (result.hasExistingLead) {
+        setShowSuccess(true);
+      }
+      hideLoading();
+    };
+
+    checkStatus();
+
+    return () => {
+      controller.abort();
+    };
+  }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
 
   return (
     <AnimatePresence>
@@ -28,7 +60,19 @@ const BusinessLoanFormModal = ({ isOpen, onClose }: BusinessLoanFormModalProps):
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <BusinessLoanForm onClose={onClose} isModal />
+
+        {showSuccess ? (
+        <SuccessScreen
+          title="THANK YOU FOR SUBMITTING YOUR BUSINESS LOAN REQUEST!"
+          description="We'll get in touch with you shortly to guide you through the next steps."
+          ctaLabel="Continue to Homepage"
+          onCtaClick={onClose}
+          variant="sticky"
+          primaryIcon={<CheckCircle2 className="w-14 h-14 text-green-500 mb-6" />}
+        />
+      ) :
+        <BusinessLoanForm onClose={onClose} isModal onSuccess={() => setShowSuccess(true)} />
+      }
       </motion.div>
     </AnimatePresence>
   );

@@ -22,7 +22,6 @@ const HomeLoanFormModal = ({ onClose }: HomeLoanFormModalProps): React.ReactNode
   const { isAuthenticated, user } = useAuth();
   const { show: showLoading, hide: hideLoading } = useLoadingStore();
   const [showSuccess, setShowSuccess] = useState(false);
-  const hasCheckedStatusRef = useRef(false);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -32,10 +31,9 @@ const HomeLoanFormModal = ({ onClose }: HomeLoanFormModalProps): React.ReactNode
     };
   }, []);
 
-  // Check loan status once on mount when user is authenticated
+  // Check loan status when user is authenticated (runs on mount and when auth/phone change)
   useEffect(() => {
-    if (!isAuthenticated || !user?.phoneNumber || hasCheckedStatusRef.current) return;
-    hasCheckedStatusRef.current = true;
+    if (!isAuthenticated || !user?.phoneNumber) return;
 
     const controller = new AbortController();
 

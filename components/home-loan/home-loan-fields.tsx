@@ -1,14 +1,17 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import InputField from '@/components/forms/input-field';
 import ButtonGroup from '@/components/forms/button-group';
+import { dobToNativeFormat, normalizePan } from '@/lib/utils/form-helpers';
 import {
-  HOME_LOAN_EMPLOYMENT_OPTIONS,
+  HOME_LOAN_INCOME_SOURCE_OPTIONS,
   sanitizeNumericInput,
   type HomeLoanFormState,
 } from './home-loan-form.config';
 
 const PAN_HINT = 'As per PAN card';
+const DOB_HINT = 'As per PAN card';
 
 interface HomeLoanFieldsProps {
   formValues: HomeLoanFormState;
@@ -16,7 +19,7 @@ interface HomeLoanFieldsProps {
   handleFieldChange: (key: keyof HomeLoanFormState, value: string | boolean) => void;
 }
 
-const employmentOptions = HOME_LOAN_EMPLOYMENT_OPTIONS.map((option) => ({
+const incomeSourceOptions = HOME_LOAN_INCOME_SOURCE_OPTIONS.map((option) => ({
   value: option,
   label: option === 'Self-employed' ? 'Self - employed' : option,
 }));
@@ -61,6 +64,52 @@ const HomeLoanFields = ({
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
+      </div>
+
+      <div>
+        <label className="lead-form-label">
+          PAN Number <span className="text-red-500">*</span>
+        </label>
+        <InputField
+          label="PAN Number"
+          value={formValues.panNumber}
+          onChange={(value) => handleFieldChange('panNumber', normalizePan(value))}
+          placeholder="e.g. ABCDE1234F"
+          error={formErrors.panNumber}
+          type="text"
+          maxLength={10}
+          required
+          autoComplete="off"
+        />
+        <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
+      </div>
+
+      <div>
+        <label htmlFor="home-loan-dob" className="lead-form-label">
+          Date of Birth <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="home-loan-dob"
+          name="dob"
+          type="date"
+          value={
+            /^\d{4}-\d{2}-\d{2}$/.test(formValues.dob)
+              ? formValues.dob
+              : dobToNativeFormat(formValues.dob)
+          }
+          onChange={(e) => handleFieldChange('dob', e.target.value)}
+          required
+          className={cn(
+            'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+            formErrors.dob ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'
+          )}
+        />
+        <p className="text-xs text-gray-500 mt-1">{DOB_HINT}</p>
+        {formErrors.dob && (
+          <p className="text-xs text-red-600 mt-1">{formErrors.dob}</p>
+        )}
       </div>
 
       <div>
@@ -121,13 +170,15 @@ const HomeLoanFields = ({
 
       <div>
         <label className="lead-form-label">
-          Employment Type <span className="text-red-500">*</span>
+          Source of Income <span className="text-red-500">*</span>
         </label>
         <ButtonGroup
-          options={employmentOptions}
-          value={formValues.employmentType}
-          onChange={(value) => handleFieldChange('employmentType', value as HomeLoanFormState['employmentType'])}
-          error={formErrors.employmentType}
+          options={incomeSourceOptions}
+          value={formValues.incomeSource}
+          onChange={(value) =>
+            handleFieldChange('incomeSource', value as HomeLoanFormState['incomeSource'])
+          }
+          error={formErrors.incomeSource}
         />
       </div>
 

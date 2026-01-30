@@ -185,7 +185,8 @@ export async function submitCarLoanEnquiry(
       body: JSON.stringify(requestBody),
     });
 
-    if (response.ok && response.status === 200) {
+    if (response.ok) {
+      toast.success('Car loan enquiry submitted successfully')
       return true;
     }
 

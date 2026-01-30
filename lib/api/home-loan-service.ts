@@ -15,12 +15,13 @@ interface HomeLoanSubmitRequestBody {
   endpoint: string;
   partnerCode: string;
   fullName: string;
-  phoneNumber: number;
-  permanentPincode: string;
-  propertyPincode: string;
-  employmentType: string;
+  mobileNumber: number;
+  permanentPincode: number;
+  propertyPincode: number;
+  incomeSource: string;
   loanAmount: number;
-  consent: boolean;
+  panNumber: string;
+  dob: string;
 }
 
 interface HomeLoanStatusRequestBody {
@@ -164,12 +165,13 @@ export async function submitHomeLoanEnquiry(
     endpoint: 'hl-leads',
     partnerCode: PARTNER_CODE,
     fullName: payload.name,
-    phoneNumber: Number(phoneDigits),
-    permanentPincode: payload.permanentPincode,
-    propertyPincode: payload.propertyPincode,
-    employmentType: payload.employmentType,
+    mobileNumber: Number(phoneDigits),
+    permanentPincode: Number(payload.permanentPincode),
+    propertyPincode: Number(payload.propertyPincode),
+    incomeSource: payload.incomeSource,
     loanAmount: payload.loanAmount,
-    consent: payload.consent,
+    panNumber: payload.panNumber,
+    dob: payload.dob,
   };
 
   try {
@@ -179,7 +181,8 @@ export async function submitHomeLoanEnquiry(
       body: JSON.stringify(requestBody),
     });
 
-    if (response.ok && response.status === 200) {
+    if (response.ok) {
+      toast.success('Home loan enquiry submitted successfully')
       return true;
     }
 

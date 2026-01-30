@@ -3,6 +3,9 @@
  * Single-step form.
  */
 
+import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
+
+export { sanitizeNumericInput };
 export type CarLoanGender = 'Male' | 'Female';
 export type CarLoanEmploymentType = 'Salaried' | 'Self-employed';
 
@@ -37,12 +40,6 @@ export const DEFAULT_CAR_LOAN_FORM_STATE: CarLoanFormState = {
   employmentType: 'Salaried',
   carModel: '',
   consent: true,
-};
-
-/** Normalize numeric input for mobile and pincode. */
-export const sanitizeNumericInput = (value: string, maxLength?: number): string => {
-  const digits = value.replace(/\D/g, '');
-  return typeof maxLength === 'number' ? digits.slice(0, maxLength) : digits;
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

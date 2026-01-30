@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Briefcase, CheckCircle2 } from 'lucide-react';
-import { ActionButton, SuccessScreen } from '@/components/shared';
+import { ArrowLeft } from 'lucide-react';
+import { ActionButton } from '@/components/shared';
 import BusinessLoanFields from './business-loan-fields';
 import { useBusinessLoanForm } from './use-business-loan-form';
 import { useRouter } from 'next/navigation';
@@ -11,9 +11,11 @@ interface BusinessLoanFormProps {
   onClose?: () => void;
   /** When true, form is embedded in modal; root uses flex-1 min-h-0 and back on step 1 calls onClose */
   isModal?: boolean;
+  /** Called when the API submit succeeds so the parent can show success state. */
+  onSuccess?: () => void;
 }
 
-const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): React.ReactNode => {
+const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanFormProps): React.ReactNode => {
   const {
     formValues,
     formErrors,
@@ -27,9 +29,8 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
     isFirstStep,
     isLastStep,
     isSubmitting,
-    showSuccess,
     canSubmit,
-  } = useBusinessLoanForm();
+  } = useBusinessLoanForm({ onSuccess });
   const router = useRouter();
 
   const handleHeaderBackClick = (): void => {
@@ -42,14 +43,6 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
       return;
     }
     handleBack();
-  };
-
-  const handleContinueToHomepage = (): void => {
-    if (onClose) {
-      onClose();
-    } else {
-      router.push('/');
-    }
   };
 
   const onFormSubmit = (e: React.FormEvent): void => {
@@ -81,27 +74,6 @@ const BusinessLoanForm = ({ onClose, isModal = false }: BusinessLoanFormProps): 
   const rootClassName = isModal
     ? 'flex flex-col flex-1 min-h-0 bg-white'
     : 'bg-white h-screen flex flex-col';
-
-  // Success screen: full-screen replacement with message and CTA.
-  if (showSuccess) {
-    return (
-      <div className={rootClassName}>
-        <SuccessScreen
-          title="THANK YOU FOR SUBMITTING YOUR BUSINESS LOAN REQUEST!"
-          description="We'll get in touch with you shortly to guide you through the next steps."
-          ctaLabel="Continue to Homepage"
-          onCtaClick={handleContinueToHomepage}
-          variant="sticky"
-          primaryIcon={
-            <div className="rounded-full bg-blue-50 p-4">
-              <Briefcase className="w-12 h-12 text-blue-600" />
-            </div>
-          }
-          secondaryIcon={<CheckCircle2 className="w-10 h-10 text-green-500" />}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className={rootClassName}>

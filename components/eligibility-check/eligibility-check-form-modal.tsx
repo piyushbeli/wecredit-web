@@ -4,53 +4,74 @@ import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { fetchGoldLoanStatus } from '@/lib/api/gold-loan-service';
+import { checkEligibilityStatus } from '@/lib/api/eligibility-check-service';
 import { useLoadingStore } from '@/stores/loading-store';
 import { SuccessScreen } from '@/components/shared';
-import GoldLoanForm from './gold-loan-form';
+import EligibilityCheckForm from './eligibility-check-form';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 
-interface GoldLoanFormModalProps {
+interface EligibilityCheckFormModalProps {
   onClose: () => void;
 }
 
-const GoldLoanFormModal = ({ onClose }: GoldLoanFormModalProps): React.ReactNode => {
+const EligibilityCheckFormModal = ({
+  onClose,
+}: EligibilityCheckFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
   const { show: showLoading, hide: hideLoading } = useLoadingStore();
   const [showSuccess, setShowSuccess] = useState(false);
+  const isMountedRef = useRef(true);
 
+  useBodyScrollLock(true);
 
-  // Check loan status when user is authenticated (runs on mount and when auth/phone change)
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Check bureau status when user is authenticated (runs on mount and when auth/phone change)
   useEffect(() => {
     if (!isAuthenticated || !user?.phoneNumber) return;
 
     const controller = new AbortController();
 
-    const checkStatus = async (): Promise<void> => {
-      // Avoid showing the form if a lead already exists for this user.
+    const runCheck = async (): Promise<void> => {
       showLoading({
-        message: 'Checking your gold loan status...',
+        message: 'Checking your eligibility status...',
         subtext: 'Please wait while we fetch your details.',
       });
 
       try {
-        const result = await fetchGoldLoanStatus(user.phoneNumber, controller.signal);
-        if (result.hasExistingLead) {
+        const result = await checkEligibilityStatus(
+          user.phoneNumber,
+          controller.signal
+        );
+        if (!isMountedRef.current) return;
+        if (result.showSuccess) {
           setShowSuccess(true);
         }
-      } catch (error) {
-        // If the status check fails, fall back to the form so users can proceed.
-        setShowSuccess(false);
+      } catch {
+        if (isMountedRef.current) {
+          setShowSuccess(false);
+        }
       } finally {
         hideLoading();
       }
     };
 
-    checkStatus();
+    runCheck();
 
     return () => {
       controller.abort();
     };
   }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
+
+  const handleSuccess = (): void => {
+    if (isMountedRef.current) {
+      setShowSuccess(true);
+    }
+  };
 
   return (
     <motion.div
@@ -62,18 +83,22 @@ const GoldLoanFormModal = ({ onClose }: GoldLoanFormModalProps): React.ReactNode
     >
       {showSuccess ? (
         <SuccessScreen
-          title="THANK YOU FOR SUBMITTING YOUR GOLD LOAN REQUEST!"
-          description="We'll get in touch with you shortly to guide you through the next steps."
+          title="Your details have been successfully submitted."
+          description="We're processing your request."
           ctaLabel="Continue to Homepage"
           onCtaClick={onClose}
           variant="sticky"
           primaryIcon={<CheckCircle2 className="w-14 h-14 text-green-500 mb-6" />}
         />
       ) : (
-        <GoldLoanForm onClose={onClose} isModal onSuccess={() => setShowSuccess(true)} />
+        <EligibilityCheckForm
+          onClose={onClose}
+          isModal
+          onSuccess={handleSuccess}
+        />
       )}
     </motion.div>
   );
 };
 
-export default GoldLoanFormModal;
+export default EligibilityCheckFormModal;

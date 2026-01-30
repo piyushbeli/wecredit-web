@@ -212,8 +212,8 @@ export async function submitBusinessLoanEnquiry(
       headers: buildBusinessLoanHeaders(phoneDigits),
       body: JSON.stringify(requestBody),
     });
-
-    if (response.ok && response.status === 200) {
+    if (response.ok) {
+      toast.success('Business loan enquiry submitted successfully')
       return true;
     }
 

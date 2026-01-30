@@ -3,20 +3,31 @@
  * Single-step form; no step mapping.
  */
 
-export type HomeLoanEmploymentType = 'Salaried' | 'Self-employed';
+import {
+  sanitizeNumericInput,
+  formatDobForApi,
+  isValidDobFormat,
+  normalizePan,
+} from '@/lib/utils/form-helpers';
+
+export { sanitizeNumericInput };
+
+export type HomeLoanIncomeSourceType = 'Salaried' | 'Self-employed';
 
 export interface HomeLoanFormState {
   firstName: string;
   lastName: string;
   mobile: string;
+  panNumber: string;
+  dob: string;
   permanentPincode: string;
   propertyPincode: string;
-  employmentType: HomeLoanEmploymentType;
+  incomeSource: HomeLoanIncomeSourceType;
   loanAmount: string;
   consent: boolean;
 }
 
-export const HOME_LOAN_EMPLOYMENT_OPTIONS: HomeLoanEmploymentType[] = [
+export const HOME_LOAN_INCOME_SOURCE_OPTIONS: HomeLoanIncomeSourceType[] = [
   'Salaried',
   'Self-employed',
 ];
@@ -25,18 +36,17 @@ export const DEFAULT_HOME_LOAN_FORM_STATE: HomeLoanFormState = {
   firstName: '',
   lastName: '',
   mobile: '',
+  panNumber: '',
+  dob: '',
   permanentPincode: '',
   propertyPincode: '',
-  employmentType: 'Salaried',
+  incomeSource: 'Salaried',
   loanAmount: '',
   consent: true,
 };
 
-/** Normalize numeric input for mobile and pincode fields. */
-export const sanitizeNumericInput = (value: string, maxLength?: number): string => {
-  const digits = value.replace(/\D/g, '');
-  return typeof maxLength === 'number' ? digits.slice(0, maxLength) : digits;
-};
+/** PAN format: 5 letters + 4 digits + 1 letter (e.g. ABCDE1234F). */
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 export const validateHomeLoanForm = (
   values: HomeLoanFormState
@@ -72,8 +82,23 @@ export const validateHomeLoanForm = (
     nextErrors.propertyPincode = 'Enter a valid 6-digit pincode';
   }
 
-  if (!values.employmentType) {
-    nextErrors.employmentType = 'Employment type is required';
+  const panUpper = normalizePan(values.panNumber);
+  if (!panUpper) {
+    nextErrors.panNumber = 'PAN is required';
+  } else if (panUpper.length !== 10) {
+    nextErrors.panNumber = 'Enter a valid 10-character PAN number';
+  } else if (!PAN_REGEX.test(panUpper)) {
+    nextErrors.panNumber = 'Enter a valid PAN (e.g. ABCDE1234F)';
+  }
+
+  if (!values.dob.trim()) {
+    nextErrors.dob = 'Date of birth is required';
+  } else if (!isValidDobFormat(values.dob)) {
+    nextErrors.dob = 'Enter a valid date (DD-MM-YYYY)';
+  }
+
+  if (!values.incomeSource) {
+    nextErrors.incomeSource = 'Source of income is required';
   }
 
   if (!values.loanAmount.trim()) {
@@ -93,9 +118,11 @@ export const validateHomeLoanForm = (
 export interface HomeLoanEnquiryPayload {
   name: string;
   mobile: string;
+  panNumber: string;
+  dob: string;
   permanentPincode: string;
   propertyPincode: string;
-  employmentType: HomeLoanEmploymentType;
+  incomeSource: HomeLoanIncomeSourceType;
   loanAmount: number;
   consent: boolean;
 }
@@ -107,9 +134,11 @@ export const buildHomeLoanPayload = (
   return {
     name: fullName,
     mobile: values.mobile.trim(),
+    panNumber: normalizePan(values.panNumber),
+    dob: formatDobForApi(values.dob),
     permanentPincode: values.permanentPincode.trim(),
     propertyPincode: values.propertyPincode.trim(),
-    employmentType: values.employmentType,
+    incomeSource: values.incomeSource,
     loanAmount: Number(values.loanAmount),
     consent: values.consent,
   };
