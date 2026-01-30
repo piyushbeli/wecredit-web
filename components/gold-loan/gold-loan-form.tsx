@@ -5,6 +5,7 @@ import { ActionButton } from '@/components/shared';
 import GoldLoanFields from './gold-loan-fields';
 import { useGoldLoanForm } from './use-gold-loan-form';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 interface GoldLoanFormProps {
   onClose?: () => void;
@@ -28,6 +29,7 @@ const GoldLoanForm = ({
     canSubmit,
   } = useGoldLoanForm({ onSuccess });
   const router = useRouter();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -39,6 +41,10 @@ const GoldLoanForm = ({
 
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
     handleSubmit();
   };
 
