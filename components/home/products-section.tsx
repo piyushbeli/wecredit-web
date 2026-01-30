@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShoppingBag, BriefcaseBusiness, ShoppingCart, CreditCard } from 'lucide-react';
+import { ShoppingBag, BriefcaseBusiness, ShoppingCart, CreditCard, Home } from 'lucide-react';
 import ProductCard from './product-card';
 import { IMAGES } from '@/lib/constants/images';
 import type { LucideIcon } from 'lucide-react';
@@ -38,6 +38,27 @@ const products: Product[] = [
   //   icon: ShoppingCart,
   //   imagePath: IMAGES.ICONS.PL_BY_ONDC,
   // },
+  {
+    id: 'home-loan',
+    label: 'Home\nLoan',
+    href: '/home-loan',
+    icon: Home,
+    imagePath: IMAGES.ICONS.CREDIT_CARD,
+  },
+  {
+    id: 'car-loan',
+    label: 'Car\nLoan',
+    href: '/car-loan',
+    icon: ShoppingBag,
+    imagePath: IMAGES.ICONS.CREDIT_CARD,
+  },
+  {
+    id: 'gold-loan',
+    label: 'Gold\nLoan',
+    href: '/gold-loan',
+    icon: BriefcaseBusiness,
+    imagePath: IMAGES.ICONS.CREDIT_CARD,
+  },
   {
     id: 'credit-cards',
     label: 'Credit\nCards',
