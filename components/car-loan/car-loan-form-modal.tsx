@@ -22,20 +22,11 @@ const CarLoanFormModal = ({ onClose }: CarLoanFormModalProps): React.ReactNode =
   const { isAuthenticated, user } = useAuth();
   const { show: showLoading, hide: hideLoading } = useLoadingStore();
   const [showSuccess, setShowSuccess] = useState(false);
-  const hasCheckedStatusRef = useRef(false);
-  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    // Track unmount to avoid state updates after component unmounts.
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
-  // Check loan status once on mount when user is authenticated
+  // Check loan status when user is authenticated (runs on mount and when auth/phone change)
   useEffect(() => {
-    if (!isAuthenticated || !user?.phoneNumber || hasCheckedStatusRef.current) return;
-    hasCheckedStatusRef.current = true;
+    if (!isAuthenticated || !user?.phoneNumber) return;
 
     const controller = new AbortController();
 
@@ -46,7 +37,6 @@ const CarLoanFormModal = ({ onClose }: CarLoanFormModalProps): React.ReactNode =
         subtext: 'Please wait while we fetch your details.',
       });
       const result = await fetchCarLoanStatus(user.phoneNumber, controller.signal);
-      if (!isMountedRef.current) return;
       if (result.hasExistingLead) {
         setShowSuccess(true);
       }

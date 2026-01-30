@@ -53,7 +53,13 @@ function splitFullName(fullName: string | undefined): { firstName: string; lastN
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
 
-export const useBusinessLoanForm = (): UseBusinessLoanFormReturn => {
+interface UseBusinessLoanFormOptions {
+  /** Called when the API submit succeeds so the parent can show success state. */
+  onSuccess?: () => void;
+}
+
+export const useBusinessLoanForm = (options: UseBusinessLoanFormOptions = {}): UseBusinessLoanFormReturn => {
+  const { onSuccess } = options;
   const { isAuthenticated, user } = useAuth();
   const searchParams = useSearchParams();
   const enableBusinessLoanPrefill = useFeatureFlag('enableBusinessLoanPrefill');
@@ -64,16 +70,12 @@ export const useBusinessLoanForm = (): UseBusinessLoanFormReturn => {
   const [currentStep, setCurrentStep] = useState(1);
   const hasPrefilledRef = useRef(false);
   const hasTestPrefilledRef = useRef(false);
-  const isMountedRef = useRef(true);
-  const hasCheckedStatusRef = useRef(false);
 
   const isPrefillEnabled =
     enableBusinessLoanPrefill ||
     (process.env.NODE_ENV !== 'production' && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE);
 
-  useEffect(() => () => {
-    isMountedRef.current = false;
-  }, []);
+
 
   const handleFieldChange = useCallback((key: keyof BusinessLoanFormState, value: string | boolean): void => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -126,18 +128,22 @@ export const useBusinessLoanForm = (): UseBusinessLoanFormReturn => {
     try {
       const payload = buildBusinessLoanPayload(formValues);
       const success = await submitBusinessLoanEnquiry(payload);
-
-      if (!isMountedRef.current) return;
+      
       if (success) {
-        setShowSuccess(true);
+        const result = await fetchBusinessLoanStatus(user?.phoneNumber ?? '', new AbortController().signal);
+        if (result.hasExistingLead) {
+          setShowSuccess(true);
+        }
+        if (onSuccess) {
+          onSuccess();
+        }
         setCurrentStep(1);
         setFormValues(DEFAULT_FORM_STATE);
         setFormErrors({});
       }
     } finally {
-      if (isMountedRef.current) {
         setIsSubmitting(false);
-      }
+      
     }
   }, [formValues, isSubmitting]);
 
@@ -177,16 +183,14 @@ export const useBusinessLoanForm = (): UseBusinessLoanFormReturn => {
     setFormErrors({});
   }, [isPrefillEnabled]);
 
-  // Check existing lead once on page load.
+  // Check existing lead when user is authenticated (runs on mount and when auth/phone change).
   useEffect(() => {
-    if (!isAuthenticated || !user?.phoneNumber || hasCheckedStatusRef.current) return;
-    hasCheckedStatusRef.current = true;
+    if (!isAuthenticated || !user?.phoneNumber) return;
 
     const controller = new AbortController();
 
     const checkStatus = async (): Promise<void> => {
       const result = await fetchBusinessLoanStatus(user.phoneNumber, controller.signal);
-      if (!isMountedRef.current) return;
       if (result.hasExistingLead) {
         setShowSuccess(true);
       }

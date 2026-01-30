@@ -81,18 +81,18 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
   {
     id: "slide-2",
     image: IMAGES.CAROUSEL.SLIDE_2,
-    titleWhite: "More Savings",
-    titleGradient: "on Every Loan",
+    titleWhite: "Find the Card",
+    titleGradient: "That Fits You",
     ctaText: "Get Your Card",
-    ctaLink: "/credit-card",
+    ctaLink: "/credit-cards",
   },
   {
     id: "slide-3",
     image: IMAGES.CAROUSEL.SLIDE_3,
-    titleWhite: "More Savings",
-    titleGradient: "on Every Loan",
+    titleWhite: "More Choices",
+    titleGradient: "Better Loan Deals",
     ctaText: "Check Eligibility",
-    ctaLink: "/eligibility-check",
+    ctaLink: "/bureau-report",
   },
 ];
   

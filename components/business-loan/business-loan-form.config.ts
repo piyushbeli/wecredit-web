@@ -1,5 +1,8 @@
 import type { BusinessLoanEnquiryPayload, CompanyType, Gender } from '@/lib/api/business-loan-service';
 import { BUSINESS_NATURE_CATEGORIES } from '@/lib/constants/business-loan';
+import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
+
+export { sanitizeNumericInput };
 
 export type HasGstValue = '' | 'true' | 'false';
 
@@ -93,12 +96,6 @@ export const BUSINESS_LOAN_PREFILL_TEST_VALUES: BusinessLoanFormState = {
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export const sanitizeNumericInput = (value: string, maxLength?: number): string => {
-  // Normalize numeric fields so validation and API payloads are consistent.
-  const digits = value.replace(/\D/g, '');
-  return typeof maxLength === 'number' ? digits.slice(0, maxLength) : digits;
-};
 
 export const getCanonicalBusinessNature = (value: string): string => {
   // Normalize to a known category to prevent backend mismatch and typos.

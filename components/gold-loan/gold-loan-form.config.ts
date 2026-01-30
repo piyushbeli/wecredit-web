@@ -3,6 +3,15 @@
  * Single-step form.
  */
 
+import {
+  sanitizeNumericInput,
+  formatDobForApi,
+  dobToNativeFormat,
+  isValidDobFormat,
+  normalizePan,
+} from '@/lib/utils/form-helpers';
+
+export { sanitizeNumericInput, formatDobForApi, dobToNativeFormat };
 export interface GoldLoanFormState {
   firstName: string;
   lastName: string;
@@ -27,67 +36,8 @@ export const DEFAULT_GOLD_LOAN_FORM_STATE: GoldLoanFormState = {
   consent: true,
 };
 
-/** Normalize numeric input for mobile and loan amount. */
-export const sanitizeNumericInput = (value: string, maxLength?: number): string => {
-  const digits = value.replace(/\D/g, '');
-  return typeof maxLength === 'number' ? digits.slice(0, maxLength) : digits;
-};
-
 /** PAN format: 5 letters + 4 digits + 1 letter (e.g. ABCDE1234F). */
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
-
-/**
- * Validate DOB in YYYY-MM-DD format (native date input).
- * Also accepts DD-MM-YYYY and DD/MM/YYYY for manual typing fallback.
- */
-function isValidDobFormat(value: string): boolean {
-  const trimmed = value.trim();
-  const isNative = /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
-  const isSlash = /^\d{2}\/\d{2}\/\d{4}$/.test(trimmed);
-  const isDash = /^\d{2}-\d{2}-\d{4}$/.test(trimmed);
-  if (!isNative && !isSlash && !isDash) return false;
-  const normalized = isNative
-    ? trimmed
-    : trimmed.replace(/\//g, '-').split('-').reverse().join('-');
-  const [y, m, d] = normalized.split('-').map((x) => parseInt(x ?? '0', 10));
-  if (d < 1 || d > 31) return false;
-  if (m < 1 || m > 12) return false;
-  if (y < 1900 || y > 2099) return false;
-  return true;
-}
-
-/**
- * Convert YYYY-MM-DD (native date input) to DD-MM-YYYY for API.
- * Same as Lead form formatDateForApi.
- */
-export const formatDobForApi = (dateStr: string): string => {
-  if (!dateStr.trim()) return '';
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    const [year, month, day] = dateStr.split('-');
-    return `${day}-${month}-${year}`;
-  }
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    return dateStr.replace(/\//g, '-');
-  }
-  return dateStr;
-};
-
-/**
- * Convert DD-MM-YYYY to YYYY-MM-DD for native date input display.
- * Same as Lead form convertDateToNativeFormat (e.g. when initializing from API).
- */
-export const dobToNativeFormat = (dateStr: string): string => {
-  if (!dateStr?.trim()) return '';
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    const [day, month, year] = dateStr.split('/');
-    return `${year}-${month}-${day}`;
-  }
-  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
-    const [day, month, year] = dateStr.split('-');
-    return `${year}-${month}-${day}`;
-  }
-  return dateStr;
-};
 
 export const validateGoldLoanForm = (
   values: GoldLoanFormState
@@ -115,7 +65,7 @@ export const validateGoldLoanForm = (
     nextErrors.dob = 'Enter a valid date of birth';
   }
 
-  const panUpper = values.pan.trim().toUpperCase();
+  const panUpper = normalizePan(values.pan);
   if (!panUpper) {
     nextErrors.pan = 'PAN is required';
   } else if (panUpper.length !== 10) {
@@ -164,7 +114,7 @@ export const buildGoldLoanPayload = (
     name: fullName,
     mobile: values.mobile.trim(),
     dob: formatDobForApi(values.dob),
-    pan: values.pan.trim().toUpperCase(),
+    pan: normalizePan(values.pan),
     state: values.state.trim(),
     city: values.city.trim(),
     loanAmount: Number(values.loanAmount),

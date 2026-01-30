@@ -181,7 +181,8 @@ export async function submitGoldLoanEnquiry(
       body: JSON.stringify(requestBody),
     });
 
-    if (response.ok && response.status === 200) {
+    if (response.ok) {
+      toast.success('Gold loan enquiry submitted successfully')
       return true;
     }
 

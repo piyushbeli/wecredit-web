@@ -64,6 +64,9 @@ export const ENDPOINTS = {
 
     /** Endpoint identifier for update utm clicked (Offers Screen) */
     UPDATE_UTM_CLICKED: 'update-utm-clicked',
+
+    /** Endpoint identifier for credit card Apply Now click tracking */
+    CLICKS_COUNTER: 'clicks_counter',
   },
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',

@@ -31,13 +31,13 @@ const products: Product[] = [
     icon: BriefcaseBusiness,
     imagePath: IMAGES.ICONS.BUSINESS_LOAN,
   },
-  {
-    id: 'pl-by-ondc',
-    label: 'PL By\nONDC',
-    href: '/pl-by-ondc',
-    icon: ShoppingCart,
-    imagePath: IMAGES.ICONS.PL_BY_ONDC,
-  },
+  // {
+  //   id: 'pl-by-ondc',
+  //   label: 'PL By\nONDC',
+  //   href: '/pl-by-ondc',
+  //   icon: ShoppingCart,
+  //   imagePath: IMAGES.ICONS.PL_BY_ONDC,
+  // },
   {
     id: 'credit-cards',
     label: 'Credit\nCards',
@@ -65,7 +65,7 @@ const ProductsSection = (): React.ReactNode => {
       </motion.h2>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-4 gap-2 mx-auto">
+      <div className="grid grid-cols-3 gap-2 mx-auto">
         {products.map((product, index) => (
           <ProductCard
             key={product.id}
