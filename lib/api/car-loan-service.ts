@@ -7,6 +7,12 @@ import { getCookie } from 'cookies-next';
 import { toast } from 'sonner';
 import { wecreditConfig } from '@/lib/config';
 import { PARTNER_CODE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
+import { getErrorMessage, isAbortError } from '@/lib/utils/error-helpers';
+import {
+  getLoanFormStatus,
+  getResponseMessage,
+  getResponseStatus,
+} from '@/lib/utils/response-helpers';
 import type { CarLoanEnquiryPayload } from '@/components/car-loan/car-loan-form.config';
 
 const CAR_LOAN_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
@@ -89,21 +95,10 @@ export async function fetchCarLoanStatus(
       // Response body might be empty or non-JSON on some failures.
     }
 
-    const responseMessage =
-      typeof responseData === 'object' && responseData
-        ? (responseData as { message?: string; error?: string; statusMessage?: string }).message ||
-          (responseData as { message?: string; error?: string; statusMessage?: string }).error ||
-          (responseData as { message?: string; error?: string; statusMessage?: string }).statusMessage
-        : undefined;
-    const responseStatus =
-      typeof responseData === 'object' && responseData
-        ? (responseData as { status?: number }).status
-        : undefined;
-    const loanFormStatus =
-      typeof responseData === 'object' && responseData
-        ? (responseData as { loan_form_status?: unknown; loanFormStatus?: unknown }).loan_form_status ??
-          (responseData as { loan_form_status?: unknown; loanFormStatus?: unknown }).loanFormStatus
-        : undefined;
+    const responseMessage = getResponseMessage(responseData);
+    const responseStatus = getResponseStatus(responseData);
+    const loanFormStatus = getLoanFormStatus(responseData);
+
     if (loanFormStatus !== undefined) {
       // Some status APIs return a dedicated loan_form_status field instead of HTTP 404/200.
       const normalizedStatus =
@@ -138,12 +133,10 @@ export async function fetchCarLoanStatus(
     });
     return { hasExistingLead: false, error: errorMessage, data: responseData };
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      // Silent abort to avoid confusing users during route changes.
+    if (isAbortError(error)) {
       return { hasExistingLead: false };
     }
-    const errorMessage =
-      error instanceof Error ? error.message : 'Network error occurred';
+    const errorMessage = getErrorMessage(error, 'Network error occurred');
     toast.error(errorMessage, {
       description: 'Failed to check your submission. Please try again.',
     });
@@ -176,8 +169,6 @@ export async function submitCarLoanEnquiry(
     // consent: payload.consent,
   };
 
-  console.log(requestBody);
-
   try {
     const response = await fetch(CAR_LOAN_ENDPOINT, {
       method: 'POST',
@@ -207,8 +198,7 @@ export async function submitCarLoanEnquiry(
     });
     return false;
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Network error occurred';
+    const errorMessage = getErrorMessage(error, 'Network error occurred');
     toast.error(errorMessage, {
       description: 'Failed to submit your request. Please check your connection.',
     });
