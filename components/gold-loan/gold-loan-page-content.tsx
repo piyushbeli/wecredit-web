@@ -11,7 +11,11 @@ const GoldLoanPageContent = (): React.ReactNode => {
     router.push('/');
   }, [router]);
 
-  return <GoldLoanFormModal onClose={handleCloseModal} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <GoldLoanFormModal onClose={handleCloseModal} />
+    </div>
+  );
 };
 
 export default GoldLoanPageContent;

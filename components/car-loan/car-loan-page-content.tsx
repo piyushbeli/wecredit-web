@@ -11,7 +11,12 @@ const CarLoanPageContent = (): React.ReactNode => {
     router.push('/');
   }, [router]);
 
-  return <CarLoanFormModal onClose={handleCloseModal} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <CarLoanFormModal onClose={handleCloseModal} />
+    </div>
+  );
+
 };
 
 export default CarLoanPageContent;

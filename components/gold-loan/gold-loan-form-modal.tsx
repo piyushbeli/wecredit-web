@@ -1,87 +1,78 @@
 'use client';
 
-import { motion } from 'framer-motion';
+/**
+ * Fullscreen modal for the gold loan form.
+ * Overlays the page like HomeLoanFormModal; use isOpen/onClose to control visibility.
+ */
+
 import { CheckCircle2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
+import { useLoanModalState } from '@/hooks/use-loan-modal-state';
 import { fetchGoldLoanStatus } from '@/lib/api/gold-loan-service';
-import { useLoadingStore } from '@/stores/loading-store';
 import { SuccessScreen } from '@/components/shared';
 import GoldLoanForm from './gold-loan-form';
+import { LoadingScreen } from '../shared/loading-screen';
 
 interface GoldLoanFormModalProps {
   onClose: () => void;
 }
 
+/** Adapter: hook expects (phone, signal) => Promise<boolean>; service returns { hasExistingLead }. */
+async function checkGoldLoanStatus(
+  phoneNumber: string,
+  signal: AbortSignal
+): Promise<boolean> {
+  const result = await fetchGoldLoanStatus(phoneNumber, signal);
+  return result.hasExistingLead;
+}
+
 const GoldLoanFormModal = ({ onClose }: GoldLoanFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
-  const { show: showLoading, hide: hideLoading } = useLoadingStore();
-  const [showSuccess, setShowSuccess] = useState(false);
 
+  const isReady = isAuthenticated && !!user?.phoneNumber;
+  const { state, transitionToSuccess } = useLoanModalState({
+    checkStatus: checkGoldLoanStatus,
+    loadingMessage: 'Checking your gold loan status...',
+    loadingSubtext: 'Please wait while we fetch your details.',
+    isReady,
+    phoneNumber: user?.phoneNumber,
+  });
 
-  // Check loan status when user is authenticated (runs on mount and when auth/phone change)
-  useEffect(() => {
-    if (!isAuthenticated || !user?.phoneNumber) return;
+  const renderContent = (): React.ReactNode => {
+    switch (state) {
+      case 'loading':
+        return <LoadingScreen />;
 
-    const controller = new AbortController();
+      case 'success':
+        return (
+          <SuccessScreen
+            title="THANK YOU FOR SUBMITTING YOUR GOLD LOAN REQUEST!"
+            description="We'll get in touch with you shortly to guide you through the next steps."
+            ctaLabel="Continue to Homepage"
+            onCtaClick={onClose}
+            variant="sticky"
+            primaryIcon={<CheckCircle2 className="w-14 h-14 text-green-500 mb-6" />}
+          />
+        );
 
-    const checkStatus = async (): Promise<void> => {
-      // Gate the form with a status check to avoid showing it when a lead exists.
-      showLoading({
-        message: 'Checking your gold loan status...',
-        subtext: 'Please wait while we fetch your details.',
-      });
+      case 'form':
+        return (
+          <GoldLoanForm
+            onClose={onClose}
+            isModal
+            onSuccess={transitionToSuccess}
+          />
+        );
 
-      try {
-        const result = await fetchGoldLoanStatus(user.phoneNumber, controller.signal);
-
-        if (result.hasExistingLead) {
-          setShowSuccess(true);
-        }
-      } catch (error) {
-        // Log error for debugging while allowing users to proceed with the form
-        console.error('Failed to check gold loan status:', error);
-
-
-        // Fall back to showing the form so users can still submit their request
-        setShowSuccess(false);
-      } finally {
-        // Ensure loading state is always cleaned up
-        hideLoading();
-
-      }
-    };
-
-    checkStatus();
-
-    return () => {
-      // Cleanup: abort ongoing request and hide loading if still shown
-      controller.abort();
-      hideLoading();
-    };
-  }, [hideLoading, isAuthenticated, showLoading, user?.phoneNumber]);
+      default:
+        return <LoadingScreen />;
+    }
+  };
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 bg-white flex flex-col"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      {showSuccess ? (
-        <SuccessScreen
-          title="THANK YOU FOR SUBMITTING YOUR GOLD LOAN REQUEST!"
-          description="We'll get in touch with you shortly to guide you through the next steps."
-          ctaLabel="Continue to Homepage"
-          onCtaClick={onClose}
-          variant="sticky"
-          primaryIcon={<CheckCircle2 className="w-14 h-14 text-green-500 mb-6" />}
-        />
-      ) : (
-        <GoldLoanForm onClose={onClose} isModal onSuccess={() => setShowSuccess(true)} />
-      )}
-    </motion.div>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+      {renderContent()}
+    </div>
   );
 };
 

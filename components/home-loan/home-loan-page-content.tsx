@@ -16,7 +16,11 @@ const HomeLoanPageContent = (): React.ReactNode => {
     router.push('/');
   }, [router]);
 
-  return <HomeLoanFormModal onClose={handleCloseModal} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <HomeLoanFormModal onClose={handleCloseModal} />
+    </div>
+  );
 };
 
 export default HomeLoanPageContent;
