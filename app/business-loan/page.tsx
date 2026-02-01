@@ -5,9 +5,7 @@ import { PageLoader } from '@/components/shared/page-loader';
 
 const BusinessLoanPage = (): React.ReactNode => {
   return (
-    <Suspense 
-    fallback={<PageLoader />}
-    >
+    <Suspense fallback={<PageLoader />}>
       <BusinessLoanPageContent />
     </Suspense>
   );

@@ -44,13 +44,8 @@ export const useHomeLoanForm = (
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasPrefilledRef = useRef(false);
-  const isMountedRef = useRef(true);
   const formValuesRef = useRef(formValues);
   formValuesRef.current = formValues;
-
-  useEffect(() => () => {
-    isMountedRef.current = false;
-  }, []);
 
   const handleFieldChange = useCallback(
     (key: keyof HomeLoanFormState, value: string | boolean): void => {
@@ -98,7 +93,6 @@ export const useHomeLoanForm = (
       const payload = buildHomeLoanPayload(formValues);
       const success = await submitHomeLoanEnquiry(payload);
 
-      if (!isMountedRef.current) return;
       if (success) {
         if (onSuccess) {
           onSuccess();
@@ -107,9 +101,7 @@ export const useHomeLoanForm = (
         setFormErrors({});
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
       hideLoading();
     }
   }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
