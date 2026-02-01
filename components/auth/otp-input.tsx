@@ -110,7 +110,7 @@ const OTPInput = ({
         'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-2 rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
         'border-white/30 bg-white/20 text-white placeholder:text-white/40',
         'backdrop-blur-sm ',
-        disabled && 'opacity-50 cursor-not-allowed'
+        disabled && 'opacity-50 cursor-not-allowed', 'focus:outline-none'
       );
     }
 
@@ -120,7 +120,7 @@ const OTPInput = ({
       error
         ? 'border-b-red-400 bg-red-50 text-gray-900'
         : 'bg-[#045CCF]/15 text-gray-900 placeholder:text-gray-400',
-      disabled && 'opacity-50 cursor-not-allowed'
+      disabled && 'opacity-50 cursor-not-allowed', 'focus:outline-none'
     );
   };
 
