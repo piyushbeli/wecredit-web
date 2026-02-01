@@ -118,7 +118,7 @@ export const selectFilteredOffers = (
  */
 export const selectExploreOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
   return offers.filter((offer) => 
-    offer.wcStatus === 'INITIATED' || offer.wcStatus === 'UTM_CLICKED'
+    offer.wcStatus === 'INITIATED'
   );
 };
 

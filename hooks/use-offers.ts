@@ -7,53 +7,17 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { 
-  MOCK_CHECK_STATUS_RESPONSE, 
   MOCK_REHIT_RESPONSE, 
   MOCK_ALL_STATUSES_RESPONSE,
   simulateMockApiCall 
 } from '@/lib/mock-data/offers';
 import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
+import { UseOffersReturn } from '@/types/offer';
 
 /** Polling constants */
 const POLL_INTERVAL = 15000; // 15 seconds
 const MAX_POLL_DURATION = 90000; // 90 seconds
 const API_TIMEOUT = 15000; // 15 seconds
-
-/**
- * Hook return type
- */
-interface UseOffersReturn {
-  /** List of lender offers */
-  offers: LenderOfferStatus[];
-  /** Explore offers (INITIATED status - new offers to explore) */
-  exploreOffers: LenderOfferStatus[];
-  /** Status offers (non-INITIATED - offers user has clicked/applied) */
-  statusOffers: LenderOfferStatus[];
-  /** Loading state for initial fetch */
-  isLoading: boolean;
-  /** Whether the hook is currently polling for offers */
-  isPolling: boolean;
-  /** Error message if fetch failed */
-  error: string | null;
-  /** Whether more lenders can be checked (isRehitLenders === 0) */
-  canReHit: boolean;
-  /** Loading state for re-hit operation */
-  isReHitting: boolean;
-  /** Status code from API */
-  statusCode: string | null;
-  /** Fetch offers (initial load or retry) */
-  fetchOffers: (signal?: AbortSignal) => Promise<void>;
-  /** Re-hit all lenders to find more offers */
-  reHitLenders: () => Promise<void>;
-  /** Filter offers by status */
-  filterByStatus: (status: WcStatus | 'ALL') => LenderOfferStatus[];
-  /** Count of offers by status */
-  statusCounts: Record<WcStatus | 'ALL', number>;
-  /** Currently selected status filter */
-  selectedStatus: StatusFilter;
-  /** Set selected status filter */
-  setSelectedStatus: (status: StatusFilter) => void;
-}
 
 /**
  * Hook for managing loan offers
@@ -252,7 +216,7 @@ export function useOffers(): UseOffersReturn {
   /**
    * Derived arrays for different offer categories
    */
-  const exploreOffers = (offers);
+  const exploreOffers = selectExploreOffers(offers);
   const statusOffers = selectStatusOffers(offers);
 
   /**

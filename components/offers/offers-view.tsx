@@ -135,7 +135,7 @@ export const OffersView = () => {
           </div>
         )}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
+      {hasOffers && <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
         <ActionButton
           type="button"
           onClick={handleCheckStatus}
@@ -144,7 +144,7 @@ export const OffersView = () => {
         >
           Check your Loan Status
         </ActionButton>
-      </div>
+      </div>}
     </div>
   );
 };
