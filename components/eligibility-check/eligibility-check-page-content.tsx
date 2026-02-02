@@ -11,7 +11,11 @@ const EligibilityCheckPageContent = (): React.ReactNode => {
     router.push('/');
   }, [router]);
 
-  return <EligibilityCheckFormModal onClose={handleCloseModal} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <EligibilityCheckFormModal onClose={handleCloseModal} />
+    </div>
+  );
 };
 
 export default EligibilityCheckPageContent;

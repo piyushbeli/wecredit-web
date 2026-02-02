@@ -10,6 +10,7 @@ import { SOURCE_WEBSITE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import type { EligibilityCheckPayload } from '@/components/eligibility-check/eligibility-check-form.config';
 
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
+const ELIGIBILITY_CHECK_ENDPOINT_PROD = `https://wecredit.co.in/api/wechat`;
 
 export interface CheckEligibilityStatusResult {
   showSuccess: boolean;
@@ -27,21 +28,26 @@ export async function checkEligibilityStatus(
   signal?: AbortSignal
 ): Promise<CheckEligibilityStatusResult> {
   const phoneDigits = phoneNumber.replace(/\D/g, '');
+
   if (!/^[0-9]{10}$/.test(phoneDigits)) {
     return { showSuccess: false, error: 'Invalid mobile number' };
   }
 
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
+
   const requestBody = {
     source: SOURCE_WEBSITE,
     agentId: '',
-    phoneNumber: phoneDigits,
+    phoneNumber: environment === "staging" ? '8077904664' : phoneDigits,
     endpoint: 'get-bureau-url',
   };
 
+  const eligibilityCheckEndpoint = environment === "staging" ? ELIGIBILITY_CHECK_ENDPOINT : ELIGIBILITY_CHECK_ENDPOINT_PROD;
+
   try {
-    const response = await fetch(ELIGIBILITY_CHECK_ENDPOINT, {
+    const response = await fetch(eligibilityCheckEndpoint, {
       method: 'POST',
-      headers: buildEligibilityCheckHeaders(phoneDigits),
+      headers: buildEligibilityCheckHeaders(phoneDigits, true),
       body: JSON.stringify(requestBody),
       signal,
     });
@@ -85,15 +91,29 @@ function buildDefaultHeaders(): Record<string, string> {
   };
 }
 
-function buildEligibilityCheckHeaders(phoneNumber: string): Record<string, string> {
+/**
+ * Build headers for eligibility check API requests
+ * @param phoneNumber - User's phone number
+ * @param excludeAgentHost - If true, removes X-Agent-Host header (for get-bureau-url endpoint)
+ */
+function buildEligibilityCheckHeaders(
+  phoneNumber: string,
+  excludeAgentHost?: boolean
+): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
+
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
-    mobile: phoneNumber.replace(/\D/g, ''),
+    mobile: environment === "staging" ? '8077904664' : phoneNumber.replace(/\D/g, ''),
   };
+
+  headers['X-Agent-Host'] = 'agent-backend';
+  
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+
   return headers;
 }
 

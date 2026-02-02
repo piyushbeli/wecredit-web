@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import React, { Suspense } from 'react';
 import EligibilityCheckPageContent from '@/components/eligibility-check/eligibility-check-page-content';
+import { PageLoader } from '@/components/shared/page-loader';
 
 export const metadata: Metadata = {
   title: 'Eligibility Check | WeCredit',
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 const EligibilityCheckPage = (): React.ReactNode => {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PageLoader />}>
       <EligibilityCheckPageContent />
     </Suspense>
   );
