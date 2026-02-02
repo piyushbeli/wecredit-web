@@ -17,7 +17,7 @@ import { useFeatureFlag } from '@/hooks/use-feature-flag';
 interface UseCheckDedupeReturn {
   /** Whether API call is in progress */
   isLoading: boolean;
-  /** Whether user needs to fill form (statusCode === 1003) */
+  /** Whether user needs to fill form (statusCode 1003 or 1004) */
   needsForm: boolean;
   /** Raw response data from API */
   response: CheckDedupeResponse | null;
@@ -88,12 +88,12 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
       if (result.success && result.data) {
         setResponse(result.data);
         
-        // Check if user needs to fill form (statusCode 1003)
+        // 1003: new user needs form; 1004: mobile already exist, reopen form
         const statusCodeNumber = typeof result.data.statusCode === 'number' 
           ? result.data.statusCode 
           : parseInt(String(result.data.statusCode), 10);
         
-        setNeedsForm(statusCodeNumber === 1003);
+        setNeedsForm(statusCodeNumber === 1003 || statusCodeNumber === 1004);
         return true;
       } else {
         setError(result.error || 'Failed to check dedupe');

@@ -5,6 +5,7 @@ import { ActionButton } from '@/components/shared';
 import EligibilityCheckFields from './eligibility-check-fields';
 import { useEligibilityCheckForm } from './use-eligibility-check-form';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 interface EligibilityCheckFormProps {
   onClose?: () => void;
@@ -28,6 +29,7 @@ const EligibilityCheckForm = ({
     canSubmit,
   } = useEligibilityCheckForm({ onSuccess });
   const router = useRouter();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -39,6 +41,10 @@ const EligibilityCheckForm = ({
 
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
     handleSubmit();
   };
 
