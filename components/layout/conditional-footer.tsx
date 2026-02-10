@@ -19,7 +19,7 @@ const ConditionalFooter = (): React.ReactNode => {
 
   // Check if current route should hide the footer
   const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    pathname?.startsWith(route)
   );
 
   if (shouldHideFooter) {
