@@ -57,6 +57,44 @@ const TrendingOfferCard = ({
   index,
   skipAnimation = false,
 }: TrendingOfferCardProps): React.ReactNode => {
+  /**
+   * Validate logo path for Next.js Image.
+   * 
+   * Next.js tries to construct a URL from the src string, which throws
+   * "Failed to construct 'URL': Invalid URL" for values like "N/A" or "--".
+   * We only allow:
+   * - Absolute URLs (http/https/data)
+   * - Root-relative paths (starting with "/")
+   */
+  const hasValidLogoPath = React.useMemo((): boolean => {
+    if (!logoPath || typeof logoPath !== 'string') {
+      return false;
+    }
+    const trimmedPath = logoPath.trim();
+    if (trimmedPath === '') {
+      return false;
+    }
+    if (trimmedPath.startsWith('/')) {
+      return true;
+    }
+    if (
+      trimmedPath.startsWith('http://') ||
+      trimmedPath.startsWith('https://') ||
+      trimmedPath.startsWith('data:')
+    ) {
+      try {
+        // Validate that the URL can be constructed successfully.
+        // This prevents runtime TypeError from Next/Image internals.
+        // eslint-disable-next-line no-new
+        new URL(trimmedPath);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }, [logoPath]);
+
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithAction } = useAuth();
 
@@ -306,16 +344,20 @@ const TrendingOfferCard = ({
             </div>
           )}
 
-          {/* Header: Logo */}
+          {/* Header: Logo - only render Image when we have a valid URL-safe src */}
           <div className="flex items-center mb-1">
-            {/* {logoPath && <Image
-              src={logoPath || ''}
-              alt={lenderName}
-              width={100}
-              height={10}
-              className="object-contain h-5 w-auto"
-              priority
-            />} */}
+            {hasValidLogoPath ? (
+              <Image
+                src={logoPath?.trim() ?? ''}
+                alt={lenderName}
+                width={100}
+                height={10}
+                className="object-contain h-5 w-auto"
+                priority
+              />
+            ) : (
+              <span className="font-medium text-sm text-gray-700">{lenderName}</span>
+            )}
           </div>
 
           {/* Card Content - Always shows original offer details (UI unchanged) */}
