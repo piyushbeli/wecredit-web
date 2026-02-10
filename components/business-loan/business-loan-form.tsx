@@ -33,7 +33,7 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
     canSubmit,
   } = useBusinessLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (isFirstStep) {
@@ -50,7 +50,11 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
-      openAuthModal();
+      // Business loan currently relies on auth for a trusted mobile; if the
+      // form ever includes an editable mobile field, we will use it here.
+      // For now this safely falls back to the standard auth modal when the
+      // mobile value is not a valid 10-digit number.
+      void openAuthModalWithPhone(formValues.mobile);
       return;
     }
     handleSubmit();

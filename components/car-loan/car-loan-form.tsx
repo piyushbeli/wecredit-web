@@ -30,7 +30,7 @@ const CarLoanForm = ({
     canSubmit,
   } = useCarLoanForm({ onSuccess });
   const router = useRouter();
-  const {isAuthenticated, openAuthModal} = useAuth();
+  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -43,7 +43,9 @@ const CarLoanForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
-      openAuthModal();
+      // User has already entered phone in the form; use it for OTP and skip
+      // the login bottom sheet (phone input screen).
+      void openAuthModalWithPhone(formValues.mobile);
       return;
     }
     handleSubmit();

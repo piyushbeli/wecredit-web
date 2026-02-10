@@ -100,8 +100,8 @@ const AuthModal = (): React.ReactNode => {
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
           >
-            {/* Screen transitions */}
-            <AnimatePresence mode="wait" initial={false}>
+            {/* Screen transitions - use sync mode to avoid a visible gap when switching */}
+            <AnimatePresence mode="sync" initial={false}>
               {currentStep === 'phone' ? (
                 <PhoneStepScreen
                   key="phone-screen"

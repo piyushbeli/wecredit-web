@@ -30,7 +30,7 @@ const GoldLoanForm = ({
     canSubmit,
   } = useGoldLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -43,7 +43,9 @@ const GoldLoanForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
-      openAuthModal();
+      // Use the mobile from the form to start OTP flow and skip the login
+      // phone entry bottom sheet.
+      void openAuthModalWithPhone(formValues.mobile);
       return;
     }
     handleSubmit();

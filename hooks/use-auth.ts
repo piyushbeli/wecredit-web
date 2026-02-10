@@ -2,9 +2,10 @@
 
 import { useCallback } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
-import { clearAuthData } from '@/lib/api';
+import { authService, clearAuthData } from '@/lib/api';
 import type { User, PendingAction } from '@/stores/auth-store';
 import { useRouter } from 'next/navigation';
+import { useLoading } from '@/hooks/use-loading';
 
 /**
  * Return type for useAuth hook
@@ -22,6 +23,16 @@ interface UseAuthReturn {
   pendingAction: PendingAction | null;
   /** Open the auth modal */
   openAuthModal: () => void;
+  /**
+   * Open auth modal using a pre-filled phone number.
+   *
+   * Used by loan / eligibility forms where the user has already entered a
+   * valid mobile number in a preceding step. In this case we:
+   * - Skip the phone input bottom sheet
+   * - Use the provided phone for the login / OTP API
+   * - Immediately transition the modal into the OTP screen.
+   */
+  openAuthModalWithPhone: (phoneNumber: string) => Promise<void>;
   /** Open auth modal with a pending action to execute after login (PDF Step 5A) */
   openAuthModalWithAction: (action: PendingAction) => void;
   /** Close the auth modal */
@@ -64,6 +75,7 @@ interface UseAuthReturn {
  */
 export function useAuth(): UseAuthReturn {
   const router = useRouter();
+  const { showLoading, hideLoading } = useLoading();
   const {
     isModalOpen,
     isAuthenticated,
@@ -75,6 +87,10 @@ export function useAuth(): UseAuthReturn {
     closeModal,
     logout: storeLogout,
     consumePendingAction: storeConsumePendingAction,
+    setStep,
+    setPhoneNumber,
+    setLoading,
+    setError,
   } = useAuthStore();
 
   /** Logout and clear persisted auth data */
@@ -84,6 +100,53 @@ export function useAuth(): UseAuthReturn {
     router.push('/');
   }, [storeLogout]);
 
+  /**
+   * Open auth modal for a specific phone number and immediately trigger the OTP flow.
+   *
+   * This is used when the app already has a trusted mobile number from a form.
+   * We avoid asking for the phone again and:
+   * - store the phone in auth state
+   * - open the auth modal
+   * - send OTP
+   * - switch directly to the OTP step.
+   */
+  const openAuthModalWithPhone = useCallback(
+    async (rawPhoneNumber: string): Promise<void> => {
+      const phoneDigits = (rawPhoneNumber || '').replace(/\D/g, '');
+
+      // If we do not have a valid phone, fall back to the regular flow
+      // so the user can enter it manually. Form validation should make this rare.
+      if (phoneDigits.length !== 10) {
+        openModal();
+        return;
+      }
+
+      // Prepare auth store state before sending OTP.
+      setPhoneNumber(phoneDigits);
+      setError(null);
+      setLoading(true);
+
+      // Open modal immediately so the user sees feedback while OTP is sent.
+      openModal();
+      showLoading('Sending OTP...', 'We are verifying your phone number.');
+
+      try {
+        const result = await authService.sendOtp(phoneDigits);
+        if (result.success) {
+          // Jump directly to OTP screen since we already have the phone.
+          setStep('otp');
+          setLoading(false);
+        } else {
+          setError(result.error || 'Failed to send OTP. Please try again.');
+          setLoading(false);
+        }
+      } finally {
+        hideLoading();
+      }
+    },
+    [hideLoading, openModal, setError, setLoading, setPhoneNumber, setStep, showLoading]
+  );
+
   return {
     isModalOpen,
     isAuthenticated,
@@ -91,6 +154,8 @@ export function useAuth(): UseAuthReturn {
     isLoading,
     pendingAction,
     openAuthModal: openModal,
+    // New entry point for flows that already have the phone number (e.g. loan forms).
+    openAuthModalWithPhone,
     openAuthModalWithAction: openModalWithPendingAction,
     closeAuthModal: closeModal,
     logout,
