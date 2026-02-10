@@ -33,6 +33,11 @@ interface UseAuthReturn {
    * - Immediately transition the modal into the OTP screen.
    */
   openAuthModalWithPhone: (phoneNumber: string) => Promise<void>;
+  /**
+   * Open auth modal with phone and a pending action (e.g. submit_business_loan).
+   * Skips phone input, sends OTP, shows OTP step; after OTP success the action is consumed.
+   */
+  openAuthModalWithPhoneAndAction: (phoneNumber: string, action: PendingAction) => Promise<void>;
   /** Open auth modal with a pending action to execute after login (PDF Step 5A) */
   openAuthModalWithAction: (action: PendingAction) => void;
   /** Close the auth modal */
@@ -84,6 +89,7 @@ export function useAuth(): UseAuthReturn {
     pendingAction,
     openModal,
     openModalWithPendingAction,
+    setPendingAction,
     closeModal,
     logout: storeLogout,
     consumePendingAction: storeConsumePendingAction,
@@ -147,6 +153,53 @@ export function useAuth(): UseAuthReturn {
     [hideLoading, openModal, setError, setLoading, setPhoneNumber, setStep, showLoading]
   );
 
+  /**
+   * Open auth modal with phone and pending action; skip phone input, go straight to OTP.
+   * Used when form has mobile and we want to run an action after OTP (e.g. submit bl-leads).
+   */
+  const openAuthModalWithPhoneAndAction = useCallback(
+    async (rawPhoneNumber: string, action: PendingAction): Promise<void> => {
+      const phoneDigits = (rawPhoneNumber || '').replace(/\D/g, '');
+
+      if (phoneDigits.length !== 10) {
+        openModalWithPendingAction(action);
+        return;
+      }
+
+      setPendingAction(action);
+      setPhoneNumber(phoneDigits);
+      setError(null);
+      setLoading(true);
+
+      openModal();
+      showLoading('Sending OTP...', 'We are verifying your phone number.');
+
+      try {
+        const result = await authService.sendOtp(phoneDigits);
+        if (result.success) {
+          setStep('otp');
+          setLoading(false);
+        } else {
+          setError(result.error || 'Failed to send OTP. Please try again.');
+          setLoading(false);
+        }
+      } finally {
+        hideLoading();
+      }
+    },
+    [
+      hideLoading,
+      openModal,
+      openModalWithPendingAction,
+      setPendingAction,
+      setError,
+      setLoading,
+      setPhoneNumber,
+      setStep,
+      showLoading,
+    ]
+  );
+
   return {
     isModalOpen,
     isAuthenticated,
@@ -154,8 +207,8 @@ export function useAuth(): UseAuthReturn {
     isLoading,
     pendingAction,
     openAuthModal: openModal,
-    // New entry point for flows that already have the phone number (e.g. loan forms).
     openAuthModalWithPhone,
+    openAuthModalWithPhoneAndAction,
     openAuthModalWithAction: openModalWithPendingAction,
     closeAuthModal: closeModal,
     logout,

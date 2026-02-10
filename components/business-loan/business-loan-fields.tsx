@@ -12,6 +12,7 @@ import {
   type BusinessLoanFormState,
   type HasGstValue,
 } from './business-loan-form.config';
+import { useAuth } from '@/hooks/use-auth';
 
 const PAN_HINT = 'As per PAN card';
 
@@ -49,7 +50,7 @@ const BusinessLoanFields = ({
   handleFieldChange,
 }: BusinessLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
-
+  const { isAuthenticated } = useAuth();
   // Step 1: Personal Information
   if (stepNumber === 1) {
     return (
@@ -101,7 +102,7 @@ const BusinessLoanFields = ({
             inputMode="numeric"
             maxLength={10}
             required
-            disabled
+            disabled={isAuthenticated}
             autoComplete="tel"
           />
         </div>

@@ -20,18 +20,9 @@ interface UseHomeLoanFormReturn {
   isSubmitting: boolean;
   canSubmit: boolean;
 }
-
 interface UseHomeLoanFormOptions {
   /** Called when the API submit succeeds so the parent can show success state. */
   onSuccess?: () => void;
-}
-
-function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
-  if (!fullName?.trim()) return { firstName: '', lastName: '' };
-  const parts = fullName.trim().split(/\s+/);
-  const firstName = parts[0] ?? '';
-  const lastName = parts.slice(1).join(' ') ?? '';
-  return { firstName, lastName };
 }
 
 export const useHomeLoanForm = (
@@ -60,6 +51,17 @@ export const useHomeLoanForm = (
     []
   );
 
+  /**
+   * Scrolls the viewport to the first visible field with a validation error.
+   * Keeps the UX consistent with Personal, Car, and Gold loan forms by
+   * immediately highlighting where the user should start fixing issues.
+   */
+  const scrollToFirstError = useCallback((): void => {
+    const firstErrorElement = document.querySelector('.border-red-300, input:invalid');
+    if (!firstErrorElement) return;
+    firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
+
   const validateForm = useCallback((): boolean => {
     const errors = validateHomeLoanForm(formValues);
     setFormErrors(errors);
@@ -82,7 +84,12 @@ export const useHomeLoanForm = (
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      // When validation fails, bring the first errored field into view so the user
+      // can quickly understand what needs attention, consistent across loan forms.
+      scrollToFirstError();
+      return;
+    }
 
     setIsSubmitting(true);
     showLoading({
@@ -92,7 +99,6 @@ export const useHomeLoanForm = (
     try {
       const payload = buildHomeLoanPayload(formValues);
       const success = await submitHomeLoanEnquiry(payload);
-
       if (success) {
         if (onSuccess) {
           onSuccess();
@@ -104,7 +110,7 @@ export const useHomeLoanForm = (
       setIsSubmitting(false);
       hideLoading();
     }
-  }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
+  }, [formValues, hideLoading, isSubmitting, onSuccess, scrollToFirstError, showLoading, validateForm]);
 
   /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
@@ -118,11 +124,11 @@ export const useHomeLoanForm = (
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
     hasPrefilledRef.current = true;
 
-    const { firstName, lastName } = splitFullName(user.name);
+    // const { firstName, lastName } = splitFullName(user.name);
     setFormValues((prev) => ({
       ...prev,
-      ...(firstName && !prev.firstName ? { firstName } : {}),
-      ...(lastName && !prev.lastName ? { lastName } : {}),
+      // ...(firstName && !prev.firstName ? { firstName } : {}),
+      // ...(lastName && !prev.lastName ? { lastName } : {}),
       ...(user.phoneNumber && !prev.mobile ? { mobile: user.phoneNumber } : {}),
     }));
   }, [isAuthenticated, user]);

@@ -41,7 +41,6 @@ const DateOfBirthField = ({
         value={displayValue}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        required
         className={cn(
           'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',

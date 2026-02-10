@@ -10,6 +10,9 @@ import { leadService } from '@/lib/api/lead-service';
 import type { CheckDedupeResponse } from '@/types/lead';
 import type { LeadServiceResult } from '@/lib/api/lead-service';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { checkStatusAll } from '@/lib/api';
+import { getCookie } from 'cookies-next';
+import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 
 /**
  * Return type for useCheckDedupe hook
@@ -17,7 +20,7 @@ import { useFeatureFlag } from '@/hooks/use-feature-flag';
 interface UseCheckDedupeReturn {
   /** Whether API call is in progress */
   isLoading: boolean;
-  /** Whether user needs to fill form (statusCode 1003 or 1004) */
+  /** Whether user needs to fill form (1003 or 1004 without existing lenders) */
   needsForm: boolean;
   /** Raw response data from API */
   response: CheckDedupeResponse | null;
@@ -85,20 +88,45 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
         partnerCode
       );
 
-      if (result.success && result.data) {
-        setResponse(result.data);
-        
-        // 1003: new user needs form; 1004: mobile already exist, reopen form
-        const statusCodeNumber = typeof result.data.statusCode === 'number' 
-          ? result.data.statusCode 
-          : parseInt(String(result.data.statusCode), 10);
-        
-        setNeedsForm(statusCodeNumber === 1003 || statusCodeNumber === 1004);
-        return true;
-      } else {
+      if (!result.success || !result.data) {
         setError(result.error || 'Failed to check dedupe');
         return false;
       }
+
+      setResponse(result.data);
+
+      const statusCodeNumber = typeof result.data.statusCode === 'number'
+        ? result.data.statusCode
+        : parseInt(String(result.data.statusCode), 10);
+
+      const isNewUserStatus = statusCodeNumber === 1003;
+      const isExistingMobileStatus = statusCodeNumber === 1004;
+
+      // 1003: new user always needs to fill the form
+      if (isNewUserStatus) {
+        setNeedsForm(true);
+        return true;
+      }
+
+      if (isExistingMobileStatus) {
+        // 1004: mobile already exists
+        // Business rule:
+        // - Call check-status-all to see if there are any existing lenders
+        // - If lenders exist → user has offers, do NOT show form (go to offers)
+        // - If no lenders → open personal loan form again
+        const token = getCookie(STORAGE_AUTH_TOKEN) as string;
+        const statusResult = await checkStatusAll(mobile, token);
+        const lenders = statusResult.data?.lenders ?? [];
+        const hasLenders = lenders.length > 0;
+
+        // When there are no lenders (or API failed), we fall back to showing the form
+        setNeedsForm(!hasLenders);
+        return true;
+      }
+
+      // Any other status code → no form needed, user can proceed
+      setNeedsForm(false);
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(message);

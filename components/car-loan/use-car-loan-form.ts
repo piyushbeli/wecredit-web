@@ -26,13 +26,6 @@ interface UseCarLoanFormOptions {
   onSuccess?: () => void;
 }
 
-function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
-  if (!fullName?.trim()) return { firstName: '', lastName: '' };
-  const parts = fullName.trim().split(/\s+/);
-  const firstName = parts[0] ?? '';
-  const lastName = parts.slice(1).join(' ') ?? '';
-  return { firstName, lastName };
-}
 
 export const useCarLoanForm = (
   options: UseCarLoanFormOptions = {}
@@ -43,14 +36,9 @@ export const useCarLoanForm = (
   const [formValues, setFormValues] = useState<CarLoanFormState>(DEFAULT_CAR_LOAN_FORM_STATE);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const hasPrefilledRef = useRef(false);
-  const isMountedRef = useRef(true);
+  const hasPrefilledRef = useRef(false)
   const formValuesRef = useRef(formValues);
   formValuesRef.current = formValues;
-
-  useEffect(() => () => {
-    isMountedRef.current = false;
-  }, []);
 
   const handleFieldChange = useCallback(
     (key: keyof CarLoanFormState, value: string | boolean): void => {
@@ -64,6 +52,17 @@ export const useCarLoanForm = (
     },
     []
   );
+
+  /**
+   * Scrolls the viewport to the first visible field with a validation error.
+   * This mirrors the behaviour used in the Personal Loan and Gold Loan flows
+   * so the user immediately sees where to start fixing issues after submit.
+   */
+  const scrollToFirstError = useCallback((): void => {
+    const firstErrorElement = document.querySelector('.border-red-300, input:invalid');
+    if (!firstErrorElement) return;
+    firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
 
   const validateForm = useCallback((): boolean => {
     const errors = validateCarLoanForm(formValues);
@@ -87,7 +86,12 @@ export const useCarLoanForm = (
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      // When validation fails, bring the first errored field into view so the user
+      // can quickly understand what needs attention, consistent across loan forms.
+      scrollToFirstError();
+      return;
+    }
 
     setIsSubmitting(true);
     showLoading({
@@ -98,7 +102,6 @@ export const useCarLoanForm = (
       const payload = buildCarLoanPayload(formValues);
       const success = await submitCarLoanEnquiry(payload);
 
-      if (!isMountedRef.current) return;
       if (success) {
         if (onSuccess) {
           onSuccess();
@@ -107,12 +110,10 @@ export const useCarLoanForm = (
         setFormErrors({});
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
       hideLoading();
     }
-  }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
+  }, [formValues, hideLoading, isSubmitting, onSuccess, scrollToFirstError, showLoading, validateForm]);
 
   /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
@@ -125,11 +126,11 @@ export const useCarLoanForm = (
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
     hasPrefilledRef.current = true;
 
-    const { firstName, lastName } = splitFullName(user.name);
+    // const { firstName, lastName } = splitFullName(user.name);
     setFormValues((prev) => ({
       ...prev,
-      ...(firstName && !prev.firstName ? { firstName } : {}),
-      ...(lastName && !prev.lastName ? { lastName } : {}),
+      // ...(firstName && !prev.firstName ? { firstName } : {}),
+      // ...(lastName && !prev.lastName ? { lastName } : {}),
       ...(user.phoneNumber && !prev.mobile ? { mobile: user.phoneNumber } : {}),
       ...(user.email && !prev.email ? { email: user.email } : {}),
     }));
