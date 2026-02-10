@@ -13,6 +13,7 @@ import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
 import { useCreateLead } from '@/hooks/use-create-lead';
 import { useLeadForm } from '@/hooks/use-lead-form';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
@@ -89,6 +90,7 @@ const LeadFormModal = ({
 }: LeadFormModalProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
@@ -172,14 +174,14 @@ const LeadFormModal = ({
   const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
 
-    // Check consent - only block if consent field is mandatory AND not checked
+    // Check consent - always enforce when consent field is present, regardless of backend isMandatory flag.
+    // This guarantees the user must actively agree before their personal data is submitted.
     const consentField = fields.find(f => f.key === 'consent');
 
-    // If consent field exists in API and is mandatory, check if it's checked
-    if (consentField?.isMandatory) {
+    if (consentField) {
       const hasConsent = formValues.consent === 'true';
       if (!hasConsent) {
-        // Don't submit if mandatory consent is not checked
+        // Don't submit if consent exists but is not checked
         return;
       }
     }
@@ -270,9 +272,10 @@ const LeadFormModal = ({
       );
     }
 
-    // Check if consent is mandatory - only disable button if mandatory consent is not checked
+    // Treat consent as mandatory whenever the field exists in the final step.
+    // This keeps the UI (disabled state) aligned with the submit guard above.
     const consentField = fields.find(f => f.key === 'consent');
-    const isConsentRequired = consentField?.isMandatory ?? false;
+    const isConsentRequired = Boolean(consentField);
     const hasConsent = formValues.consent === 'true';
 
     // Only disable submit if consent is mandatory AND not checked
@@ -349,7 +352,9 @@ const LeadFormModal = ({
               onChange={(val) => handleFieldChange(field.key, val)}
               onBlur={() => validateField(field.key)}
               error={formErrors[field.key]}
-              disabled={isSubmitting}
+              // When the user is logged in, phone fields should be auto-populated
+              // and read-only to mirror Business Loan behaviour.
+              disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
             />
           );
         })}

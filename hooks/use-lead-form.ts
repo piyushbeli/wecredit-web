@@ -6,6 +6,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { FormField, FormFieldKey } from '@/types/lead';
+import { useAuth } from '@/hooks/use-auth';
+import { getCookie } from 'cookies-next';
+import { STORAGE_MOBILE } from '@/lib/constants/api-keys';
 
 interface WizardStep {
   stepNumber: number;
@@ -60,6 +63,7 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
+  const { isAuthenticated, user } = useAuth();
 
   /**
    * Get current step configuration
@@ -279,9 +283,17 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
       
       // Handle boolean fields
       if (field.type === 'boolean') {
-        // Convert string value to boolean string representation
-        const boolValue = field.value?.toLowerCase() === 'true' || field.value === '1';
-        initialValues[field.key] = boolValue ? 'true' : 'false';
+        // For consent we want a safe default of "checked".
+        // Backend might send an empty string for new users, so we only respect explicit false values.
+        if (field.key === 'consent') {
+          const lowerValue = field.value?.toLowerCase();
+          const isExplicitFalse = lowerValue === 'false' || field.value === '0';
+          initialValues[field.key] = isExplicitFalse ? 'false' : 'true';
+        } else {
+          // For non-consent boolean fields, preserve the backend intent exactly.
+          const boolValue = field.value?.toLowerCase() === 'true' || field.value === '1';
+          initialValues[field.key] = boolValue ? 'true' : 'false';
+        }
         return;
       }
       
@@ -291,6 +303,41 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
     
     setFormValues(initialValues);
   }, []);
+
+  /**
+   * Auth prefill for mobile/phone:
+   * When the user is authenticated, ensure the lead form has the same mobile number
+   * that was used for login. This mirrors the behaviour in Business Loan and avoids
+   * cases where the dynamic form API does not pre-populate the phone field.
+   */
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    const authMobileFromUser = user?.phoneNumber?.trim() ?? '';
+    const authMobileFromCookie = (getCookie(STORAGE_MOBILE) as string | undefined)?.trim() ?? '';
+    const effectiveMobile = authMobileFromUser || authMobileFromCookie;
+
+    if (!effectiveMobile) {
+      // If we do not have a reliable mobile number, do not touch form state.
+      return;
+    }
+
+    const hasMobile = Boolean(formValues.mobile?.trim());
+    const hasPhone = Boolean(formValues.phone?.trim());
+
+    // If both fields already have values, we assume API or the user has set them intentionally.
+    if (hasMobile && hasPhone) {
+      return;
+    }
+
+    setFormValues((previousValues) => ({
+      ...previousValues,
+      ...(hasMobile ? {} : { mobile: effectiveMobile }),
+      ...(hasPhone ? {} : { phone: effectiveMobile }),
+    }));
+  }, [formValues.mobile, formValues.phone, isAuthenticated, user]);
 
   // Reset to step 1 when fields are first loaded
   useEffect(() => {

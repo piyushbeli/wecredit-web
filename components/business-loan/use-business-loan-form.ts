@@ -41,15 +41,6 @@ interface UseBusinessLoanFormReturn {
   canSubmit: boolean;
 }
 
-/** Derive firstName and lastName from a single name string (e.g. from auth user). */
-function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
-  if (!fullName?.trim()) return { firstName: '', lastName: '' };
-  const parts = fullName.trim().split(/\s+/);
-  const firstName = parts[0] ?? '';
-  const lastName = parts.slice(1).join(' ') ?? '';
-  return { firstName, lastName };
-}
-
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
 
@@ -74,8 +65,6 @@ export const useBusinessLoanForm = (options: UseBusinessLoanFormOptions = {}): U
   const isPrefillEnabled =
     enableBusinessLoanPrefill ||
     (process.env.NODE_ENV !== 'production' && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE);
-
-
 
   const handleFieldChange = useCallback((key: keyof BusinessLoanFormState, value: string | boolean): void => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -165,11 +154,11 @@ export const useBusinessLoanForm = (options: UseBusinessLoanFormOptions = {}): U
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
     hasPrefilledRef.current = true;
 
-    const { firstName, lastName } = splitFullName(user.name);
+    // const { firstName, lastName } = splitFullName(user.name);
     setFormValues((prev) => ({
       ...prev,
-      ...(firstName && !prev.firstName ? { firstName } : {}),
-      ...(lastName && !prev.lastName ? { lastName } : {}),
+      // ...(firstName && !prev.firstName ? { firstName } : {}),
+      // ...(lastName && !prev.lastName ? { lastName } : {}),
       ...(user.phoneNumber && !prev.mobile ? { mobile: user.phoneNumber } : {}),
       ...(user.email && !prev.email ? { email: user.email } : {}),
     }));

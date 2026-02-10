@@ -7,6 +7,7 @@
 import { cn } from '@/lib/utils';
 import type { FormField, FormFieldKey } from '@/types/lead';
 import ButtonGroup from './button-group';
+import ConsentCheckbox from './consent-checkbox';
 
 interface DynamicFieldProps {
   /** Field configuration from API */
@@ -135,24 +136,12 @@ const DynamicField = ({
     const isChecked = value === 'true';
     return (
       <div className="space-y-2">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id={key}
-            checked={isChecked}
-            onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
-            onBlur={onBlur}
-            disabled={disabled}
-            className={cn(
-              'mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer',
-              disabled && 'opacity-50 cursor-not-allowed',
-              error && 'border-red-300'
-            )}
-          />
-          <label htmlFor={key} className="text-sm text-gray-700 cursor-pointer flex-1">
-            {title} {isMandatory && <span className="text-red-500">*</span>}
-          </label>
-        </div>
+        <ConsentCheckbox
+          id={key}
+          checked={isChecked}
+          onChange={(value) => onChange(value ? 'true' : 'false')}
+          error={error}
+        />
         {error && (
           <p className="text-xs text-red-600 ml-8">{error}</p>
         )}

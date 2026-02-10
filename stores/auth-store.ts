@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import type { BusinessLoanEnquiryPayload } from '@/lib/api/business-loan-service';
 
 /**
  * User data interface
@@ -20,7 +21,7 @@ type AuthStep = 'phone' | 'otp';
  * Pending action types for post-login continuation
  * Per PDF Step 5A - Post Login Behaviour: Continue with intended action after login
  */
-type PendingActionType = 'navigate_to_offer' | 'check_eligibility';
+type PendingActionType = 'navigate_to_offer' | 'check_eligibility' | 'submit_business_loan';
 
 /**
  * Pending action data structure
@@ -29,12 +30,14 @@ type PendingActionType = 'navigate_to_offer' | 'check_eligibility';
 interface PendingAction {
   /** Type of action to perform after login */
   type: PendingActionType;
-  /** Lender ID for the action */
-  lenderId: string;
-  /** Lender name for display/logging */
-  lenderName: string;
-  /** Target URL to navigate to */
-  href: string;
+  /** Lender ID for the action (navigate_to_offer / check_eligibility) */
+  lenderId?: string;
+  /** Lender name for display/logging (navigate_to_offer / check_eligibility) */
+  lenderName?: string;
+  /** Target URL to navigate to (navigate_to_offer / check_eligibility) */
+  href?: string;
+  /** Form payload for submit_business_loan - used after OTP to call bl-leads API */
+  businessLoanPayload?: BusinessLoanEnquiryPayload;
 }
 
 /**

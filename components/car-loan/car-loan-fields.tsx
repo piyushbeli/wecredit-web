@@ -2,6 +2,7 @@
 
 import InputField from '@/components/forms/input-field';
 import ButtonGroup from '@/components/forms/button-group';
+import ConsentCheckbox from '@/components/forms/consent-checkbox';
 import {
   CAR_LOAN_GENDER_OPTIONS,
   CAR_LOAN_EMPLOYMENT_OPTIONS,
@@ -183,32 +184,12 @@ const CarLoanFields = ({
           required
         />
       </div>
-
-      <div className="space-y-2">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="car-loan-consent"
-            checked={formValues.consent}
-            onChange={(event) => handleFieldChange('consent', event.target.checked)}
-            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-          />
-          <label htmlFor="car-loan-consent" className="text-sm text-gray-700">
-            I agree to{' '}
-            <a href="/terms-of-service" className="text-blue-600 underline">
-              Term
-            </a>{' '}
-            and{' '}
-            <a href="/privacy-policy" className="text-blue-600 underline">
-              Policy
-            </a>{' '}
-            of WeCredit.
-          </label>
-        </div>
-        {consentError && (
-          <p className="text-xs text-red-600 ml-8">{consentError}</p>
-        )}
-      </div>
+      <ConsentCheckbox
+        id="car-loan-consent"
+        checked={formValues.consent}
+        onChange={(value) => handleFieldChange('consent', value)}
+        error={consentError}
+      />
     </>
   );
 };

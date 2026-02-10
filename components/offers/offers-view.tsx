@@ -61,6 +61,7 @@ export const OffersView = () => {
   // Calculate total offers including recently clicked
   const totalOffers = statusOffers.length + exploreOffers.length;
   const hasOffers = totalOffers > 0;
+  const hasInitiatedOffers = exploreOffers.length > 0;
   const showPolling = isPolling && !hasOffers;
   const showEmpty = !isPolling && !hasOffers;
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
@@ -117,7 +118,7 @@ export const OffersView = () => {
       )}
 
       {/* Congratulations message */}
-      {hasOffers && (
+      {hasInitiatedOffers && (
         <div className="px-4 mb-4">
           <p className="text-blue-600 text-sm font-medium">
             Congratulations! You are eligible for a loan of upto ₹1,00,000

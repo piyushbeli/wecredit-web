@@ -90,3 +90,12 @@ export function isValidDobFormat(value: string): boolean {
 export function normalizePan(pan: string): string {
   return pan.trim().toUpperCase();
 }
+
+/** Derive firstName and lastName from a single name string (e.g. from auth user). */
+export function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
+  if (!fullName?.trim()) return { firstName: '', lastName: '' };
+  const parts = fullName.trim().split(/\s+/);
+  const firstName = parts[0] ?? '';
+  const lastName = parts.slice(1).join(' ') ?? '';
+  return { firstName, lastName };
+}

@@ -5,6 +5,7 @@
  * Overlays the page like LeadFormModal; use isOpen/onClose to control visibility.
  */
 
+import { useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
@@ -26,6 +27,8 @@ async function checkBusinessLoanStatus(
   return result.hasExistingLead;
 }
 
+const BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT = 'business-loan-submit-success';
+
 const BusinessLoanFormModal = ({ onClose }: BusinessLoanFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
 
@@ -37,6 +40,13 @@ const BusinessLoanFormModal = ({ onClose }: BusinessLoanFormModalProps): React.R
     isReady,
     phoneNumber: user?.phoneNumber,
   });
+
+  // After guest OTP verification, usePostLogin calls bl-leads API and dispatches this event.
+  useEffect(() => {
+    const handler = (): void => transitionToSuccess();
+    window.addEventListener(BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+    return () => window.removeEventListener(BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+  }, [transitionToSuccess]);
 
   const renderContent = (): React.ReactNode => {
     switch (state) {

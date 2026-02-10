@@ -5,6 +5,8 @@
 
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { CampaignLandingClient } from '@/components/pages/campaign-landing-client';
+import { Suspense } from 'react';
+import { PageLoader } from '@/components/shared/page-loader';
 
 interface PageProps {
   params: Promise<{ lender: string }>;
@@ -23,9 +25,11 @@ export default async function CampaignFormPage({ params, searchParams }: PagePro
   const partnerCode = partner || PARTNER_CODE;
 
   return (
-    <CampaignLandingClient 
-      lenderName={lenderName} 
-      partnerCode={partnerCode} 
-    />
+    <Suspense fallback={<PageLoader />}>
+      <CampaignLandingClient 
+        lenderName={lenderName} 
+        partnerCode={partnerCode} 
+      />
+    </Suspense>
   );
 }

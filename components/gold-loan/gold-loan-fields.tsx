@@ -1,10 +1,10 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import InputField from '@/components/forms/input-field';
+import ConsentCheckbox from '@/components/forms/consent-checkbox';
+import DateOfBirthField from '@/components/forms/date-of-birth-field';
 import {
   sanitizeNumericInput,
-  dobToNativeFormat,
   type GoldLoanFormState,
 } from './gold-loan-form.config';
 
@@ -83,28 +83,14 @@ const GoldLoanFields = ({
       </div>
 
       <div>
-        <label htmlFor="gold-loan-dob" className="lead-form-label">
-          Date of Birth <span className="text-red-500">*</span>
-        </label>
-        <input
+        <DateOfBirthField
           id="gold-loan-dob"
-          name="dob"
-          type="date"
-          value={/^\d{4}-\d{2}-\d{2}$/.test(formValues.dob) ? formValues.dob : dobToNativeFormat(formValues.dob)}
-          onChange={(e) => handleFieldChange('dob', e.target.value)}
+          value={formValues.dob}
+          onChange={(value) => handleFieldChange('dob', value)}
           onBlur={() => handleFieldBlur('dob')}
-          required
-          className={cn(
-            'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-            formErrors.dob ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'
-          )}
+          error={formErrors.dob}
+          hint={DOB_HINT}
         />
-        <p className="text-xs text-gray-500 mt-1">{DOB_HINT}</p>
-        {formErrors.dob && (
-          <p className="text-xs text-red-600 mt-1">{formErrors.dob}</p>
-        )}
       </div>
 
       <div>
@@ -173,32 +159,12 @@ const GoldLoanFields = ({
           required
         />
       </div>
-
-      <div className="space-y-2">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="gold-loan-consent"
-            checked={formValues.consent}
-            onChange={(event) => handleFieldChange('consent', event.target.checked)}
-            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-          />
-          <label htmlFor="gold-loan-consent" className="text-sm text-gray-700">
-            I agree to{' '}
-            <a href="/terms-of-service" className="text-blue-600 underline">
-              Term
-            </a>{' '}
-            and{' '}
-            <a href="/privacy-policy" className="text-blue-600 underline">
-              Policy
-            </a>{' '}
-            of WeCredit.
-          </label>
-        </div>
-        {consentError && (
-          <p className="text-xs text-red-600 ml-8">{consentError}</p>
-        )}
-      </div>
+      <ConsentCheckbox
+        id="gold-loan-consent"
+        checked={formValues.consent}
+        onChange={(value) => handleFieldChange('consent', value)}
+        error={consentError}
+      />
     </>
   );
 };

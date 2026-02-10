@@ -308,14 +308,14 @@ const TrendingOfferCard = ({
 
           {/* Header: Logo */}
           <div className="flex items-center mb-1">
-            <Image
+            {/* {logoPath && <Image
               src={logoPath || ''}
               alt={lenderName}
               width={100}
               height={10}
               className="object-contain h-5 w-auto"
               priority
-            />
+            />} */}
           </div>
 
           {/* Card Content - Always shows original offer details (UI unchanged) */}

@@ -29,7 +29,7 @@ const EligibilityCheckForm = ({
     canSubmit,
   } = useEligibilityCheckForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -42,7 +42,9 @@ const EligibilityCheckForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
-      openAuthModal();
+      // Use the eligibility form's phone number for OTP and skip the
+      // separate login phone bottom sheet.
+      void openAuthModalWithPhone(formValues.phoneNumber);
       return;
     }
     handleSubmit();

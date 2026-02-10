@@ -2,75 +2,77 @@
 
 /**
  * Campaign Landing Client
- * Handles the interactive landing UI and auto-opening of the LeadFormModal
+ * Fullscreen lead form for campaign URLs (e.g. /personal-loan/lender/[lender]).
+ * Validates lender name against active-lenders API before showing form.
+ * Same pattern as HomeLoanPageContent and BusinessLoanPageContent: fixed overlay
+ * covers footer from first paint to avoid flash (no FOOTER_EXCLUDED_ROUTES needed).
  */
 
-import { useEffect } from 'react';
-import { useModal } from '@/hooks/use-modal';
+import { useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
-import { ActionButton } from '@/components/shared';
+import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
+import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 
 interface CampaignLandingClientProps {
   lenderName: string;
   partnerCode: string;
 }
 
+const INCORRECT_LENDER_ERROR = 'Incorrect Lender name';
+
 export const CampaignLandingClient = ({
   lenderName,
   partnerCode,
 }: CampaignLandingClientProps) => {
-  const { isOpen: isFormOpen, openModal: openForm, closeModal: closeForm } = useModal();
+  const router = useRouter();
+  const { activeLenders, isLoading, error } = useFilteredActiveLenders({
+    fetchOnMount: true,
+    // No mobile - fetch generic active lenders
+  });
 
-  const lenderInitial = lenderName?.charAt(0).toUpperCase() || 'L';
-  const displayLenderName = lenderName || 'Lender';
+  const handleCloseModal = useCallback(() => {
+    router.push('/personal-loan');
+  }, [router]);
 
-  // Auto-open form on mount
+  // Redirect to home with error if lender is invalid (after load completes)
   useEffect(() => {
-    if (lenderName) {
-      openForm();
+    if (isLoading) return;
+    // API failed: redirect with generic error
+    if (error) {
+      toast.error('Failed to load lenders. Please try again.');
+      router.replace('/');
+      return;
     }
-  }, [lenderName, openForm]);
+    // Lender not in active list: redirect with specific error
+    const canonicalName = getMatchedLenderCanonicalName(lenderName, activeLenders);
+    if (!canonicalName) {
+      toast.error(INCORRECT_LENDER_ERROR);
+      router.replace('/');
+    }
+  }, [isLoading, error, activeLenders, lenderName, router]);
 
+  // Guard: Do not render form if API failed or lender is invalid (will redirect from useEffect)
+  const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
+  const showForm = !error && !!canonicalLenderName;
+
+  // Fixed overlay from first paint (like BusinessLoanFormModal) so footer is never visible
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-        {/* Placeholder UI while modal is opening or if closed */}
-        <div className="mb-8">
-          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-3xl font-bold text-blue-600">
-              {lenderInitial}
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Loan Application
-          </h1>
-          <p className="text-gray-600">
-            Apply for a personal loan from{' '}
-            <span className="font-semibold capitalize text-blue-600">{displayLenderName}</span>
-          </p>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+      {isLoading || !showForm ? (
+        <div className="flex-1 flex items-center justify-center bg-gray-50">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
         </div>
-
-        <ActionButton
-          type="button"
-          onClick={openForm}
-          fullWidth
-          className="h-14 text-base font-medium"
-        >
-          Check Eligibility
-        </ActionButton>
-
-        <p className="mt-6 text-sm text-gray-400">
-          Takes less than 2 minutes to get an offer
-        </p>
-      </div>
-
-      {/* Lead Form Modal */}
-      <LeadFormModal
-        isOpen={isFormOpen}
-        onClose={closeForm}
-        lenderName={lenderName}
-        partnerCode={partnerCode}
-      />
+      ) : (
+        <LeadFormModal
+          isOpen
+          onClose={handleCloseModal}
+          lenderName={canonicalLenderName}
+          partnerCode={partnerCode}
+        />
+      )}
     </div>
   );
 };

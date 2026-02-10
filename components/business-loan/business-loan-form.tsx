@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { ActionButton } from '@/components/shared';
 import BusinessLoanFields from './business-loan-fields';
+import { buildBusinessLoanPayload } from './business-loan-form.config';
 import { useBusinessLoanForm } from './use-business-loan-form';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
@@ -33,7 +34,7 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
     canSubmit,
   } = useBusinessLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhoneAndAction } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (isFirstStep) {
@@ -50,7 +51,13 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
-      openAuthModal();
+      // Store form payload as pending action; show OTP (no phone input).
+      // After OTP success, usePostLogin calls bl-leads API and emits success event.
+      const payload = buildBusinessLoanPayload(formValues);
+      void openAuthModalWithPhoneAndAction(formValues.mobile, {
+        type: 'submit_business_loan',
+        businessLoanPayload: payload,
+      });
       return;
     }
     handleSubmit();

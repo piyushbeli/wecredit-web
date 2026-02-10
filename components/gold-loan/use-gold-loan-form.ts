@@ -26,14 +26,6 @@ interface UseGoldLoanFormOptions {
   onSuccess?: () => void;
 }
 
-function splitFullName(fullName: string | undefined): { firstName: string; lastName: string } {
-  if (!fullName?.trim()) return { firstName: '', lastName: '' };
-  const parts = fullName.trim().split(/\s+/);
-  const firstName = parts[0] ?? '';
-  const lastName = parts.slice(1).join(' ') ?? '';
-  return { firstName, lastName };
-}
-
 export const useGoldLoanForm = (
   options: UseGoldLoanFormOptions = {}
 ): UseGoldLoanFormReturn => {
@@ -44,13 +36,8 @@ export const useGoldLoanForm = (
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasPrefilledRef = useRef(false);
-  const isMountedRef = useRef(true);
   const formValuesRef = useRef(formValues);
   formValuesRef.current = formValues;
-
-  useEffect(() => () => {
-    isMountedRef.current = false;
-  }, []);
 
   const handleFieldChange = useCallback(
     (key: keyof GoldLoanFormState, value: string | boolean): void => {
@@ -65,15 +52,26 @@ export const useGoldLoanForm = (
     []
   );
 
+  /**
+   * Scrolls the viewport to the first visible field with a validation error.
+   * Mirrors the behaviour used in the Personal Loan multi-step form so the user
+   * immediately sees where to start fixing issues after submit.
+   */
+  const scrollToFirstError = useCallback((): void => {
+    const firstErrorElement = document.querySelector('.border-red-300, input:invalid');
+    if (!firstErrorElement) return;
+    firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
+
   const validateForm = useCallback((): boolean => {
-    const errors = validateGoldLoanForm(formValues);
+    const errors: Record<string, string> = validateGoldLoanForm(formValues);
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   }, [formValues]);
 
   /** Validates a single field on blur and updates its error so inline feedback shows immediately. */
   const handleFieldBlur = useCallback((key: keyof GoldLoanFormState): void => {
-    const errors = validateGoldLoanForm(formValuesRef.current);
+    const errors: Record<string, string> = validateGoldLoanForm(formValuesRef.current);
     const message = errors[key];
     setFormErrors((prev) => {
       if (message) {
@@ -87,7 +85,12 @@ export const useGoldLoanForm = (
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      // When validation fails, bring the first errored field into view so the user
+      // can quickly understand what needs attention, similar to Personal Loan flow.
+      scrollToFirstError();
+      return;
+    }
 
     setIsSubmitting(true);
     showLoading({
@@ -97,8 +100,6 @@ export const useGoldLoanForm = (
     try {
       const payload = buildGoldLoanPayload(formValues);
       const success = await submitGoldLoanEnquiry(payload);
-
-      if (!isMountedRef.current) return;
       if (success) {
         if (onSuccess) {
           onSuccess();
@@ -107,12 +108,10 @@ export const useGoldLoanForm = (
         setFormErrors({});
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
       hideLoading();
     }
-  }, [formValues, hideLoading, isSubmitting, onSuccess, showLoading, validateForm]);
+  }, [formValues, hideLoading, isSubmitting, onSuccess, scrollToFirstError, showLoading, validateForm]);
 
   /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
@@ -125,11 +124,11 @@ export const useGoldLoanForm = (
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
     hasPrefilledRef.current = true;
 
-    const { firstName, lastName } = splitFullName(user.name);
+    // const { firstName, lastName } = splitFullName(user.name);
     setFormValues((prev) => ({
       ...prev,
-      ...(firstName && !prev.firstName ? { firstName } : {}),
-      ...(lastName && !prev.lastName ? { lastName } : {}),
+      // ...(firstName && !prev.firstName ? { firstName } : {}),
+      // ...(lastName && !prev.lastName ? { lastName } : {}),
       ...(user.phoneNumber && !prev.mobile ? { mobile: user.phoneNumber } : {}),
     }));
   }, [isAuthenticated, user]);

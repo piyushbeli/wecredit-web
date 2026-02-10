@@ -30,7 +30,7 @@ const HomeLoanForm = ({
     canSubmit,
   } = useHomeLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -43,7 +43,9 @@ const HomeLoanForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
-      openAuthModal();
+      // Start OTP using the mobile captured in the form and skip the login
+      // phone input bottom sheet.
+      void openAuthModalWithPhone(formValues.mobile);
       return;
     }
     handleSubmit();

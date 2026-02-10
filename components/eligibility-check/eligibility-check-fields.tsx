@@ -1,12 +1,11 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import InputField from '@/components/forms/input-field';
 import ButtonGroup from '@/components/forms/button-group';
+import DateOfBirthField from '@/components/forms/date-of-birth-field';
 import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
 import {
   GENDER_OPTIONS,
-  dobToNativeFormat,
   type EligibilityCheckFormValues,
 } from './eligibility-check-form.config';
 
@@ -21,11 +20,6 @@ const EligibilityCheckFields = ({
   formErrors,
   handleFieldChange,
 }: EligibilityCheckFieldsProps): React.ReactNode => {
-  const dobDisplay =
-    /^\d{4}-\d{2}-\d{2}$/.test(formValues.dob)
-      ? formValues.dob
-      : dobToNativeFormat(formValues.dob);
-
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -92,26 +86,12 @@ const EligibilityCheckFields = ({
       </div>
 
       <div>
-        <label htmlFor="eligibility-check-dob" className="lead-form-label">
-          Date of Birth <span className="text-red-500">*</span>
-        </label>
-        <input
+        <DateOfBirthField
           id="eligibility-check-dob"
-          name="dob"
-          type="date"
-          value={dobDisplay}
-          onChange={(e) => handleFieldChange('dob', e.target.value)}
-          required
-          className={cn(
-            'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-            formErrors.dob ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'
-          )}
+          value={formValues.dob}
+          onChange={(value) => handleFieldChange('dob', value)}
+          error={formErrors.dob}
         />
-        {formErrors.dob && (
-          <p className="text-xs text-red-600 mt-1">{formErrors.dob}</p>
-        )}
       </div>
 
       <div>
