@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import type { PendingAction } from '@/stores/auth-store';
 import { submitBusinessLoanEnquiry } from '@/lib/api/business-loan-service';
 import { submitCarLoanEnquiry } from '@/lib/api/car-loan-service';
 import { submitHomeLoanEnquiry } from '@/lib/api/home-loan-service';
@@ -11,6 +12,46 @@ import {
   HOME_LOAN_SUBMIT_SUCCESS_EVENT,
   GOLD_LOAN_SUBMIT_SUCCESS_EVENT,
 } from '@/lib/constants/events';
+
+type SubmitFn<TPayload> = (payload: TPayload) => Promise<boolean>;
+
+async function submitAndDispatch<TPayload>(
+  payload: TPayload,
+  submit: SubmitFn<TPayload>,
+  eventName: string,
+  logPrefix: string,
+  apiLabel: string
+): Promise<void> {
+  try {
+    const success = await submit(payload);
+    console.info(`${logPrefix} usePostLogin: ${apiLabel} API result`, { success });
+    if (success) {
+      window.dispatchEvent(new CustomEvent(eventName));
+      console.info(`${logPrefix} usePostLogin: dispatched`, eventName);
+    }
+  } catch (err) {
+    // Log and keep the user on the form; success is only signaled via the event.
+    console.error(`${logPrefix} usePostLogin: ${apiLabel} API error`, err);
+  }
+}
+
+function submitLoanPayload<TPayload>(
+  payload: TPayload | undefined,
+  submit: SubmitFn<TPayload>,
+  eventName: string,
+  logPrefix: string,
+  apiLabel: string,
+  missingPayloadMessage: string
+): void {
+  // Guard against incomplete pending actions (e.g., cleared state or bad payload).
+  if (!payload) {
+    console.warn(missingPayloadMessage);
+    return;
+  }
+
+  console.info(`${logPrefix} usePostLogin: calling ${apiLabel} API with stored payload`);
+  void submitAndDispatch(payload, submit, eventName, logPrefix, apiLabel);
+}
 
 /**
  * Custom hook for handling post-login actions
@@ -23,6 +64,66 @@ export const usePostLogin = (): void => {
   const router = useRouter();
   const { isAuthenticated, consumePendingAction } = useAuthStore();
   const wasAuthenticated = useRef(false);
+
+  const executePendingAction = useCallback((action: PendingAction | null): void => {
+    if (!action) {
+      return;
+    }
+
+    console.info('[AuthModal] Executing pending action:', action.type, action.lenderId);
+
+    switch (action.type) {
+      case 'navigate_to_offer':
+      case 'check_eligibility':
+        // Guard against missing href; avoid navigating to an undefined route.
+        if (action.href) {
+          router.push(action.href);
+        }
+        break;
+      case 'submit_business_loan':
+        submitLoanPayload(
+          action.businessLoanPayload,
+          submitBusinessLoanEnquiry,
+          BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[BL]',
+          'bl-leads',
+          '[BL] usePostLogin: submit_business_loan but no businessLoanPayload'
+        );
+        break;
+      case 'submit_car_loan':
+        submitLoanPayload(
+          action.carLoanPayload,
+          submitCarLoanEnquiry,
+          CAR_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[CL]',
+          'car loan',
+          '[CL] usePostLogin: submit_car_loan but no carLoanPayload'
+        );
+        break;
+      case 'submit_home_loan':
+        submitLoanPayload(
+          action.homeLoanPayload,
+          submitHomeLoanEnquiry,
+          HOME_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[HL]',
+          'home loan',
+          '[HL] usePostLogin: submit_home_loan but no homeLoanPayload'
+        );
+        break;
+      case 'submit_gold_loan':
+        submitLoanPayload(
+          action.goldLoanPayload,
+          submitGoldLoanEnquiry,
+          GOLD_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[GL]',
+          'gold loan',
+          '[GL] usePostLogin: submit_gold_loan but no goldLoanPayload'
+        );
+        break;
+      default:
+        console.warn('[AuthModal] Unknown pending action type:', action.type);
+    }
+  }, [router]);
 
   /**
    * PDF Step 5A - Post Login Behaviour
@@ -40,98 +141,9 @@ export const usePostLogin = (): void => {
         actionType: action?.type,
       });
 
-      if (action) {
-        console.info('[AuthModal] Executing pending action:', action.type, action.lenderId);
-
-        switch (action.type) {
-          case 'navigate_to_offer':
-          case 'check_eligibility':
-            if (action.href) {
-              router.push(action.href);
-            }
-            break;
-          case 'submit_business_loan':
-            if (action.businessLoanPayload) {
-              console.info('[BL] usePostLogin: calling bl-leads API with stored payload');
-              void (async (): Promise<void> => {
-                try {
-                  const success = await submitBusinessLoanEnquiry(action.businessLoanPayload);
-                  console.info('[BL] usePostLogin: bl-leads API result', { success });
-                  if (success) {
-                    window.dispatchEvent(new CustomEvent(BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT));
-                    console.info('[BL] usePostLogin: dispatched', BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT);
-                  }
-                } catch (err) {
-                  console.error('[BL] usePostLogin: bl-leads API error', err);
-                }
-              })();
-            } else {
-              console.warn('[BL] usePostLogin: submit_business_loan but no businessLoanPayload');
-            }
-            break;
-          case 'submit_car_loan':
-            if (action.carLoanPayload) {
-              console.info('[CL] usePostLogin: calling car loan API with stored payload');
-              void (async (): Promise<void> => {
-                try {
-                  const success = await submitCarLoanEnquiry(action.carLoanPayload);
-                  console.info('[CL] usePostLogin: car loan API result', { success });
-                  if (success) {
-                    window.dispatchEvent(new CustomEvent(CAR_LOAN_SUBMIT_SUCCESS_EVENT));
-                    console.info('[CL] usePostLogin: dispatched', CAR_LOAN_SUBMIT_SUCCESS_EVENT);
-                  }
-                } catch (err) {
-                  console.error('[CL] usePostLogin: car loan API error', err);
-                }
-              })();
-            } else {
-              console.warn('[CL] usePostLogin: submit_car_loan but no carLoanPayload');
-            }
-            break;
-          case 'submit_home_loan':
-            if (action.homeLoanPayload) {
-              console.info('[HL] usePostLogin: calling home loan API with stored payload');
-              void (async (): Promise<void> => {
-                try {
-                  const success = await submitHomeLoanEnquiry(action.homeLoanPayload);
-                  console.info('[HL] usePostLogin: home loan API result', { success });
-                  if (success) {
-                    window.dispatchEvent(new CustomEvent(HOME_LOAN_SUBMIT_SUCCESS_EVENT));
-                    console.info('[HL] usePostLogin: dispatched', HOME_LOAN_SUBMIT_SUCCESS_EVENT);
-                  }
-                } catch (err) {
-                  console.error('[HL] usePostLogin: home loan API error', err);
-                }
-              })();
-            } else {
-              console.warn('[HL] usePostLogin: submit_home_loan but no homeLoanPayload');
-            }
-            break;
-          case 'submit_gold_loan':
-            if (action.goldLoanPayload) {
-              console.info('[GL] usePostLogin: calling gold loan API with stored payload');
-              void (async (): Promise<void> => {
-                try {
-                  const success = await submitGoldLoanEnquiry(action.goldLoanPayload);
-                  console.info('[GL] usePostLogin: gold loan API result', { success });
-                  if (success) {
-                    window.dispatchEvent(new CustomEvent(GOLD_LOAN_SUBMIT_SUCCESS_EVENT));
-                    console.info('[GL] usePostLogin: dispatched', GOLD_LOAN_SUBMIT_SUCCESS_EVENT);
-                  }
-                } catch (err) {
-                  console.error('[GL] usePostLogin: gold loan API error', err);
-                }
-              })();
-            } else {
-              console.warn('[GL] usePostLogin: submit_gold_loan but no goldLoanPayload');
-            }
-            break;
-          default:
-            console.warn('[AuthModal] Unknown pending action type:', action.type);
-        }
-      }
+      executePendingAction(action);
     }
 
     wasAuthenticated.current = isAuthenticated;
-  }, [isAuthenticated, consumePendingAction, router]);
+  }, [isAuthenticated, consumePendingAction, executePendingAction]);
 };
