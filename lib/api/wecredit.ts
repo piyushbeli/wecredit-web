@@ -396,14 +396,10 @@ export async function hitAllLenders(
       }
     );
     
-    // Show success toast
-    toast.success('Checked for new offers', {
-      description: `Found ${data.lenders.length} lender${data.lenders.length !== 1 ? 's' : ''}`,
-    });
+
     
     return {
       success: true,
-      data,
     };
   } catch (error) {
     const errorMessage = error instanceof Error

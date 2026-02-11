@@ -231,16 +231,18 @@ const LeadFormModal = ({
     };
 
     const success = await createLead(formData, partnerCode, lenderName);
-
     if (success) {
       setShowSuccess(true);
       if (onSuccess) {
         onSuccess('');
+        onClose();
       } else {
         // Case A: Redirect to offers with newLead=true to trigger polling
-        router.push('/offers?newLead=true');
+        // Close first to avoid onClose navigation overriding the offers route.
+        onClose();
+        // router.push(`/offers?newLead=true`);
+        router.push(`/offers?newLead=true&${lenderName ? `lenderName=${lenderName}` : ''}`);
       }
-      onClose();
     }
   }, [formValues, userIp, createLead, partnerCode, lenderName, onSuccess, router, onClose, fields]);
 

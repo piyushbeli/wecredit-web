@@ -34,7 +34,7 @@ export const CampaignLandingClient = ({
   });
 
   const handleCloseModal = useCallback(() => {
-    router.push('/personal-loan');
+    router.push('/');
   }, [router]);
 
   // Redirect to home with error if lender is invalid (after load completes)

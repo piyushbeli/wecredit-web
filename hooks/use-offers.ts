@@ -60,78 +60,15 @@ export function useOffers(): UseOffersReturn {
   
   const searchParams = useSearchParams();
   const isNewLead = searchParams?.get('newLead') === 'true';
+  // Skip re-hit when a specific lender flow is identified via query params.
+  const lenderNameParam = searchParams?.get('lenderName') ?? searchParams?.get('lendername') ?? '';
+  const shouldSkipRehit = Boolean(lenderNameParam.trim());
   const enableMockData = useFeatureFlag('enableOfferMockData');
   
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pollStartTimeRef = useRef<number | null>(null);
   const didInitialFetchRef = useRef(false);
-
-  /**
-   * Fetch offers from API or mock data
-   */
-  const fetchOffers = useCallback(async (signal?: AbortSignal): Promise<void> => {
-    // Only show global loading on first fetch when not polling
-    if (!isPolling) {
-      setIsLoading(true);
-    }
-    setError(null);
-
-    // Feature flag: Use mock data for testing
-    if (enableMockData) {
-      console.info('[FeatureFlag] Using mock offers data');
-      try {
-        // Use MOCK_ALL_STATUSES_RESPONSE to test all status badges in UI
-        // Switch to MOCK_CHECK_STATUS_RESPONSE for normal testing
-        const mockResponse = await simulateMockApiCall(MOCK_ALL_STATUSES_RESPONSE);
-        setOffers(mockResponse.lenders || []);
-        setCanReHit(mockResponse.isRehitLenders === 0);
-        setStatusCode(mockResponse.statusCode);
-      } catch (err) {
-        setError('Failed to load mock data');
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
-
-    // Real API call
-    const mobile = getCookie(STORAGE_MOBILE) as string;
-    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
-
-    console.info(`[useOffers] Fetching offers. Mobile present: ${!!mobile}, Token present: ${!!token}, isPolling: ${isPolling}`);
-
-    if (!mobile) {
-      setError('Mobile number not found. Please login again.');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const result = await checkStatusAll(mobile, token, signal);
-
-      if (result.success && result.data) {
-        const response = result.data;
-        const newOffers = response.lenders || [];
-        setOffers(newOffers);
-        setCanReHit(response.isRehitLenders === 0);
-        setStatusCode(response.statusCode);
-      } else {
-        // Don't show error toast if it's a timeout during polling
-        if (result.error !== 'Request timed out') {
-          setError(result.error || 'Failed to load offers');
-        }
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        // Ignore abort errors
-        return;
-      }
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [enableMockData, isPolling, setOffers, setIsLoading, setError, setCanReHit, setStatusCode]);
+  const didPollingExpireRef = useRef(false);
 
   /**
    * Re-hit all lenders to check for more offers
@@ -199,6 +136,92 @@ export function useOffers(): UseOffersReturn {
   }, [canReHit, enableMockData, setOffers, setIsReHitting, setError, setCanReHit, setStatusCode]);
 
   /**
+   * Fetch offers from API or mock data
+   */
+  const fetchOffers = useCallback(async (signal?: AbortSignal): Promise<void> => {
+    // Only show global loading on first fetch when not polling
+    if (!isPolling) {
+      setIsLoading(true);
+    }
+    setError(null);
+
+    // Feature flag: Use mock data for testing
+    if (enableMockData) {
+      console.info('[FeatureFlag] Using mock offers data');
+      try {
+        // Use MOCK_ALL_STATUSES_RESPONSE to test all status badges in UI
+        // Switch to MOCK_CHECK_STATUS_RESPONSE for normal testing
+        const mockResponse = await simulateMockApiCall(MOCK_ALL_STATUSES_RESPONSE);
+        setOffers(mockResponse.lenders || []);
+        setCanReHit(mockResponse.isRehitLenders === 0);
+        setStatusCode(mockResponse.statusCode);
+      } catch (err) {
+        setError('Failed to load mock data');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Real API call
+    const mobile = getCookie(STORAGE_MOBILE) as string;
+    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
+
+    console.info(`[useOffers] Fetching offers. Mobile present: ${!!mobile}, Token present: ${!!token}, isPolling: ${isPolling}`);
+
+    if (!mobile) {
+      setError('Mobile number not found. Please login again.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const result = await checkStatusAll(mobile, token, signal);
+
+      if (result.success && result.data) {
+        const response = result.data;
+        const newOffers = response.lenders || [];
+        setOffers(newOffers);
+        setCanReHit(response.isRehitLenders === 0);
+        setStatusCode(response.statusCode);
+
+        // If API signals more lenders can be checked, hit all lenders and re-check status.
+        // Re-hit only when API allows it and we are not in a lender-specific flow.
+        if (response.isRehitLenders === 0 && !shouldSkipRehit) {
+          const rehitResult = await hitAllLenders(mobile, token);
+          if (rehitResult.success) {
+            const refreshedResult = await checkStatusAll(mobile, token, signal);
+            if (refreshedResult.success && refreshedResult.data) {
+              const refreshedResponse = refreshedResult.data;
+              setOffers(refreshedResponse.lenders || []);
+              setCanReHit(refreshedResponse.isRehitLenders === 0);
+              setStatusCode(refreshedResponse.statusCode);
+            } else if (refreshedResult.error !== 'Request timed out') {
+              setError(refreshedResult.error || 'Failed to refresh offers');
+            }
+          } else {
+            setError(rehitResult.error || 'Failed to check for new offers');
+          }
+        }
+      } else {
+        // Don't show error toast if it's a timeout during polling
+        if (result.error !== 'Request timed out') {
+          setError(result.error || 'Failed to load offers');
+        }
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Ignore abort errors
+        return;
+      }
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [enableMockData, isPolling, setOffers, setIsLoading, setError, setCanReHit, setStatusCode]);
+
+  /**
    * Filter offers by status
    */
   const filterByStatus = useCallback(
@@ -240,6 +263,8 @@ export function useOffers(): UseOffersReturn {
       const elapsed = Date.now() - pollStartTimeRef.current;
       if (elapsed >= MAX_POLL_DURATION) {
         console.info('[useOffers] Max poll duration reached, stopping.');
+        // Mark expiry so we don't restart polling without a fresh lead flow.
+        didPollingExpireRef.current = true;
         stopPolling();
         return;
       }
@@ -260,8 +285,9 @@ export function useOffers(): UseOffersReturn {
 
   // Handle polling lifecycle
   useEffect(() => {
-    // Start polling ONLY if user just created a lead and we have no offers yet
-    if (isNewLead && offers.length === 0 && !isPolling && !error) {
+    // Start polling ONLY if user just created a lead and we have no offers yet.
+    // If we already hit max duration, don't re-enter polling until navigation changes.
+    if (isNewLead && offers.length === 0 && !isPolling && !error && !didPollingExpireRef.current) {
       console.info('[useOffers] Starting polling for new lead offers...');
       setIsPolling(true);
       pollStartTimeRef.current = Date.now();
@@ -279,6 +305,13 @@ export function useOffers(): UseOffersReturn {
       stopPolling();
     }
   }, [isNewLead, offers.length, isPolling, error, stopPolling, setIsPolling]);
+
+  useEffect(() => {
+    // Reset expiry when user is no longer in the new lead flow.
+    if (!isNewLead) {
+      didPollingExpireRef.current = false;
+    }
+  }, [isNewLead]);
 
   // Set up the next poll interval timer
   useEffect(() => {

@@ -21,6 +21,7 @@ import { useAuthCookies } from '@/hooks/use-auth-cookies';
  */
 const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: string }): React.ReactNode => {
   const { isAuthenticated, user } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // PDF Step 3: Fetch user-specific lenders when logged in
   const [userLenders, setUserLenders] = useState<ActiveLender[] | null>(null);
@@ -42,6 +43,11 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
    * PDF Step 3: Fetch user-specific lenders when user logs in
    * Only fetches once per user session (prevents duplicate calls)
    */
+  useEffect(() => {
+    // Ensure initial render matches server output to avoid hydration mismatch.
+    setIsHydrated(true);
+  }, []);
+
   useEffect(() => {
     const fetchUserLenders = async (): Promise<void> => {
       // Prioritize cookie data for faster/more stable check
@@ -91,6 +97,11 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
 
   // Show skeleton when loading and no lenders available
   if (displayLenders.length === 0 && isAnyLoading) {
+    return <TrendingOffersSkeleton />;
+  }
+
+  // Keep markup stable across SSR and first client render to avoid hydration errors.
+  if (!isHydrated) {
     return <TrendingOffersSkeleton />;
   }
 
