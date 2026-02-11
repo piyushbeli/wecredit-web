@@ -31,7 +31,7 @@ function RecentlyClickedOfferCard({
 	offer: LenderOfferStatus;
 	onClick: () => void;
 }) {
-	const { lenderName, loanAmount, interestRate, tenure, logo, wcStatus } = offer;
+	const { lenderName, uptoAmount, interestRate, tenure, logo, wcStatus } = offer;
 
 	return (
 		<button
@@ -73,7 +73,7 @@ function RecentlyClickedOfferCard({
 
 			{/* Amount */}
 			<h3 className="font-medium text-xs mb-1.5 text-gray-900">
-				Amount upto {loanAmount}
+				Amount upto {uptoAmount}
 			</h3>
 
 			{/* Rate & Tenure */}
