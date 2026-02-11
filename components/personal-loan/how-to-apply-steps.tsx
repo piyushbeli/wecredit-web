@@ -70,7 +70,7 @@ const StepRow = ({ step, index, isLast }: StepRowProps): JSX.Element => {
  * Displays the loan application process in a compact vertical timeline
  */
 const HowToApplySteps = (): JSX.Element => {
-	const { triggerApplyFlow } = useLoanApplicationStore();
+	const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 
 	return (
 		<section className="bg-gray-50 py-6 px-4">
@@ -108,6 +108,7 @@ const HowToApplySteps = (): JSX.Element => {
 					variant="secondary"
 					size="lg"
 					onClick={triggerApplyFlow}
+					isLoading={isApplyLoading}
 				>
 					Start Loan Application
 				</ActionButton>

@@ -17,7 +17,7 @@ const DebugData = ({ data, title = 'API Response', defaultOpen = false }: DebugD
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isCopied, setIsCopied] = useState(false);
   // Only show in development
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'production') {
     return null;
   }
   const jsonString = JSON.stringify(data, null, 2);

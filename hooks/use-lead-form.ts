@@ -326,7 +326,7 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
     const initialValues: Record<string, string> = {};
     
     // Debug logging
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
       console.log('[useLeadForm] Initializing form values:', {
         totalFields: fields.length,
         userIp,

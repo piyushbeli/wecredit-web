@@ -5,14 +5,14 @@
  */
 
 /** Check if we're in development mode */
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
 
 /** Check if we're in production mode */
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
 /** Environment flags for server-side code */
 export const serverEnv = {
   isDevelopment,
   isProduction,
-  isTest: process.env.NODE_ENV === 'test',
+  isTest: process.env.NEXT_PUBLIC_ENVIRONMENT === 'test',
 } as const;

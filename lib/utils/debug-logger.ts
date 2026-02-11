@@ -46,7 +46,7 @@ class DebugStore {
   private isEnabled: boolean;
 
   private constructor() {
-    // Check both NODE_ENV and feature flag
+    // Check both NEXT_PUBLIC_ENVIRONMENT and feature flag
     this.isEnabled = this.shouldEnableDebug();
   }
 
@@ -55,7 +55,7 @@ class DebugStore {
    */
   private shouldEnableDebug(): boolean {
     // Always disabled in production
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'production') {
       return false;
     }
 

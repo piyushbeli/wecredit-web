@@ -6,7 +6,14 @@
 import { Metadata } from 'next';
 import { Page, getStrapiMediaUrl } from '@/lib/api/strapi';
 
-const SITE_URL = process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://staging.wecredit.co.in';
+const getSiteUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  // Server render or missing origin: fall back to a stable default.
+  return process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
+};
 const SITE_NAME = 'WeCredit';
 const DEFAULT_OG_IMAGE = '/og-default.jpg';
 
@@ -14,11 +21,12 @@ const DEFAULT_OG_IMAGE = '/og-default.jpg';
  * Generate Next.js Metadata from Page
  */
 export function generatePageMetadata(page: Page): Metadata {
+  const siteUrl = getSiteUrl();
   const seo = page.seo;
   const title = seo?.metaTitle || page.title;
   const description = seo?.metaDescription || page.metaDescription || page.excerpt || '';
-  const canonicalUrl = seo?.canonicalUrl || `${SITE_URL}${page.fullPath}`;
-  const imageUrl = getStrapiMediaUrl(seo?.metaImage?.url || page.featuredImage?.url) || `${SITE_URL}${DEFAULT_OG_IMAGE}`;
+  const canonicalUrl = seo?.canonicalUrl || `${siteUrl}${page.fullPath}`;
+  const imageUrl = getStrapiMediaUrl(seo?.metaImage?.url || page.featuredImage?.url) || `${siteUrl}${DEFAULT_OG_IMAGE}`;
 
   const metadata: Metadata = {
     title,
@@ -70,6 +78,7 @@ export function generatePageMetadata(page: Page): Metadata {
  * Generate JSON-LD structured data
  */
 export function generateJsonLd(page: Page): Record<string, unknown> | null {
+  const siteUrl = getSiteUrl();
   // If custom JSON-LD is provided, use it
   if (page.seo?.scriptApplicationLdJson) {
     try {
@@ -85,7 +94,7 @@ export function generateJsonLd(page: Page): Record<string, unknown> | null {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    url: `${SITE_URL}${page.fullPath}`,
+    url: `${siteUrl}${page.fullPath}`,
     name: page.title,
     description: page.seo?.metaDescription || page.metaDescription || page.excerpt,
   };

@@ -34,7 +34,7 @@ export const useCreditCardTracking = () => {
         ip,
         cardTitle
       );
-      if (process.env.NODE_ENV === 'development' && result.success) {
+      if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' && result.success) {
         // eslint-disable-next-line no-console
         console.debug('[CreditCardTracking] Click tracked:', cardTitle);
       }

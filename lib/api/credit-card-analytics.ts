@@ -88,7 +88,7 @@ export async function trackCreditCardClick(
 
     if (!response.ok) {
       const errorMsg = `clicks_counter failed: ${response.status}`;
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
         // eslint-disable-next-line no-console
         console.warn('[CreditCardAnalytics]', errorMsg);
       }
@@ -98,7 +98,7 @@ export async function trackCreditCardClick(
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Network error';
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
       // eslint-disable-next-line no-console
       console.warn('[CreditCardAnalytics]', errorMessage);
     }

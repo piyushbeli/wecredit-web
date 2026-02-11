@@ -64,7 +64,7 @@ export const useBusinessLoanForm = (options: UseBusinessLoanFormOptions = {}): U
 
   const isPrefillEnabled =
     enableBusinessLoanPrefill ||
-    (process.env.NODE_ENV !== 'production' && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE);
+    (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production' && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE);
 
   const handleFieldChange = useCallback((key: keyof BusinessLoanFormState, value: string | boolean): void => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -166,7 +166,7 @@ export const useBusinessLoanForm = (options: UseBusinessLoanFormOptions = {}): U
 
   // Test prefill: apply when ?prefill=1 in non-production.
   useEffect(() => {
-    if (!isPrefillEnabled || process.env.NODE_ENV === 'production' || hasTestPrefilledRef.current) return;
+    if (!isPrefillEnabled || process.env.NEXT_PUBLIC_ENVIRONMENT === 'production' || hasTestPrefilledRef.current) return;
     hasTestPrefilledRef.current = true;
     setFormValues(BUSINESS_LOAN_PREFILL_TEST_VALUES);
     setFormErrors({});
