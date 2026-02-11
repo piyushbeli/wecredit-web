@@ -11,6 +11,7 @@ import { FaqSection } from '@/components/shared';
 import BlogSection from './blog-section';
 import AppDownloadSection from './app-download-section';
 import DreamsSection from './dreams-section';
+import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-content';
 
 /**
  * Main home page component that composes all sections
@@ -64,6 +65,9 @@ const HomePage = (): React.ReactNode => {
 
       {/* Dreams Section */}
       <DreamsSection />
+
+      {/* Shared apply flow (auth/dedupe + lead form) for home page CTA */}
+      <PersonalLoanContent />
     </div>
   );
 };

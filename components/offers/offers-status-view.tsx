@@ -1,6 +1,7 @@
 'use client';
 
 import { getCookie } from 'cookies-next';
+import { useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
 import {
   OfferCard,
@@ -12,13 +13,14 @@ import {
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { PageHeader } from '@/components/shared';
+import { ActionButton, PageHeader } from '@/components/shared';
 
 /**
  * Offers Status View Component
  * Displays non-INITIATED offers in Status section
  */
 export const OffersStatusView = () => {
+  const router = useRouter();
   const { statusOffers, isLoading, error, fetchOffers } = useOffers();
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
@@ -42,6 +44,10 @@ export const OffersStatusView = () => {
   };
 
   const hasStatusOffers = statusOffers.length > 0;
+
+  const handleExploreOffers = (): void => {
+    router.push('/offers');
+  };
 
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
     if (offerList.length === 0) {
@@ -82,14 +88,23 @@ export const OffersStatusView = () => {
   return (
     <div className="min-h-screen">
       <PageHeader title="Loan Status" />
-      <OffersHero eligibleAmount="₹1,00,000" offerCount={statusOffers.length} />
+      {hasStatusOffers && <OffersHero eligibleAmount="₹1,00,000" offerCount={statusOffers.length} />}
 
       <div className="px-4 pb-4">
         {!hasStatusOffers ? (
-          <EmptyState 
-            title="No active applications" 
-            description="You haven't applied for any loans yet. Go back to explore offers."
-          />
+          <div className="min-h-[50vh] flex flex-col items-center justify-center text-center">
+            <EmptyState 
+              title="No active applications" 
+              description="You haven't applied for any loans yet. Go back to explore offers."
+            />
+            <ActionButton
+              type="button"
+              onClick={handleExploreOffers}
+              className="h-12 text-base font-medium"
+            >
+              Explore Offers
+            </ActionButton>
+          </div>
         ) : (
           <div className="space-y-6">
             {renderOfferSection('Check loan status', statusOffers)}

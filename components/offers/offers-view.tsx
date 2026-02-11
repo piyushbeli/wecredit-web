@@ -57,11 +57,16 @@ export const OffersView = () => {
   const handleCheckStatus = (): void => {
     router.push('/offers/status');
   };
-
+  const handleGoBack = (): void => {
+    router.push('/');
+  };
   // Calculate total offers including recently clicked
   const totalOffers = statusOffers.length + exploreOffers.length;
   const hasOffers = totalOffers > 0;
   const hasInitiatedOffers = exploreOffers.length > 0;
+  // Only show the status CTA once we have non-initiated offers to check.
+  // const hasStatusOffers = statusOffers.length > 0;
+  const hasStatusOffers = statusOffers.length > 0;
   const showPolling = isPolling && !hasOffers;
   const showEmpty = !isPolling && !hasOffers;
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
@@ -107,7 +112,7 @@ export const OffersView = () => {
 
   return (
     <div className="min-h-screen ">
-      <PageHeader title="Offers for you" />
+      <PageHeader title="Offers for you" onBack={handleGoBack} />
       
       {/* Recently Clicked Offers Carousel - At the top */}
       {statusOffers.length > 0 && (
@@ -136,16 +141,18 @@ export const OffersView = () => {
           </div>
         )}
       </div>
-      {hasOffers && <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
-        <ActionButton
-          type="button"
-          onClick={handleCheckStatus}
-          fullWidth
-          className="h-14 text-base font-medium"
-        >
-          Check your Loan Status
-        </ActionButton>
-      </div>}
+      {hasStatusOffers && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
+          <ActionButton
+            type="button"
+            onClick={handleCheckStatus}
+            fullWidth
+            className="h-14 text-base font-medium"
+          >
+            Check your Loan Status
+          </ActionButton>
+        </div>
+      )}
     </div>
   );
 };

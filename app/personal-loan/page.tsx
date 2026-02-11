@@ -41,7 +41,7 @@ const PersonalLoanPage = (): React.ReactNode => {
       <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
 
       {/* Video Section */}
-      <VideoSection />
+      {/* <VideoSection /> */}
 
       {/* How to Apply Steps */}
       <HowToApplySteps />
