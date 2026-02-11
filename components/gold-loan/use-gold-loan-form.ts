@@ -8,6 +8,7 @@ import {
   DEFAULT_GOLD_LOAN_FORM_STATE,
   buildGoldLoanPayload,
   validateGoldLoanForm,
+  type GoldLoanEnquiryPayload,
   type GoldLoanFormState,
 } from './gold-loan-form.config';
 
@@ -17,6 +18,7 @@ interface UseGoldLoanFormReturn {
   handleFieldChange: (key: keyof GoldLoanFormState, value: string | boolean) => void;
   handleFieldBlur: (key: keyof GoldLoanFormState) => void;
   handleSubmit: () => Promise<void>;
+  getValidatedPayload: () => GoldLoanEnquiryPayload | null;
   isSubmitting: boolean;
   canSubmit: boolean;
 }
@@ -69,6 +71,20 @@ export const useGoldLoanForm = (
     return Object.keys(errors).length === 0;
   }, [formValues]);
 
+  /**
+   * Validates the form and returns a submission payload.
+   * Used by both direct submit and post-login flows so validation is consistent.
+   */
+  const getValidatedPayload = useCallback((): GoldLoanEnquiryPayload | null => {
+    if (!validateForm()) {
+      // When validation fails, bring the first errored field into view so the user
+      // can quickly understand what needs attention, similar to Personal Loan flow.
+      scrollToFirstError();
+      return null;
+    }
+    return buildGoldLoanPayload(formValues);
+  }, [formValues, scrollToFirstError, validateForm]);
+
   /** Validates a single field on blur and updates its error so inline feedback shows immediately. */
   const handleFieldBlur = useCallback((key: keyof GoldLoanFormState): void => {
     const errors: Record<string, string> = validateGoldLoanForm(formValuesRef.current);
@@ -85,12 +101,8 @@ export const useGoldLoanForm = (
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
-    if (!validateForm()) {
-      // When validation fails, bring the first errored field into view so the user
-      // can quickly understand what needs attention, similar to Personal Loan flow.
-      scrollToFirstError();
-      return;
-    }
+    const payload = getValidatedPayload();
+    if (!payload) return;
 
     setIsSubmitting(true);
     showLoading({
@@ -98,7 +110,6 @@ export const useGoldLoanForm = (
       subtext: 'This will only take a moment.',
     });
     try {
-      const payload = buildGoldLoanPayload(formValues);
       const success = await submitGoldLoanEnquiry(payload);
       if (success) {
         if (onSuccess) {
@@ -111,7 +122,7 @@ export const useGoldLoanForm = (
       setIsSubmitting(false);
       hideLoading();
     }
-  }, [formValues, hideLoading, isSubmitting, onSuccess, scrollToFirstError, showLoading, validateForm]);
+  }, [getValidatedPayload, hideLoading, isSubmitting, onSuccess, showLoading]);
 
   /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
@@ -139,6 +150,7 @@ export const useGoldLoanForm = (
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    getValidatedPayload,
     isSubmitting,
     canSubmit,
   };

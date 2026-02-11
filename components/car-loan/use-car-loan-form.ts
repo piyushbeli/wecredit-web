@@ -8,6 +8,7 @@ import {
   DEFAULT_CAR_LOAN_FORM_STATE,
   buildCarLoanPayload,
   validateCarLoanForm,
+  type CarLoanEnquiryPayload,
   type CarLoanFormState,
 } from './car-loan-form.config';
 
@@ -17,6 +18,7 @@ interface UseCarLoanFormReturn {
   handleFieldChange: (key: keyof CarLoanFormState, value: string | boolean) => void;
   handleFieldBlur: (key: keyof CarLoanFormState) => void;
   handleSubmit: () => Promise<void>;
+  getValidatedPayload: () => CarLoanEnquiryPayload | null;
   isSubmitting: boolean;
   canSubmit: boolean;
 }
@@ -70,6 +72,20 @@ export const useCarLoanForm = (
     return Object.keys(errors).length === 0;
   }, [formValues]);
 
+  /**
+   * Validates the form and returns a submission payload.
+   * Used by both direct submit and post-login flows so validation is consistent.
+   */
+  const getValidatedPayload = useCallback((): CarLoanEnquiryPayload | null => {
+    if (!validateForm()) {
+      // When validation fails, bring the first errored field into view so the user
+      // can quickly understand what needs attention, consistent across loan forms.
+      scrollToFirstError();
+      return null;
+    }
+    return buildCarLoanPayload(formValues);
+  }, [formValues, scrollToFirstError, validateForm]);
+
   /** Validates a single field on blur and updates its error so inline feedback shows immediately. */
   const handleFieldBlur = useCallback((key: keyof CarLoanFormState): void => {
     const errors = validateCarLoanForm(formValuesRef.current);
@@ -86,12 +102,8 @@ export const useCarLoanForm = (
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
-    if (!validateForm()) {
-      // When validation fails, bring the first errored field into view so the user
-      // can quickly understand what needs attention, consistent across loan forms.
-      scrollToFirstError();
-      return;
-    }
+    const payload = getValidatedPayload();
+    if (!payload) return;
 
     setIsSubmitting(true);
     showLoading({
@@ -99,7 +111,6 @@ export const useCarLoanForm = (
       subtext: 'This will only take a moment.',
     });
     try {
-      const payload = buildCarLoanPayload(formValues);
       const success = await submitCarLoanEnquiry(payload);
 
       if (success) {
@@ -113,7 +124,7 @@ export const useCarLoanForm = (
       setIsSubmitting(false);
       hideLoading();
     }
-  }, [formValues, hideLoading, isSubmitting, onSuccess, scrollToFirstError, showLoading, validateForm]);
+  }, [getValidatedPayload, hideLoading, isSubmitting, onSuccess, showLoading]);
 
   /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
@@ -142,6 +153,7 @@ export const useCarLoanForm = (
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    getValidatedPayload,
     isSubmitting,
     canSubmit,
   };

@@ -26,11 +26,12 @@ const HomeLoanForm = ({
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    getValidatedPayload,
     isSubmitting,
     canSubmit,
   } = useHomeLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhoneAndAction } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -43,9 +44,15 @@ const HomeLoanForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
+      const payload = getValidatedPayload();
+      // Validation errors are already surfaced by the hook; avoid opening OTP if invalid.
+      if (!payload) return;
       // Start OTP using the mobile captured in the form and skip the login
-      // phone input bottom sheet.
-      void openAuthModalWithPhone(formValues.mobile);
+      // phone input bottom sheet. Payload is stored for post-login submit.
+      void openAuthModalWithPhoneAndAction(payload.mobile, {
+        type: 'submit_home_loan',
+        homeLoanPayload: payload,
+      });
       return;
     }
     handleSubmit();

@@ -5,6 +5,7 @@
  * Overlays the page like BusinessLoanFormModal; use isOpen/onClose to control visibility.
  */
 
+import { useEffect } from 'react';
 import { CheckCircle2, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
@@ -12,6 +13,7 @@ import { fetchHomeLoanStatus } from '@/lib/api/home-loan-service';
 import { SuccessScreen } from '@/components/shared';
 import HomeLoanForm from './home-loan-form';
 import { LoadingScreen } from '../shared/loading-screen';
+import { HOME_LOAN_SUBMIT_SUCCESS_EVENT } from '@/lib/constants/events';
 
 interface HomeLoanFormModalProps {
   onClose: () => void;
@@ -37,6 +39,13 @@ const HomeLoanFormModal = ({ onClose }: HomeLoanFormModalProps): React.ReactNode
     isReady,
     phoneNumber: user?.phoneNumber,
   });
+
+  // After guest OTP verification, usePostLogin submits and dispatches this event.
+  useEffect(() => {
+    const handler = (): void => transitionToSuccess();
+    window.addEventListener(HOME_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+    return () => window.removeEventListener(HOME_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+  }, [transitionToSuccess]);
 
   const renderContent = (): React.ReactNode => {
     switch (state) {

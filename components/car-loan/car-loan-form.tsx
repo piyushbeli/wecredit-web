@@ -26,11 +26,12 @@ const CarLoanForm = ({
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    getValidatedPayload,
     isSubmitting,
     canSubmit,
   } = useCarLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhoneAndAction } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -43,9 +44,15 @@ const CarLoanForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
+      const payload = getValidatedPayload();
+      // Validation errors are already surfaced by the hook; avoid opening OTP if invalid.
+      if (!payload) return;
       // User has already entered phone in the form; use it for OTP and skip
-      // the login bottom sheet (phone input screen).
-      void openAuthModalWithPhone(formValues.mobile);
+      // the login bottom sheet (phone input screen). Payload is stored for post-login submit.
+      void openAuthModalWithPhoneAndAction(payload.mobile, {
+        type: 'submit_car_loan',
+        carLoanPayload: payload,
+      });
       return;
     }
     handleSubmit();

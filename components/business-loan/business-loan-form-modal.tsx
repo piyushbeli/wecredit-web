@@ -13,6 +13,7 @@ import { fetchBusinessLoanStatus } from '@/lib/api/business-loan-service';
 import { SuccessScreen } from '@/components/shared';
 import BusinessLoanForm from './business-loan-form';
 import { LoadingScreen } from '../shared/loading-screen';
+import { BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT } from '@/lib/constants/events';
 
 interface BusinessLoanFormModalProps {
   onClose: () => void;
@@ -26,8 +27,6 @@ async function checkBusinessLoanStatus(
   const result = await fetchBusinessLoanStatus(phoneNumber, signal);
   return result.hasExistingLead;
 }
-
-const BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT = 'business-loan-submit-success';
 
 const BusinessLoanFormModal = ({ onClose }: BusinessLoanFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
