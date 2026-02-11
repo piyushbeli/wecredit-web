@@ -26,11 +26,12 @@ const GoldLoanForm = ({
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    getValidatedPayload,
     isSubmitting,
     canSubmit,
   } = useGoldLoanForm({ onSuccess });
   const router = useRouter();
-  const { isAuthenticated, openAuthModalWithPhone } = useAuth();
+  const { isAuthenticated, openAuthModalWithPhoneAndAction } = useAuth();
 
   const handleHeaderBackClick = (): void => {
     if (onClose) {
@@ -43,9 +44,15 @@ const GoldLoanForm = ({
   const onFormSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!isAuthenticated) {
+      const payload = getValidatedPayload();
+      // Validation errors are already surfaced by the hook; avoid opening OTP if invalid.
+      if (!payload) return;
       // Use the mobile from the form to start OTP flow and skip the login
-      // phone entry bottom sheet.
-      void openAuthModalWithPhone(formValues.mobile);
+      // phone entry bottom sheet. Payload is stored for post-login submit.
+      void openAuthModalWithPhoneAndAction(payload.mobile, {
+        type: 'submit_gold_loan',
+        goldLoanPayload: payload,
+      });
       return;
     }
     handleSubmit();

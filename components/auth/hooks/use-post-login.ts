@@ -1,7 +1,57 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import type { PendingAction } from '@/stores/auth-store';
 import { submitBusinessLoanEnquiry } from '@/lib/api/business-loan-service';
+import { submitCarLoanEnquiry } from '@/lib/api/car-loan-service';
+import { submitHomeLoanEnquiry } from '@/lib/api/home-loan-service';
+import { submitGoldLoanEnquiry } from '@/lib/api/gold-loan-service';
+import {
+  BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT,
+  CAR_LOAN_SUBMIT_SUCCESS_EVENT,
+  HOME_LOAN_SUBMIT_SUCCESS_EVENT,
+  GOLD_LOAN_SUBMIT_SUCCESS_EVENT,
+} from '@/lib/constants/events';
+
+type SubmitFn<TPayload> = (payload: TPayload) => Promise<boolean>;
+
+async function submitAndDispatch<TPayload>(
+  payload: TPayload,
+  submit: SubmitFn<TPayload>,
+  eventName: string,
+  logPrefix: string,
+  apiLabel: string
+): Promise<void> {
+  try {
+    const success = await submit(payload);
+    console.info(`${logPrefix} usePostLogin: ${apiLabel} API result`, { success });
+    if (success) {
+      window.dispatchEvent(new CustomEvent(eventName));
+      console.info(`${logPrefix} usePostLogin: dispatched`, eventName);
+    }
+  } catch (err) {
+    // Log and keep the user on the form; success is only signaled via the event.
+    console.error(`${logPrefix} usePostLogin: ${apiLabel} API error`, err);
+  }
+}
+
+function submitLoanPayload<TPayload>(
+  payload: TPayload | undefined,
+  submit: SubmitFn<TPayload>,
+  eventName: string,
+  logPrefix: string,
+  apiLabel: string,
+  missingPayloadMessage: string
+): void {
+  // Guard against incomplete pending actions (e.g., cleared state or bad payload).
+  if (!payload) {
+    console.warn(missingPayloadMessage);
+    return;
+  }
+
+  console.info(`${logPrefix} usePostLogin: calling ${apiLabel} API with stored payload`);
+  void submitAndDispatch(payload, submit, eventName, logPrefix, apiLabel);
+}
 
 /**
  * Custom hook for handling post-login actions
@@ -15,6 +65,66 @@ export const usePostLogin = (): void => {
   const { isAuthenticated, consumePendingAction } = useAuthStore();
   const wasAuthenticated = useRef(false);
 
+  const executePendingAction = useCallback((action: PendingAction | null): void => {
+    if (!action) {
+      return;
+    }
+
+    console.info('[AuthModal] Executing pending action:', action.type, action.lenderId);
+
+    switch (action.type) {
+      case 'navigate_to_offer':
+      case 'check_eligibility':
+        // Guard against missing href; avoid navigating to an undefined route.
+        if (action.href) {
+          router.push(action.href);
+        }
+        break;
+      case 'submit_business_loan':
+        submitLoanPayload(
+          action.businessLoanPayload,
+          submitBusinessLoanEnquiry,
+          BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[BL]',
+          'bl-leads',
+          '[BL] usePostLogin: submit_business_loan but no businessLoanPayload'
+        );
+        break;
+      case 'submit_car_loan':
+        submitLoanPayload(
+          action.carLoanPayload,
+          submitCarLoanEnquiry,
+          CAR_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[CL]',
+          'car loan',
+          '[CL] usePostLogin: submit_car_loan but no carLoanPayload'
+        );
+        break;
+      case 'submit_home_loan':
+        submitLoanPayload(
+          action.homeLoanPayload,
+          submitHomeLoanEnquiry,
+          HOME_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[HL]',
+          'home loan',
+          '[HL] usePostLogin: submit_home_loan but no homeLoanPayload'
+        );
+        break;
+      case 'submit_gold_loan':
+        submitLoanPayload(
+          action.goldLoanPayload,
+          submitGoldLoanEnquiry,
+          GOLD_LOAN_SUBMIT_SUCCESS_EVENT,
+          '[GL]',
+          'gold loan',
+          '[GL] usePostLogin: submit_gold_loan but no goldLoanPayload'
+        );
+        break;
+      default:
+        console.warn('[AuthModal] Unknown pending action type:', action.type);
+    }
+  }, [router]);
+
   /**
    * PDF Step 5A - Post Login Behaviour
    * Watch for successful login and execute pending action.
@@ -26,46 +136,14 @@ export const usePostLogin = (): void => {
     if (isAuthenticated && !wasAuthenticated.current) {
       const action = consumePendingAction();
 
-      console.info('[BL] usePostLogin: auth transition to authenticated', {
+      console.info('[Auth] usePostLogin: auth transition to authenticated', {
         hadPendingAction: !!action,
         actionType: action?.type,
       });
 
-      if (action) {
-        console.info('[AuthModal] Executing pending action:', action.type, action.lenderId);
-
-        switch (action.type) {
-          case 'navigate_to_offer':
-          case 'check_eligibility':
-            if (action.href) {
-              router.push(action.href);
-            }
-            break;
-          case 'submit_business_loan':
-            if (action.businessLoanPayload) {
-              console.info('[BL] usePostLogin: calling bl-leads API with stored payload');
-              void (async (): Promise<void> => {
-                try {
-                  const success = await submitBusinessLoanEnquiry(action.businessLoanPayload!);
-                  console.info('[BL] usePostLogin: bl-leads API result', { success });
-                  if (success) {
-                    window.dispatchEvent(new CustomEvent('business-loan-submit-success'));
-                    console.info('[BL] usePostLogin: dispatched business-loan-submit-success');
-                  }
-                } catch (err) {
-                  console.error('[BL] usePostLogin: bl-leads API error', err);
-                }
-              })();
-            } else {
-              console.warn('[BL] usePostLogin: submit_business_loan but no businessLoanPayload');
-            }
-            break;
-          default:
-            console.warn('[AuthModal] Unknown pending action type:', action.type);
-        }
-      }
+      executePendingAction(action);
     }
 
     wasAuthenticated.current = isAuthenticated;
-  }, [isAuthenticated, consumePendingAction, router]);
+  }, [isAuthenticated, consumePendingAction, executePendingAction]);
 };

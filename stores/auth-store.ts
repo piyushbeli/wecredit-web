@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type { BusinessLoanEnquiryPayload } from '@/lib/api/business-loan-service';
+import type { CarLoanEnquiryPayload } from '@/components/car-loan/car-loan-form.config';
+import type { HomeLoanEnquiryPayload } from '@/components/home-loan/home-loan-form.config';
+import type { GoldLoanEnquiryPayload } from '@/components/gold-loan/gold-loan-form.config';
 
 /**
  * User data interface
@@ -21,7 +24,13 @@ type AuthStep = 'phone' | 'otp';
  * Pending action types for post-login continuation
  * Per PDF Step 5A - Post Login Behaviour: Continue with intended action after login
  */
-type PendingActionType = 'navigate_to_offer' | 'check_eligibility' | 'submit_business_loan';
+type PendingActionType =
+  | 'navigate_to_offer'
+  | 'check_eligibility'
+  | 'submit_business_loan'
+  | 'submit_car_loan'
+  | 'submit_home_loan'
+  | 'submit_gold_loan';
 
 /**
  * Pending action data structure
@@ -38,6 +47,12 @@ interface PendingAction {
   href?: string;
   /** Form payload for submit_business_loan - used after OTP to call bl-leads API */
   businessLoanPayload?: BusinessLoanEnquiryPayload;
+  /** Form payload for submit_car_loan - used after OTP to call car loan API */
+  carLoanPayload?: CarLoanEnquiryPayload;
+  /** Form payload for submit_home_loan - used after OTP to call home loan API */
+  homeLoanPayload?: HomeLoanEnquiryPayload;
+  /** Form payload for submit_gold_loan - used after OTP to call gold loan API */
+  goldLoanPayload?: GoldLoanEnquiryPayload;
 }
 
 /**

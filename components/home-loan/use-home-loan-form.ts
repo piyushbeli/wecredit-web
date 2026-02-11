@@ -8,6 +8,7 @@ import {
   DEFAULT_HOME_LOAN_FORM_STATE,
   buildHomeLoanPayload,
   validateHomeLoanForm,
+  type HomeLoanEnquiryPayload,
   type HomeLoanFormState,
 } from './home-loan-form.config';
 
@@ -17,6 +18,7 @@ interface UseHomeLoanFormReturn {
   handleFieldChange: (key: keyof HomeLoanFormState, value: string | boolean) => void;
   handleFieldBlur: (key: keyof HomeLoanFormState) => void;
   handleSubmit: () => Promise<void>;
+  getValidatedPayload: () => HomeLoanEnquiryPayload | null;
   isSubmitting: boolean;
   canSubmit: boolean;
 }
@@ -68,6 +70,20 @@ export const useHomeLoanForm = (
     return Object.keys(errors).length === 0;
   }, [formValues]);
 
+  /**
+   * Validates the form and returns a submission payload.
+   * Used by both direct submit and post-login flows so validation is consistent.
+   */
+  const getValidatedPayload = useCallback((): HomeLoanEnquiryPayload | null => {
+    if (!validateForm()) {
+      // When validation fails, bring the first errored field into view so the user
+      // can quickly understand what needs attention, consistent across loan forms.
+      scrollToFirstError();
+      return null;
+    }
+    return buildHomeLoanPayload(formValues);
+  }, [formValues, scrollToFirstError, validateForm]);
+
   /** Validates a single field on blur and updates its error so inline feedback shows immediately. */
   const handleFieldBlur = useCallback((key: keyof HomeLoanFormState): void => {
     const errors = validateHomeLoanForm(formValuesRef.current);
@@ -84,12 +100,8 @@ export const useHomeLoanForm = (
 
   const handleSubmit = useCallback(async (): Promise<void> => {
     if (isSubmitting) return;
-    if (!validateForm()) {
-      // When validation fails, bring the first errored field into view so the user
-      // can quickly understand what needs attention, consistent across loan forms.
-      scrollToFirstError();
-      return;
-    }
+    const payload = getValidatedPayload();
+    if (!payload) return;
 
     setIsSubmitting(true);
     showLoading({
@@ -97,7 +109,6 @@ export const useHomeLoanForm = (
       subtext: 'This will only take a moment.',
     });
     try {
-      const payload = buildHomeLoanPayload(formValues);
       const success = await submitHomeLoanEnquiry(payload);
       if (success) {
         if (onSuccess) {
@@ -110,7 +121,7 @@ export const useHomeLoanForm = (
       setIsSubmitting(false);
       hideLoading();
     }
-  }, [formValues, hideLoading, isSubmitting, onSuccess, scrollToFirstError, showLoading, validateForm]);
+  }, [getValidatedPayload, hideLoading, isSubmitting, onSuccess, showLoading]);
 
   /** Enable submit when consent is checked; full validation runs on submit. */
   const canSubmit = useMemo((): boolean => {
@@ -139,6 +150,7 @@ export const useHomeLoanForm = (
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    getValidatedPayload,
     isSubmitting,
     canSubmit,
   };

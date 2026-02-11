@@ -5,6 +5,7 @@
  * Overlays the page like HomeLoanFormModal; use isOpen/onClose to control visibility.
  */
 
+import { useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
@@ -12,6 +13,7 @@ import { fetchCarLoanStatus } from '@/lib/api/car-loan-service';
 import { SuccessScreen } from '@/components/shared';
 import CarLoanForm from './car-loan-form';
 import { LoadingScreen } from '../shared/loading-screen';
+import { CAR_LOAN_SUBMIT_SUCCESS_EVENT } from '@/lib/constants/events';
 
 interface CarLoanFormModalProps {
   onClose: () => void;
@@ -37,6 +39,13 @@ const CarLoanFormModal = ({ onClose }: CarLoanFormModalProps): React.ReactNode =
     isReady,
     phoneNumber: user?.phoneNumber,
   });
+
+  // After guest OTP verification, usePostLogin submits and dispatches this event.
+  useEffect(() => {
+    const handler = (): void => transitionToSuccess();
+    window.addEventListener(CAR_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+    return () => window.removeEventListener(CAR_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+  }, [transitionToSuccess]);
 
   const renderContent = (): React.ReactNode => {
     switch (state) {

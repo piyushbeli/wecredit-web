@@ -5,6 +5,7 @@
  * Overlays the page like HomeLoanFormModal; use isOpen/onClose to control visibility.
  */
 
+import { useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
@@ -12,6 +13,7 @@ import { fetchGoldLoanStatus } from '@/lib/api/gold-loan-service';
 import { SuccessScreen } from '@/components/shared';
 import GoldLoanForm from './gold-loan-form';
 import { LoadingScreen } from '../shared/loading-screen';
+import { GOLD_LOAN_SUBMIT_SUCCESS_EVENT } from '@/lib/constants/events';
 
 interface GoldLoanFormModalProps {
   onClose: () => void;
@@ -37,6 +39,13 @@ const GoldLoanFormModal = ({ onClose }: GoldLoanFormModalProps): React.ReactNode
     isReady,
     phoneNumber: user?.phoneNumber,
   });
+
+  // After guest OTP verification, usePostLogin submits and dispatches this event.
+  useEffect(() => {
+    const handler = (): void => transitionToSuccess();
+    window.addEventListener(GOLD_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+    return () => window.removeEventListener(GOLD_LOAN_SUBMIT_SUCCESS_EVENT, handler);
+  }, [transitionToSuccess]);
 
   const renderContent = (): React.ReactNode => {
     switch (state) {
