@@ -7,6 +7,7 @@ import {
   sanitizeNumericInput,
   type GoldLoanFormState,
 } from './gold-loan-form.config';
+import { useAuth } from '@/hooks/use-auth';
 
 const PAN_HINT = 'As per PAN card';
 const DOB_HINT = 'Enter your Date of Birth As Per PAN Card';
@@ -25,6 +26,8 @@ const GoldLoanFields = ({
   handleFieldBlur,
 }: GoldLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
+  const { isAuthenticated } = useAuth();
+  // Keep the phone field locked for authenticated users to match the verified mobile.
 
   return (
     <>
@@ -78,6 +81,7 @@ const GoldLoanFields = ({
           inputMode="numeric"
           maxLength={10}
           required
+          disabled={isAuthenticated}
           autoComplete="tel"
         />
       </div>

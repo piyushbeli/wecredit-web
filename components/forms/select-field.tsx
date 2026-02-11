@@ -48,7 +48,7 @@ const SelectField = ({
           onBlur={onBlur}
           disabled={disabled}
           className={cn(
-            'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+            'w-full px-4 py-3 rounded-lg border text-base transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'appearance-none bg-white pr-10 cursor-pointer',
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',

@@ -28,6 +28,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   title: 'WeCredit - Quick Personal Loans',
   description: 'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.',
 };

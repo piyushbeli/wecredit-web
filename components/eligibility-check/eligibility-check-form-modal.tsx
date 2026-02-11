@@ -7,6 +7,7 @@
 
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
 import { checkEligibilityStatus } from '@/lib/api/eligibility-check-service';
 import { SuccessScreen } from '@/components/shared';
@@ -30,6 +31,7 @@ const EligibilityCheckFormModal = ({
   onClose,
 }: EligibilityCheckFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
+  useBodyScrollLock(true);
 
   const isReady = isAuthenticated && !!user?.phoneNumber;
   const { state, transitionToSuccess } = useLoanModalState({

@@ -23,7 +23,8 @@ export const OffersHero = ({ eligibleAmount, offerCount }: OffersHeroProps) => {
           Offers for you
         </h2> */}
         <p className="text-base text-brand-primary font-medium">
-          Congratulations! You are eligible for a loan of upto {eligibleAmount}
+          {/* Congratulations! You are eligible for a loan of upto {eligibleAmount} */}
+          Check your loan status
         </p>
       </div>
     </div>

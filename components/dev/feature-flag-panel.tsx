@@ -147,7 +147,7 @@ export function FeatureFlagPanel() {
             placeholder="Search flags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3"
+            className="w-full px-3 py-2 bg-gray-700 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3"
           />
           
           {/* Category tabs */}
@@ -272,7 +272,7 @@ export function FeatureFlagPanel() {
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
               placeholder="Paste exported JSON here..."
-              className="w-full h-48 px-3 py-2 bg-gray-800 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2"
+              className="w-full h-48 px-3 py-2 bg-gray-800 rounded-lg text-base font-mono focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2"
             />
             {importError && (
               <p className="text-red-400 text-sm mb-4">{importError}</p>

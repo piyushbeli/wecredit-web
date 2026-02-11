@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { CheckCircle2, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
 import { fetchHomeLoanStatus } from '@/lib/api/home-loan-service';
 import { SuccessScreen } from '@/components/shared';
@@ -30,6 +31,7 @@ async function checkHomeLoanStatus(
 
 const HomeLoanFormModal = ({ onClose }: HomeLoanFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
+  useBodyScrollLock(true);
 
   const isReady = isAuthenticated && !!user?.phoneNumber;
   const { state, transitionToSuccess } = useLoanModalState({

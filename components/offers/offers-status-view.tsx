@@ -92,7 +92,7 @@ export const OffersStatusView = () => {
           />
         ) : (
           <div className="space-y-6">
-            {renderOfferSection('Check your application status', statusOffers)}
+            {renderOfferSection('Check loan status', statusOffers)}
           </div>
         )}
       </div>

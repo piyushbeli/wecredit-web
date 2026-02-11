@@ -56,7 +56,7 @@ const InputField = ({
         maxLength={maxLength}
         autoComplete={autoComplete}
         className={cn(
-          'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+          'w-full px-4 py-3 rounded-lg border text-base transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
           // Hide number input spinners
           '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',

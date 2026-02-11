@@ -29,11 +29,11 @@ interface OfferCardProps {
 export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProps) {
   const {
     lenderName,
-    loanAmount,
     interestRate,
     tenure,
     logo,
-    wcStatus
+    wcStatus,
+    uptoAmount
   } = offer;
   
   // In explore screen: show ApprovalBadge for INITIATED and UTM_CLICKED
@@ -122,7 +122,7 @@ export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProp
 
         {/* Amount */}
         <h3 className="font-medium text-sm mb-1">
-          Amount upto {loanAmount}
+          Amount upto {uptoAmount}
         </h3>
 
         {/* Rate & Tenure - With proper icons */}

@@ -9,6 +9,7 @@ import {
   sanitizeNumericInput,
   type CarLoanFormState,
 } from './car-loan-form.config';
+import { useAuth } from '@/hooks/use-auth';
 
 const PAN_HINT = 'As per PAN card';
 
@@ -36,6 +37,8 @@ const CarLoanFields = ({
   handleFieldBlur,
 }: CarLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
+  const { isAuthenticated } = useAuth();
+  // Keep the phone field locked for authenticated users to match the verified mobile.
 
   return (
     <>
@@ -89,6 +92,7 @@ const CarLoanFields = ({
           inputMode="numeric"
           maxLength={10}
           required
+          disabled={isAuthenticated}
           autoComplete="tel"
         />
       </div>

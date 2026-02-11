@@ -10,6 +10,7 @@ import {
   sanitizeNumericInput,
   type HomeLoanFormState,
 } from './home-loan-form.config';
+import { useAuth } from '@/hooks/use-auth';
 
 const PAN_HINT = 'As per PAN card';
 const DOB_HINT = 'As per PAN card';
@@ -33,6 +34,8 @@ const HomeLoanFields = ({
   handleFieldBlur,
 }: HomeLoanFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
+  const { isAuthenticated } = useAuth();
+  // Keep the phone field locked for authenticated users to match the verified mobile.
 
   return (
     <>
@@ -116,6 +119,7 @@ const HomeLoanFields = ({
           inputMode="numeric"
           maxLength={10}
           required
+          disabled={isAuthenticated}
           autoComplete="tel"
         />
       </div>

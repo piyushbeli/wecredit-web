@@ -5,6 +5,13 @@
  */
 
 import { cn } from '@/lib/utils';
+import {
+  formatDobForDisplay,
+  getDobMaxDate,
+  normalizeDobTextInput,
+  sanitizeNumericInput,
+  sanitizePanInput,
+} from '@/lib/utils/form-helpers';
 import type { FormField, FormFieldKey } from '@/types/lead';
 import ButtonGroup from './button-group';
 import ConsentCheckbox from './consent-checkbox';
@@ -116,6 +123,31 @@ function convertDateToApiFormat(dateStr: string): string {
   return dateStr;
 }
 
+/**
+ * iOS Safari date inputs are inconsistent with max/min constraints inside modals.
+ * Use a text input fallback to keep DOB entry predictable.
+ */
+function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isAppleMobile = /iPad|iPhone|iPod/.test(ua);
+  const isIpadOs = ua.includes('Mac') && navigator.maxTouchPoints > 1;
+  return isAppleMobile || isIpadOs;
+}
+
+/**
+ * Normalizes user input for fields that need strict formatting.
+ */
+function normalizeFieldValue(key: FormFieldKey, value: string): string {
+  if (key === 'pan') {
+    return sanitizePanInput(value);
+  }
+  if (NUMERIC_FIELDS.includes(key)) {
+    return sanitizeNumericInput(value, getMaxLength(key));
+  }
+  return value;
+}
+
 const DynamicField = ({
   field,
   value,
@@ -189,11 +221,11 @@ const DynamicField = ({
             onBlur={onBlur}
             required={isMandatory}
             disabled={disabled}
-            className={cn(
-              'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-              'appearance-none bg-white pr-10 cursor-pointer',
-              error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
+          className={cn(
+            'w-full px-4 py-3 rounded-lg border text-base transition-colors',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'appearance-none bg-white pr-10 cursor-pointer',
+            error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
               disabled && 'opacity-50 cursor-not-allowed'
             )}
           >
@@ -221,11 +253,12 @@ const DynamicField = ({
 
   // Handle date field - use native date input
   if (DATE_FIELDS.includes(key)) {
-    // Value is already in YYYY-MM-DD format from initialization
-    // If it's in DD-MM-YYYY format (from API), convert it
-    const nativeDateValue = /^\d{4}-\d{2}-\d{2}$/.test(value) 
-      ? value 
+    const isIos = isIOSDevice();
+    const nativeDateValue = /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? value
       : convertDateToNativeFormat(value);
+    const textDateValue = formatDobForDisplay(value);
+    const maxDobDate = getDobMaxDate(18);
     
     return (
       <div className="space-y-2">
@@ -235,19 +268,25 @@ const DynamicField = ({
         <input
           id={key}
           name={key}
-          type="date"
-          value={nativeDateValue}
+          type={isIos ? 'text' : 'date'}
+          inputMode={isIos ? 'numeric' : undefined}
+          placeholder={isIos ? 'DD-MM-YYYY' : undefined}
+          maxLength={isIos ? 10 : undefined}
+          value={isIos ? textDateValue : nativeDateValue}
           onChange={(e) => {
-            // Store in YYYY-MM-DD format (will be converted to DD-MM-YYYY on submit)
-            onChange(e.target.value);
+            const nextValue = isIos
+              ? normalizeDobTextInput(e.target.value)
+              : e.target.value;
+            // iOS uses DD-MM-YYYY text entry; non-iOS uses native YYYY-MM-DD.
+            onChange(nextValue);
           }}
           onBlur={onBlur}
+          max={isIos ? undefined : maxDobDate}
           required={isMandatory}
           disabled={disabled}
           className={cn(
-            'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+            'w-full px-4 py-3 rounded-lg border text-base transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
@@ -284,7 +323,7 @@ const DynamicField = ({
           placeholder={getPlaceholder(key, title)}
           maxLength={10}
           className={cn(
-            'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+            'w-full px-4 py-3 rounded-lg border text-base transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
@@ -310,14 +349,17 @@ const DynamicField = ({
         type={getInputType(key, type)}
         inputMode={getInputMode(key, type)}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const normalizedValue = normalizeFieldValue(key, e.target.value);
+          onChange(normalizedValue);
+        }}
         onBlur={onBlur}
         required={isMandatory}
         disabled={disabled}
         placeholder={getPlaceholder(key, title)}
         maxLength={getMaxLength(key)}
         className={cn(
-          'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+          'w-full px-4 py-3 rounded-lg border text-base transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
           '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
           error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
