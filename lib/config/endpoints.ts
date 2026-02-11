@@ -9,7 +9,7 @@ import { ENDPOINTS } from '@/lib/constants/api-keys';
 /**
  * WeCredit API Configuration
  * Direct calls to WeCredit backend (same domain as frontend)
- * URL determined by NEXT_PUBLIC_ENVIRONMENT and NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL
+ * URL determined by NEXT_PUBLIC_ENVIRONMENT and NEXT_PUBLIC_WEBSITE_BASE_URL
  */
 export const wecreditApi = {
   /** Gateway URL for WeCredit public API */

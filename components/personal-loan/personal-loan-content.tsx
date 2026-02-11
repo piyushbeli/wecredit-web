@@ -29,7 +29,7 @@ export const PersonalLoanContent = (): JSX.Element => {
   const searchParams = useSearchParams();
   const { isOpen: isLeadFormModalOpen, openModal: openLeadFormModal, closeModal: closeLeadFormModal } = useModal();
   const { isAuthenticated, openModal }: { isAuthenticated: boolean; openModal: () => void } = useAuthStore();
-  const { triggerApply, resetTrigger } = useLoanApplicationStore();
+  const { triggerApply, resetTrigger, setApplyLoading } = useLoanApplicationStore();
   const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response }: UseCheckDedupeResult = useCheckDedupe();
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);
@@ -109,6 +109,19 @@ export const PersonalLoanContent = (): JSX.Element => {
   useEffect(() => {
     handleDedupeResponse();
   }, [handleDedupeResponse]);
+
+  /**
+   * Keep apply button loading state in sync with dedupe API calls
+   * Ensures users see feedback across all entry points during async work
+   */
+  useEffect(() => {
+    setApplyLoading(isCheckingDedupe);
+
+    // Reset shared loading if this component unmounts mid-request.
+    return () => {
+      setApplyLoading(false);
+    };
+  }, [isCheckingDedupe, setApplyLoading]);
 
   /**
    * Watch for triggerApply from other components (Apply Now, Start Loan Application buttons)

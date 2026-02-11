@@ -14,7 +14,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
  * Displays gradient background, headline, benefits, and stats
  */
 const HeroSection = (): JSX.Element => {
-	const { triggerApplyFlow } = useLoanApplicationStore();
+	const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 
 	return (
 		<section className="pt-20 pb-6">
@@ -38,6 +38,7 @@ const HeroSection = (): JSX.Element => {
 					variant="secondary"
 					size="lg"
 					onClick={triggerApplyFlow}
+					isLoading={isApplyLoading}
 				>
 					Apply Now
 				</ActionButton>

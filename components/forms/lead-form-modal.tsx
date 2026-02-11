@@ -113,7 +113,7 @@ const LeadFormModal = ({
 
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === 4;
-  const isPrefillEnabled = process.env.NODE_ENV !== 'production'
+  const isPrefillEnabled = process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production'
     && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE;
   // Use visual viewport height to keep CTA visible above iOS Safari toolbars.
   const appHeightStyle = useAppHeight();
@@ -302,7 +302,7 @@ const LeadFormModal = ({
 
   const renderStepContent = (): React.ReactElement | null => {
     // Debug logging
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
       console.log(`[LeadFormModal] Rendering step ${currentStep}:`, {
         stepTitle: currentStepConfig.title,
         totalFieldsFromHook: currentStepFields.length,
@@ -321,7 +321,7 @@ const LeadFormModal = ({
 
     // Handle empty step - show message
     if (visibleFields.length === 0) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
         console.warn(`[LeadFormModal] Step ${currentStep} has no fields to render`);
       }
       return (
@@ -336,7 +336,7 @@ const LeadFormModal = ({
       <>
         {visibleFields.map((field) => {
           // Debug logging for each field
-          if (process.env.NODE_ENV !== 'production') {
+          if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
             console.log(`[LeadFormModal] Rendering field:`, {
               key: field.key,
               title: field.title,

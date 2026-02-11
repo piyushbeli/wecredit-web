@@ -16,7 +16,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
  * Uses safe area insets to avoid overlapping device UI on mobile
  */
 const StickyApplyButton = (): JSX.Element => {
-	const { triggerApplyFlow } = useLoanApplicationStore();
+	const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 
 	/**
 	 * Handle button click - triggers the loan application flow
@@ -40,6 +40,7 @@ const StickyApplyButton = (): JSX.Element => {
 				onClick={handleApplyClick}
 				fullWidth
 				className="h-14 text-base font-medium"
+				isLoading={isApplyLoading}
 			>
 				Check Offers
 			</ActionButton>

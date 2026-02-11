@@ -21,8 +21,8 @@ interface FeatureFlagProviderProps {
  * Check if we're in development mode
  */
 const isDevelopment = (): boolean => {
-  // Check NODE_ENV
-  if (process.env.NODE_ENV === 'development') {
+  // Check NEXT_PUBLIC_ENVIRONMENT
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
     return true;
   }
   

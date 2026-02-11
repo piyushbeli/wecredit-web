@@ -8,6 +8,8 @@ import { devtools } from 'zustand/middleware';
 interface LoanApplicationState {
   /** Flag to trigger the loan application flow */
   triggerApply: boolean;
+  /** Shared loading state for apply flow buttons */
+  isApplyLoading: boolean;
 }
 
 /**
@@ -18,6 +20,8 @@ interface LoanApplicationActions {
   triggerApplyFlow: () => void;
   /** Reset the trigger flag after handling */
   resetTrigger: () => void;
+  /** Sync loading state across all apply buttons */
+  setApplyLoading: (isLoading: boolean) => void;
 }
 
 /**
@@ -29,10 +33,13 @@ export const useLoanApplicationStore = create<LoanApplicationState & LoanApplica
   devtools(
     (set) => ({
       triggerApply: false,
+      isApplyLoading: false,
 
       triggerApplyFlow: () => set({ triggerApply: true }),
 
       resetTrigger: () => set({ triggerApply: false }),
+
+      setApplyLoading: (isLoading: boolean) => set({ isApplyLoading: isLoading }),
     }),
     {
       name: 'loan-application-store',

@@ -32,7 +32,7 @@ const AUTH_COOKIE_OPTIONS = {
   maxAge: COOKIE_MAX_AGE,
   path: '/',
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
+  secure: process.env.NEXT_PUBLIC_ENVIRONMENT === 'production',
 };
 
 /** Request options interface */

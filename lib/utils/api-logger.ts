@@ -5,8 +5,8 @@
  */
 
 /** Environment check (works on both server and client) */
-const isProduction = process.env.NODE_ENV === 'production';
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
+const isDevelopment = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
 
 /** Request metadata for logging */
 interface ApiRequestMetadata {

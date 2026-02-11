@@ -6,7 +6,7 @@
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 
 /** Environment type for multi-environment support */
-type EnvironmentType = 'staging' | 'prod';
+type EnvironmentType = 'staging' | 'production';
 
 /** Environment-specific headers */
 interface EnvironmentHeaders {
@@ -18,7 +18,6 @@ interface EnvironmentHeaders {
 interface EnvironmentConfig {
   /** Base URL for both frontend and API (same domain) */
   apiUrl: string;
-  baseUrl: string;
   ondcBaseUrl: string;
   multilenderBaseUrl: string;
   wecreditHeaders: EnvironmentHeaders;
@@ -30,7 +29,6 @@ interface EnvironmentConfig {
 const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
   staging: {
     apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wecredit.co.in',
-    baseUrl: process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://staging.wecredit.co.in',
     ondcBaseUrl: process.env.NEXT_PUBLIC_ONDC_BASE_URL_STAGING ||
       'https://ondc-internal-staging-pl.azurewebsites.net/ondc',
     multilenderBaseUrl: process.env.NEXT_PUBLIC_MULTILENDER_BASE_URL ||
@@ -47,16 +45,14 @@ const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
     },
   },
 
-  prod: {
+  production: {
     apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wecredit.co.in',
-    baseUrl: process.env.NEXT_PUBLIC_MAIN_WEBSITE_BASE_URL || 'https://wecredit.co.in',
     ondcBaseUrl: process.env.NEXT_PUBLIC_ONDC_BASE_URL_PROD ||
       'https://ondc-internal-prod-pl.azurewebsites.net/ondc',
     multilenderBaseUrl: process.env.NEXT_PUBLIC_MULTILENDER_BASE_URL ||
       'https://multilender.wecredit.co.in/api/v1/user/data-upload',
     wecreditHeaders: {
       'Content-Type': 'application/json',
-      'X-Agent-Host': 'gateway-uat',
     },
     ondcHeaders: {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -77,8 +73,8 @@ class Environment {
   private readonly environmentType: EnvironmentType;
 
   private constructor() {
-    this.environmentType = (process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod') as EnvironmentType;
-    this.config = ENVIRONMENTS[this.environmentType] || ENVIRONMENTS.prod;
+    this.environmentType = (process.env.NEXT_PUBLIC_ENVIRONMENT || 'production') as EnvironmentType;
+    this.config = ENVIRONMENTS[this.environmentType] || ENVIRONMENTS.production;
   }
 
   /** Get singleton instance */
@@ -97,11 +93,6 @@ class Environment {
   /** Get current environment type */
   public getEnvironmentType(): EnvironmentType {
     return this.environmentType;
-  }
-
-  /** Base URL for frontend and API (same domain) */
-  public get baseUrl(): string {
-    return this.config.baseUrl;
   }
 
   /** API URL */
@@ -126,17 +117,17 @@ class Environment {
 
   /** Check if running in development mode */
   public get isDevelopment(): boolean {
-    return process.env.NODE_ENV === 'development';
+    return process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
   }
 
   /** Check if running in production mode */
   public get isProduction(): boolean {
-    return process.env.NODE_ENV === 'production';
+    return process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
   }
 
   /** Check if running in test mode */
   public get isTest(): boolean {
-    return process.env.NODE_ENV === 'test';
+    return process.env.NEXT_PUBLIC_ENVIRONMENT === 'test';
   }
 }
 
