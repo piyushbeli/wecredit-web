@@ -100,7 +100,7 @@ const LeadCaptureFormWidget = ({ widget }: LeadCaptureFormWidgetProps) => {
             value={mobileNumber}
             onChange={handleMobileNumberChange}
             placeholder={placeholder}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             inputMode="numeric"
             pattern="[0-9]*"
             maxLength={10}
@@ -146,4 +146,3 @@ const LeadCaptureFormWidget = ({ widget }: LeadCaptureFormWidgetProps) => {
 };
 
 export default LeadCaptureFormWidget;
-

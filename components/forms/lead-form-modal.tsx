@@ -14,6 +14,7 @@ import { useCreateLead } from '@/hooks/use-create-lead';
 import { useLeadForm } from '@/hooks/use-lead-form';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useAuth } from '@/hooks/use-auth';
+import { useAppHeight } from '@/hooks/use-app-height';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
@@ -114,6 +115,12 @@ const LeadFormModal = ({
   const isLastStep = currentStep === 4;
   const isPrefillEnabled = process.env.NODE_ENV !== 'production'
     && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE;
+  // Use visual viewport height to keep CTA visible above iOS Safari toolbars.
+  const appHeightStyle = useAppHeight();
+  const modalStyle: React.CSSProperties = {
+    ...appHeightStyle,
+    height: 'calc(var(--app-height, 1vh) * 100)',
+  };
 
   // Reset any retained state on close (component stays mounted even when hidden).
   useEffect(() => {
@@ -367,7 +374,8 @@ const LeadFormModal = ({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 bg-white"
+        className="fixed left-0 right-0 top-0 z-50 bg-white flex flex-col"
+        style={modalStyle}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -404,7 +412,7 @@ const LeadFormModal = ({
         </AnimatePresence>
 
         {/* Header */}
-        <div className="bg-white border-b px-4 py-4 flex items-center gap-3">
+        <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={handleHeaderBackClick}
@@ -419,7 +427,7 @@ const LeadFormModal = ({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col h-[calc(100vh-64px)]">
+        <div className="flex flex-col flex-1 min-h-0">
           {isFieldsLoading ? (
             <div className="flex-1 p-6 space-y-6 overflow-y-auto">
               {[1, 2, 3].map((i) => (
@@ -476,7 +484,7 @@ const LeadFormModal = ({
               </div>
 
               {/* Footer Button */}
-              <div className="border-t bg-white p-4">
+              <div className="border-t bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shrink-0">
                 {renderFooterButton()}
               </div>
             </>

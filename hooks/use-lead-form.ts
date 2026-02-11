@@ -9,6 +9,7 @@ import type { FormField, FormFieldKey } from '@/types/lead';
 import { useAuth } from '@/hooks/use-auth';
 import { getCookie } from 'cookies-next';
 import { STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { sanitizeNumericInput, sanitizePanInput } from '@/lib/utils/form-helpers';
 
 interface WizardStep {
   stepNumber: number;
@@ -35,6 +36,23 @@ const VALIDATION_PATTERNS: Record<string, RegExp> = {
   pincode: /^[0-9]{6}$/,
   companyPincode: /^[0-9]{6}$/,
   pan: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+};
+
+const DOB_NATIVE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const DOB_DASH_PATTERN = /^\d{2}-\d{2}-\d{4}$/;
+const MINIMUM_AGE_YEARS = 18;
+
+/**
+ * Normalize values that must stay numeric or uppercased even on prefill.
+ */
+const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
+  if (fieldKey === 'pan') {
+    return sanitizePanInput(value);
+  }
+  if (fieldKey === 'pincode' || fieldKey === 'companyPincode') {
+    return sanitizeNumericInput(value, 6);
+  }
+  return value;
 };
 
 interface UseLeadFormReturn {
@@ -100,7 +118,8 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
    * Handle field value change
    */
   const handleFieldChange = useCallback((key: string, value: string): void => {
-    setFormValues((prev) => ({ ...prev, [key]: value }));
+    const normalizedValue = normalizeLeadFieldValue(key, value);
+    setFormValues((prev) => ({ ...prev, [key]: normalizedValue }));
     
     // Clear error for this field when user starts typing
     if (formErrors[key]) {
@@ -113,9 +132,73 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
   }, [formErrors]);
 
   /**
+   * Validate DOB format (YYYY-MM-DD or DD-MM-YYYY) and enforce 18+ age rule.
+   */
+  const getDobValidationError = useCallback((value: string): string => {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    const isNativeFormat = DOB_NATIVE_PATTERN.test(trimmed);
+    const isDashFormat = DOB_DASH_PATTERN.test(trimmed);
+
+    if (!isNativeFormat && !isDashFormat) {
+      return 'Please enter a valid date with a 4-digit year (YYYY)';
+    }
+
+    // Normalize to YYYY-MM-DD so we can compare dates safely.
+    const [yearStr, monthStr, dayStr] = isNativeFormat
+      ? trimmed.split('-')
+      : (() => {
+          const [day, month, year] = trimmed.split('-');
+          return [year, month, day];
+        })();
+
+    if (yearStr.length !== 4) {
+      return 'Please enter a valid date with a 4-digit year (YYYY)';
+    }
+
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    if ([year, month, day].some((part) => Number.isNaN(part))) {
+      return 'Please enter a valid date of birth';
+    }
+
+    const dobDate = new Date(year, month - 1, day);
+    // Guard against invalid dates like 31-02-2000 rolling over.
+    if (
+      dobDate.getFullYear() !== year
+      || dobDate.getMonth() !== month - 1
+      || dobDate.getDate() !== day
+    ) {
+      return 'Please enter a valid date of birth';
+    }
+
+    const today = new Date();
+    if (dobDate > today) {
+      return 'Please enter a valid date of birth';
+    }
+
+    const ageCutoff = new Date(
+      today.getFullYear() - MINIMUM_AGE_YEARS,
+      today.getMonth(),
+      today.getDate()
+    );
+    if (dobDate > ageCutoff) {
+      return 'You must be at least 18 years old';
+    }
+
+    return '';
+  }, []);
+
+  /**
    * Get format validation error for a field
    */
   const getFieldFormatError = useCallback((fieldKey: string, value: string): string => {
+    if (fieldKey === 'dob') {
+      return getDobValidationError(value);
+    }
+
     const pattern = VALIDATION_PATTERNS[fieldKey];
     if (!pattern) return '';
 
@@ -139,7 +222,7 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
     }
     
     return '';
-  }, []);
+  }, [getDobValidationError]);
 
   /**
    * Validate a single field on blur
@@ -297,8 +380,16 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
         return;
       }
       
+      const rawValue = field.value ?? '';
+
+      if (field.key === 'pan' || field.key === 'pincode' || field.key === 'companyPincode') {
+        // Keep PAN and pincode values normalized even when the API pre-fills them.
+        initialValues[field.key] = normalizeLeadFieldValue(field.key, rawValue);
+        return;
+      }
+
       // Default: use field value as-is
-      initialValues[field.key] = field.value?.trim() || '';
+      initialValues[field.key] = rawValue.trim();
     });
     
     setFormValues(initialValues);

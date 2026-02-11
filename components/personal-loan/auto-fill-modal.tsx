@@ -9,6 +9,7 @@
 import { JSX, useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ActionButton } from '@/components/shared';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import PrivacyBadge from './privacy-badge';
 import CountdownTimer from './countdown-timer';
 import CertificationLogos from './certification-logos';
@@ -34,6 +35,8 @@ const COUNTDOWN_DURATION = 5;
 const AutoFillModal = ({ isOpen, onProceed, onClose, disableTimer = false }: AutoFillModalProps): JSX.Element | null => {
   const [countdown, setCountdown] = useState<number>(COUNTDOWN_DURATION);
   const [isClosing, setIsClosing] = useState<boolean>(false);
+
+  useBodyScrollLock(isOpen);
 
   // Reset countdown when modal opens
   useEffect(() => {

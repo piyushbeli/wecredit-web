@@ -5,7 +5,24 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { dobToNativeFormat } from '@/lib/utils/form-helpers';
+import {
+  dobToNativeFormat,
+  formatDobForDisplay,
+  getDobMaxDate,
+  normalizeDobTextInput,
+} from '@/lib/utils/form-helpers';
+
+/**
+ * iOS Safari date inputs are inconsistent with max/min constraints inside modals.
+ * Use a text input fallback to keep DOB entry predictable.
+ */
+function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isAppleMobile = /iPad|iPhone|iPod/.test(ua);
+  const isIpadOs = ua.includes('Mac') && navigator.maxTouchPoints > 1;
+  return isAppleMobile || isIpadOs;
+}
 
 interface DateOfBirthFieldProps {
   id: string;
@@ -24,10 +41,13 @@ const DateOfBirthField = ({
   error,
   hint,
 }: DateOfBirthFieldProps): React.ReactNode => {
+  const isIos = isIOSDevice();
   // Normalize the stored DOB into native input format.
-  const displayValue = /^\d{4}-\d{2}-\d{2}$/.test(value)
+  const nativeDisplayValue = /^\d{4}-\d{2}-\d{2}$/.test(value)
     ? value
     : dobToNativeFormat(value);
+  const textDisplayValue = formatDobForDisplay(value);
+  const maxDobDate = getDobMaxDate(18);
 
   return (
     <div>
@@ -37,14 +57,23 @@ const DateOfBirthField = ({
       <input
         id={id}
         name="dob"
-        type="date"
-        value={displayValue}
-        onChange={(event) => onChange(event.target.value)}
+        type={isIos ? 'text' : 'date'}
+        inputMode={isIos ? 'numeric' : undefined}
+        placeholder={isIos ? 'DD-MM-YYYY' : undefined}
+        maxLength={isIos ? 10 : undefined}
+        value={isIos ? textDisplayValue : nativeDisplayValue}
+        onChange={(event) => {
+          const nextValue = isIos
+            ? normalizeDobTextInput(event.target.value)
+            : event.target.value;
+          // iOS uses DD-MM-YYYY text entry; non-iOS uses native YYYY-MM-DD.
+          onChange(nextValue);
+        }}
         onBlur={onBlur}
+        max={isIos ? undefined : maxDobDate}
         className={cn(
-          'w-full px-4 py-3 rounded-lg border text-sm transition-colors',
+          'w-full px-4 py-3 rounded-lg border text-base transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-          '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
           error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'
         )}
       />
@@ -57,4 +86,3 @@ const DateOfBirthField = ({
 };
 
 export default DateOfBirthField;
-

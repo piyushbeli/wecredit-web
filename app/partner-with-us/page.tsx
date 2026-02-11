@@ -211,7 +211,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
    * Separates conditional logic from JSX for better readability
    */
   const getTextareaClassName = (): string => {
-    const baseClasses = 'w-full px-4 py-3 rounded-lg border text-sm transition-colors resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+    const baseClasses = 'w-full px-4 py-3 rounded-lg border text-base transition-colors resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent';
     return errors.message
       ? `${baseClasses} border-red-300 bg-red-50`
       : `${baseClasses} border-gray-300 bg-white`;

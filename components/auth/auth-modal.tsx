@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useAuthHandlers } from './hooks/use-auth-handlers';
 import { usePostLogin } from './hooks/use-post-login';
 import { PhoneStepScreen } from './screens/phone-step-screen';
@@ -20,6 +21,8 @@ const AuthModal = (): React.ReactNode => {
   const { isModalOpen, currentStep, closeModal, setStep, setError } = useAuthStore();
   const pathname: string = usePathname();
   const previousPathnameRef = useRef<string | null>(null);
+
+  useBodyScrollLock(isModalOpen);
 
   // Use custom hooks for business logic
   const {

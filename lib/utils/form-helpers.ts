@@ -17,6 +17,14 @@ export function sanitizeNumericInput(
 }
 
 /**
+ * Normalize PAN input for UI use by stripping non-alphanumerics and uppercasing.
+ */
+export function sanitizePanInput(value: string, maxLength = 10): string {
+  const cleaned = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  return cleaned.slice(0, maxLength);
+}
+
+/**
  * Convert YYYY-MM-DD (native date input) to DD-MM-YYYY (API format).
  */
 export function formatDobForApi(dateStr: string): string {
@@ -51,6 +59,65 @@ export function dobToNativeFormat(dateStr: string): string {
   }
   // Already in YYYY-MM-DD format
   return dateStr;
+}
+
+/**
+ * Normalize DOB input for text-based entry (DD-MM-YYYY).
+ * Keeps pasted ISO values readable while the user types digits.
+ */
+export function normalizeDobTextInput(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  if (/^\d{2}-\d{2}-\d{4}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const [year, month, day] = trimmed.split('-');
+    return `${day}-${month}-${year}`;
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    return trimmed.replace(/\//g, '-');
+  }
+
+  const digits = trimmed.replace(/\D/g, '').slice(0, 8);
+  if (!digits) return '';
+
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 8);
+
+  return [day, month, year].filter(Boolean).join('-');
+}
+
+/**
+ * Format DOB for display in text inputs (DD-MM-YYYY).
+ */
+export function formatDobForDisplay(dateStr: string): string {
+  if (!dateStr?.trim()) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    return dateStr.replace(/\//g, '-');
+  }
+  return dateStr;
+}
+
+/**
+ * Calculates the latest selectable DOB to enforce a minimum age.
+ */
+export function getDobMaxDate(minAge: number): string {
+  const today = new Date();
+  // Use local date math to avoid timezone offsets changing the day.
+  const cutoff = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate());
+  const year = cutoff.getFullYear();
+  const month = String(cutoff.getMonth() + 1).padStart(2, '0');
+  const day = String(cutoff.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
