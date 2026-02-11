@@ -234,15 +234,13 @@ const LeadFormModal = ({
 
     if (success) {
       setShowSuccess(true);
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess('');
-        } else {
-          // Case A: Redirect to offers with newLead=true to trigger polling
-          router.push('/offers?newLead=true');
-        }
-        onClose();
-      }, 2000);
+      if (onSuccess) {
+        onSuccess('');
+      } else {
+        // Case A: Redirect to offers with newLead=true to trigger polling
+        router.push('/offers?newLead=true');
+      }
+      onClose();
     }
   }, [formValues, userIp, createLead, partnerCode, lenderName, onSuccess, router, onClose, fields]);
 

@@ -9,6 +9,7 @@ import {
   CarouselSlide,
   CarouselDots,
 } from '@/components/ui/carousel';
+import { cn } from '@/lib/utils';
 import type { ActiveLender } from '@/lib/utils/lenders';
 
 /** Props for TrendingOffersSection component */
@@ -26,6 +27,18 @@ function groupIntoColumns<T>(items: T[], rowsPerColumn: number): T[][] {
   return columns;
 }
 
+function getCarouselSlideClassName(columnIndex: number, totalColumns: number): string {
+  const isFirstSlide = columnIndex === 0;
+  const isLastSlide = columnIndex === Math.max(totalColumns - 1, 0);
+
+  // Add edge padding to first/last slides to replace wrapper padding.
+  return cn(
+    'basis-4/5 pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
+    isFirstSlide && 'pl-7',
+    isLastSlide && 'pr-4'
+  );
+}
+
 /**
  * Trending Offers section component
  * Displays a responsive carousel with 3-row columns
@@ -36,6 +49,7 @@ const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSection
   const lenderColumns = groupIntoColumns(activeLenders, 3);
 
   useEffect(() => {
+    // Delay animation disabling so initial staggered motion doesn't replay on mount.
     const timeout = setTimeout(() => setSkipAnimation(true), 800);
     return () => clearTimeout(timeout);
   }, []);
@@ -60,13 +74,13 @@ const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSection
       </div>
 
       {/* Lender Carousel */}
-      <Carousel options={{ loop: true, align: 'start', slidesToScroll: 1 }} className="px-4">
+      <Carousel options={{ loop: false, align: 'start', slidesToScroll: 1 }}>
         <CarouselContent className="-ml-3">
           {lenderColumns.map((column, colIndex) => (
             <CarouselSlide
               key={colIndex}
               index={colIndex}
-              className="basis-4/5 pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+              className={getCarouselSlideClassName(colIndex, lenderColumns.length)}
             >
               {/* 3-row vertical stack */}
               <div className="flex flex-col gap-3">
