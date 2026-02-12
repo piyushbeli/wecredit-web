@@ -98,6 +98,7 @@ export const OTPStepScreen = ({
               void onVerify(otp);
             }}
             onResend={onResend}
+            onChangeNumber={onBack} 
             error={error || undefined}
             disabled={isLoading}
             variant="default"

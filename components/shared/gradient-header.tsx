@@ -55,7 +55,6 @@ const GradientHeader = ({
     <header
       className={cn(
         'relative flex flex-col',
-        isPhoneNumberHeader ? 'bg-brand-primary' : '',
         heightClasses[height],
         className
       )}
@@ -89,7 +88,7 @@ const GradientHeader = ({
       )}
 
       {/* Centered Logo - for logo-only variant */}
-      {variant === 'logo-only' && (
+      {variant === 'logo-only' && !isPhoneNumberHeader && (
         <div className="flex-1 flex items-center justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

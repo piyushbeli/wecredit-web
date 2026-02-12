@@ -325,57 +325,56 @@ const TrendingOfferCard = ({
     >
       {/* Outer white container */}
       <div
-        className="relative rounded-3xl h-full overflow-hidden bg-white border border-gray-200"
+        className="relative rounded-lg h-full overflow-hidden bg-white border border-gray-200"
         style={{
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
         }}
       >
         {/* Gradient content area */}
         <div
-          className="relative p-3 pb-4"
+          className="relative pt-2 pl-3 pr-0 pb-2"
           style={{
-            background: 'linear-gradient(145deg, #D4E4FC 0%, #EEF4FF 50%, #FAFCFF 100%)',
+            background: 'linear-gradient(96.83deg, #CCDFFC 35.72%, #FAFCFF 100%)',
           }}
         >
-          {/* Ribbon Badge - Arrow style positioned at top right corner */}
-          {badge && (
-            <div className="absolute right-0 top-4">
-              <ArrowBadge text={badge} />
-            </div>
-          )}
+          {/* Header: Logo + Badge */}
+          <div className="flex items-center justify-between mb-1 h-[30px]">
+          <div className="w-[80px] h-[30px] flex items-center justify-start overflow-hidden">
+    {hasValidLogoPath ? (
+      <Image
+        src={logoPath?.trim() ?? ''}
+        alt={lenderName}
+        width={80}
+        height={30}
+        className="max-h-[30px] w-auto object-contain"
+        priority
+      />
+    ) : (
+      <span className="font-medium text-sm text-gray-700 truncate w-full">  {lenderName}</span>
+    )}
+  </div>
 
-          {/* Header: Logo - only render Image when we have a valid URL-safe src */}
-          <div className="flex items-center mb-1">
-            {hasValidLogoPath ? (
-              <Image
-                src={logoPath?.trim() ?? ''}
-                alt={lenderName}
-                width={100}
-                height={10}
-                className="object-contain h-5 w-auto"
-                priority
-              />
-            ) : (
-              <span className="font-medium text-sm text-gray-700">{lenderName}</span>
-            )}
-          </div>
+  {badge && <ArrowBadge text={badge} />}
+  </div>
+
+
 
           {/* Card Content - Always shows original offer details (UI unchanged) */}
           <>
             {/* Amount - Italic blue text */}
-            <h3 className="font-medium text-sm mb-1">
-              Amount upto {amount}
+            <h3 className="font-medium text-sm leading-[120%] mb-2">
+            Amount upto {amount}
             </h3>
 
             {/* Rate & Tenure - With proper icons */}
             <div className="flex items-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <PercentIcon />
-                <span className="text-gray-500 text-xs font-light">Int. rate {interestRate}</span>
+               <span className="text-gray-500 text-xs font-light leading-none">Int. rate {interestRate}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <CalendarIcon />
-                <span className="text-gray-500 text-xs font-light">Upto {tenure}</span>
+                <span className="text-gray-500 text-xs font-light leading-none">Upto {tenure}</span>
               </div>
             </div>
           </>
@@ -383,7 +382,7 @@ const TrendingOfferCard = ({
 
         {/* CTA Button - On white background outside gradient */}
         {/* Button shows loading state during check, otherwise always "Check Eligibility" */}
-        <div className="p-2 bg-white">
+        <div className="p-2 bg-[#ECF1FE]">
           <ActionButton
             type="button"
             onClick={handleCheckEligibility}
