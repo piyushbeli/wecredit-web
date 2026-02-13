@@ -7,7 +7,6 @@ import { GradientHeader } from '@/components/shared';
 import { BottomSheet, PhoneInput } from '@/components/auth';
 import { useAppHeight } from '@/hooks/use-app-height';
 import { cn } from '@/lib/utils';
-import { IMAGES } from '@/lib/constants/images';
 import type { HeaderHeightPreset, PhoneStepScreenProps } from '../types';
 
 /**
@@ -39,7 +38,7 @@ export const PhoneStepScreen = ({
 
   return (
     <motion.div
-      className="relative flex flex-col bg-white"
+className="relative flex flex-col"
       style={containerStyle}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -58,14 +57,13 @@ export const PhoneStepScreen = ({
 
       {/* Gradient Header with Illustration - 75% height */}
       <GradientHeader
-        variant="with-illustration"
-        height={resolvedHeaderHeight}
-        style={headerHeightStyle}
-        className={headerClassName}
-        illustration={IMAGES.LOGOS.DEFAULT}
-        isPhoneNumberHeader={true}
-        illustrationAlt="Phone authentication illustration"
-      />
+         variant="logo-only"
+         height={resolvedHeaderHeight}
+         style={headerHeightStyle}
+         className={headerClassName}
+         isPhoneNumberHeader
+/>
+
 
       {/* Bottom Sheet - fills remaining 50% */}
       <BottomSheet className={bottomSheetClasses}>

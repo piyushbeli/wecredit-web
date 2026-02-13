@@ -6,8 +6,8 @@ export const PercentIcon = (): React.ReactNode => (
     <Image
         src={IMAGES.ICONS.PERCENTAGE}
         alt="Percent"
-        width={10}
-        height={10}
+        width={15}
+        height={15}
         className="shrink-0"
     />
 )
@@ -16,8 +16,8 @@ export const CalendarIcon = (): React.ReactNode => (
     <Image
         src={IMAGES.ICONS.CALENDAR}
         alt="Calendar"
-        width={10}
-        height={10}
+        width={15}
+        height={15}
         className="shrink-0"
     />
 )
