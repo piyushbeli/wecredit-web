@@ -9,6 +9,7 @@
 import { JSX, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCookie } from 'cookies-next';
+import { Loader2 } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { useCheckDedupe } from '@/hooks/use-check-dedupe';
@@ -169,6 +170,19 @@ export const PersonalLoanContent = (): JSX.Element => {
 
   return (
     <>
+      {/* Translucent Loading Overlay - blocks all interactions while checking dedupe */}
+      {isCheckingDedupe && (
+        <div 
+          className="fixed inset-0 z-100 bg-black/30 backdrop-blur-sm flex items-center justify-center"
+          style={{ touchAction: 'none' }}
+        >
+          <div className="bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+            <p className="text-sm text-gray-600 font-medium">Checking eligibility...</p>
+          </div>
+        </div>
+      )}
+
       {/* Auto-Fill Modal - shown before lead form modal */}
       <AutoFillModal
         isOpen={showAutoFillModal}

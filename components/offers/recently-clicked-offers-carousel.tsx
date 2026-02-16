@@ -31,61 +31,62 @@ function RecentlyClickedOfferCard({
 	offer: LenderOfferStatus;
 	onClick: () => void;
 }) {
-	const { lenderName, uptoAmount, interestRate, tenure, logo, wcStatus } = offer;
+	const { lenderName, uptoAmount, intRate, tenure, logo, wcStatus } = offer;
 
 	return (
 		<button
 			onClick={onClick}
-			className="w-full rounded-2xl overflow-hidden p-3 text-left relative"
+			className="w-full rounded-[8px] overflow-hidden pt-2 pb-2 pr-[10px] pl-[10px] text-left relative"
 			style={{
-				background: 'linear-gradient(145deg, #D4E4FC 0%, #EEF4FF 50%, #FAFCFF 100%)',
+				background: 'linear-gradient(96.83deg, #CCDFFC 35.72%, #FAFCFF 100%)',
 			}}
 		>
-
-
-			<div className="absolute right-3 top-3">
+			<div className="absolute right-1.5 top-1.5">
 				<StatusBadge status={wcStatus} />
 			</div>
 
 			{/* Lender Logo */}
-			<div className="mb-2">
+			<div className="w-[80px] h-[24px] flex items-center justify-start overflow-hidden">
 				{logo ? (
 					<Image
 						src={logo}
 						alt={lenderName}
 						width={80}
-						height={10}
-						className="object-contain h-4 w-auto"
+						height={24}
+						className="max-h-[24px] w-auto object-contain"
 					/>
 				) : (
-					<div className="flex items-center gap-1.5">
-						<div className="w-6 h-6 rounded-lg bg-wc-blue-500 flex items-center justify-center">
-							<span className="text-white text-xs font-bold">
-								{lenderName.charAt(0)}
-							</span>
-						</div>
-						<span className="text-sm font-semibold text-gray-800">
-							{lenderName}
-						</span>
-					</div>
+					<span className="text-sm font-medium text-gray-800 truncate">
+						{lenderName}
+					</span>
 				)}
 			</div>
 
+
+
 			{/* Amount */}
-			<h3 className="font-medium text-xs mb-1.5 text-gray-900">
+			<h3
+				className="ml-[0px] mb-[8px] mt-[8px]"
+				style={{
+					fontFamily: 'Poppins, sans-serif',
+					fontWeight: 500,
+					fontSize: '14px',
+					lineHeight: '120%',
+				}}
+			>
 				Amount upto {uptoAmount}
 			</h3>
 
 			{/* Rate & Tenure */}
-			<div className="flex items-center gap-4 text-xs text-gray-600">
-				{interestRate && (
-					<div className="flex items-center gap-0.5">
+			<div className="flex items-center gap-4 mb-1 text-xs text-gray-600">
+				{intRate && (
+					<div className="flex items-center gap-1.5 font-light leading-none">
 						<PercentIcon />
-						<span>Int. rate {interestRate}%</span>
+						<span>Int. rate {intRate}%</span>
 					</div>
 				)}
 				{tenure && (
-					<div className="flex items-center gap-0.5">
+					<div className="flex items-center gap-1.5 font-light leading-none">
 						<CalendarIcon />
 						<span>Upto {tenure} m</span>
 					</div>
@@ -109,40 +110,55 @@ export function RecentlyClickedOffersCarousel({
 	}
 
 	return (
-		<section className="mb-6">
+		<section className="mb-4">
 			{/* Section Title */}
-			<h2 className="text-sm font-medium text-gray-900 mb-3 px-4">
+			<h2 className="text-sm font-light text-black-900 mb-4 ml-4 mt-5">
 				Recently Clicked Offers
 			</h2>
 
 			{/* Carousel */}
-			<div className="px-4">
+			<div>
 				<Carousel
 					options={{
 						align: 'start',
 						loop: false,
 						slidesToScroll: 1,
 					}}
-				>
-					<CarouselContent className="-ml-3">
-						{offers.map((offer, index) => (
-							<CarouselSlide
-								key={`${offer.lenderName}-${index}`}
-								className="pl-3 basis-[85%] sm:basis-[70%] md:basis-[50%]"
-							>
-								<RecentlyClickedOfferCard
-									offer={offer}
-									onClick={() => onOfferClick(offer)}
-								/>
-							</CarouselSlide>
-						))}
+				><CarouselContent className="-ml-4">
+						{offers.map((offer, index) => {
+							const isFirst = index === 0;
+							const isLast = index === offers.length - 1;
+							const singleOffer =isFirst && isLast; // Only one offer in the carousel
+
+							return (
+								<CarouselSlide
+									key={`${offer.lenderName}-${index}`}
+									className={`${isFirst ? 'pl-8' : 'pl-4'} ${isLast ? 'pr-4' : ''} ${singleOffer ? 'basis-[100%]' : 'basis-[85%]'} sm:basis-[70%] md:basis-[50%]`}
+								>
+									<RecentlyClickedOfferCard
+										offer={offer}
+										onClick={() => onOfferClick(offer)}
+									/>
+								</CarouselSlide>
+							);
+						})}
 					</CarouselContent>
+
 
 					{/* Pagination Dots - Only show if more than one offer */}
 					{offers.length > 1 && (
-						<div className="flex justify-center mt-3">
-							<CarouselDots />
-						</div>
+						<CarouselDots
+							className="flex items-center justify-center gap-[2px] h-[8px] mt-4"
+							renderDot={(index, isActive) => (
+								<div
+									className={`rounded-full transition-all duration-200 ${isActive
+										? 'w-[8px] h-[8px] bg-blue-600'
+										: 'w-[6px] h-[6px] bg-gray-400'
+										}`}
+								/>
+							)}
+						/>
+
 					)}
 				</Carousel>
 			</div>

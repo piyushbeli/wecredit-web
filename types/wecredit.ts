@@ -78,7 +78,7 @@ export interface LenderOfferStatus {
   /** Offered/requested loan amount */
   loanAmount?: string;
   /** Interest rate percentage */
-  interestRate?: string;
+  intRate?: string;
   /** Loan tenure in months */
   tenure?: string;
   /** Monthly EMI amount */
