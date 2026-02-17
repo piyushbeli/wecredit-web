@@ -15,6 +15,7 @@ import { useLeadForm } from '@/hooks/use-lead-form';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppHeight } from '@/hooks/use-app-height';
+import { useUrlParamsStore } from '@/stores/url-params-store';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
@@ -92,11 +93,15 @@ const LeadFormModal = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const { partner, originSubLender, isConsumed, consumeParams } = useUrlParamsStore();
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const isIpFetchInFlight = useRef(false);
+  
+  // Use partner from URL if available and not yet consumed, otherwise use prop or default
+  const effectivePartnerCode = !isConsumed && partner ? partner : partnerCode;
 
   const {
     currentStep,
@@ -228,10 +233,17 @@ const LeadFormModal = ({
       ConsentIp: userIp || formValues.ConsentIp || '',
       ConsentDateTime: getCurrentDateTime(),
       consent: formValues.consent || 'false',
+      // Add originSubLender from URL if available
+      ...(originSubLender && !isConsumed && { originSubLender }),
     };
 
-    const success = await createLead(formData, partnerCode, lenderName);
+    const success = await createLead(formData, effectivePartnerCode, lenderName);
     if (success) {
+      // Mark URL params as consumed after successful lead creation
+      if (!isConsumed && (partner || originSubLender)) {
+        consumeParams();
+        console.log('[LeadForm] URL params consumed after successful submission');
+      }
       setShowSuccess(true);
       if (onSuccess) {
         onSuccess('');
@@ -244,7 +256,7 @@ const LeadFormModal = ({
         router.push(`/offers?newLead=true&${lenderName ? `lenderName=${lenderName}` : ''}`);
       }
     }
-  }, [formValues, userIp, createLead, partnerCode, lenderName, onSuccess, router, onClose, fields]);
+  }, [formValues, userIp, createLead, effectivePartnerCode, lenderName, onSuccess, router, onClose, fields, partner, originSubLender, isConsumed, consumeParams]);
 
 
   const renderSubmitError = (): React.ReactElement | null => {

@@ -224,6 +224,8 @@ export interface LeadFormData {
   ConsentDateTime: string;
   /** Consent checkbox value */
   consent?: string;
+  /** Sub-lender reference from URL */
+  originSubLender?: string;
 }
 
 /** Form validation errors */
