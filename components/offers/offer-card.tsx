@@ -29,7 +29,7 @@ interface OfferCardProps {
 export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProps) {
   const {
     lenderName,
-    interestRate,
+    intRate,
     tenure,
     logo,
     wcStatus,
@@ -70,86 +70,105 @@ export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProp
   
   return (
     <div
-      className="relative rounded-3xl overflow-hidden bg-white border border-gray-200"
-      style={{
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-      }}
+      className="relative rounded-lg overflow-hidden bg-white"
     >
       {/* Gradient content area */}
-      <div
-        className="relative p-3 pb-4"
-        style={{
-          background: 'linear-gradient(145deg, #D4E4FC 0%, #EEF4FF 50%, #FAFCFF 100%)',
-        }}
-      >
-        {/* Approval Badge - Only shown in explore screen for INITIATED and UTM_CLICKED */}
-        {shouldShowApprovalBadge && (
-          <div className="absolute right-2 top-2">
-            <ApprovalBadge percentage={approvalChance} size="sm" />
-          </div>
+<div
+  className="pb-2.5"
+  style={{
+    background: 'linear-gradient(96.83deg, #CCDFFC 35.72%, #FAFCFF 100%)',
+  }}
+>
+  <div className="flex justify-between gap-[10px]">
+
+    {/* Column 1 */}
+    <div className="flex flex-col">
+
+      {/* Logo */}
+      <div className="mt-[8px] ml-[12px] w-[80px] h-[30px] flex items-center overflow-hidden">
+        {logo ? (
+          <Image
+            src={logo}
+            alt={lenderName}
+            width={80}
+            height={30}
+            className="max-h-[30px] w-auto object-contain"
+            priority
+          />
+        ) : (
+          <span className="font-medium text-sm text-gray-700 truncate w-full">
+            {lenderName}
+          </span>
         )}
-        {/* Status Badge - Shown in status screen for all statuses, or in explore for other statuses */}
-        {shouldShowStatusBadge && (
-          <div className="absolute right-3 top-3">
-            <StatusBadge status={wcStatus} />
-          </div>
-        )}
-
-        {/* Header: Logo */}
-        <div className="flex items-center mb-1">
-          {logo ? (
-            <Image
-              src={logo}
-              alt={lenderName}
-              width={100}
-              height={10}
-              className="object-contain h-5 w-auto"
-              priority
-            />
-          ) : (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-wc-blue-500 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">
-                  {lenderName.charAt(0)}
-                </span>
-              </div>
-              <span className="text-lg font-semibold text-gray-800">
-                {lenderName}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Amount */}
-        <h3 className="font-medium text-sm mb-1">
-          Amount upto {uptoAmount}
-        </h3>
-
-        {/* Rate & Tenure - With proper icons */}
-        <div className="flex items-center gap-6 text-sm text-gray-600">
-          {interestRate && (
-            <div className="flex items-center gap-1">
-              <PercentIcon />
-              <span className="text-gray-600 text-xs">Int. rate {interestRate}%</span>
-            </div>
-          )}
-          {tenure && (
-            <div className="flex items-center gap-1">
-              <CalendarIcon />
-              <span className="text-gray-600 text-xs">Upto {tenure} m</span>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* CTA Button - On white background outside gradient */}
-      <div className="p-2 bg-white">
+      {/* 8px space */}
+      <div className="h-[8px]" />
+
+      {/* Amount */}
+      <h3
+        className="ml-[12px]"
+        style={{
+          fontFamily: 'Poppins, sans-serif',
+          fontWeight: 500,
+          fontSize: '14px',
+          lineHeight: '120%',
+        }}
+      >
+        Amount upto {uptoAmount || 0}
+      </h3>
+
+      {/* 8px space */}
+      <div className="h-[8px]" />
+
+      {/* Rate & Tenure */}
+      <div className="ml-[12px] flex items-center gap-6 text-xs text-gray-600">
+        {intRate !== undefined && intRate !== null && intRate !== '' && (
+
+          <div className="flex items-center gap-1.5">
+            <PercentIcon />
+            <span className="font-light leading-none">
+              Int. rate {intRate}%
+            </span>
+          </div>
+        )}
+
+              <div className="flex items-center gap-1.5">
+                <CalendarIcon />
+                <span className="font-light leading-none">
+                  Upto {Number(tenure) || 0} m
+                </span>
+              </div>
+
+      </div>
+    </div>
+
+    {/* Column 2 */}
+    <div className="flex flex-col items-end mt-[5px] mr-[5px]">
+      {shouldShowApprovalBadge && (
+        <ApprovalBadge percentage={approvalChance} size="sm" />
+      )}
+
+            {shouldShowStatusBadge && (
+              <div className="pt-[5px] pr-[5px]">
+                <StatusBadge status={wcStatus} />
+              </div>
+            )}
+
+    </div>
+
+  </div>
+</div>
+
+
+      {/* CTA Section */}
+      < div className="py-2 px-3 bg-[#ECF1FE]">
         <ActionButton
           type="button"
           onClick={onClick}
           fullWidth
           className={cn(
-            "text-xs font-medium rounded-full py-1 h-6",
+            "text-xs font-medium rounded-full py-1 h-[26px]",
             (isClickedOffer || shouldShowGreenButton) && "bg-green-600 hover:bg-green-700 text-white",
             variant === 'status' && "bg-blue-600 hover:bg-blue-700 text-white"
           )}

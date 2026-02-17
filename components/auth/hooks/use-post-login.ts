@@ -74,10 +74,14 @@ export const usePostLogin = (): void => {
 
     switch (action.type) {
       case 'navigate_to_offer':
-      case 'check_eligibility':
-        // Guard against missing href; avoid navigating to an undefined route.
         if (action.href) {
           router.push(action.href);
+        }
+        break;
+
+      case 'check_eligibility':
+        if (action.lenderName) {
+          router.push(`/personal-loan/lender/${action.lenderName}`);
         }
         break;
       case 'submit_business_loan':

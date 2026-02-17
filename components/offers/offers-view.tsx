@@ -3,6 +3,8 @@
 import { getCookie } from 'cookies-next';
 import { redirect, useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
+import { useMemo, useEffect } from 'react';
+
 import {
   OfferCard,
   OffersHero,
@@ -17,14 +19,33 @@ import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
+import { useOfferStore } from '@/stores/offer-store';
 
 /**
  * Offers View Component
  * Handles the interactive part of the offers page
  */
+const parseAmountToNumber = (amount: string | number | undefined): number => {
+  if (!amount) return 0;
+
+  const value = String(amount).toLowerCase().trim();
+
+  // Handle lakh / lakhs
+  if (value.includes('lakh')) {
+    const numeric = parseFloat(value.replace(/[^\d.]/g, ''));
+    return isNaN(numeric) ? 0 : numeric * 100000;
+  }
+
+  // Handle normal numbers like 50000 or ₹1,20,000
+  const numeric = parseFloat(value.replace(/[^\d.]/g, ''));
+  return isNaN(numeric) ? 0 : numeric;
+};
+
 export const OffersView = () => {
   const router = useRouter();
-  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers } = useOffers();
+  const reset = useOfferStore((state) => state.reset);
+  useEffect(() => {return () => {reset();};}, [reset]);
+  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting } = useOffers();
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     // For non-INITIATED offers in explore screen, navigate to status page
     if (offer.wcStatus !== 'INITIATED') {
@@ -64,6 +85,17 @@ export const OffersView = () => {
   const totalOffers = statusOffers.length + exploreOffers.length;
   const hasOffers = totalOffers > 0;
   const hasInitiatedOffers = exploreOffers.length > 0;
+  const maxInitiatedAmount = useMemo(() => {
+  return exploreOffers
+    .filter((offer) => offer.wcStatus === 'INITIATED' && offer.uptoAmount)
+    .map((offer) => parseAmountToNumber(offer.uptoAmount))
+    .reduce((max, current) => Math.max(max, current), 0);
+  }, [exploreOffers]);
+  const formattedMaxAmount = useMemo(() => {
+  return maxInitiatedAmount > 0
+    ? `₹${maxInitiatedAmount.toLocaleString('en-IN')}`
+    : null;
+  }, [maxInitiatedAmount]);
   // Only show the status CTA once we have non-initiated offers to check.
   // const hasStatusOffers = statusOffers.length > 0;
   const hasStatusOffers = statusOffers.length > 0;
@@ -89,7 +121,9 @@ export const OffersView = () => {
       </section>
     );
   };
-  if (isLoading) {
+  
+  // Show loading skeleton while: initial loading, polling, or re-hitting lenders
+  if (isLoading || isPolling || isReHitting) {
     return (
       <div className="min-h-screen bg-gray-50">
         <OffersLoadingSkeleton />
@@ -123,20 +157,28 @@ export const OffersView = () => {
       )}
 
       {/* Congratulations message */}
-      {hasInitiatedOffers && (
-        <div className="px-4 mb-4">
-          <p className="text-blue-600 text-sm font-medium">
-            Congratulations! You are eligible for a loan of upto ₹1,00,000
-          </p>
-        </div>
-      )}
+      {hasInitiatedOffers && formattedMaxAmount && (
+    <div className="px-4 mb-4">
+    <p
+      className="text-blue-600 pt-2"
+      style={{
+        fontWeight: 400,
+        fontSize: '14px',
+        lineHeight: '153%',
+        letterSpacing: '-0.01em',
+      }}
+    > Congratulations! You are eligible for a loan of upto {formattedMaxAmount}
+    </p>
+  </div>
+)}
+
 
       <div className="px-4 pb-4">
         {showPolling && <PollingState />}
         {showEmpty && <EmptyState />}
         {hasOffers && (
           <div className="space-y-6">
-            {renderOfferSection('Please select the offers you are interested in.', exploreOffers)}
+            {renderOfferSection('', exploreOffers)}
             <UnmatchedOffersSection />
           </div>
         )}

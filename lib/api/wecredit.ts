@@ -239,12 +239,8 @@ export async function checkStatusAll(
         data: DEFAULT_CHECK_STATUS_RESPONSE,
       };
     }
-    const errorMessage = error instanceof Error
-      ? error.message
-      : 'Unable to check status. Please try again.';
-    toast.error(errorMessage, {
-      description: 'Failed to check your loan application status.',
-    });
+    const errorMessage = error instanceof Error? error.message: 'Unable to check status. Please try again.';
+    //toast.error(errorMessage, {description: 'Failed to check your loan application status.', });
     return {
       success: false,
       error: errorMessage,
@@ -378,6 +374,10 @@ export async function hitAllLenders(
     partnerCode: wecreditConfig.partnerCode,
   };
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 15000); // 15s timeout
     const data = await withApiLogging<CheckStatusAllResponse>(
       'hitAllLenders',
       () => fetch(HIT_ALL_LENDERS_ENDPOINT, {
@@ -385,6 +385,7 @@ export async function hitAllLenders(
         headers: buildHeaders({ mobile, authorization }),
         body: JSON.stringify(requestBody),
         cache: 'no-store',
+        signal: controller.signal,
       }),
       {
         method: 'POST',
@@ -395,23 +396,31 @@ export async function hitAllLenders(
         hasAuthorization: Boolean(authorization),
       }
     );
-    
 
-    
+    clearTimeout(timeoutId);
+
     return {
       success: true,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error
-      ? error.message
-      : 'Unable to check for new offers. Please try again.';
-    toast.error(errorMessage, {
-      description: 'Failed to refresh your loan offers.',
-    });
+  // Handle timeout explicitly
+  if (error instanceof Error && error.name === 'AbortError') {
     return {
       success: false,
-      error: errorMessage,
+      error: 'Request timed out',
       data: DEFAULT_CHECK_STATUS_RESPONSE,
     };
   }
+
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : 'Unable to check for new offers. Please try again.';
+
+  return {
+    success: false,
+    error: errorMessage,
+    data: DEFAULT_CHECK_STATUS_RESPONSE,
+  };
+}
 }

@@ -180,7 +180,6 @@ const TrendingOfferCard = ({
           type: 'check_eligibility',
           lenderId: id,
           lenderName,
-          href,
         });
         return;
       }
@@ -325,7 +324,7 @@ const TrendingOfferCard = ({
     >
       {/* Outer white container */}
       <div
-        className="relative rounded-lg h-full overflow-hidden bg-white border border-gray-200"
+        className="relative rounded-lg h-full overflow-hidden bg-white"
         style={{
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
         }}

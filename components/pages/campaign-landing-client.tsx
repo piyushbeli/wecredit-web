@@ -4,15 +4,17 @@
  * Campaign Landing Client
  * Fullscreen lead form for campaign URLs (e.g. /personal-loan/lender/[lender]).
  * Validates lender name against active-lenders API before showing form.
+ * Shows auto-fill modal first, then lead form with user's choice.
  * Same pattern as HomeLoanPageContent and BusinessLoanPageContent: fixed overlay
  * covers footer from first paint to avoid flash (no FOOTER_EXCLUDED_ROUTES needed).
  */
 
-import { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
+import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 
@@ -28,10 +30,19 @@ export const CampaignLandingClient = ({
   partnerCode,
 }: CampaignLandingClientProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { activeLenders, isLoading, error } = useFilteredActiveLenders({
     fetchOnMount: true,
     // No mobile - fetch generic active lenders
   });
+
+  // State for auto-fill modal and fetchDetails
+  const [showAutoFillModal, setShowAutoFillModal] = useState<boolean>(false);
+  const [showLeadFormModal, setShowLeadFormModal] = useState<boolean>(false);
+  const [fetchDetails, setFetchDetails] = useState<boolean>(true);
+
+  // Debug mode: skip auto-fill modal when ?debugAutoFill=true is in URL
+  const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
 
   const handleCloseModal = useCallback(() => {
     router.push('/');
@@ -51,28 +62,71 @@ export const CampaignLandingClient = ({
     if (!canonicalName) {
       toast.error(INCORRECT_LENDER_ERROR);
       router.replace('/');
+      return;
     }
+    // Valid lender: show auto-fill modal first
+    setShowAutoFillModal(true);
   }, [isLoading, error, activeLenders, lenderName, router]);
+
+  /**
+   * Handle auto-fill modal proceed
+   * Sets fetchDetails value and opens the lead form modal
+   * In debug mode, skip auto-fill modal and go straight to form
+   */
+  const handleAutoFillProceed = useCallback((shouldFetchDetails: boolean): void => {
+    setFetchDetails(shouldFetchDetails);
+    setShowAutoFillModal(false);
+    
+    // In debug mode, just close the modal without opening lead form
+    if (isDebugMode) {
+      console.log('[Debug] AutoFillModal closed with fetchDetails:', shouldFetchDetails);
+      return;
+    }
+    
+    // Open lead form modal after auto-fill modal closes
+    setTimeout(() => {
+      setShowLeadFormModal(true);
+    }, 300);
+  }, [isDebugMode]);
 
   // Guard: Do not render form if API failed or lender is invalid (will redirect from useEffect)
   const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
   const showForm = !error && !!canonicalLenderName;
 
-  // Fixed overlay from first paint (like BusinessLoanFormModal) so footer is never visible
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
-      {isLoading || !showForm ? (
-        <div className="flex-1 flex items-center justify-center bg-gray-50">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+    <>
+      {/* Auto-Fill Modal - shown first (renders above the original page background) */}
+      <AutoFillModal
+        isOpen={showAutoFillModal && showForm}
+        onProceed={handleAutoFillProceed}
+        onClose={() => {
+          setShowAutoFillModal(false);
+          // Reset fetchDetails to default when closing without proceeding
+          setFetchDetails(true);
+          // Close entire page
+          handleCloseModal();
+        }}
+        disableTimer={isDebugMode}
+      />
+
+      {/* Fixed overlay - only shown AFTER auto-fill modal closes */}
+      {showLeadFormModal && (
+        <div className="fixed inset-0 z-50 bg-white flex flex-col">
+          {isLoading || !showForm ? (
+            <div className="flex-1 flex items-center justify-center bg-gray-50">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+            </div>
+          ) : (
+            <LeadFormModal
+              isOpen={showLeadFormModal}
+              onClose={handleCloseModal}
+              lenderName={canonicalLenderName}
+              partnerCode={partnerCode}
+              fetchDetails={fetchDetails}
+            />
+          )}
         </div>
-      ) : (
-        <LeadFormModal
-          isOpen
-          onClose={handleCloseModal}
-          lenderName={canonicalLenderName}
-          partnerCode={partnerCode}
-        />
       )}
-    </div>
+    </>
   );
 };

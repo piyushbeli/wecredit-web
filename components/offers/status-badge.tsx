@@ -48,7 +48,7 @@ const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
   },
   UTM_CLICKED: {
     label: 'UTM CLICKED',
-    bgColor: 'bg-purple-200',
+    bgColor: "bg-[#B878FF]/20",
     textColor: 'text-purple-500',
     iconChar: '!',
     ctaLabel: 'Go to Status',
@@ -90,7 +90,7 @@ const STATUS_CONFIG: Record<WcStatus, StatusConfigItem> = {
   },
   DISBURSED: {
     label: 'DISBURSED',
-    bgColor: 'bg-blue-200',
+    bgColor: "bg-[#0048FF33]",
     textColor: 'text-blue-500',
     iconChar: '💰',
     ctaLabel: 'View Details',
@@ -136,7 +136,7 @@ export function StatusBadge({ status, className, showIcon = false }: StatusBadge
         'inline-flex items-center justify-center px-3 py-1 rounded-full',
         config.bgColor,
         config.textColor,
-        'text-xs font-medium',
+        'text-[12px] font-medium leading-[140%] tracking-[0] text-center font-manrope',
         className
       )}
     >

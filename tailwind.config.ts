@@ -179,6 +179,15 @@ const config = {
         marquee: 'marquee 40s linear infinite',
         'marquee-reverse': 'marquee-reverse 40s linear infinite',
       },
+
+      /**
+       * Z-Index
+       * Custom z-index values for modal and overlay layers
+       */
+      zIndex: {
+        '100': '100',
+        '10000': '10000',
+      },
     },
   },
   plugins: [],
