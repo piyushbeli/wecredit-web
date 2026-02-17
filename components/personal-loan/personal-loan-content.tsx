@@ -16,6 +16,7 @@ import { useCheckDedupe } from '@/hooks/use-check-dedupe';
 import { useModal } from '@/hooks/use-modal';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
+import { useUrlParamsStore } from '@/stores/url-params-store';
 import { PARTNER_CODE, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 
 type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
@@ -31,6 +32,7 @@ export const PersonalLoanContent = (): JSX.Element => {
   const { isOpen: isLeadFormModalOpen, openModal: openLeadFormModal, closeModal: closeLeadFormModal } = useModal();
   const { isAuthenticated, openModal }: { isAuthenticated: boolean; openModal: () => void } = useAuthStore();
   const { triggerApply, resetTrigger, setApplyLoading } = useLoanApplicationStore();
+  const { consumeParams } = useUrlParamsStore();
   const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response }: UseCheckDedupeResult = useCheckDedupe();
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);
@@ -64,10 +66,13 @@ export const PersonalLoanContent = (): JSX.Element => {
         setShowAutoFillModal(true);
       }
     } else {
+      // User has existing offers - consume URL params as they won't fill form
+      consumeParams();
+      console.log('[PersonalLoan] URL params consumed - redirecting to existing offers');
       router.push('/offers');
     }
     didInitiateCheckOffers.current = false;
-  }, [needsForm, isCheckingDedupe, response, router]);
+  }, [needsForm, isCheckingDedupe, response, router, consumeParams]);
 
   /**
    * Handle auto-fill modal proceed

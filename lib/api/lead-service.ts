@@ -277,6 +277,7 @@ async function createLead(
       endpoint: 'create-lead',
       partnerCode: partnerCode,
       ...(lenderName && { lenderName: [lenderName] }),
+      ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
     };
     const response = await fetch(LEAD_ENDPOINT, {
       method: 'POST',

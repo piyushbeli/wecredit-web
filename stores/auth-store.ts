@@ -4,6 +4,8 @@ import type { BusinessLoanEnquiryPayload } from '@/lib/api/business-loan-service
 import type { CarLoanEnquiryPayload } from '@/components/car-loan/car-loan-form.config';
 import type { HomeLoanEnquiryPayload } from '@/components/home-loan/home-loan-form.config';
 import type { GoldLoanEnquiryPayload } from '@/components/gold-loan/gold-loan-form.config';
+import { useOfferStore } from './offer-store';
+import { useUrlParamsStore } from './url-params-store';
 
 /**
  * User data interface
@@ -178,11 +180,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             // Note: pendingAction is NOT cleared here - it's consumed by the component
           }),
 
-        logout: () =>
+        logout: () => {
+          // Reset offer store to prevent old user data from persisting
+          useOfferStore.getState().reset();
+          // Clear URL params to prevent reuse across sessions
+          useUrlParamsStore.getState().clearParams();
+          
           set({
             ...initialAuthState,
             ...initialModalState,
-          }),
+          });
+        },
 
         setLoading: (isLoading: boolean) => set({ isLoading }),
 
