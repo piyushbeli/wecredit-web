@@ -38,7 +38,7 @@ export async function checkEligibilityStatus(
   const requestBody = {
     source: SOURCE_WEBSITE,
     agentId: '',
-    phoneNumber: environment === "staging" ? '8077904664' : phoneDigits,
+    phoneNumber:  phoneDigits,
     endpoint: 'get-bureau-url',
   };
 
@@ -105,7 +105,7 @@ function buildEligibilityCheckHeaders(
 
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
-    mobile: environment === "staging" ? '8077904664' : phoneNumber.replace(/\D/g, ''),
+    mobile:  phoneNumber.replace(/\D/g, ''),
   };
 
   headers['X-Agent-Host'] = 'agent-backend';
