@@ -16,7 +16,7 @@ const InfoCard = ({
   mb = 'mb-4',
 }: InfoCardProps) => (
   <div
-    className={`w-full max-w-[361px] bg-white rounded-lg shadow-[1px_1px_4px_0px_#6666661A,-1px_-1px_4px_0px_#6666661A] overflow-hidden ${mb}`}
+    className={`w-full bg-white rounded-lg shadow-[1px_1px_4px_0px_#6666661A,-1px_-1px_4px_0px_#6666661A] overflow-hidden ${mb}`}
   >
     <div className="w-full aspect-[361/261]">
       <img src={image} alt={alt} className="w-full h-full object-cover" />
