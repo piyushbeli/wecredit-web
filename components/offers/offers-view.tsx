@@ -3,7 +3,8 @@
 import { getCookie } from 'cookies-next';
 import { redirect, useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect , useRef} from 'react';
+
 
 import {
   OfferCard,
@@ -20,6 +21,7 @@ import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
 
 /**
  * Offers View Component
@@ -43,9 +45,25 @@ const parseAmountToNumber = (amount: string | number | undefined): number => {
 
 export const OffersView = () => {
   const router = useRouter();
+   const { triggerApplyFlow } = useLoanApplicationStore(); 
   const reset = useOfferStore((state) => state.reset);
   useEffect(() => {return () => {reset();};}, [reset]);
-  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting } = useOffers();
+  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply } = useOffers();
+  const hasTriggeredRef = useRef(false);
+
+useEffect(() => {
+  if (!shouldTriggerApply) return;
+  // Step 1: Go to home
+  router.replace('/');
+
+  // Step 2: Trigger apply AFTER navigation
+  Promise.resolve().then(() => {
+  triggerApplyFlow();
+});
+
+}, [shouldTriggerApply, triggerApplyFlow]);
+
+
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     // For non-INITIATED offers in explore screen, navigate to status page
     if (offer.wcStatus !== 'INITIATED') {

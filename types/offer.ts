@@ -35,4 +35,6 @@ export interface UseOffersReturn {
     selectedStatus: StatusFilter;
     /** Set selected status filter */
     setSelectedStatus: (status: StatusFilter) => void;
+    shouldTriggerApply: boolean;
+
   }

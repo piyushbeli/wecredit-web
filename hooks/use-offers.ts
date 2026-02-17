@@ -6,10 +6,10 @@ import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
-import { 
-  MOCK_REHIT_RESPONSE, 
+import {
+  MOCK_REHIT_RESPONSE,
   MOCK_ALL_STATUSES_RESPONSE,
-  simulateMockApiCall 
+  simulateMockApiCall
 } from '@/lib/mock-data/offers';
 import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
 import { UseOffersReturn } from '@/types/offer';
@@ -58,6 +58,7 @@ export function useOffers(): UseOffersReturn {
     setSelectedStatus,
   } = useOfferStore();
 
+  const [shouldTriggerApply, setShouldTriggerApply] = useState(false);
   const [pollTick, setPollTick] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -204,55 +205,44 @@ export function useOffers(): UseOffersReturn {
       setIsInitializing(true);
       setIsLoading(true);
 
-      /* ---------------- NEW LEAD ---------------- */
+      const mobile = getCookie(STORAGE_MOBILE) as string | undefined;
 
-      if (isNewLead) {
-        if (!shouldSkipRehit) {
-          // Multi-lender
-          const success = await executeHitAllLenders();
-
-          if (!success) {
-            console.warn(
-              '[useOffers] hitAll failed — fallback to polling'
-            );
-          }
-
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
-        } else {
-          // Single-lender
-          await fetchOffers();
-
-          if (useOfferStore.getState().offers.length === 0) {
-            setIsPolling(true);
-            pollStartTimeRef.current = Date.now();
-            executePoll();
-          }
-        }
-
+      /* 🚨 EARLY EXIT — NO MOBILE */
+      if (!mobile) {
+        setShouldTriggerApply(true);
         setIsInitializing(false);
         setIsLoading(false);
         return;
       }
 
-      /* ---------------- DIRECT NAVIGATION ---------------- */
+      /* ---------------- FETCH OFFERS FIRST ---------------- */
 
       await fetchOffers();
 
-      if (!shouldSkipRehit) {
-        const currentCanReHit =
-          useOfferStore.getState().canReHit;
+      const currentState = useOfferStore.getState();
 
-        if (currentCanReHit) {
-          const success = await executeHitAllLenders();
+      /* 🚨 EARLY EXIT — NO LEAD (3018) */
+      if (currentState.statusCode?.toString() === '3018') {
+        setShouldTriggerApply(true);
+        setIsInitializing(false);
+        setIsLoading(false);
+        return;
+      }
 
-          if (!success) {
-            console.warn(
-              '[useOffers] hitAll failed (direct nav) — fallback to polling'
-            );
-          }
+      /* ---------------- NEW LEAD FLOW ---------------- */
 
+      if (isNewLead) {
+        if (!shouldSkipRehit) {
+          await executeHitAllLenders();
+          setIsPolling(true);
+          pollStartTimeRef.current = Date.now();
+          executePoll();
+        }
+      } else {
+        /* ---------------- DIRECT NAVIGATION ---------------- */
+
+        if (!shouldSkipRehit && currentState.canReHit) {
+          await executeHitAllLenders();
           setIsPolling(true);
           pollStartTimeRef.current = Date.now();
           executePoll();
@@ -276,8 +266,7 @@ export function useOffers(): UseOffersReturn {
     if (shouldSkipRehit) {
       if (offers.length > 0) stopPolling();
     } else {
-      if (offers.length > 0 && !canReHit)
-        stopPolling();
+      if (offers.length > 0 && !canReHit) stopPolling();
     }
   }, [offers.length, canReHit, isPolling, shouldSkipRehit]);
 
@@ -296,13 +285,14 @@ export function useOffers(): UseOffersReturn {
     isReHitting,
     statusCode,
     fetchOffers,
-    reHitLenders: async () => {}, // preserved API surface
-    filterByStatus: (status) =>
-      selectFilteredOffers(offers, status),
+    reHitLenders: async () => { },
+    filterByStatus: (status) => selectFilteredOffers(offers, status),
     statusCounts: selectStatusCounts(offers),
     selectedStatus,
     setSelectedStatus,
+    shouldTriggerApply,
   };
 }
+
 
 

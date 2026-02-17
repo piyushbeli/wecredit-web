@@ -155,10 +155,27 @@ export const MobileMenuDrawer = ({
                         {/* Navigation Links */}
                         <nav className="p-4">
                             <ul className="space-y-1">
+                                {isAuthenticated && (
+                                    <motion.li
+                                        custom={0}
+                                        variants={menuItemVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                    >
+                                        <Link
+                                            href="/offers/status"
+                                            onClick={closeMenu}
+                                            className="flex items-center gap-3 px-3 py-3 text-white rounded-lg hover:bg-white/10 transition-colors"
+                                        >
+                                            <span className="font-medium">Loan Status</span>
+                                        </Link>
+                                    </motion.li>
+                                )}
                                 {headerLinks.map((link, index) => (
                                     <motion.li
                                         key={link.id}
-                                        custom={index}
+                                        custom={isAuthenticated ? index + 1 : index}
                                         variants={menuItemVariants}
                                         initial="hidden"
                                         animate="visible"
