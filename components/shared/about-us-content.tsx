@@ -1,181 +1,229 @@
 import React from 'react';
-import Link from 'next/link';
 
-/**
- * About Us content component
- * Displays WeCredit's mission, brands, and value propositions
- * Structured with clear sections for readability and SEO
- */
+interface InfoCardProps {
+  image: string;
+  alt: string;
+  title: string;
+  description: string;
+  mb?: string;
+}
+
+const InfoCard = ({
+  image,
+  alt,
+  title,
+  description,
+  mb = 'mb-4',
+}: InfoCardProps) => (
+  <div
+    className={`w-full max-w-[361px] bg-white rounded-lg shadow-[1px_1px_4px_0px_#6666661A,-1px_-1px_4px_0px_#6666661A] overflow-hidden ${mb}`}
+  >
+    <div className="w-full aspect-[361/261]">
+      <img src={image} alt={alt} className="w-full h-full object-cover" />
+    </div>
+
+    <div className="p-3 text-center">
+      <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800">
+        {title}
+      </h3>
+
+      <div className="h-2" />
+
+      <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-zinc-500">
+        {description}
+      </p>
+    </div>
+  </div>
+);
+
 const AboutUsContent = (): React.ReactNode => {
+  const teamMembers = [
+    {
+      image:
+        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ryan_placeholder.png',
+      title: 'Mukul Devpura',
+      description:
+        'Chief Executive Officer (CEO) and Chief Financial Officer (CFO)',
+    },
+    {
+      image:
+        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ryan_placeholder.png',
+      title: 'Brijesh Chokhra',
+      description: 'Chief Operating Officer (COO)',
+    },
+    {
+      image:
+        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ryan_placeholder.png',
+      title: 'Laksh Dua',
+      description: 'Chief Risk Officer (CRO)',
+    },
+    {
+      image:
+        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ryan_placeholder.png',
+      title: 'Sumit Chokhra',
+      description: 'Chief Business Officer (CBO)',
+    },
+  ];
+
+  const achievements = [
+    {
+      title: 'ONDC Partnership',
+      description:
+        'We started working with ONDC partners in 2024, expanding our reach and collaboration in the digital commerce ecosystem.',
+    },
+    {
+      title: 'Jobs Created',
+      description:
+        'WeCredit has provided over 400 jobs, contributing to employment and growth in the financial sector.',
+    },
+    {
+      title: 'Strong Lending Network',
+      description:
+        'We work with 25–30 lenders, NBFCs, fintechs, and banks, ensuring a wide range of credit options for our customers.',
+    },
+  ];
+
   return (
-    <div className="w-full space-y-8 text-zinc-700">
-      {/* Mission Statement */}
-      <section>
-        <p className="text-base leading-relaxed">
-          At WeCredit, our mission is to make personal finance easy, convenient, and transparent for everyone. 
-          Leveraging the latest data and technology innovations, we help you choose the best offers across 
-          personal loans and business loans. Our sophisticated algorithm-based technology platform provides 
-          you with access to multiple personal loan offers, simplifies the comparison of various options, 
-          and offers unbiased advice.
+    <div className="w-full">
+
+      {/* Gradient Intro */}
+      <div className="bg-[linear-gradient(96.83deg,_#CCDFFC_35.72%,_#FAFCFF_100%)] px-4 py-6 mb-4">
+        <h2 className="font-['Poppins'] font-medium text-2xl leading-[1] tracking-normal text-zinc-800">
+          About WeCredit
+        </h2>
+
+        <div className="h-4" />
+
+        <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-zinc-600">
+          At WeCredit, we believe that managing credit should be easy and transparent without confusion or hidden details.
         </p>
-      </section>
+      </div>
 
-      {/* Horizontal Divider */}
-      <hr className="border-zinc-300" />
+      <div className="px-4">
 
-      {/* Our Brands Section */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900">Our Brands</h2>
-        <p className="text-base text-zinc-600">Sub-products of WeCredit:</p>
-        
-        {/* Brand links - rendered as a clean list */}
-        <ul className="space-y-3 ml-4">
-          <li>
-            <Link 
-              href="https://www.snapit.photo/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-            >
-              <strong>Snapit</strong>
-            </Link>
-            {' '}- Snapit
-          </li>
-          <li>
-            <Link 
-              href="https://fatafatloans.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-            >
-              <strong>FataFatLoans.com</strong>
-            </Link>
-            {' '}- Quick and hassle-free financing
-          </li>
-          <li>
-            <Link 
-              href="https://loansbazaar.co" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-            >
-              <strong>LoansBazaar.co</strong>
-            </Link>
-            {' '}- Loan options from Rs 10,000 to Rs 5 lakh
-          </li>
-        </ul>
-      </section>
-
-      {/* Horizontal Divider */}
-      <hr className="border-zinc-300" />
-
-      {/* Why Choose WeCredit Section */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold text-zinc-900">Why Choose WeCredit?</h2>
-        
-        {/* Feature Grid - using a structured layout for clarity */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Quick Approvals */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Quick Approvals</h3>
-            <p className="text-base leading-relaxed">
-              Experience fast loan approvals and quick disbursals directly into your bank account.
-            </p>
-          </div>
-
-          {/* Financial Education */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Financial Education</h3>
-            <p className="text-base leading-relaxed">
-              We provide resources and advice to help you make informed financial decisions.
-            </p>
-          </div>
-
-          {/* Convenient Access */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Convenient Access</h3>
-            <p className="text-base leading-relaxed">
-              Apply for loans online from the comfort of your home.
-            </p>
-          </div>
-
-          {/* Flexible Repayment */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Flexible Repayment Options</h3>
-            <p className="text-base leading-relaxed">
-              Enjoy manageable EMIs that fit your budget.
-            </p>
-          </div>
+        {/* Laptop Image */}
+        <div className="w-full overflow-hidden mb-8">
+          <img
+            src="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/laptop.png"
+            alt="About WeCredit"
+            className="w-full h-auto object-cover"
+          />
         </div>
-      </section>
 
-      {/* Horizontal Divider */}
-      <hr className="border-zinc-300" />
+        <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
+          We make personal finance simple and transparent.
+        </h3>
 
-      {/* How We Help Section */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900">How We Help People Across India?</h2>
-        
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium text-zinc-900">Seamless Loan Experience</h3>
-          <p className="text-base leading-relaxed">
-            From the moment you apply to the moment your loan is disbursed, WeCredit is with you every 
-            step of the way. Our user-friendly platform ensures a hassle-free experience, guiding you 
-            through the entire loan process with clarity and ease.
-          </p>
-        </div>
-      </section>
-
-      {/* Horizontal Divider */}
-      <hr className="border-zinc-300" />
-
-      {/* Commitment to Transparency Section */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold text-zinc-900">Our Commitment To Transparency</h2>
-        
-        {/* Transparency Features */}
-        <div className="space-y-5">
-          {/* Clear Communication */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Clear Communication</h3>
-            <p className="text-base leading-relaxed">
-              We believe in clear and honest communication. All terms and conditions of the loan offers 
-              are presented transparently, ensuring there are no surprises down the line.
-            </p>
-          </div>
-
-          {/* Security */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Secure and Confidential</h3>
-            <p className="text-base leading-relaxed">
-              Your security is our priority. We employ the highest standards of data protection to ensure 
-              your personal and financial information is safe and confidential.
-            </p>
-          </div>
-
-          {/* Customer Support */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-zinc-900">Customer Support</h3>
-            <p className="text-base leading-relaxed">
-              Our dedicated customer support team is always ready to assist you. If you have questions 
-              about the loan process or need help with your application, we&apos;re here to help.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Horizontal Divider */}
-      <hr className="border-zinc-300" />
-
-      {/* Call to Action Section */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900">Join the WeCredit Community</h2>
-        <p className="text-base leading-relaxed">
-          WeCredit is not just a financial platform; it&apos;s a community committed to financial empowerment. 
-          Join us and take the first step towards achieving your financial goals. Download the WeCredit 
-          app today and unlock a world of financial opportunities tailored just for you.
+        <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-[#7F7F7F] mb-8">
+          With the help of data and technology, WeCredit lets you view and compare multiple loan and card offers in one place. We share clear and unbiased information to help you make better decisions and support you throughout your credit journey.
         </p>
-      </section>
+
+        {/* Team */}
+        <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
+          Meet the Team Behind WeCredit
+        </h3>
+
+        <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-[#7F7F7F] mb-10">
+          Our leadership team brings experience from key areas of the business, including finance, operations, risk, and growth.
+        </p>
+
+        {teamMembers.map((member, index) => (
+          <InfoCard
+            key={index}
+            image={member.image}
+            alt={member.title}
+            title={member.title}
+            description={member.description}
+            mb={index === teamMembers.length - 1 ? 'mb-6' : 'mb-4'}
+          />
+        ))}
+
+        {/* Timeline */}
+        <div className="mb-6 mt-8">
+          <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-black">
+            Our Journey
+          </h2>
+        </div>
+
+        <div className="relative w-full">
+          <div className="absolute left-[42px] top-0 bottom-0 w-[2px] bg-[#D9D9D9]" />
+
+          <div className="space-y-10">
+            {[
+              {
+                year: '2022',
+                title: 'The Beginning',
+                desc:
+                  'WeCredit started under the name Spiraea Digital Private Limited...',
+                dot: '#045BCF',
+              },
+              {
+                year: '2025',
+                title: 'Growth & Rebranding',
+                desc:
+                  'The company became QuantumX Global Private Limited...',
+                dot: '#00F076',
+              },
+            ].map((item, index) => (
+              <div key={index} className="relative flex">
+                <div
+                  className="w-6 h-6 rounded-full shrink-0"
+                  style={{ backgroundColor: item.dot }}
+                />
+
+                <div className="ml-8 flex-1">
+                  <div className="font-['Poppins'] font-medium text-sm leading-[1.2] text-[#045BCF]">
+                    {item.year}
+                  </div>
+
+                  <div className="mt-1 font-['Poppins'] font-medium text-base leading-[1.2] text-[#045BCF]">
+                    {item.title}
+                  </div>
+
+                  <p className="mt-2 font-['Poppins'] font-normal text-sm leading-[1.2] text-zinc-400">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {/* 2026 */}
+            <div className="relative flex">
+              <div className="w-6 h-6 rounded-full bg-[#D9D9D9] shrink-0" />
+
+              <div className="ml-8 flex-1">
+                <div className="font-['Poppins'] font-medium text-sm leading-[1.2] text-[#045BCF]">
+                  2026
+                </div>
+
+                <div className="mt-3 p-4 rounded-lg border border-dashed border-[#045BCF] bg-[linear-gradient(96.83deg,_#CCDFFC_35.72%,_#FAFCFF_100%)]">
+                  <p className="font-['Poppins'] font-normal text-sm leading-[1.2] text-[#045BCF]">
+                    Since then, WeCredit has been helping people get credit easily and quickly.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Achievements */}
+        <div className="mb-6 mt-8">
+          <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-black">
+            Our Achievements & Partnerships
+          </h2>
+        </div>
+
+        {achievements.map((item, index) => (
+          <InfoCard
+            key={index}
+            image="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/achievements.png"
+            alt={item.title}
+            title={item.title}
+            description={item.description}
+          />
+        ))}
+
+      </div>
     </div>
   );
 };

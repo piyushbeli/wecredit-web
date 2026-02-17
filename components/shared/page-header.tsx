@@ -27,18 +27,20 @@ const PageHeader = ({ title, onBack }: PageHeaderProps): JSX.Element => {
   };
 
   return (
-    <header className="bg-white border-b sticky top-0 z-10">
+<header className="bg-white sticky top-0 z-10 shadow-[2px_2px_4px_0px_#0000001A]">
       <div className="px-4 py-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={handleBack}
             className="p-0 bg-transparent border-none cursor-pointer"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-7 h-7 pr-2" />
+<ArrowLeft className="w-6 h-6" strokeWidth={1.5}/>
           </button>
-          <h1 className="text-sm font-medium text-gray-900">{title}</h1>
+<h1 className="font-['Poppins'] font-normal text-sm leading-7 tracking-normal text-gray-900">
+  {title}
+</h1>
         </div>
       </div>
     </header>
