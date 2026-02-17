@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { ActionButton } from '@/components/shared';
 import { partnerWithUs } from '@/lib/api/partner-service';
 import { useAuth } from '@/hooks/use-auth';
-
+import { BackToHomeButton } from '@/components/shared/back-to-home-button'; 
 /**
  * Partner with Us page component
  * Displays a form for partnership inquiries
@@ -255,6 +255,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 pt-24 pb-8 md:pt-28">
+       <BackToHomeButton />  
           {/* Page Banner */}
           <div className="mb-8 flex justify-center">
             <PageBanner 

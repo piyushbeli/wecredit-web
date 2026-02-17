@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import PageHeader from '@/components/shared/page-header';
 import PartnerCard from '@/components/shared/partner-card';
 import type { PartnerDetail } from '@/lib/constants/partners-data';
+import { BackToHomeButton } from '@/components/shared/back-to-home-button';
 
 /** Force static generation with 30-minute revalidation */
 export const dynamic = 'force-static';
@@ -64,6 +65,9 @@ const OurPartnersPage = async (): Promise<React.ReactNode> => {
 
       {/* Main Content */}
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-12">
+        {/* Back to Home Button */}
+        <BackToHomeButton />
+        
         {/* Section Title */}
 <h2 className="font-['Poppins'] font-normal text-base leading-7 tracking-normal text-zinc-800">
           Personal Loans Partners

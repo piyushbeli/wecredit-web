@@ -14,6 +14,9 @@ import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
+import { useEffect, useRef } from 'react';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
+
 
 /**
  * Offers Status View Component
@@ -21,7 +24,27 @@ import { ActionButton, PageHeader } from '@/components/shared';
  */
 export const OffersStatusView = () => {
   const router = useRouter();
-  const { statusOffers, isLoading, error, fetchOffers } = useOffers();
+  const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply } = useOffers();
+ const { triggerApplyFlow } = useLoanApplicationStore();
+const hasTriggeredRef = useRef(false);
+
+useEffect(() => {
+  if (!shouldTriggerApply) return;
+  if (hasTriggeredRef.current) return;
+
+  hasTriggeredRef.current = true;
+
+  // Step 1: Go home
+  router.replace('/');
+
+  // Step 2: Trigger apply after navigation
+  Promise.resolve().then(() => {
+  triggerApplyFlow();
+});
+
+
+}, [shouldTriggerApply, router, triggerApplyFlow]);
+
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
@@ -45,10 +68,7 @@ export const OffersStatusView = () => {
 
   const hasStatusOffers = statusOffers.length > 0;
 
-  const handleExploreOffers = (): void => {
-    router.push('/offers');
-  };
-
+  
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
     if (offerList.length === 0) {
       return null;
@@ -97,13 +117,6 @@ export const OffersStatusView = () => {
               title="No active applications" 
               description="You haven't applied for any loans yet. Go back to explore offers."
             />
-            <ActionButton
-              type="button"
-              onClick={handleExploreOffers}
-              className="h-12 text-base font-medium"
-            >
-              Explore Offers
-            </ActionButton>
           </div>
         ) : (
           <div className="space-y-6">
