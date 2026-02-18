@@ -14,7 +14,7 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/contact-us/',
   '/faq/',
   '/grievance-redressal/',
-  '/personal-loan-calculator/',
+  '/calculator/personal-loan',
   '/our-partners/',
   '/blog/',
 ];

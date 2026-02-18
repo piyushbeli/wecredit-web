@@ -36,7 +36,7 @@ const PersonalLoanPage = (): React.ReactNode => {
       <HeroSection />
 
       {/* EMI Calculator - Interactive */}
-      <EmiCalculator />
+      <EmiCalculator title='Personal Loan Calculator' />
 
       <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
 

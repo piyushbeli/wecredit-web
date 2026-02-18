@@ -14,21 +14,21 @@ interface StatItem {
 const stats: StatItem[] = [
   {
     id: 'users',
-    value: '200K',
+    value: '180K',
     suffix: '+',
     label: 'Satisfied Users',
   },
   {
     id: 'disbursal',
-    value: '100Cr',
-    suffix: '',
+    value: '1000Cr',
+    suffix: '+',
     label: 'Total Disbursal',
   },
   {
     id: 'ratings',
-    value: '200K',
-    suffix: '+',
-    label: 'Ratings',
+    value: '4.2',
+    suffix: '',
+    label: 'Total Ratings',
   },
 ];
 
@@ -63,7 +63,7 @@ const itemVariants: Variants = {
  */
 const StatsSection = (): React.ReactNode => {
   return (
-    <section className="py-2 px-4">
+    <section className="py-2">
       <motion.div
         className="flex justify-around items-start mx-auto"
         variants={containerVariants}
@@ -78,14 +78,14 @@ const StatsSection = (): React.ReactNode => {
             variants={itemVariants}
           >
             <div className="flex items-baseline">
-              <span className="text-2xl font-medium text-wc-blue-600 wc-stat-number">
+              <span className="text-[20px] font-medium text-wc-blue-600 wc-stat-number">
                 {stat.value}
               </span>
               {stat.suffix && (
-                <span className="text-lg font-medium text-wc-blue-600">{stat.suffix}</span>
+                <span className="text-[20px] font-medium text-wc-blue-600">{stat.suffix}</span>
               )}
             </div>
-            <span className="text-xs text-gray-600 mt-1 leading-tight">{stat.label}</span>
+            <span className="text-[13px] text-gray-600 mt-1 leading-tight">{stat.label}</span>
           </motion.div>
         ))}
       </motion.div>

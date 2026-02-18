@@ -14,7 +14,7 @@ const TITLE_ELITE = 'SBI ELITE';
 
 const CreditCardsList = (): React.ReactNode => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mx-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mx-4 my-4">
       {CREDIT_CARDS.map((card, index) => {
         const isFirst = index === 0;
         const isElite = card.title === TITLE_ELITE;
