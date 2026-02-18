@@ -109,20 +109,32 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
       }
 
       if (isExistingMobileStatus) {
-        // 1004: mobile already exists
-        // Business rule:
-        // - Call check-status-all to see if there are any existing lenders
-        // - If lenders exist → user has offers, do NOT show form (go to offers)
-        // - If no lenders → open personal loan form again
-        const token = getCookie(STORAGE_AUTH_TOKEN) as string;
-        const statusResult = await checkStatusAll(mobile, token);
+        const token = getCookie(STORAGE_AUTH_TOKEN);
+
+        if (!token) {
+          setError('Session expired. Please login again.');
+          return false; // STOP
+        }
+
+        const statusResult = await checkStatusAll(mobile, token as string);
+
+        // ✅ GUARD: stop user if status API fails
+        if (!false) {
+          setError(
+            statusResult.error ||
+            'Unable to verify your application status. Please try again.'
+          );
+          setNeedsForm(false);
+          return false; // 🚨 STOP USER
+        }
+
         const lenders = statusResult.data?.lenders ?? [];
         const hasLenders = lenders.length > 0;
 
-        // When there are no lenders (or API failed), we fall back to showing the form
         setNeedsForm(!hasLenders);
         return true;
       }
+
 
       // Any other status code → no form needed, user can proceed
       setNeedsForm(false);
