@@ -5,13 +5,11 @@
 
 import type { CreditCard } from '@/types/credit-card';
 
-const S3_BASE =
-  'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Fw_+CampaignProcess/';
 
 export const CREDIT_CARDS: CreditCard[] = [
   {
     title: 'SBI SimplyCLICK',
-    imageAsset: `${S3_BASE}Simply+Click.jpg`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/sbi_s_click.jpg`,
     link: 'https://www.sbicard.com/sprint/c/simplyClick?ch=dis&GEMID1=dis_smart_SimplyClick_conversion_July25_eapply_Banner_static&GEMID2=WeCredit',
     intro:
       'SBI presents, SimplyClick! Best for online shopping and e-commerce rewards.',
@@ -27,7 +25,7 @@ export const CREDIT_CARDS: CreditCard[] = [
   },
   {
     title: 'SBI SimplySAVE',
-    imageAsset: `${S3_BASE}Simply+Save-Network+Agnostic.jpg`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Simply_Save.jpg`,
     link: 'https://www.sbicard.com/sprint/c/simplySave?ch=dis&GEMID1=dis_smart_SimplySave_conversion_July25_eapply_Banner_static&GEMID2=WeCredit',
     intro:
       'SBI SimplySAVE credit card. Best suited for your daily spends like groceries dining and online purchases.',
@@ -43,7 +41,7 @@ export const CREDIT_CARDS: CreditCard[] = [
   },
   {
     title: 'SBI PRIME',
-    imageAsset: `${S3_BASE}Prime-card-Network+Agnostic.jpg`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Prime_card.jpg`,
     link: 'https://www.sbicard.com/sprint/c/prime?ch=dis&GEMID1=dis_smart_Prime_conversion_July25_eapply_banner_static&GEMID2=WeCredit',
     intro:
       'SBI presents PRIME. Premium lifestyle credit card with high-value travel and milestone benefits.',
@@ -59,7 +57,7 @@ export const CREDIT_CARDS: CreditCard[] = [
   },
   {
     title: 'SBI ELITE',
-    imageAsset: `${S3_BASE}Elite-Network+Agnostic.webp`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Elite_card.jpg`,
     link: 'https://www.sbicard.com/sprint/c/elite?ch=dis&GEMID1=dis_smart_Elite_conversion_July25_eapply_banner_static&GEMID2=WeCredit',
     intro:
       'SBI ELITE credit card. Luxury credit card with travel, lifestyle & premium brand privileges.',
@@ -75,7 +73,7 @@ export const CREDIT_CARDS: CreditCard[] = [
   },
   {
     title: 'SBI MILES',
-    imageAsset: `${S3_BASE}Miles-SBI-Card-Base.jpg`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Miles-SBI-Card-Base.jpg`,
     link: 'https://www.sbicard.com/sprint/c/miles?ch=dis&GEMID1=dis_smart_miles_conversion_July25_eapply_banner_static&GEMID2=WeCredit',
     intro:
       'Get exclusive benefits on your SBI Card MILES.Ideal for frequent flyers who want to earn AirMiles.',
@@ -91,7 +89,7 @@ export const CREDIT_CARDS: CreditCard[] = [
   },
   {
     title: 'SBI PULSE',
-    imageAsset: `${S3_BASE}PULSE+Card+Network+Agniostic.jpg`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Prime_card.jpg`,
     link: 'https://www.sbicard.com/sprint/c/Pulse?ch=dis&GEMID1=dis_smart_miles_conversion_July25_eapply_banner_static&GEMID2=WeCredit',
     intro:
       'SBI presents PULSE. Fitness-focused card with smart health rewards and subscriptions.',
@@ -107,7 +105,7 @@ export const CREDIT_CARDS: CreditCard[] = [
   },
   {
     title: 'AnqX',
-    imageAsset: `${S3_BASE}xcard.png`,
+    imageAsset: `https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Fw_+CampaignProcess/xcard.png`,
     link: 'https://anqcc.anq.finance/?referral_code=WECREDIT',
     intro:
       'Load your card with rupees using UPI at zero charge Travel Smarter with RuPay-On-the-Go across Metro, Buses & Parking, and skip the Ticket Queue.',

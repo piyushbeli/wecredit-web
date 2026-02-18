@@ -370,22 +370,20 @@ const TenureToggle = ({ mode, onModeChange }: TenureToggleProps): JSX.Element =>
       <button
         type="button"
         onClick={() => onModeChange('years')}
-        className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-          mode === 'years'
-            ? 'bg-wc-blue-500 text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
+        className={`px-3 py-1 text-sm font-medium rounded transition-colors ${mode === 'years'
+          ? 'bg-wc-blue-500 text-white'
+          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
       >
         Yr
       </button>
       <button
         type="button"
         onClick={() => onModeChange('months')}
-        className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-          mode === 'months'
-            ? 'bg-wc-blue-500 text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
+        className={`px-3 py-1 text-sm font-medium rounded transition-colors ${mode === 'months'
+          ? 'bg-wc-blue-500 text-white'
+          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
       >
         Mo
       </button>
@@ -397,7 +395,12 @@ const TenureToggle = ({ mode, onModeChange }: TenureToggleProps): JSX.Element =>
  * EMI Calculator Section
  * Main component with sliders and calculation results
  */
-const EmiCalculator = (): JSX.Element => {
+interface EmiCalculatorProps {
+  title: string;
+}
+
+const EmiCalculator = ({ title }: EmiCalculatorProps): JSX.Element => {
+
   const { loanAmount: loanConfig, tenure: tenureConfig, interestRate: rateConfig } = EMI_CALCULATOR_CONFIG;
 
   const [loanAmount, setLoanAmount] = useState<number>(loanConfig.default);
@@ -482,8 +485,9 @@ const EmiCalculator = (): JSX.Element => {
       >
         {/* Section Title */}
         <h2 className="text-xl font-semibold text-center mb-6">
-          Personal Loan EMI Calculator
+          {title}
         </h2>
+
 
         {/* Calculator Card */}
         <div className="">

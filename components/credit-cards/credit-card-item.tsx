@@ -36,28 +36,28 @@ const CreditCardItem = ({ card, badge }: CreditCardItemProps): React.ReactNode =
 
   return (
     <article
-      className="w-full relative bg-white rounded-2xl shadow overflow-hidden flex flex-col transition-transform hover:scale-[1.02]"
+      className="w-full relative bg-white rounded-xl shadow overflow-hidden flex flex-col transition-transform hover:scale-[1.02]"
       data-card-title={card.title}
     >
       {/* Image area with gradient behind */}
       <div
-        className="w-full h-48 shrink-0 overflow-hidden bg-zinc-700 flex items-center justify-center"
+        className="relative w-full h-48 shrink-0 overflow-hidden bg-zinc-700"
         style={gradientStyle}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={card.imageAsset}
           alt={card.title}
-          className={`w-full h-full object-cover object-center ${imageRadius}`}
+          className={`absolute inset-0 w-full h-full object-fill ${imageRadius}`}
           loading="lazy"
         />
       </div>
+
 
       {/* Content area */}
       <div className="flex-1 flex flex-col p-2.5 min-h-0">
         {/* Title row with optional badge */}
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h2 className="text-neutral-900 text-lg font-medium font-sans leading-5 flex-1 min-w-0">
+          <h2 className="text-neutral-900 text-[18px] leading-[22px] font-medium font-['Poppins'] text-left flex-1 min-w-0">
             {card.title}
           </h2>
           {badge ? (
