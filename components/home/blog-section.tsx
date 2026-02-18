@@ -20,35 +20,35 @@ interface BlogPost {
 const blogPosts: BlogPost[] = [
 	{
 		id: 'blog-1',
-		title: 'Validate your idea',
-		description: 'Test your product idea by launching payments with little to no code.',
+		title: "Savings Account vs Current Account: What's the Difference?",
+		description: 'Understand the key differences between savings and current accounts to make informed financial decisions.',
 		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
 		readTime: 4,
-		href: '/blog/validate-your-idea',
+		href: 'https://wecredit.co.in/blog/savings-account-vs-current-account-whats-the-difference/',
 	},
 	{
 		id: 'blog-2',
-		title: 'Validate your idea',
-		description: 'Test your product idea by launching payments with little to no code.',
+		title: 'Adjustable Rate Mortgages: An Overview',
+		description: 'Learn how adjustable rate mortgages work and whether they are right for you.',
 		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
 		readTime: 4,
-		href: '/blog/validate-your-idea-2',
+		href: 'https://wecredit.co.in/blog/adjustable-rate-mortgages-an-overview/',
 	},
 	{
 		id: 'blog-3',
-		title: 'Validate your idea',
-		description: 'Test your product idea by launching payments with little to no code.',
+		title: 'Fixed Rate Mortgage: An Overview',
+		description: 'Explore the benefits and drawbacks of fixed rate mortgages for home buyers.',
 		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
 		readTime: 4,
-		href: '/blog/validate-your-idea-3',
+		href: 'https://wecredit.co.in/blog/fixed-rate-mortgage-an-overview/',
 	},
 	{
 		id: 'blog-4',
-		title: 'Validate your idea',
-		description: 'Test your product idea by launching payments with little to no code.',
+		title: 'How to Track Your Personal Loan Status Online',
+		description: 'A step-by-step guide to checking your personal loan application status online.',
 		imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
 		readTime: 4,
-		href: '/blog/validate-your-idea-4',
+		href: 'https://wecredit.co.in/blog/how-to-track-your-personal-loan-status-online/',
 	},
 ];
 
@@ -71,6 +71,8 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 		>
 			<Link
 				href={post.href}
+				target="_blank"
+				rel="noopener noreferrer"
 				className="group block bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300"
 			>
 				{/* Image Container */}
