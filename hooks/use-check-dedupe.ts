@@ -13,6 +13,7 @@ import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { checkStatusAll } from '@/lib/api';
 import { getCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
+import { toast } from 'sonner';
 
 /**
  * Return type for useCheckDedupe hook
@@ -119,13 +120,12 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
         const statusResult = await checkStatusAll(mobile, token as string);
 
         // ✅ GUARD: stop user if status API fails
-        if (!false) {
-          setError(
-            statusResult.error ||
-            'Unable to verify your application status. Please try again.'
-          );
+        if (!statusResult.success) {
+          const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
+          toast.error(toastMsg);
+          setError(toastMsg);
           setNeedsForm(false);
-          return false; // 🚨 STOP USER
+          return false; 
         }
 
         const lenders = statusResult.data?.lenders ?? [];
