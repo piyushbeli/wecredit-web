@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+.dockerignore
+Dockerfile
+*.md
+.env*
+.vscode
+.cursor
+.cursorrules
+.DS_Store
+coverage
+docs
+npm-debug.log*
+yarn-debug.log*
