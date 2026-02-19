@@ -105,7 +105,8 @@ const socialLinks: SocialLink[] = [
 const Footer = () => {
   return (
     <footer className="bg-white">
-      <div className="px-4 pt-8 pb-[100px]">
+  <div className="max-w-7xl mx-auto px-4 pt-8 pb-[100px]">
+
         {/* Top Section - Logo, Tagline, and Social Links */}
         <div className="mb-10">
           {/* Logo */}

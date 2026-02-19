@@ -17,17 +17,12 @@ const CertificationsSection = (): React.ReactNode => {
         Certified By
       </h2>
       
-      <div className="container mx-auto px-4 sm:px-6 md:px-8">
-        {/* Main Certifications Card */}
-        <div className="max-w-5xl mx-auto">
-          {/* Card with gradient bottom border */}
-          <div 
-            className="relative bg-[#FCFAFE] rounded-2xl rounded-b-3xl overflow-hidden border-b-8 border-b-brand-light-from  to-brand-light-to"
-          >
-            {/* Main Content Area */}
-            <div className="px-6 py-8 sm:px-8 sm:py-14 md:px-12 md:py-16">
-              {/* Certification Logos Grid */}
-              <div className="flex justify-around items-center gap-4 sm:gap-6 md:gap-10 max-w-4xl mx-auto">
+      <div className="container mx-auto px-4">
+  <div className="max-w-xl mx-auto">
+    <div className="relative bg-[#FCFAFE] rounded-2xl overflow-hidden border-b-8">
+      <div className="px-6 py-8">
+        <div className="flex justify-between items-center gap-6 max-w-xl mx-auto">
+
                 {/* ISO Badge 1 */}
                 <CertificationBadge
                   src={IMAGES.CERTIFICATIONS.ISO_BADGE_1}

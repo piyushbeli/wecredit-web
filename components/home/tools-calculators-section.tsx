@@ -59,7 +59,7 @@ const tools: Tool[] = [
 const ToolsCalculatorsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-4 px-4">
-      <div className="mx-auto">
+      <div className="mx-auto max-w-3xl md:my-8 lg:my-12">
         {/* Section Title */}
         <motion.h2
           className="text-lg font-medium text-center mb-6"
@@ -72,20 +72,22 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
         </motion.h2>
 
         {/* Tools Grid - 2x2 layout */}
-        <div className="grid grid-cols-2 gap-3">
-          {tools.map((tool, index) => (
-            <ToolCard
-              key={tool.id}
-              id={tool.id}
-              title={tool.title}
-              description={tool.description}
-              href={tool.href}
-              imagePath={tool.imagePath}
-              fallbackIcon={tool.fallbackIcon}
-              index={index}
-            />
-          ))}
-        </div>
+        {/* Tools Grid */}
+<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+  {tools.map((tool, index) => (
+    <ToolCard
+      key={tool.id}
+      id={tool.id}
+      title={tool.title}
+      description={tool.description}
+      href={tool.href}
+      imagePath={tool.imagePath}
+      fallbackIcon={tool.fallbackIcon}
+      index={index}
+    />
+  ))}
+</div>
+
       </div>
     </section>
   );

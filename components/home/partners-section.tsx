@@ -27,19 +27,20 @@ const PartnersSection = (): React.ReactNode => {
 			<h2 className="text-xl sm:text-2xl md:text-3xl font-medium mb-6 sm:mb-8 text-center">
 				Our Partners
 			</h2>
-			<div className="px-1 sm:pl-6 md:pl-8">
-				<div className="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4 justify-items-center">
-					{partnerGridItems.map((partner, index) => (
-						<div key={`partner-grid-${index}`} className="flex items-center justify-center">
-							{partner ? (
-								<PartnerCard partner={partner} />
-							) : (
-								<div className="w-14 h-10 sm:w-20 sm:h-12 md:w-28 md:h-16 lg:w-32 lg:h-20" />
-							)}
-						</div>
-					))}
-				</div>
-			</div>
+			<div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
+  <div className="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4 justify-items-center">
+    {partnerGridItems.map((partner, index) => (
+      <div key={`partner-grid-${index}`} className="flex items-center justify-center">
+        {partner ? (
+          <PartnerCard partner={partner} />
+        ) : (
+          <div className="w-14 h-10 sm:w-20 sm:h-12 md:w-28 md:h-16 lg:w-32 lg:h-20" />
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
 		</section>
 	);
 };
