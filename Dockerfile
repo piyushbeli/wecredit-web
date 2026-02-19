@@ -31,7 +31,7 @@ ENV NEXT_PUBLIC_WEBSITE_BASE_URL=$NEXT_PUBLIC_WEBSITE_BASE_URL
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build
+RUN rm -rf .next && npm run build
 
 # ---- Runner ----
 FROM base AS runner
