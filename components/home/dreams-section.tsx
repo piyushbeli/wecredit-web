@@ -23,10 +23,10 @@ const DreamsSection = (): React.ReactNode => {
           <br />
           don&apos;t wait !
         </h2> */}
-        <h2 className="text-5xl font-semibold text-gray-100 leading-tight">
-          For dreams that{' '}
-          don&apos;t wait !
-        </h2>
+        <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold text-gray-100 leading-tight">
+  For dreams that don&apos;t wait !
+</h2>
+
 
         {/* Tagline */}
         <p className="text-sm sm:text-base text-gray-500 mt-6">
