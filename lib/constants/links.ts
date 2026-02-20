@@ -13,7 +13,7 @@ export const EXTERNAL_LINKS = {
 		FACEBOOK: "https://www.facebook.com/people/Wecredit/61550321134539/",
 		INSTAGRAM: "https://www.instagram.com/we_credit/#",
 		X: "https://x.com/Wecredit136650",
-		LINKEDIN: "https://www.linkedin.com/authwall?trk=bf&trkInfo=AQGWckjlKXemTAAAAZx6ZOLwQB3Yo5dElk_PpSaSPwnRwEOVfJJzVMdI1T0qpjTn1FEM08EIWRU6sh9BmWXcG1F7suxFM4lTOuz9MrMOMeDZWv3C65zEIxdsxmanRuM4C2Y6emg=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fwe-credit",
+		LINKEDIN: "https://www.linkedin.com/company/we-credit",
 		YOUTUBE: "https://www.youtube.com/@WeCredit",
 	},
 } as const;
