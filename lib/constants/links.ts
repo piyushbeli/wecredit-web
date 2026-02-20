@@ -10,10 +10,10 @@ export const EXTERNAL_LINKS = {
 
 	/** Social Media Links */
 	SOCIAL: {
-		FACEBOOK: "https://facebook.com/wecredit",
-		INSTAGRAM: "https://instagram.com/wecredit",
-		X: "https://x.com/wecredit",
-		LINKEDIN: "https://linkedin.com/company/wecredit",
-		YOUTUBE: "https://youtube.com/@wecredit",
+		FACEBOOK: "https://www.facebook.com/people/Wecredit/61550321134539/",
+		INSTAGRAM: "https://www.instagram.com/we_credit/#",
+		X: "https://x.com/i/flow/login?redirect_after_login=%2FWecredit136650",
+		LINKEDIN: "https://www.linkedin.com/authwall?trk=bf&trkInfo=AQGWckjlKXemTAAAAZx6ZOLwQB3Yo5dElk_PpSaSPwnRwEOVfJJzVMdI1T0qpjTn1FEM08EIWRU6sh9BmWXcG1F7suxFM4lTOuz9MrMOMeDZWv3C65zEIxdsxmanRuM4C2Y6emg=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fwe-credit",
+		YOUTUBE: "https://www.youtube.com/@WeCredit",
 	},
 } as const;
