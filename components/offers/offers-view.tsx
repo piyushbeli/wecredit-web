@@ -141,13 +141,23 @@ useEffect(() => {
   };
   
   // Show loading skeleton while: initial loading, polling, or re-hitting lenders
-  if (isLoading || isPolling || isReHitting) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <OffersLoadingSkeleton />
-      </div>
-    );
-  }
+if (isLoading ||isReHitting) {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      < PollingState message= 'Please Wait while we fetch the best offers for you.' />
+    </div>
+  );
+}
+
+ else if (isPolling) {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      < PollingState message= '' />
+    </div>
+  );
+}
+
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">

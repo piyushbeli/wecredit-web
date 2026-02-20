@@ -57,7 +57,7 @@ useEffect(() => {
     const isUtmClicked: boolean = offer.wcStatus === 'UTM_CLICKED';
 
     if (lenderName && mobile && !isUtmClicked) {
-      void updateUtmClicked(mobile, lenderName, token);
+      //void updateUtmClicked(mobile, lenderName, token);
     }
     window.open(utmLink, '_blank'); 
 
