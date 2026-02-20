@@ -18,38 +18,38 @@ interface BlogPost {
 
 /** Static blog posts data */
 const blogPosts: BlogPost[] = [
-	{
-		id: 'blog-1',
-		title: "Savings Account vs Current Account: What's the Difference?",
-		description: 'Understand the key differences between savings and current accounts to make informed financial decisions.',
-		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
-		readTime: 4,
-		href: 'https://wecredit.co.in/blog/savings-account-vs-current-account-whats-the-difference/',
-	},
-	{
-		id: 'blog-2',
-		title: 'Adjustable Rate Mortgages: An Overview',
-		description: 'Learn how adjustable rate mortgages work and whether they are right for you.',
-		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
-		readTime: 4,
-		href: 'https://wecredit.co.in/blog/adjustable-rate-mortgages-an-overview/',
-	},
-	{
-		id: 'blog-3',
-		title: 'Fixed Rate Mortgage: An Overview',
-		description: 'Explore the benefits and drawbacks of fixed rate mortgages for home buyers.',
-		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
-		readTime: 4,
-		href: 'https://wecredit.co.in/blog/fixed-rate-mortgage-an-overview/',
-	},
-	{
-		id: 'blog-4',
-		title: 'How to Track Your Personal Loan Status Online',
-		description: 'A step-by-step guide to checking your personal loan application status online.',
-		imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
-		readTime: 4,
-		href: 'https://wecredit.co.in/blog/how-to-track-your-personal-loan-status-online/',
-	},
+  {
+    id: 'blog-1',
+    title: 'How to Automate Your Bank Savings Like a Pro',
+    description: 'Learn practical steps to automate your savings and grow your wealth effortlessly.',
+    imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
+    readTime: 4,
+    href: 'https://wecredit.co.in/blog/how-to-automate-your-bank-savings-like-a-pro/',
+  },
+  {
+    id: 'blog-2',
+    title: 'Secure Your Emergency Fund With These Options',
+    description: 'Explore the best options to keep your emergency fund safe and accessible.',
+    imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
+    readTime: 4,
+    href: 'https://wecredit.co.in/blog/secure-your-emergency-fund-with-these-options/',
+  },
+  {
+    id: 'blog-3',
+    title: 'India’s 5 Best Apps to Track and Save Money Easily',
+    description: 'Discover top apps for tracking expenses and boosting your savings in India.',
+    imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
+    readTime: 4,
+    href: 'https://wecredit.co.in/blog/india-s-5-best-apps-to-track-and-save-money-easily/',
+  },
+  {
+    id: 'blog-4',
+    title: 'SIP vs RD: What’s Best for Your Money Goals?',
+    description: 'Compare SIP and RD to choose the right investment for your financial goals.',
+    imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
+    readTime: 4,
+    href: 'https://wecredit.co.in/blog/sip-vs-rd-what-s-best-for-your-money-goals/',
+  },
 ];
 
 /** Props for BlogCard component */
