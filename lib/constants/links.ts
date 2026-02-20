@@ -10,10 +10,10 @@ export const EXTERNAL_LINKS = {
 
 	/** Social Media Links */
 	SOCIAL: {
-		FACEBOOK: "https://facebook.com/wecredit",
-		INSTAGRAM: "https://instagram.com/wecredit",
-		X: "https://x.com/wecredit",
-		LINKEDIN: "https://linkedin.com/company/wecredit",
-		YOUTUBE: "https://youtube.com/@wecredit",
+		FACEBOOK: "https://www.facebook.com/people/Wecredit/61550321134539/",
+		INSTAGRAM: "https://www.instagram.com/we_credit/#",
+		X: "https://x.com/Wecredit136650",
+		LINKEDIN: "https://www.linkedin.com/company/we-credit",
+		YOUTUBE: "https://www.youtube.com/@WeCredit",
 	},
 } as const;
