@@ -33,7 +33,7 @@ export const PersonalLoanContent = (): JSX.Element => {
   const { isAuthenticated, openModal }: { isAuthenticated: boolean; openModal: () => void } = useAuthStore();
   const { triggerApply, resetTrigger, setApplyLoading } = useLoanApplicationStore();
   const { consumeParams } = useUrlParamsStore();
-  const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response }: UseCheckDedupeResult = useCheckDedupe();
+  const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response, error }: UseCheckDedupeResult = useCheckDedupe();
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);
   const didInitiateCheckOffers = useRef<boolean>(false);
@@ -65,12 +65,13 @@ export const PersonalLoanContent = (): JSX.Element => {
         // Show auto-fill modal instead of directly opening lead form modal
         setShowAutoFillModal(true);
       }
-    } else {
-      // User has existing offers - consume URL params as they won't fill form
+    } else if (!error) {
+      // Only redirect to offers if there is NO error (i.e., checkStatusAll succeeded and user has offers)
       consumeParams();
       console.log('[PersonalLoan] URL params consumed - redirecting to existing offers');
       router.push('/offers');
     }
+    // If there is an error, do not redirect; error UI will be shown elsewhere
     didInitiateCheckOffers.current = false;
   }, [needsForm, isCheckingDedupe, response, router, consumeParams]);
 

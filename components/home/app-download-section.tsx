@@ -14,7 +14,7 @@ import { EXTERNAL_LINKS } from '@/lib/constants/links';
  */
 const AppDownloadSection = (): React.ReactNode => {
   return (
-    <section className="container mx-auto px-4 py-12 md:py-24">
+    <section className="mx-auto max-w-7xl px-4 py-12 md:py-24">
       <div className={cn(
         "relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem]",
         "px-8 py-6 md:px-20 md:py-20",
