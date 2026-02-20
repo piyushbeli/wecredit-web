@@ -65,11 +65,8 @@ export function useOffers(): UseOffersReturn {
   const searchParams = useSearchParams();
 
   const isNewLead = searchParams?.get('newLead') === 'true';
-  const lenderNameParam =
-    searchParams?.get('lenderName') ??
-    searchParams?.get('lendername') ??
-    '';
-
+  const lenderNameParam = searchParams?.get('lenderName') ??searchParams?.get('lendername') ?? '';
+  const pathname = usePathname();
   const shouldSkipRehit = Boolean(lenderNameParam.trim());
   const enableMockData = useFeatureFlag('enableOfferMockData');
 
@@ -230,9 +227,8 @@ export function useOffers(): UseOffersReturn {
       }
 
       /* ---------------- NEW LEAD FLOW ---------------- */
-
       if (isNewLead) {
-        if (!shouldSkipRehit) {
+        if (!shouldSkipRehit && pathname !== '/offers/status/') {
           await executeHitAllLenders();
           setIsPolling(true);
           pollStartTimeRef.current = Date.now();
@@ -241,7 +237,7 @@ export function useOffers(): UseOffersReturn {
       } else {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
-        if (!shouldSkipRehit && currentState.canReHit) {
+        if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
           await executeHitAllLenders();
           setIsPolling(true);
           pollStartTimeRef.current = Date.now();

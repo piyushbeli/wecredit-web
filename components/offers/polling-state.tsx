@@ -32,7 +32,7 @@ export const PollingState = ({ message }: { message?: string }) => {
 
   return (
     <div className="px-4 py-12 text-center">
-      <div className="relative w-24 h-24 mx-auto mb-6">
+      <div className="relative w-24 h-24 mx-auto mb-12">
         <div className="absolute inset-0 rounded-full border-4 border-blue-100 animate-ping" />
 
         <div className="relative w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
@@ -40,29 +40,36 @@ export const PollingState = ({ message }: { message?: string }) => {
           {!hasCustomMessage && (
             <span className="text-5xl animate-bounce">🔍</span>
           )}
+          {hasCustomMessage && (
+             <div className="rounded-full w-10 h-10 border-4 border-blue-400 animate-ping" />
+          )}
         </div>
       </div>
-
+      <p className="mb-4"></p>
       <h2 className="text-xl font-bold text-gray-900 mb-2">
         {message || defaultMessage}
       </h2>
 
-      {!hasCustomMessage && (
+      
         <div className="text-gray-600 mb-6 max-w-sm mx-auto">
-          <p className="mb-2">
-            We are checking with our lender partners to find the best loan
-            offers for you.
-          </p>
+          <div>
+            {!hasCustomMessage && (
+              <p className="mb-2">
+                We are checking with our lender partners to find the best loan
+                offers for you.
+              </p>
+            )}
 
-          <p className="font-semibold text-blue-600">
+          {!hasCustomMessage&&(<p className="font-semibold text-blue-600">
             Time remaining: {formattedTime}
-          </p>
+          </p>)}
+          </div>
 
           <p className="text-sm mt-2">
             Please do not refresh or navigate away from the page.
           </p>
         </div>
-      )}
+      
 
       <div className="flex justify-center gap-1">
         <div

@@ -100,7 +100,7 @@ export const UnmatchedOffersSection = () => {
   }, []);
 
   return (
-    <section className="rounded-[8px] bg-[#CCDFFC] pb-4">
+    <section className="rounded-[8px] bg-[#CCDFFC] pb-4 mb-25 ">
       {/* Title */}
       <h3 className="text-[18px] font-light text-gray-800 mb-3 px-4 pt-4">
         Unmatched Offers

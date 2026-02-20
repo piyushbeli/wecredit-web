@@ -3,8 +3,8 @@
 import { getCookie } from 'cookies-next';
 import { redirect, useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
-import { useMemo, useEffect , useRef} from 'react';
-
+import { useMemo, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import {
   OfferCard,
@@ -45,11 +45,27 @@ const parseAmountToNumber = (amount: string | number | undefined): number => {
 
 export const OffersView = () => {
   const router = useRouter();
-   const { triggerApplyFlow } = useLoanApplicationStore(); 
+  const { triggerApplyFlow } = useLoanApplicationStore();
   const reset = useOfferStore((state) => state.reset);
-  useEffect(() => {return () => {reset();};}, [reset]);
+  const searchParams = useSearchParams();
+  const newLead = searchParams.get('newLead') || searchParams.get('newlead');
+  const lenderNameParam = searchParams.get('lenderName') ?? searchParams.get('lendername') ?? '';
+  useEffect(() => { return () => {reset();}; }, [reset]);
   const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply } = useOffers();
-  const hasTriggeredRef = useRef(false);
+
+  // Memoized filtered offers for lenderName(single Lender flow having both explore and status offers for deciding whether lenerName in URL has non-INITIATED offer or not. To decide the redirection to status page using singleLenderHasNonInitiatedOffer)
+  const filteredExploreOffers = useMemo(() => {
+    if (!lenderNameParam) return exploreOffers;
+    return [...exploreOffers, ...statusOffers].filter(
+      (offer) => offer.lenderName?.toLowerCase() === lenderNameParam.toLowerCase()
+    );
+  }, [exploreOffers, statusOffers, lenderNameParam]);
+
+  // Memoized check for single lender non-initiated offer
+  const singleLenderHasNonInitiatedOffer = useMemo(() =>
+    lenderNameParam && filteredExploreOffers.length === 1 && filteredExploreOffers[0].wcStatus !== 'INITIATED',
+    [lenderNameParam, filteredExploreOffers]
+  );
 
 useEffect(() => {
   if (!shouldTriggerApply) return;
@@ -61,8 +77,19 @@ useEffect(() => {
   triggerApplyFlow();
 });
 
-}, [shouldTriggerApply, triggerApplyFlow]);
+}, [shouldTriggerApply, triggerApplyFlow, router]);
 
+  // If lenderName is present and the matching offer is non-INITIATED, redirect to status page
+  useEffect(() => {
+    if (!lenderNameParam) return;
+    if (singleLenderHasNonInitiatedOffer) {
+      router.replace('/offers/status');
+    }
+  }, [lenderNameParam, singleLenderHasNonInitiatedOffer, router]);
+
+  const handleExploreMore = () => {
+    window.location.replace('/offers'); // removes lenderName from URL and reloads the page to show all offers   
+  };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     // For non-INITIATED offers in explore screen, navigate to status page
@@ -104,11 +131,12 @@ useEffect(() => {
   const hasOffers = totalOffers > 0;
   const hasInitiatedOffers = exploreOffers.length > 0;
   const maxInitiatedAmount = useMemo(() => {
+    // Find the maximum uptoAmount from INITIATED offers, optionally filtered by lenderName
   return exploreOffers
-    .filter((offer) => offer.wcStatus === 'INITIATED' && offer.uptoAmount)
+    .filter((offer) => lenderNameParam ? (offer.lenderName === lenderNameParam && offer.wcStatus === 'INITIATED') : (offer.wcStatus === 'INITIATED') && offer.uptoAmount)
     .map((offer) => parseAmountToNumber(offer.uptoAmount))
     .reduce((max, current) => Math.max(max, current), 0);
-  }, [exploreOffers]);
+  }, [exploreOffers, lenderNameParam]);
   const formattedMaxAmount = useMemo(() => {
   return maxInitiatedAmount > 0
     ? `₹${maxInitiatedAmount.toLocaleString('en-IN')}`
@@ -172,46 +200,83 @@ if (isLoading ||isReHitting) {
   //   redirect('/offers/status');
   // }
 
+
   return (
     <div className="min-h-screen ">
       <PageHeader title="Offers for you" onBack={handleGoBack} />
       
       {/* Recently Clicked Offers Carousel - At the top */}
-      {statusOffers.length > 0 && (
-        <RecentlyClickedOffersCarousel 
-          offers={statusOffers} 
+      {/*// Show carousel if there are status offers and no lender filter is applied (to avoid confusion in single lender view)*/}
+      {statusOffers.length > 0 && !lenderNameParam && (
+        <RecentlyClickedOffersCarousel
+          offers={statusOffers}
           onOfferClick={handleRecentlyClickedOfferClick}
         />
       )}
 
       {/* Congratulations message */}
-      {hasInitiatedOffers && formattedMaxAmount && (
-    <div className="px-4 mb-4">
-    <p
-      className="text-blue-600 pt-2"
-      style={{
-        fontWeight: 400,
-        fontSize: '14px',
-        lineHeight: '153%',
-        letterSpacing: '-0.01em',
-      }}
-    > Congratulations! You are eligible for a loan of upto {formattedMaxAmount}
-    </p>
-  </div>
-)}
+      {!singleLenderHasNonInitiatedOffer && filteredExploreOffers.length > 0 && hasInitiatedOffers && formattedMaxAmount && (
+        <div className="px-4 pb-4 pt-2">
+          <p
+            className="text-blue-600 pt-2 max-w-xl mx-auto"
+            style={{
+              fontWeight: 400,
+              fontSize: '14px',
+              lineHeight: '153%',
+              letterSpacing: '-0.01em',
+            }}
+          > Congratulations! You are eligible for a loan of upto {formattedMaxAmount} {lenderNameParam ? `from ${lenderNameParam.charAt(0).toUpperCase() + lenderNameParam.slice(1)}` : ''}
+          </p>
+        </div>
+      )}
 
 
       <div className="px-4 pb-4">
         {showPolling && <PollingState />}
-        {showEmpty && <EmptyState />}
-        {hasOffers && (
-          <div className="space-y-6">
-            {renderOfferSection('', exploreOffers)}
-            <UnmatchedOffersSection />
-          </div>
-        )}
+        <div className="flex flex-col items-start justify-center text-center py-0 space-y-0">
+          {!lenderNameParam && showEmpty && <EmptyState />}
+        </div>
+        {
+          lenderNameParam ? (
+            // 🔹 If lenderName exists in URL
+            singleLenderHasNonInitiatedOffer ? <></> : filteredExploreOffers.length > 0 ? (
+              <div className="space-y-6 max-w-xl mx-auto">
+                {renderOfferSection('', filteredExploreOffers)}
+                <p className="text-[14px] text-gray-600">More lenders might have exciting offers waiting for you. Take a moment to explore your options.</p>
+                 <div className="flex justify-center w-full ">
+                   <ActionButton
+                    type="button"
+                    onClick={handleExploreMore}
+                    className="w-[200px] px-10"
+                    rightIcon="🔍"
+                  >
+                    Explore More Offers
+                </ActionButton></div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center ">
+                <EmptyState title="No offers available from this lender" description=' ' />
+
+                <ActionButton
+                  type="button"
+                  onClick={handleExploreMore}
+                  className="w-full max-w-xs"
+                >
+                  Explore Other Offers
+                </ActionButton>
+              </div>
+            )
+          ) : (
+            // 🔹 Normal flow (no lenderName in URL)
+            hasOffers && (
+              <div className="space-y-6">
+                {renderOfferSection('', exploreOffers)}
+                <UnmatchedOffersSection />
+              </div>
+            )
+          )}
       </div>
-      {hasStatusOffers && (
+      {hasStatusOffers && !lenderNameParam && (
         <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">
           <ActionButton
             type="button"
