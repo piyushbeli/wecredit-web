@@ -258,8 +258,8 @@ const TrendingOfferCard = ({
 
         if (matchedLender) {
           // Lender found: User is already a lead for this lender
-          // Navigate to offers status page instead of lender form
-          router.push('/offers/');
+          // Navigate to offers status page instead of lender form, always with lenderName in query
+          router.push(`/offers/?lenderName=${encodeURIComponent(lenderName)}`);
         } else {
           // Lender not found: User hasn't applied to this lender yet
           // Proceed with normal flow (navigate to lender page)

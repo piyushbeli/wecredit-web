@@ -67,7 +67,9 @@ useEffect(() => {
   };
 
   const hasStatusOffers = statusOffers.length > 0;
-
+ const handleExploreMore = () => {
+    window.location.replace('/offers'); // removes lenderName from URL and reloads the page to show all offers   
+  };
   
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
     if (offerList.length === 0) {
@@ -117,6 +119,13 @@ useEffect(() => {
               title="No active applications" 
               description="You haven't applied for any loans yet. Go back to explore offers."
             />
+            <ActionButton
+                  type="button"
+                  onClick={handleExploreMore}
+                  className="w-full max-w-xs"
+                >
+                  Explore Other Offers
+                </ActionButton>
           </div>
         ) : (
           <div className="space-y-6">
