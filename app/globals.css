@@ -254,12 +254,10 @@
 
 /* Hero + Stats Gradient Wrapper - Smooth gradient from dark blue to white */
 .wc-hero-gradient-wrapper {
-  background: linear-gradient(180deg,
-      #1E5FE6 0%,
-      #3B7BF7 35%,
-      #5A9BFF 55%,
-      #89BFFF 70%,
-      #CDDEFF 85%,
+  background: linear-gradient(
+      180deg,
+      #89BFFF 30%,
+      #CDDEFF 65%,
       #FFFFFF 100%);
 }
 
