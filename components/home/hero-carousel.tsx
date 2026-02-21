@@ -9,7 +9,7 @@ import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/compon
 import { ActionButton } from '@/components/shared';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
-
+import type { MouseEvent } from 'react';
 /** Slide content configuration */
 export interface SlideContent {
   id: string;
@@ -30,7 +30,7 @@ const HeroCarousel = (): JSX.Element => {
   const renderCtaElement = (slide: SlideContent) => {
   const isPersonalLoan = slide.ctaLink === '/personal-loan';
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (isPersonalLoan) {
       e.preventDefault(); // stop navigation
       triggerApplyFlow(); // trigger apply flow instead
