@@ -14,7 +14,7 @@ const CreditCardsPageContent = (): React.ReactNode => {
       <div className="py-8 sm:py-10 pt-20">
 
         {/* Credit cards grid */}
-        <section className="mb-12 sm:mb-16" aria-label="Credit card offers">
+        <section className="mb-12 sm:mb-16 px-4" aria-label="Credit card offers">
           <CreditCardsList />
         </section>
 

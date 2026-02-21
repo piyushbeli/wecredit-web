@@ -9,7 +9,7 @@ import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/compon
 import { ActionButton } from '@/components/shared';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
-
+import type { MouseEvent } from 'react';
 /** Slide content configuration */
 export interface SlideContent {
   id: string;
@@ -28,29 +28,25 @@ const HeroCarousel = (): JSX.Element => {
   const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 
   const renderCtaElement = (slide: SlideContent) => {
-    if (slide.ctaLink === '/personal-loan') {
-      return (
-        <ActionButton
-          type="button"
-          onClick={triggerApplyFlow}
-          isLoading={isApplyLoading}
-          size="lg"
-          className="inline-flex h-14 items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white rounded-lg shadow-lg shadow-wc-blue-500/30 transition-all duration-300 active:scale-95"
-        >
-          {slide.ctaText}
-        </ActionButton>
-      );
-    } else {
-      return (
-        <Link
-          href={slide.ctaLink}
-          className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white rounded-lg shadow-lg shadow-wc-blue-500/30 transition-all duration-300 active:scale-95"
-        >
-          {slide.ctaText}
-        </Link>
-      );
+  const isPersonalLoan = slide.ctaLink === '/personal-loan';
+
+  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (isPersonalLoan) {
+      e.preventDefault(); // stop navigation
+      triggerApplyFlow(); // trigger apply flow instead
     }
-  }
+  };
+
+  return (
+    <Link
+      href={slide.ctaLink}
+      onClick={handleClick}
+      className="inline-flex items-center justify-center px-8 py-4 bg-wc-blue-500 hover:bg-wc-blue-600 text-white rounded-lg transition-all duration-300 active:scale-95"
+    >
+      {slide.ctaText}
+    </Link>
+  );
+};
 
   return (
     <section className="wc-hero-bg min-h-[40vh] relative pt-16">

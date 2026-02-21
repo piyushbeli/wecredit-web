@@ -612,7 +612,7 @@ export interface ExpertQuote {
 /** Expert testimonial quote */
 export const EXPERT_QUOTE: ExpertQuote = {
   quote:
-    'I got my loan approved faster than I ever expected — the whole process was smooth, simple, and completely hassle-free!',
+    "A personal loan is not just a transaction. It is a moment in someone's life, a medical bill that could not wait, a dream that needed a push, or a gap that needed filling. When we started WeCredit, we wanted to make sure that moment felt simple, fair, and judgment-free. That has not changed, and it never will.",
   name: 'Laksh Dua',
   designation: 'Co - Founder',
   imageUrl:IMAGES.DIRECT_CONTACT_EXPERTS.LAKASH,

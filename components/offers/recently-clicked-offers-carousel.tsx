@@ -110,9 +110,9 @@ export function RecentlyClickedOffersCarousel({
 	}
 
 	return (
-		<section className="mb-4">
+		<section className="mb-4  mx-auto max-w-xl">
 			{/* Section Title */}
-			<h2 className="text-sm font-light text-black-900 mb-4 ml-4 mt-5">
+			<h2 className="text-sm font-light text-black-900 mb-4 ml-4 mt-5 lg:ml-0">
 				Recently Clicked Offers
 			</h2>
 
@@ -124,7 +124,7 @@ export function RecentlyClickedOffersCarousel({
 						loop: false,
 						slidesToScroll: 1,
 					}}
-				><CarouselContent className="-ml-4 max-w-xl">
+				><CarouselContent className=" max-w-xl">
 						{offers.map((offer, index) => {
 							const isFirst = index === 0;
 							const isLast = index === offers.length - 1;
@@ -133,7 +133,7 @@ export function RecentlyClickedOffersCarousel({
 							return (
 								<CarouselSlide
 									key={`${offer.lenderName}-${index}`}
-									className={`${isFirst ? 'pl-8' : 'pl-4'} ${isLast ? 'pr-4' : ''} ${singleOffer ? 'basis-[100%]' : 'basis-[85%]'} sm:basis-[70%] md:basis-[50%]`}
+									className={`pl-4 ${isLast ? 'pr-4' : ''} ${singleOffer ? 'basis-[100%]' : 'basis-[85%]'} sm:basis-[70%] md:basis-[50%]`}
 								>
 									<RecentlyClickedOfferCard
 										offer={offer}

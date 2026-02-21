@@ -439,7 +439,7 @@ const LeadFormModal = ({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex flex-col flex-1 min-h-0 max-w-xl mx-auto w-full">
           {isFieldsLoading ? (
             <div className="flex-1 p-6 space-y-6 overflow-y-auto">
               {[1, 2, 3].map((i) => (

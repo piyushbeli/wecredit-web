@@ -27,27 +27,24 @@ function groupIntoColumns<T>(items: T[], rowsPerColumn: number): T[][] {
   return columns;
 }
 
-function getCarouselSlideClassName(columnIndex: number, totalColumns: number): string {
-  const isFirstSlide = columnIndex === 0;
-  const isLastSlide = columnIndex === Math.max(totalColumns - 1, 0);
+function getCarouselSlideClassName(
+  columnIndex: number,
+  totalColumns: number
+): string {
+  const isSingle = totalColumns === 1;
 
-  // Add edge padding to first/last slides to replace wrapper padding.
   return cn(
-    totalColumns > 1
-      ? 'basis-4/5'
-      : 'basis-full',
-    'pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
-    isFirstSlide && 'pl-7',
-    isLastSlide && 'pr-4'
+    isSingle
+      ? 'basis-full'
+      : 'basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
+    'px-3' // spacing handled at slide level for proper snap sync
   );
 }
 
-/**
- * Trending Offers section component
- * Displays a responsive carousel with 3-row columns
- * Receives pre-fetched lender data from server
- */
-const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSectionProps): React.ReactNode => {
+const TrendingOffersSection = ({
+  activeLenders,
+  heading,
+}: TrendingOffersSectionProps): React.ReactNode => {
   const [skipAnimation, setSkipAnimation] = useState(false);
   const lenderColumns = groupIntoColumns(activeLenders, 3);
 
@@ -76,16 +73,24 @@ const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSection
         </motion.h2>
       </div>
 
-      {/* Lender Carousel */}
-      <Carousel options={{ loop: false, align: 'start', slidesToScroll: 1 }}>
-        <CarouselContent className="-ml-3">
+      <Carousel
+        options={{
+          loop: false,
+          align: lenderColumns.length === 1 ? 'center' : 'start',
+          slidesToScroll: 1,
+          containScroll: 'trimSnaps',
+        }}
+      >
+        <CarouselContent>
           {lenderColumns.map((column, colIndex) => (
             <CarouselSlide
               key={colIndex}
               index={colIndex}
-              className={getCarouselSlideClassName(colIndex, lenderColumns.length)}
+              className={getCarouselSlideClassName(
+                colIndex,
+                lenderColumns.length
+              )}
             >
-              {/* 3-row vertical stack */}
               <div className="flex flex-col gap-3">
                 {column.map(({ id, lender }, rowIndex) => (
                   <TrendingOfferCard
@@ -95,7 +100,9 @@ const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSection
                     logoPath={lender.logo || undefined}
                     badge="Fast Disbursal"
                     amount={lender.UptoAmount || 'N/A'}
-                    interestRate={lender.IntRate ? `${lender.IntRate}%` : 'N/A'}
+                    interestRate={
+                      lender.IntRate ? `${lender.IntRate}%` : 'N/A'
+                    }
                     tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
                     href={lender.utmLink || `/offers/${id}`}
                     index={colIndex * 3 + rowIndex}
@@ -107,12 +114,11 @@ const TrendingOffersSection = ({ activeLenders, heading }: TrendingOffersSection
           ))}
         </CarouselContent>
 
-        {/* Dot Indicators */}
-        <CarouselDots
+        { /* <CarouselDots
           className="mt-4"
           dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
           activeDotClassName="bg-wc-blue-500"
-        />
+        /> */}
       </Carousel>
     </section>
   );
