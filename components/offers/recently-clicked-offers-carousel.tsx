@@ -124,7 +124,7 @@ export function RecentlyClickedOffersCarousel({
 						loop: false,
 						slidesToScroll: 1,
 					}}
-				><CarouselContent className="-ml-4">
+				><CarouselContent className="-ml-4 max-w-xl">
 						{offers.map((offer, index) => {
 							const isFirst = index === 0;
 							const isLast = index === offers.length - 1;

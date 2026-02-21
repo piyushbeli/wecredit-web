@@ -73,7 +73,7 @@ const HowToApplySteps = (): JSX.Element => {
 	const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 
 	return (
-		<section className="bg-gray-50 py-6 px-4">
+		<section className="bg-gray-50 py-6 px-4 max-w-3xl mx-auto ">
 			<motion.div
 				className="max-w-md mx-auto"
 				initial={{ opacity: 0 }}

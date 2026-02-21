@@ -93,7 +93,7 @@ useEffect(() => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 max-w-xl mx-auto">
         <OffersLoadingSkeleton />
       </div>
     );
@@ -112,7 +112,7 @@ useEffect(() => {
       <PageHeader title="Loan Status" />
       {hasStatusOffers && <OffersHero eligibleAmount="₹1,00,000" offerCount={statusOffers.length} />}
 
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 max-w-xl mx-auto">
         {!hasStatusOffers ? (
           <div className="min-h-[50vh] flex flex-col items-center justify-center text-center">
             <EmptyState 

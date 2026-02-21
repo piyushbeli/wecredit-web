@@ -35,7 +35,7 @@ export const IMAGES = {
     OTP_SMS: `${BUCKET_IMAGE_URL}/otp-sms.png`,
   },
   DIRECT_CONTACT_EXPERTS: {
-    LAKASH: `${BUCKET_IMAGE_URL}/lakash.png`,
+    LAKASH: `${BUCKET_IMAGE_URL}/person_placeholder.png`,
     PLAYSTORE_ICON: `${BUCKET_IMAGE_URL}/playstoreicon.png`,
   },
   LOAN_ICONS: {

@@ -57,7 +57,7 @@ const EligibilityCriteria = (): JSX.Element => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4 }}
-        className="max-w-lg mx-auto"
+        className="max-w-3xl mx-auto"
       >
         {/* Container with dashed border and corner brackets */}
         <div className="relative">

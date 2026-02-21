@@ -118,10 +118,10 @@ useEffect(() => {
 
   const handleRecentlyClickedOfferClick = (offer: LenderOfferStatus): void => {
     // For recently clicked offers, navigate to status page
-    router.push('/offers/status');
+    router.replace('/offers/status');
   };
   const handleCheckStatus = (): void => {
-    router.push('/offers/status');
+    router.replace('/offers/status');
   };
   const handleGoBack = (): void => {
     router.push('/');
@@ -269,7 +269,7 @@ if (isLoading ||isReHitting) {
           ) : (
             // 🔹 Normal flow (no lenderName in URL)
             hasOffers && (
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-xl mx-auto">
                 {renderOfferSection('', exploreOffers)}
                 <UnmatchedOffersSection />
               </div>
@@ -282,7 +282,7 @@ if (isLoading ||isReHitting) {
             type="button"
             onClick={handleCheckStatus}
             fullWidth
-            className="h-14 text-base font-medium"
+            className="h-14 text-base font-medium max-w-xl mx-auto items-center justify-center flex"
           >
             Check your Loan Status
           </ActionButton>
