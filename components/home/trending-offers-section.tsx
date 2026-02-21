@@ -33,7 +33,10 @@ function getCarouselSlideClassName(columnIndex: number, totalColumns: number): s
 
   // Add edge padding to first/last slides to replace wrapper padding.
   return cn(
-    'basis-4/5 pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
+    totalColumns > 1
+      ? 'basis-4/5'
+      : 'basis-full',
+    'pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
     isFirstSlide && 'pl-7',
     isLastSlide && 'pr-4'
   );
