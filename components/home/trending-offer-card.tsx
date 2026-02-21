@@ -320,7 +320,7 @@ const TrendingOfferCard = ({
         damping: 15,
         delay: index * 0.1,
       }}
-      className="w-full h-full"
+      className="w-full h-full max-w-xl mx-auto"
     >
       {/* Outer white container */}
       <div

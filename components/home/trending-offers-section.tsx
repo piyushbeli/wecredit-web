@@ -36,8 +36,8 @@ function getCarouselSlideClassName(
   return cn(
     isSingle
       ? 'basis-full'
-      : 'basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
-    'px-3' // spacing handled at slide level for proper snap sync
+      : 'basis-9/10 sm:basis-1/2 md:basis-1/3 lg:basis-1/4',
+    isSingle ? 'px-4' : columnIndex===0 ? 'pl-4' : columnIndex===totalColumns-1 ? 'pl-3 pr-4' : 'pl-3 pr-0'  // spacing handled at slide level for proper snap sync
   );
 }
 
