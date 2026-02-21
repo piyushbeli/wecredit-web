@@ -62,7 +62,7 @@ const BeforeApplyingSection = (): JSX.Element => {
 
         {/* Carousel */}
         <Carousel options={{ align: 'start', containScroll: 'trimSnaps' }}>
-          <CarouselContent className="pl-4">
+          <CarouselContent className="pl-4 max-w-3xl">
             {BEFORE_APPLYING_TIPS.map((tip, index) => (
               <CarouselSlide
                 key={tip.id}

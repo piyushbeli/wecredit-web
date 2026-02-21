@@ -47,7 +47,7 @@ export default async function RootLayout({
   const globalData = await getGlobal();
 
   return (
-    <html lang="en">
+    <html lang="en" className="overscroll-y-none">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${poppins.className} antialiased min-h-screen flex flex-col`}
       >

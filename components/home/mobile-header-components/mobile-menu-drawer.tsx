@@ -116,9 +116,7 @@ export const MobileMenuDrawer = ({
                                             <User className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-medium">
-                                                {user?.name || 'User'}
-                                            </p>
+                                            
                                             <p className="text-white/60 text-sm">
                                                 +91 {user?.phoneNumber}
                                             </p>

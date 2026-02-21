@@ -93,7 +93,7 @@ const DocumentsRequired = (): JSX.Element => {
 	return (
 		<section className="bg-white py-6 px-4">
 			<div
-				className="max-w-md mx-auto"
+				className="max-w-3xl mx-auto"
 			>
 				{/* Section Title */}
 				<h2 className="text-base font-medium text-center text-black/80 font-['Poppins'] mb-2">

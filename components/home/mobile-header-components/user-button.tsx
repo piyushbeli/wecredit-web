@@ -33,9 +33,7 @@ export const UserButton = ({
 				whileTap={{ scale: 0.95 }}
 			>
 				<User className="w-4 h-4" />
-				<span className="hidden sm:inline max-w-[80px] truncate">
-					{user?.name || 'Account'}
-				</span>
+			
 			</motion.button>
 		);
 	}

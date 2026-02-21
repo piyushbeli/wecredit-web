@@ -24,7 +24,7 @@ const ExpertQuoteSection = (): JSX.Element => {
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: true }}
 				transition={{ duration: 0.4 }}
-				className="max-w-lg mx-auto"
+				className="max-w-3xl mx-auto"
 			>
 				{/* Card Container */}
 				<div className="relative bg-brand-lightest rounded-lg overflow-hidden p-5">

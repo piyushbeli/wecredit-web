@@ -51,7 +51,7 @@ const FeesAndChargesSection = (): JSX.Element => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4 }}
-        className="max-w-lg mx-auto"
+        className="max-w-3xl mx-auto"
       >
         {/* Section Title */}
         <h2 className="text-base font-medium text-center text-gray-900 mb-2">
