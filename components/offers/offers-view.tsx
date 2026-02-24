@@ -209,8 +209,11 @@ if (isLoading ||isReHitting) {
       {/*// Show carousel if there are status offers and no lender filter is applied (to avoid confusion in single lender view)*/}
       {statusOffers.length > 0 && !lenderNameParam && (
         <RecentlyClickedOffersCarousel
-          offers={statusOffers}
-          onOfferClick={handleRecentlyClickedOfferClick}
+          offers={
+            statusOffers.filter((offer) => {
+              return offer.isWebHookSent !== 2})}
+          onOfferClick={handleRecentlyClickedOfferClick
+          }
         />
       )}
 
