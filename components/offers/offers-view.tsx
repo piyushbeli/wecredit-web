@@ -200,16 +200,18 @@ if (isLoading ||isReHitting) {
   //   redirect('/offers/status');
   // }
 
-
+  const nonWebhookStatusOffers = statusOffers.filter((offer) => offer.isWebHookSent !== 2);
   return (
     <div className="min-h-screen ">
       <PageHeader title="Offers for you" onBack={handleGoBack} />
-      
+
       {/* Recently Clicked Offers Carousel - At the top */}
       {/*// Show carousel if there are status offers and no lender filter is applied (to avoid confusion in single lender view)*/}
-      {statusOffers.length > 0 && !lenderNameParam && (
+      {/* Recently Clicked Offers Carousel - At the top */}
+      {/* Show carousel only if there are non-webhook status offers and no lender filter */}
+      {nonWebhookStatusOffers.length > 0 && !lenderNameParam && (
         <RecentlyClickedOffersCarousel
-          offers={statusOffers}
+          offers={nonWebhookStatusOffers}
           onOfferClick={handleRecentlyClickedOfferClick}
         />
       )}
@@ -243,15 +245,15 @@ if (isLoading ||isReHitting) {
               <div className="space-y-6 max-w-xl mx-auto">
                 {renderOfferSection('', filteredExploreOffers)}
                 <p className="text-[14px] text-gray-600">More lenders might have exciting offers waiting for you. Take a moment to explore your options.</p>
-                 <div className="flex justify-center w-full ">
-                   <ActionButton
+                <div className="flex justify-center w-full ">
+                  <ActionButton
                     type="button"
                     onClick={handleExploreMore}
                     className="w-[200px] px-10"
                     rightIcon="🔍"
                   >
                     Explore More Offers
-                </ActionButton></div>
+                  </ActionButton></div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center text-center ">

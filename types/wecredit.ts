@@ -95,6 +95,8 @@ export interface LenderOfferStatus {
   statusMessage?: string;
   /** Approval chance percentage (0-100) */
   approvalRate?: number;
+  /** Webhook sent flag: 2 = sent via webhook */
+  isWebHookSent?: number;
 }
 
 /**
