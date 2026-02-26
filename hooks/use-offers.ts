@@ -228,7 +228,16 @@ export function useOffers(): UseOffersReturn {
 
       /* ---------------- NEW LEAD FLOW ---------------- */
       if (isNewLead) {
-        if (!shouldSkipRehit && pathname !== '/offers/status/') {
+
+        /* ---------------------------------------------- */
+        /* SINGLE LENDER + NEW LEAD                      */
+        /* ---------------------------------------------- */
+        if (shouldSkipRehit) {
+          setIsPolling(true);
+          pollStartTimeRef.current = Date.now();
+          executePoll();
+        }
+        else if (!shouldSkipRehit && pathname !== '/offers/status/') {
           await executeHitAllLenders();
           setIsPolling(true);
           pollStartTimeRef.current = Date.now();
@@ -259,13 +268,32 @@ export function useOffers(): UseOffersReturn {
   useEffect(() => {
     if (!isPolling) return;
 
+    const currentStatus = statusCode?.toString();
+
+
+    if (shouldSkipRehit && isNewLead) {
+      if (currentStatus !== '3004') {
+        stopPolling();
+      }
+      return; 
+    }
+
+
     if (shouldSkipRehit) {
       if (offers.length > 0) stopPolling();
     } else {
       if (offers.length > 0 && !canReHit) stopPolling();
     }
-  }, [offers.length, canReHit, isPolling, shouldSkipRehit]);
 
+  }, [
+    offers.length,
+    canReHit,
+    isPolling,
+    shouldSkipRehit,
+    statusCode,
+    isNewLead,
+    stopPolling,
+  ]);
   /* -------------------------------------------------- */
   /* ---------------- RETURN -------------------------- */
   /* -------------------------------------------------- */
