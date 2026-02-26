@@ -52,6 +52,8 @@ export interface FormField {
   isMandatory: boolean;
   /** Display order (sort fields by this) */
   order: number;
+  /** Optional lenderName for custom rendering (not from API, injected in UI) */
+  lenderName?: string;
 }
 
 /** Check if a field should render as a select/dropdown */

@@ -166,14 +166,50 @@ const DynamicField = ({
   // Handle boolean field (consent) as checkbox
   if (type === 'boolean') {
     const isChecked = value === 'true';
+    // Unity lender-specific consent text
+    if (field.lenderName === 'unity') {
+      return (
+        <div className="space-y-2">
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id={key}
+              checked={isChecked}
+              onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
+              className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            />
+            <label htmlFor={key} className="text-sm text-gray-700">
+              I hereby give my consent to Unity Small Finance Bank Limited. as lender to collect, store,
+              and verify my credit report from Credit Bureaus and KYC details for the processing of my
+              loan application and contact me through SMS / WhatsApp / Call with reference to my loan
+              application.
+            </label>
+          </div>
+          {error && (
+            <p className="text-xs text-red-600 ml-8">{error}</p>
+          )}
+        </div>
+      );
+    }
+    // Default consent text
     return (
       <div className="space-y-2">
-        <ConsentCheckbox
-          id={key}
-          checked={isChecked}
-          onChange={(value) => onChange(value ? 'true' : 'false')}
-          error={error}
-        />
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id={key}
+            checked={isChecked}
+            onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
+            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+          <label htmlFor={key} className="text-sm text-gray-700">
+            I agree to the{' '}
+            <a href="/terms-of-service" className="text-blue-600 underline">
+              Terms of Service{' '}
+            </a>
+            of WeCredit.
+          </label>
+        </div>
         {error && (
           <p className="text-xs text-red-600 ml-8">{error}</p>
         )}

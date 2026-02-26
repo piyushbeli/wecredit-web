@@ -291,14 +291,9 @@ const LeadFormModal = ({
       );
     }
 
-    // Treat consent as mandatory whenever the field exists in the final step.
-    // This keeps the UI (disabled state) aligned with the submit guard above.
-    const consentField = fields.find(f => f.key === 'consent');
-    const isConsentRequired = Boolean(consentField);
+    // Always require consent in last step
     const hasConsent = formValues.consent === 'true';
-
-    // Only disable submit if consent is mandatory AND not checked
-    const isSubmitDisabled = isConsentRequired && !hasConsent;
+    const isSubmitDisabled = !hasConsent;
 
     return (
       <ActionButton
@@ -346,23 +341,51 @@ const LeadFormModal = ({
     }
 
     // Render fields dynamically
+    // Always show consent checkbox in last step, with Unity-specific text if lenderName === 'unity'
+    if (isLastStep) {
+      // Ensure consent is 'true' initially
+      if (formValues['consent'] === undefined) {
+        handleFieldChange('consent', 'true');
+      }
+      return (
+        <>
+          {visibleFields
+            .filter(field => field.key !== 'consent')
+            .map((field) => (
+              <DynamicField
+                key={field.key}
+                field={field}
+                value={formValues[field.key] || ''}
+                onChange={(val) => handleFieldChange(field.key, val)}
+                onBlur={() => validateField(field.key)}
+                error={formErrors[field.key]}
+                disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
+              />
+            ))}
+          <DynamicField
+            field={{
+              key: 'consent',
+              title: 'Consent',
+              type: 'boolean',
+              options: [],
+              value: 'true',
+              isMandatory: true,
+              order: 999,
+              lenderName: lenderName === 'unity' ? 'unity' : undefined,
+            }}
+            value={formValues['consent'] || 'true'}
+            onChange={(val) => handleFieldChange('consent', val)}
+            onBlur={() => validateField('consent')}
+            error={formErrors['consent']}
+            disabled={isSubmitting}
+          />
+        </>
+      );
+    }
+    // Default: render all fields
     return (
       <>
         {visibleFields.map((field) => {
-          // Debug logging for each field
-          if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
-            console.log(`[LeadFormModal] Rendering field:`, {
-              key: field.key,
-              title: field.title,
-              type: field.type,
-              options: field.options.length,
-              isMandatory: field.isMandatory,
-              currentValue: formValues[field.key] || '(empty)',
-              apiValue: field.value || '(empty)',
-              hasError: !!formErrors[field.key],
-            });
-          }
-
           return (
             <DynamicField
               key={field.key}
@@ -371,8 +394,6 @@ const LeadFormModal = ({
               onChange={(val) => handleFieldChange(field.key, val)}
               onBlur={() => validateField(field.key)}
               error={formErrors[field.key]}
-              // When the user is logged in, phone fields should be auto-populated
-              // and read-only to mirror Business Loan behaviour.
               disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
             />
           );
