@@ -62,7 +62,7 @@ export function getMatchedLenderCanonicalName(
  * Checks if a lender is active (enabled and affiliate status)
  */
 function isActiveLender(lender: Lender): boolean {
-  return Number(lender.IsAppEnabled) === 1 && Number(lender.affiliateStatus) === 1;
+  return Number(lender.internalStatus)===1;
 }
 
 /**

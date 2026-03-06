@@ -34,6 +34,7 @@ interface AuthProviderProps {
  */
 export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
+  const preAuthHandled = useRef(false);
   const searchParams = useSearchParams();
   const { isAuthenticated, logout, setLoading, setUser, setAuthInitialized } = useAuthStore();
   const { setUrlParams } = useUrlParamsStore();
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
    * @returns true if pre-auth was applied, false otherwise
    */
   const handlePreAuth = useCallback((): boolean => {
+    if (preAuthHandled.current || (typeof window !== 'undefined' && sessionStorage.getItem('pre_auth_handled'))) return false;
     const preAuth = searchParams?.get('pre_auth');
     const mobile = searchParams?.get('mn');
     const partner = searchParams?.get('partner');
@@ -55,6 +57,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       // Without pre_auth, do not capture partner/originSubLender params
       return false;
     }
+    preAuthHandled.current = true;
+    if (typeof window !== 'undefined') sessionStorage.setItem('pre_auth_handled', '1');
     
     // Store URL params if present (they'll be used in lead form)
     if (partner || originSubLender) {
