@@ -5,7 +5,7 @@ interface InfoCardProps {
   image: string;
   alt: string;
   title: string;
-  description: string;
+  description?: string;
   mb?: string;
 }
 
@@ -28,11 +28,14 @@ const InfoCard = ({
         {title}
       </h3>
 
-      <div className="h-2" />
-
-      <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-zinc-500">
-        {description}
-      </p>
+      {description && (
+        <>
+          <div className="h-2" />
+          <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-zinc-500">
+            {description}
+          </p>
+        </>
+      )}
     </div>
   </div>
 );
@@ -43,26 +46,21 @@ const AboutUsContent = (): React.ReactNode => {
       image:
         'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
       title: 'Mukul Devpura',
-      description:
-        'Chief Executive Officer (CEO) and Chief Financial Officer (CFO)',
     },
     {
       image:
         'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
       title: 'Brijesh Chokhra',
-      description: 'Chief Operating Officer (COO)',
     },
     {
       image:
         'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
       title: 'Laksh Dua',
-      description: 'Chief Risk Officer (CRO)',
     },
     {
       image:
         'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
       title: 'Sumit Chokhra',
-      description: 'Chief Business Officer (CBO)',
     },
   ];
 
@@ -71,29 +69,30 @@ const AboutUsContent = (): React.ReactNode => {
       title: 'ONDC Partnership',
       description:
         'We started working with ONDC partners in 2024, expanding our reach and collaboration in the digital commerce ecosystem.',
+        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ondccard.png',
     },
     {
       title: 'Jobs Created',
       description:
         'WeCredit has provided over 400 jobs, contributing to employment and growth in the financial sector.',
+        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/jobs_created.png',
     },
     {
       title: 'Strong Lending Network',
       description:
         'We work with 25–30 lenders, NBFCs, fintechs, and banks, ensuring a wide range of credit options for our customers.',
+        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/strong_lending_networks.png',
     },
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full lg:-mt-10">
 
-      {/* Gradient Intro */}
-      {/* Back to Home Button */}
-    
       <div className="bg-[linear-gradient(96.83deg,_#CCDFFC_35.72%,_#FAFCFF_100%)] px-4 py-6 mb-4">
         <div className="">
-        <BackToHomeButton />
-      </div>
+          <BackToHomeButton />
+        </div>
+
         <h2 className="font-['Poppins'] font-medium text-2xl leading-[1] tracking-normal text-zinc-800">
           About WeCredit
         </h2>
@@ -107,16 +106,14 @@ const AboutUsContent = (): React.ReactNode => {
 
       <div className="px-4">
 
-        {/* Laptop Image */}
+         {/* Hero Image */}
         <div className="w-full overflow-hidden mb-8">
           <img
-            src="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/laptop.png"
+            src="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Heroimage.png"
             alt="About WeCredit"
             className="w-full h-auto object-cover"
           />
         </div>
-        <OurPartnersSection />
-
 
         <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
           We make personal finance simple and transparent.
@@ -135,16 +132,16 @@ const AboutUsContent = (): React.ReactNode => {
           Our leadership team brings experience from key areas of the business, including finance, operations, risk, and growth.
         </p>
 
-        {teamMembers.map((member, index) => (
-          <InfoCard
-            key={index}
-            image={member.image}
-            alt={member.title}
-            title={member.title}
-            description={member.description}
-            mb={index === teamMembers.length - 1 ? 'mb-6' : 'mb-4'}
-          />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {teamMembers.map((member, index) => (
+            <InfoCard
+              key={index}
+              image={member.image}
+              alt={member.title}
+              title={member.title}
+            />
+          ))}
+        </div>
 
         {/* Timeline */}
         <div className="mb-6 mt-8">
@@ -195,7 +192,6 @@ const AboutUsContent = (): React.ReactNode => {
               </div>
             ))}
 
-            {/* 2026 */}
             <div className="relative flex">
               <div className="w-6 h-6 rounded-full bg-[#D9D9D9] shrink-0" />
 
@@ -221,15 +217,17 @@ const AboutUsContent = (): React.ReactNode => {
           </h2>
         </div>
 
-        {achievements.map((item, index) => (
-          <InfoCard
-            key={index}
-            image="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/achievements.png"
-            alt={item.title}
-            title={item.title}
-            description={item.description}
-          />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {achievements.map((item, index) => (
+            <InfoCard
+              key={index}
+              image={item.image}
+              alt={item.title}
+              title={item.title}
+              description={item.description}
+            />
+          ))}
+        </div>
 
       </div>
     </div>
@@ -237,88 +235,3 @@ const AboutUsContent = (): React.ReactNode => {
 };
 
 export default AboutUsContent;
-
-const OurPartnersSection = (): React.ReactNode => {
-  const partners = [
-    
-    {
-      name: 'FataFatLoans.com',
-      url: 'https://fatafatloans.com',
-      logo: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Screenshot+2025-12-27+at+11.33.19%E2%80%AFAM.png',
-      logoHeight: 'h-7',
-    },
-    {
-      name: 'LoansBazaar.co',
-      url: 'https://loansbazaar.co',
-      logo: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/2+23.png',
-      logoWidth: 'w-10',
-      logoHeight: 'h-7',
-    },
-    
-    {
-      name: 'Godrej Finance',
-      url: 'https://godrejfinance.com/',
-      logo: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/godrej.jpeg',
-      logoHeight: 'h-6',
-    },
-  ];
-
- return (
-  <div className="mb-8">
-    <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
-      Our Partners
-    </h2>
-
-    {/* Wrapper with vertical line */}
-    <div className="flex">
-      
-      {/* Vertical Grey Line */}
-      <div className="w-[4px] bg-gray-300 rounded-sm mr-4" />
-
-      {/* Partner List */}
-      <div className="flex-1 space-y-2">
-        {partners.map((partner, index) => (
-          <a
-            key={index}
-            href={partner.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between"
-          >
-            {/* Left section */}
-            <div className="flex items-center flex-1">
-
-              {/* Fixed logo width */}
-              <div className="w-16 flex items-center justify-start">
-                <div className="border border-gray-300 rounded p-1">
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    className={`${partner.logoHeight} object-contain`}
-                  />
-                </div>
-              </div>
-
-              {/* Brand name */}
-              <div className="flex-1 pl-3">
-                <span className="font-['Poppins'] font-medium text-sm leading-none text-zinc-800">
-                  {partner.name}
-                </span>
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <span className="text-black text-base leading-none">
-              →
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-
-
-
-};

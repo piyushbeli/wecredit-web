@@ -48,6 +48,12 @@ export const CampaignLandingClient = ({
     router.push('/');
   }, [router]);
 
+  // Reset modal state on mount (prevents reopening on browser back)
+  useEffect(() => {
+    setShowAutoFillModal(false);
+    setShowLeadFormModal(false);
+  }, []);
+
   // Redirect to home with error if lender is invalid (after load completes)
   useEffect(() => {
     if (isLoading) return;
