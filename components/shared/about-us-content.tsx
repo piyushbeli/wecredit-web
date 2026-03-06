@@ -69,19 +69,19 @@ const AboutUsContent = (): React.ReactNode => {
       title: 'ONDC Partnership',
       description:
         'We started working with ONDC partners in 2024, expanding our reach and collaboration in the digital commerce ecosystem.',
-        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/achievements.png',
+        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ondccard.png',
     },
     {
       title: 'Jobs Created',
       description:
         'WeCredit has provided over 400 jobs, contributing to employment and growth in the financial sector.',
-        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/achievements.png',
+        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/jobs_created.png',
     },
     {
       title: 'Strong Lending Network',
       description:
         'We work with 25–30 lenders, NBFCs, fintechs, and banks, ensuring a wide range of credit options for our customers.',
-        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/achievements.png',
+        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/strong_lending_networks.png',
     },
   ];
 
@@ -106,10 +106,10 @@ const AboutUsContent = (): React.ReactNode => {
 
       <div className="px-4">
 
-         {/* Laptop Image */}
+         {/* Hero Image */}
         <div className="w-full overflow-hidden mb-8">
           <img
-            src="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/laptop.png"
+            src="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Heroimage.png"
             alt="About WeCredit"
             className="w-full h-auto object-cover"
           />
