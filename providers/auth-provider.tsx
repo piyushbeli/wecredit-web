@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { authService } from '@/lib/api';
-import { getCookie, setCookie } from 'cookies-next';
+import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 
 /**
@@ -46,7 +46,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
    * @returns true if pre-auth was applied, false otherwise
    */
   const handlePreAuth = useCallback((): boolean => {
-    if (preAuthHandled.current || (typeof window !== 'undefined' && sessionStorage.getItem('pre_auth_handled'))) return false;
     const preAuth = searchParams?.get('pre_auth');
     const mobile = searchParams?.get('mn');
     const partner = searchParams?.get('partner');
@@ -57,8 +56,28 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       // Without pre_auth, do not capture partner/originSubLender params
       return false;
     }
+    
+    // Only skip if we've already handled THIS EXACT pre_auth in this session
+    // Compare against stored values to allow new pre-auth params
+    if (typeof window !== 'undefined') {
+      const storedPreAuth = sessionStorage.getItem('pre_auth_token');
+      const storedMobile = sessionStorage.getItem('pre_auth_mobile');
+      if (storedPreAuth === preAuth && storedMobile === mobile) {
+        // Same pre-auth already processed
+        return false;
+      }
+    }
+    
     preAuthHandled.current = true;
-    if (typeof window !== 'undefined') sessionStorage.setItem('pre_auth_handled', '1');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('pre_auth_handled', '1');
+      sessionStorage.setItem('pre_auth_token', preAuth);
+      sessionStorage.setItem('pre_auth_mobile', mobile);
+    }
+    
+    // Clear old auth cookies to prevent stale data
+    deleteCookie(STORAGE_AUTH_TOKEN);
+    deleteCookie(STORAGE_MOBILE);
     
     // Store URL params if present (they'll be used in lead form)
     if (partner || originSubLender) {
@@ -91,7 +110,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       console.log('[PRE-AUTH] Triggered apply flow');
     }, 100);
     
-    // Clean up URL parameters
+    // Clean up URL parameters without breaking browser history
+    // Use replaceState to prevent back button from showing the auth params
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       url.searchParams.delete('pre_auth');
