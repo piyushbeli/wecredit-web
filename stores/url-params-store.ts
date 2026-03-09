@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 
 /**
  * URL Parameters Store State
@@ -24,7 +24,6 @@ interface UrlParamsActions {
   /** Set partner and originSubLender from URL (called once when URL is read) */
   setUrlParams: (partner: string | null, originSubLender: string | null) => void;
   /** Permanently consume params - called after successful lead creation or offers redirect */
-  consumeParams: () => void;
   /** Clear all URL params (called on logout) */
   clearParams: () => void;
 }
@@ -57,31 +56,12 @@ export const useUrlParamsStore = create<UrlParamsState & UrlParamsActions>()(
             originSubLender, 
             isConsumed: false 
           }, false, 'setUrlParams'),
-
-        consumeParams: () => 
-          set({ 
-            partner: null, 
-            originSubLender: null, 
-            isConsumed: true 
-          }, false, 'consumeParams'),
-
         clearParams: () => 
           set(initialState, false, 'clearParams'),
       }),
       {
         name: 'url-params-store',
-        storage: {
-          getItem: (name) => {
-            const str = sessionStorage.getItem(name);
-            return str ? JSON.parse(str) : null;
-          },
-          setItem: (name, value) => {
-            sessionStorage.setItem(name, JSON.stringify(value));
-          },
-          removeItem: (name) => {
-            sessionStorage.removeItem(name);
-          },
-        },
+        storage: createJSONStorage(() => sessionStorage),
       }
     ),
     {
