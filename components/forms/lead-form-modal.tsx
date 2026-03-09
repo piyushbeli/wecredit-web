@@ -93,7 +93,7 @@ const LeadFormModal = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
-  const { partner, originSubLender, isConsumed, consumeParams } = useUrlParamsStore();
+  const { partner, originSubLender  } = useUrlParamsStore();
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
@@ -101,7 +101,7 @@ const LeadFormModal = ({
   const isIpFetchInFlight = useRef(false);
   
   // Use partner from URL if available and not yet consumed, otherwise use prop or default
-  const effectivePartnerCode = !isConsumed && partner ? partner : partnerCode;
+  const effectivePartnerCode =  partner ? partner : partnerCode;
 
   const {
     currentStep,
@@ -234,16 +234,11 @@ const LeadFormModal = ({
       ConsentDateTime: getCurrentDateTime(),
       consent: formValues.consent || 'false',
       // Add originSubLender from URL if available
-      ...(originSubLender && !isConsumed && { originSubLender }),
+      ...(originSubLender && { originSubLender }),
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName);
     if (success) {
-      // Mark URL params as consumed after successful lead creation
-      if (!isConsumed && (partner || originSubLender)) {
-        consumeParams();
-        console.log('[LeadForm] URL params consumed after successful submission');
-      }
       setShowSuccess(true);
       if (onSuccess) {
         onSuccess('');
@@ -256,7 +251,7 @@ const LeadFormModal = ({
         router.push(`/offers?newLead=true&${lenderName ? `lenderName=${lenderName}` : ''}`);
       }
     }
-  }, [formValues, userIp, createLead, effectivePartnerCode, lenderName, onSuccess, router, onClose, fields, partner, originSubLender, isConsumed, consumeParams]);
+  }, [formValues, userIp, createLead, effectivePartnerCode, lenderName, onSuccess, router, onClose, fields, partner, originSubLender]);
 
 
   const renderSubmitError = (): React.ReactElement | null => {
