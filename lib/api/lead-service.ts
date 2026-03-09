@@ -285,7 +285,7 @@ async function createLead(
       body: JSON.stringify(requestBody),
     });
     const data: CreateLeadResponse = await response.json();
-    if (!response.ok || data.statusCode === 'error') {
+    if (!response.ok || data.statusCode === 'error' || data.statusCode.toString() === '1003' || data.statusCode.toString() === '2006') {
       const errorMsg = data.statusMessage || 'Failed to create lead';
       toast.error(errorMsg, {
         description: 'Unable to submit your application. Please try again.',
