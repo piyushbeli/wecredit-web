@@ -104,6 +104,12 @@ export function setMobile(mobile: string): void {
 export function clearAuthData(): void {
   deleteCookie(STORAGE_AUTH_TOKEN);
   deleteCookie(STORAGE_MOBILE);
+
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem('pre_auth_handled');
+    sessionStorage.removeItem('pre_auth_token');
+    sessionStorage.removeItem('pre_auth_mobile');
+  }
 }
 
 /**
