@@ -3,6 +3,17 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   output: 'standalone',
   trailingSlash: true,
+
+  async redirects() {
+    return [
+      {
+        source: '/blogs',
+        destination: 'https://blog.wecredit.co.in/',
+        permanent: true,
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {
