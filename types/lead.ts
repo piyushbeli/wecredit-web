@@ -31,7 +31,8 @@ export type FormFieldKey =
   | 'modeOfSalary'
   | 'ConsentIp'
   | 'ConsentDateTime'
-  | 'consent';
+  | 'consent'
+  | 'consentPrivacyPolicy';
 
 /** Field types returned by the API */
 export type FormFieldType = 'string' | 'number' | 'float' | 'boolean';

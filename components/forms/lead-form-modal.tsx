@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
-import { useCreateLead } from '@/hooks/use-create-lead';
+import { useCreateLead } from '@/hooks/use-create-lead' ;
 import { useLeadForm } from '@/hooks/use-lead-form';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useAuth } from '@/hooks/use-auth';
@@ -35,6 +35,49 @@ interface LeadFormModalProps {
 
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
+
+/* LNT CONSENTS */
+const LNT_CONSENTS = [
+  {
+    key: 'consentHardPull',
+    consentCode: 'HARD_PULL',
+    apiText:
+      'I confirm that submission of Aadhaar/Proof of possession of Aadhaar number for KYC purposes is not mandatory.',
+    uiText:
+      'I confirm that submission of Aadhaar/Proof of possession of Aadhaar number for KYC purposes is not mandatory.',
+  },
+  {
+    key: 'consentPrivacyPolicy',
+    consentCode: 'PRIVACY_POLICY',
+    apiText:
+      'I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data...',
+    uiText:
+      'I hereby also agree to have read & understood the Personal Loan Terms & Conditions and Privacy Policy and consent to the same.',
+    links: [
+      {
+        label: 'Personal Loan Terms & Conditions',
+        url: 'https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3',
+      },
+      {
+        label: 'Privacy Policy',
+        url: 'https://www.ltfinance.com/privacy-policy',
+      },
+    ],
+  },
+  {
+    key: 'consentIndianResident',
+    consentCode: 'RESIDENTIAL_STATUS_INDIAN',
+    apiText: 'I hereby consent that I am an Indian Resident.',
+    uiText: 'I confirm that I am an Indian resident.',
+  },
+  {
+    key: 'consentIncome',
+    consentCode: 'HOUSEHOLD_INCOME_GTE_3L',
+    apiText: 'I hereby consent that my household income is greater than Rs 3,00,000.',
+    uiText: 'I confirm that my household income is above ₹3,00,000.',
+  },
+];
+
 const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   name: 'Test User',
   mobile: '9876543210',
@@ -98,6 +141,8 @@ const LeadFormModal = ({
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [lntCompanyName, setLntCompanyName] = useState('');
+
   const isIpFetchInFlight = useRef(false);
   
   // Use partner from URL if available and not yet consumed, otherwise use prop or default
@@ -192,13 +237,24 @@ const LeadFormModal = ({
 
     if (consentField) {
       const hasConsent = formValues.consent === 'true';
-      if (!hasConsent) {
-        // Don't submit if consent exists but is not checked
-        return;
-      }
+      if (!hasConsent) return;
     }
 
-    // Convert date from YYYY-MM-DD (native input) to DD-MM-YYYY (API format)
+    let consents: any[] = [];
+
+    if (lenderName === 'lnt') {
+
+      const allChecked = LNT_CONSENTS.every(c => formValues[c.key] === 'true');
+      if (!allChecked) return;
+
+      consents = LNT_CONSENTS.map(c => ({
+        consentCode: c.consentCode,
+        consentText: c.apiText,
+        submittedAt: new Date().toISOString()
+      }));
+
+    }
+
     const formatDateForApi = (dateStr: string): string => {
       if (!dateStr) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
@@ -208,7 +264,6 @@ const LeadFormModal = ({
       return dateStr;
     };
 
-    // Build form data dynamically from all fields
     const formData: LeadFormData = {
       name: formValues.name || '',
       mobile: formValues.mobile || '',
@@ -227,29 +282,24 @@ const LeadFormModal = ({
       addressType: formValues.addressType || '',
       permanentAddress: formValues.permanentAddress || '',
       modeOfSalary: formValues.modeOfSalary || '',
-      companyName: formValues.companyName || '',
+      companyName: lenderName === 'lnt' ? lntCompanyName : formValues.companyName || '',
       companyAddress: formValues.companyAddress || '',
       companyPincode: formValues.companyPincode || '',
       ConsentIp: userIp || formValues.ConsentIp || '',
       ConsentDateTime: getCurrentDateTime(),
       consent: formValues.consent || 'false',
-      // Add originSubLender from URL if available
+      ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName);
     if (success) {
       setShowSuccess(true);
-      if (onSuccess) {
-        onSuccess('');
-        onClose();
-      } else {
-        // Case A: Redirect to offers with newLead=true to trigger polling
-        // Close first to avoid onClose navigation overriding the offers route.
-        onClose();
-        // router.push(`/offers?newLead=true`);
-        router.push(`/offers?newLead=true&${lenderName ? `lenderName=${lenderName}` : ''}`);
-      }
+
+      onClose?.();
+
+      router.push(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
+
     }
   }, [formValues, userIp, createLead, effectivePartnerCode, lenderName, onSuccess, router, onClose, fields, partner, originSubLender]);
 
@@ -288,7 +338,11 @@ const LeadFormModal = ({
 
     // Always require consent in last step
     const hasConsent = formValues.consent === 'true';
-    const isSubmitDisabled = !hasConsent;
+    const hasLntConsents =
+      lenderName !== 'lnt' ||
+      LNT_CONSENTS.every(c => formValues[c.key] === 'true');
+
+    const isSubmitDisabled = !hasConsent || !hasLntConsents;
 
     return (
       <ActionButton
@@ -356,7 +410,71 @@ const LeadFormModal = ({
                 error={formErrors[field.key]}
                 disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
               />
-            ))}
+            ))
+            }
+          {lenderName === 'lnt' && (
+            <div className="space-y-2">
+              <label className="lead-form-label">
+                Company Name
+              </label>
+
+              <input
+                type="text"
+                value={lntCompanyName}
+                onChange={(e) => setLntCompanyName(e.target.value)}
+                placeholder="Enter company name"
+                className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white
+      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
+          {lenderName === 'lnt' && LNT_CONSENTS.map(consent => (
+            <div key={consent.key} className="space-y-1">
+
+              <DynamicField
+                field={{
+                  key: consent.key as FormFieldKey,
+                  title:
+  consent.key === 'consentPrivacyPolicy'
+    ? `I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data (incl. Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the`
+    : consent.uiText,
+                  type: 'boolean',
+                  options: [],
+                  value: 'true',
+                  isMandatory: true,
+                  order: 998,
+                }}
+                value={formValues[consent.key] || 'false'}
+                onChange={(val) => handleFieldChange(consent.key as FormFieldKey, val)}
+                onBlur={() => validateField(consent.key as FormFieldKey)}
+                error={formErrors[consent.key]}
+                disabled={isSubmitting}
+              />
+
+              {consent.key === 'consentPrivacyPolicy' && (
+  <div className="ml-7 text-sm break-words">
+    <a
+      href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline"
+    >
+      https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3
+    </a>{' '}
+    Personal Loan terms & Conditions and{' '}
+    <a
+      href="https://www.ltfinance.com/privacy-policy"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline"
+    >
+      https://www.ltfinance.com/privacy-policy
+    </a>{' and consent to the same.'}
+  </div>
+)}
+
+            </div>
+          ))}
           <DynamicField
             field={{
               key: 'consent',

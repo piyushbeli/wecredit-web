@@ -17,7 +17,7 @@ import {
 } from '@/components/offers';
 import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
-import { updateUtmClicked } from '@/lib/api/wecredit';
+import { forwardUpswingRedirect, updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
@@ -49,7 +49,18 @@ export const OffersView = () => {
   const reset = useOfferStore((state) => state.reset);
   const searchParams = useSearchParams();
   const newLead = searchParams.get('newLead') || searchParams.get('newlead');
-  const lenderNameParam = searchParams.get('lenderName') ?? searchParams.get('lendername') ?? '';
+  const rawLender =
+    searchParams.get('lenderName') ??
+    searchParams.get('lendername') ??
+    '';
+
+  const lenderNameParam =
+    rawLender.toLowerCase() === 'lnt'
+      ? 'lnt'
+      : rawLender; useEffect(() => { return () => { reset(); }; }, [reset]);
+      const pollingMessage = lenderNameParam
+  ? `Please wait while we fetch offer from ${lenderNameParam.charAt(0).toUpperCase() + lenderNameParam.slice(1)} for you.`
+  : 'Please wait while we fetch the best offers for you.';
   useEffect(() => { return () => {reset();}; }, [reset]);
   const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply } = useOffers();
 
@@ -92,29 +103,44 @@ useEffect(() => {
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
-    // For non-INITIATED offers in explore screen, navigate to status page
-    if (offer.wcStatus !== 'INITIATED') {
-      router.push('/offers/status');
-      return;
-    }
-    // For INITIATED offers, open UTM link
-    const utmLink: string | undefined = offer.utmLink;
-    if (!utmLink) {
-      return;
-    }
-    const lenderName: string = offer.lenderName || '';
-    const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
-    const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
-    // Update UTM clicked status for INITIATED offers
-    if (lenderName && mobile) {
-      void updateUtmClicked(mobile, lenderName, token);
-    }
-    window.open(utmLink, '_blank');
-    // Refresh offers after 2 seconds to reflect status change
-    setTimeout(() => {
-      fetchOffers();
-    }, 2000);
-  };
+  // For non-INITIATED offers in explore screen, navigate to status page
+  if (offer.wcStatus !== 'INITIATED') {
+    router.push('/offers/status');
+    return;
+  }
+
+  const lenderName: string = offer.lenderName || '';
+  const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
+  const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
+
+  if (!mobile) {
+    return;
+  }
+
+  // LNT special flow
+  if (lenderName.toLowerCase() === 'lnt') {
+    void forwardUpswingRedirect(mobile, token);
+    return;
+  }
+
+  // For INITIATED offers, open UTM link
+  const utmLink: string | undefined = offer.utmLink;
+  if (!utmLink) {
+    return;
+  }
+
+  // Update UTM clicked status
+  if (lenderName && mobile) {
+    void updateUtmClicked(mobile, lenderName, token);
+  }
+
+  window.open(utmLink, '_blank');
+
+  // Refresh offers after 2 seconds to reflect status change
+  setTimeout(() => {
+    fetchOffers();
+  }, 2000);
+};
 
   const handleRecentlyClickedOfferClick = (offer: LenderOfferStatus): void => {
     // For recently clicked offers, navigate to status page
@@ -169,21 +195,25 @@ useEffect(() => {
   };
   
   // Show loading skeleton while: initial loading, polling, or re-hitting lenders
-if (isLoading ||isReHitting) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      < PollingState message= 'Please Wait while we fetch the best offers for you.' />
-    </div>
-  );
-}
+if (isLoading || isReHitting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <PollingState message={pollingMessage} />
+      </div>
+    );
+  }
 
- else if (isPolling) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      < PollingState message= '' />
-    </div>
-  );
-}
+  else if (isPolling) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        {lenderNameParam ? (
+          <PollingState message={pollingMessage} />
+        ) : (
+          <PollingState />
+        ) }
+      </div>
+    );
+  }
 
 
   if (error) {

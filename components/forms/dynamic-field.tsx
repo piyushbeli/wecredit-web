@@ -176,14 +176,10 @@ const DynamicField = ({
               id={key}
               checked={isChecked}
               onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
-              className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <label htmlFor={key} className="text-sm text-gray-700">
-              I hereby give my consent to Unity Small Finance Bank Limited. as lender to collect, store,
-              and verify my credit report from Credit Bureaus and KYC details for the processing of my
-              loan application and contact me through SMS / WhatsApp / Call with reference to my loan
-              application.
-            </label>
+className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"            />
+           <label htmlFor={key} className="text-sm text-gray-700 leading-relaxed">
+  {title}
+</label>
           </div>
           {error && (
             <p className="text-xs text-red-600 ml-8">{error}</p>
@@ -200,15 +196,21 @@ const DynamicField = ({
             id={key}
             checked={isChecked}
             onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
-            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"
           />
           <label htmlFor={key} className="text-sm text-gray-700">
-            I agree to the{' '}
-            <a href="/terms-of-service" className="text-blue-600 underline">
-              Terms of Service{' '}
-            </a>
-            of WeCredit.
-          </label>
+  {key === 'consent' ? (
+    <>
+      I agree to the{' '}
+      <a href="/terms-of-service" className="text-blue-600 underline">
+        Terms of Service
+      </a>{' '}
+      of WeCredit.
+    </>
+  ) : (
+    title
+  )}
+</label>
         </div>
         {error && (
           <p className="text-xs text-red-600 ml-8">{error}</p>
