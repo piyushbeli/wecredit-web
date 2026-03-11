@@ -16,8 +16,8 @@ export const CalendarIcon = (): React.ReactNode => (
     <Image
         src={IMAGES.ICONS.CALENDAR}
         alt="Calendar"
-        width={15}
-        height={15}
+        width={19}
+        height={19}
         className="shrink-0"
     />
 )
