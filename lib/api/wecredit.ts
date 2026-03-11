@@ -182,7 +182,7 @@ export async function fetchActiveLendersForUser(
 const CHECK_STATUS_ALL_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 /** Lead API endpoint - uses /api/forward for offer click updates */
 const UPDATE_UTM_CLICKED_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
-
+const UPSWING_REDIRECT_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 export async function checkStatusAll(
   mobile: string,
   authorization?: string,
@@ -304,7 +304,109 @@ export async function updateUtmClicked(
     };
   }
 }
+export async function forwardUpswingRedirect(
+  mobile: string,
+  authorization?: string,
+  signal?: AbortSignal
+): Promise<{ success: boolean; data?: unknown; error?: string }> {
 
+  if (!mobile) {
+    return {
+      success: false,
+      error: 'Mobile number required',
+    };
+  }
+
+  const requestBody = {
+    endpoint: 'upswing-redirect',
+    partnerCode: wecreditConfig.partnerCode,
+  };
+
+  const url = `${UPSWING_REDIRECT_ENDPOINT}?mobile=${mobile}`;
+
+  try {
+
+    const fetchOptions: RequestInit = {
+      method: 'POST',
+      headers: buildHeaders({ mobile, authorization }),
+      body: JSON.stringify(requestBody),
+      cache: 'no-store',
+    };
+
+    if (signal instanceof AbortSignal) {
+      fetchOptions.signal = signal;
+    }
+
+    const response = await fetch(url, fetchOptions);
+
+    const text = await response.text();
+
+    try {
+
+      const json = JSON.parse(text);
+
+
+      if (json?.statusCode === 2006) {
+
+
+        toast.error(json.statusMessage, {
+          description: "Unable to start journey.",
+        });
+
+        return {
+          success: false,
+          error: json.statusMessage,
+        };
+      }
+
+      if (json?.statusMessage) {
+
+        toast.error(json.statusMessage);
+
+        return {
+          success: false,
+          error: json.statusMessage,
+        };
+      }
+
+    } catch {
+
+      window.history.replaceState(null, "", "/");
+
+      const blob = new Blob([text], { type: "text/html" });
+      const redirectUrl = URL.createObjectURL(blob);
+
+      window.location.href = redirectUrl;
+
+      return {
+        success: true,
+      };
+    }
+
+    return {
+      success: false,
+    };
+
+  } catch (error) {
+
+    if (error instanceof Error && error.name === 'AbortError') {
+      return {
+        success: false,
+        error: 'Request timed out',
+      };
+    }
+
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Unable to process redirect. Please try again.';
+
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
 /**
  * PDF Step 7: Clicked Lender Handling
  * 

@@ -254,6 +254,10 @@ async function createLead(
     // Use ConsentIp and ConsentDateTime from form if available, otherwise fetch/generate
     const consentIp = formData.ConsentIp || await fetchUserIp();
     const consentDateTime = formData.ConsentDateTime || getCurrentDateTime();
+
+    // Transform LNT lender name only
+    const transformedLenderName =lenderName?.toLowerCase() === "lnt"? "upswing_lnt": lenderName;
+
     // Transform form data to API format
     const requestBody: CreateLeadRequest = {
       mobile: mobile,
@@ -276,40 +280,88 @@ async function createLead(
       ConsentDateTime: consentDateTime,
       endpoint: 'create-lead',
       partnerCode: partnerCode,
-      ...(lenderName && { lenderName: [lenderName] }),
+
+      ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
+
+      // Add consents ONLY for LNT
+      ...(lenderName?.toLowerCase() === "lnt" && {
+  consents: [
+    {
+      consentCode: "HARD_PULL",
+      consentText:
+        "I confirm that submission of Aadhaar/Proof of possession of AADHAAR number for KYC purposes is not mandatory, however, I voluntarily consent for providing the same for authentication & verification.",
+      submittedAt: new Date().toISOString(),
+    },
+    {
+      consentCode: "PII_TNC",
+      consentText:
+        'I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data ( incl.Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the <link href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3">Personal Loan terms & Conditions</link> and <link href="https://www.ltfinance.com/privacy-policy">Privacy Policy</link> and consent to the same',
+      submittedAt: new Date().toISOString(),
+    },
+    {
+      consentCode: "RESIDENTIAL_STATUS_INDIAN",
+      consentText:
+        "I hereby consent that I am an Indian Resident.",
+      submittedAt: new Date().toISOString(),
+    },
+    {
+      consentCode: "HOUSEHOLD_INCOME_GTE_3L",
+      consentText:
+        "I hereby consent that my household income is greater than Rs 3,00,000",
+      submittedAt: new Date().toISOString(),
+    }
+  ],
+})
     };
+
     const response = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
       headers: buildCreateLeadHeaders(),
       body: JSON.stringify(requestBody),
     });
+
     const data: CreateLeadResponse = await response.json();
-    if (!response.ok || data.statusCode === 'error' || data.statusCode.toString() === '1003' || data.statusCode.toString() === '2006') {
-      const errorMsg = data.statusMessage || 'Failed to create lead';
+
+    const code = data?.statusCode?.toString();
+
+    if (
+      !response.ok ||
+      code === "error" ||
+      code === "1003" ||
+      code === "2006"
+    ) {
+      const errorMsg = data.statusMessage || "Failed to create lead";
+
       toast.error(errorMsg, {
-        description: 'Unable to submit your application. Please try again.',
+        description: "Unable to submit your application. Please try again.",
       });
+
       return {
         success: false,
         error: errorMsg,
       };
     }
+
     return {
       success: true,
       data,
     };
+
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Network error';
+    const errorMessage = error instanceof Error ? error.message : "Network error";
+
     toast.error(errorMessage, {
-      description: 'Failed to submit your application. Please check your connection.',
+      description:"Failed to submit your application. Please check your connection.",
     });
+
     return {
       success: false,
       error: errorMessage,
     };
   }
 }
+
 
 /** Lead service object with all lead-related API calls */
 export const leadService = {
