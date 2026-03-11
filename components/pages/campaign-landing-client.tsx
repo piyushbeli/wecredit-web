@@ -45,7 +45,7 @@ export const CampaignLandingClient = ({
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
 
   const handleCloseModal = useCallback(() => {
-    router.replace('/');
+    window.location.href = window.location.origin;
   }, [router]);
 
   // Reset modal state on mount (prevents reopening on browser back)

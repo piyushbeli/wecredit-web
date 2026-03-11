@@ -42,9 +42,9 @@ const LNT_CONSENTS = [
     key: 'consentHardPull',
     consentCode: 'HARD_PULL',
     apiText:
-      'I confirm that submission of Aadhaar/Proof of possession of Aadhaar number for KYC purposes is not mandatory.',
+      'I confirm that submission of Aadhaar/Proof of possession of AADHAAR number for KYC purposes is not mandatory, however, I voluntarily consent for providing the same for authentication & verification.',
     uiText:
-      'I confirm that submission of Aadhaar/Proof of possession of Aadhaar number for KYC purposes is not mandatory.',
+      'I confirm that submission of Aadhaar/Proof of possession of AADHAAR number for KYC purposes is not mandatory, however, I voluntarily consent for providing the same for authentication & verification.'
   },
   {
     key: 'consentPrivacyPolicy',
@@ -74,7 +74,7 @@ const LNT_CONSENTS = [
     key: 'consentIncome',
     consentCode: 'HOUSEHOLD_INCOME_GTE_3L',
     apiText: 'I hereby consent that my household income is greater than Rs 3,00,000.',
-    uiText: 'I confirm that my household income is above ₹3,00,000.',
+    uiText: 'I hereby consent that my household income is greater than Rs 3,00,000',
   },
 ];
 
@@ -295,11 +295,7 @@ const LeadFormModal = ({
     const success = await createLead(formData, effectivePartnerCode, lenderName);
     if (success) {
       setShowSuccess(true);
-
-      onClose?.();
-
-      router.push(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
-
+      window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
     }
   }, [formValues, userIp, createLead, effectivePartnerCode, lenderName, onSuccess, router, onClose, fields, partner, originSubLender]);
 
@@ -450,28 +446,29 @@ const LeadFormModal = ({
                 error={formErrors[consent.key]}
                 disabled={isSubmitting}
               />
-
-              {consent.key === 'consentPrivacyPolicy' && (
-  <div className="ml-7 text-sm break-words">
+  {consent.key === 'consentPrivacyPolicy' && (
+  <div className="ml-7 text-sm">
     <a
       href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-600 underline"
+      className="text-blue-600 underline mr-2"
     >
-      https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3
-    </a>{' '}
-    Personal Loan terms & Conditions and{' '}
+      Personal Loan terms & Conditions
+    </a>
+    and
     <a
       href="https://www.ltfinance.com/privacy-policy"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-600 underline"
+      className="text-blue-600 underline ml-2"
     >
-      https://www.ltfinance.com/privacy-policy
-    </a>{' and consent to the same.'}
+      Privacy Policy
+    </a>
+    {' '}and consent to the same
   </div>
 )}
+             
 
             </div>
           ))}
