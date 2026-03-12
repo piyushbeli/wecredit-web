@@ -21,16 +21,16 @@ const PartnersSection = (): React.ReactNode => {
 	const placeholders = Array.from({ length: Math.max(0, placeholderCount) }, (): PartnerGridItem => null);
 	const partnerGridItems = [...gridPartners, ...placeholders];
 	return (
-		<section className="bg-white py-4 sm:py-10 md:py-12 overflow-hidden">
+		<section className="bg-white py-4 sm:py-10 md:py-5 overflow-hidden">
 			{/* Container with blue left border accent */}
 			{/* Section Title */}
-			<h2 className="text-xl sm:text-2xl md:text-3xl font-medium mb-6 sm:mb-8 text-center">
+			<h2 className="text-xl sm:text-2xl md:text-[18px] font-medium mb-6 sm:mb-6 text-center">
 				Our Partners
 			</h2>
 			<div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
   <div className="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4 justify-items-center">
     {partnerGridItems.map((partner, index) => (
-      <div key={`partner-grid-${index}`} className="flex items-center justify-center">
+      <div key={`partner-grid-${index}`} className="flex justify-center">
         {partner ? (
           <PartnerCard partner={partner} />
         ) : (

@@ -107,7 +107,7 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
 
       <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
+          <div className="max-w-4xl mx-auto w-full p-6 space-y-6">
             <h2 className="lead-form-heading">{currentStepConfig.title}</h2>
 
             <AnimatePresence mode="wait">
@@ -131,7 +131,7 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
         </div>
 
         {/* Footer button */}
-        <div className="border-t bg-white p-4 shrink-0">{renderFooterButton()}</div>
+        <div className="border-t bg-white p-4 shrink-0 max">{renderFooterButton()}</div>
       </form>
     </div>
   );

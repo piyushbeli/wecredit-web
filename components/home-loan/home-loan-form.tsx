@@ -78,7 +78,7 @@ const HomeLoanForm = ({
 
       <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
+          <div className="max-w-4xl mx-auto w-full p-6 space-y-6">
             <HomeLoanFields
               formValues={formValues}
               formErrors={formErrors}

@@ -13,13 +13,13 @@ const CertificationsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-4 sm:py-10 md:py-12">
       {/* Section Title */}
-      <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-center mb-8 sm:mb-10">
+      <h2 className="text-xl sm:text-2xl md:text-[18px] font-medium text-center mb-8 sm:mb-6">
         Certified By
       </h2>
       
       <div className="container mx-auto px-4">
   <div className="max-w-xl mx-auto">
-    <div className="relative bg-[#FCFAFE] rounded-2xl overflow-hidden border-b-8">
+    <div className="relative bg-[#00000005] rounded-2xl overflow-hidden border-b-8">
       <div className="px-6 py-8">
         <div className="flex justify-between items-center gap-6 max-w-xl mx-auto">
 

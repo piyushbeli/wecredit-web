@@ -134,12 +134,6 @@ export const usePostLogin = (): void => {
     // Detect transition from not authenticated to authenticated
     if (isAuthenticated && !wasAuthenticated.current) {
       const action = consumePendingAction();
-
-      console.info('[Auth] usePostLogin: auth transition to authenticated', {
-        hadPendingAction: !!action,
-        actionType: action?.type,
-      });
-
       executePendingAction(action);
     }
 

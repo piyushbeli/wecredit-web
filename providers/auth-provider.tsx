@@ -163,9 +163,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         // Token is invalid - clear auth state
         // authService.validateToken already calls clearAllAuthData()
         logout();
-        console.info('[AuthProvider] Token validation failed, user logged out');
+       
       } else {
-        console.info('[AuthProvider] Token validated successfully');
+        
         if (!isAuthenticated) {
           setUser(
             {
