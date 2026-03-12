@@ -9,7 +9,7 @@
  * covers footer from first paint to avoid flash (no FOOTER_EXCLUDED_ROUTES needed).
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -17,6 +17,7 @@ import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
+import { useAuth } from '@/hooks/use-auth';
 
 interface CampaignLandingClientProps {
   lenderName: string;
@@ -31,6 +32,7 @@ export const CampaignLandingClient = ({
 }: CampaignLandingClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isAuthenticated, user, openAuthModalWithPhone } = useAuth();
   const { activeLenders, isLoading, error } = useFilteredActiveLenders({
     fetchOnMount: true,
     // No mobile - fetch generic active lenders
@@ -40,6 +42,8 @@ export const CampaignLandingClient = ({
   const [showAutoFillModal, setShowAutoFillModal] = useState<boolean>(false);
   const [showLeadFormModal, setShowLeadFormModal] = useState<boolean>(false);
   const [fetchDetails, setFetchDetails] = useState<boolean>(true);
+  const loginTriggeredRef = useRef(false);
+  const alreadyLoggedInToastRef = useRef(false);
 
   // Debug mode: skip auto-fill modal when ?debugAutoFill=true is in URL
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
@@ -70,9 +74,27 @@ export const CampaignLandingClient = ({
       router.replace('/');
       return;
     }
+    const mobile = searchParams.get('mn');
+
+    if (mobile && isAuthenticated && !alreadyLoggedInToastRef.current) {
+      alreadyLoggedInToastRef.current = true;
+      const existingDigits = (user?.phoneNumber || '').replace(/\D/g, '');
+      const displayNumber = existingDigits || user?.phoneNumber || '';
+      const message = displayNumber
+        ? `You are logged in with mobile ${displayNumber}. To login using url with a different number, please log out first.`
+        : 'You are already logged in.';
+      toast.info(message);
+    }
+
+    if (mobile && !isAuthenticated && !loginTriggeredRef.current) {
+      loginTriggeredRef.current = true;
+      openAuthModalWithPhone(mobile);
+      return;
+    }
+
     // Valid lender: show auto-fill modal first
     setShowAutoFillModal(true);
-  }, [isLoading, error, activeLenders, lenderName, router]);
+  }, [isLoading, error, activeLenders, lenderName, router, searchParams, isAuthenticated, user, openAuthModalWithPhone]);
 
   /**
    * Handle auto-fill modal proceed
