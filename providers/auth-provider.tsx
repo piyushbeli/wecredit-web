@@ -39,7 +39,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const { isAuthenticated, logout, setLoading, setUser, setAuthInitialized } = useAuthStore();
   const { setUrlParams } = useUrlParamsStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
-  console.log("AUTH PROVIDER:", { isAuthenticated })
   /**
    * Handle pre-authentication from URL parameters
    * Extracts pre_auth, mn, partner, and originSubLender from query params
@@ -51,10 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     const partner = searchParams?.get('partner');
     const originSubLender = searchParams?.get('originSubLender');
 
-    console.log('URL PARAMS:', {
-      partner: useUrlParamsStore.getState().partner,
-      originSubLender: useUrlParamsStore.getState().originSubLender
-    });
+    
     // Both pre_auth and mobile must be present for authentication
     if (!preAuth || !mobile) {
       // Without pre_auth, do not capture partner/originSubLender params
@@ -70,7 +66,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         // Same user → only update attribution
         if (partner) {
           setUrlParams(partner, originSubLender ?? null);
-          console.log('[PRE-AUTH] Attribution updated for same user:', { partner, originSubLender });
         }
 
         // clean URL
@@ -99,7 +94,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // Store URL params if present (they'll be used in lead form)
     if (partner) {
       setUrlParams(partner, originSubLender ?? null);
-      console.log('[PRE-AUTH] URL params captured:', { partner, originSubLender });
     }
 
     // Set auth token in cookie
@@ -119,12 +113,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       },
       preAuth
     );
-    console.log('[PRE-AUTH] Applied from URL:', { mobile, hasToken: true, partner, originSubLender });
-
+    
     // Trigger apply flow after a short delay to ensure auth state is set
     setTimeout(() => {
       triggerApplyFlow();
-      console.log('[PRE-AUTH] Triggered apply flow');
     }, 100);
 
     // Clean up URL parameters without breaking browser history
@@ -187,7 +179,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       }
     } catch (error) {
       // On error, clear auth for safety
-      console.error('[AuthProvider] Token validation error:', error);
       logout();
     } finally {
       setLoading(false);

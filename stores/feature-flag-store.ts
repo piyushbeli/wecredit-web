@@ -68,7 +68,6 @@ const loadFlagsFromStorage = (): FeatureFlags => {
       ...data.flags,
     };
   } catch (error) {
-    console.error('[FeatureFlags] Failed to load from storage:', error);
     return DEFAULT_FEATURE_FLAGS;
   }
 };
@@ -98,7 +97,6 @@ const saveFlagsToStorage = (flags: FeatureFlags): void => {
       })
     );
   } catch (error) {
-    console.error('[FeatureFlags] Failed to save to storage:', error);
   }
 };
 
@@ -148,7 +146,6 @@ export const useFeatureFlagStore = create<FeatureFlagState>((set, get) => ({
   resetFlags: (): void => {
     set({ flags: DEFAULT_FEATURE_FLAGS });
     saveFlagsToStorage(DEFAULT_FEATURE_FLAGS);
-    console.info('[FeatureFlags] Reset to defaults');
   },
 
   /**
@@ -201,7 +198,6 @@ export const useFeatureFlagStore = create<FeatureFlagState>((set, get) => ({
       
       // Validate version
       if (data.version !== FEATURE_FLAGS_VERSION) {
-        console.error('[FeatureFlags] Import failed: version mismatch');
         return false;
       }
       
@@ -214,10 +210,8 @@ export const useFeatureFlagStore = create<FeatureFlagState>((set, get) => ({
       set({ flags: importedFlags });
       saveFlagsToStorage(importedFlags);
       
-      console.info('[FeatureFlags] Imported successfully');
       return true;
     } catch (error) {
-      console.error('[FeatureFlags] Import failed:', error);
       return false;
     }
   },
@@ -232,9 +226,7 @@ if (typeof window !== 'undefined') {
       try {
         const data: FeatureFlagsStorage = JSON.parse(event.newValue);
         useFeatureFlagStore.setState({ flags: data.flags });
-        console.info('[FeatureFlags] Synced from another tab');
       } catch (error) {
-        console.error('[FeatureFlags] Failed to sync from storage event:', error);
       }
     }
   });

@@ -15,7 +15,6 @@ const calculatorConfig: Record<string, string> = {
 const CalculatorPage = (): React.ReactNode => {
   const router = useRouter();
   const params = useParams();
-console.log("Params:", params);
 
   const type = params.type as string;
   const title = calculatorConfig[type] || "Calculator";

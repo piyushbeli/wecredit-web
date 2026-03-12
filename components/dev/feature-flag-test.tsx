@@ -15,7 +15,6 @@ export function FeatureFlagTest() {
 
   const handleExport = () => {
     const config = exportFlags();
-    console.log('Exported configuration:', config);
     alert('Configuration copied to console');
   };
 

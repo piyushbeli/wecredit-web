@@ -79,7 +79,6 @@ export function filterActiveLenders(response: ActiveLendersResponse | string | L
     try {
       data = JSON.parse(response);
     } catch {
-      console.error('[filterActiveLenders] Failed to parse string response');
       return [];
     }
   }

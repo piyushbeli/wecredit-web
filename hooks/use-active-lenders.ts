@@ -86,25 +86,20 @@ export function useActiveLenders(
 
   /** Filtered active lenders computed from state */
   const activeLenders = useMemo((): ActiveLender[] => {
-    console.log('[useActiveLenders] state.lenders type:', typeof state.lenders);
-    console.log('[useActiveLenders] state.lenders:', state.lenders);
     if (!state.lenders) return [];
     
     // Check if it's a string (needs parsing) or already an object
     let lendersData: unknown = state.lenders;
     if (typeof state.lenders === 'string') {
-      console.log('[useActiveLenders] Data is string, parsing...');
       try {
         lendersData = JSON.parse(state.lenders);
       } catch (e) {
-        console.error('[useActiveLenders] Failed to parse string:', e);
         return [];
       }
     }
     
     // Check if data is an array or object
     const isArray = Array.isArray(lendersData);
-    console.log('[useActiveLenders] isArray:', isArray);
     
     if (isArray) {
       // If array, filter directly
@@ -112,22 +107,18 @@ export function useActiveLenders(
       const filtered = lendersArray.filter((lender) => {
         return Number(lender.IsAppEnabled) === 1 && Number(lender.affiliateStatus) === 1;
       });
-      console.log('[useActiveLenders] filtered array count:', filtered.length);
       return filtered.map((lender) => ({ id: String(lender.id || lender.Name), lender }));
     }
     
     // If object with keys
     const lendersObject = lendersData as Record<string, Lender>;
     const entries = Object.entries(lendersObject);
-    console.log('[useActiveLenders] entries count:', entries.length);
     if (entries.length > 0) {
-      console.log('[useActiveLenders] first entry:', entries[0]);
     }
     
     const filtered = entries.filter(([, lender]) => {
       return Number(lender.IsAppEnabled) === 1 && Number(lender.affiliateStatus) === 1;
     });
-    console.log('[useActiveLenders] filtered count:', filtered.length);
     return filtered.map(([id, lender]) => ({ id, lender }));
   }, [state.lenders]);
 
