@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
 import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 import './globals.css';
@@ -27,15 +27,27 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
 });
 
+/**
+ * Metadata
+ */
 export const metadata: Metadata = {
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   title: 'WeCredit - Quick Personal Loans',
-  description: 'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.',
+  description:
+    'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.',
+};
+
+/**
+ * Viewport (moved out of metadata)
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 /**
  * Root layout component that fetches global data from Strapi
- * 
+ *
  * Auth Flow (PDF Step 1):
  * AuthProvider validates existing token on app mount
  */
@@ -73,4 +85,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

@@ -6,7 +6,7 @@ import Image from "next/image";
  */
 const PartnerCard = ({ partner }: { partner: Partner }): React.ReactNode => {
 	return (
-		<div className="shrink-0 w-full h-10  bg-[#00000005] flex items-center justify-center p-2 sm:p-3">
+		<div className="shrink-0 w-full h-10  bg-[#00000005]  rounded-lg flex items-center justify-center p-2 sm:p-3">
 			<Image
 				src={partner.logo}
 				alt={partner.name}

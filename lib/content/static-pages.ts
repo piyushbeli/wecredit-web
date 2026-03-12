@@ -97,7 +97,6 @@ export async function getStaticPageBySlug(slug: string): Promise<StaticPage | nu
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return null;
     }
-    console.error(`Error reading static page "${slug}":`, error);
     return null;
   }
 }
@@ -121,7 +120,6 @@ export async function getAllStaticPages(): Promise<StaticPage[]> {
     
     return pages;
   } catch (error) {
-    console.error('Error reading static pages:', error);
     return [];
   }
 }
@@ -144,7 +142,6 @@ export async function getStaticPageSlugs(): Promise<string[]> {
       .filter(file => file.endsWith('.md'))
       .map(file => file.replace(/\.md$/, ''));
   } catch (error) {
-    console.error('Error reading static page slugs:', error);
     return [];
   }
 }

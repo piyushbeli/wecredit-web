@@ -130,7 +130,6 @@ const PartnerWithUsPage = (): React.ReactNode => {
       // Keep form visible so user can retry
     } catch (error) {
       // Handle unexpected errors (shouldn't happen as API function catches all)
-      console.error('[PartnerWithUs] Unexpected error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -194,7 +193,6 @@ const PartnerWithUsPage = (): React.ReactNode => {
   const handleSubmitClick = (): void => {
     submitForm().catch((error) => {
       // Log error for debugging, but don't show noisy console logs
-      console.error('[PartnerWithUs] Form submission error:', error);
       setIsSubmitting(false);
     });
   };

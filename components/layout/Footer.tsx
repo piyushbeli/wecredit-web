@@ -122,7 +122,7 @@ const Footer = () => {
           </Link>
 
           {/* Tagline */}
-          <p className="text-sm text-zinc-500 font-normal font-['Poppins'] leading-5 mb-6">
+          <p className="text-sm text-zinc-800 font-normal font-['Poppins'] leading-5 mb-6">
             Check your credit score, compare loans, and choose the right lender.
           </p>
 
@@ -155,7 +155,7 @@ const Footer = () => {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm font-normal font-['Poppins'] leading-5 text-zinc-500 hover:text-zinc-800 transition-colors"
+                      className="text-sm font-normal font-['Poppins'] leading-5 text-zinc-600 hover:text-zinc-800 transition-colors"
                     >
                       {link.label}
                     </Link>

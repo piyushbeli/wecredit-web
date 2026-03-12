@@ -186,7 +186,6 @@ const TrendingOfferCard = ({
 
       // Guard: Validate lenderName exists before proceeding
       if (!lenderName || typeof lenderName !== 'string') {
-        console.error('[TrendingOfferCard] Invalid lenderName:', lenderName);
         // Fallback: Navigate to normal flow even if lenderName is invalid
         router.push(`/personal-loan/lender/${lenderName || 'unknown'}`);
         return;
@@ -282,7 +281,6 @@ const TrendingOfferCard = ({
           ? error.message
           : 'An unexpected error occurred';
 
-        console.error('[TrendingOfferCard] Error checking eligibility:', errorMessage);
         setIsCheckingEligibility(false);
 
         // Fallback: Never block user - allow normal navigation on error

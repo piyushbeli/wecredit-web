@@ -112,7 +112,7 @@ const BlogSection = (): React.ReactNode => {
 		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
 			{/* Section Title */}
 			<motion.h2
-				className="text-lg sm:text-xl md:text-2xl font-medium text-center mb-6 sm:mb-8"
+				className="text-lg md:text-[18px] md:text-2xl font-medium text-center mb-6 sm:mb-8"
 				initial={{ opacity: 0, y: 10 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: true }}

@@ -24,14 +24,11 @@ async function submitAndDispatch<TPayload>(
 ): Promise<void> {
   try {
     const success = await submit(payload);
-    console.info(`${logPrefix} usePostLogin: ${apiLabel} API result`, { success });
     if (success) {
       window.dispatchEvent(new CustomEvent(eventName));
-      console.info(`${logPrefix} usePostLogin: dispatched`, eventName);
     }
   } catch (err) {
     // Log and keep the user on the form; success is only signaled via the event.
-    console.error(`${logPrefix} usePostLogin: ${apiLabel} API error`, err);
   }
 }
 
@@ -49,7 +46,6 @@ function submitLoanPayload<TPayload>(
     return;
   }
 
-  console.info(`${logPrefix} usePostLogin: calling ${apiLabel} API with stored payload`);
   void submitAndDispatch(payload, submit, eventName, logPrefix, apiLabel);
 }
 
@@ -70,7 +66,6 @@ export const usePostLogin = (): void => {
       return;
     }
 
-    console.info('[AuthModal] Executing pending action:', action.type, action.lenderId);
 
     switch (action.type) {
       case 'navigate_to_offer':
@@ -139,12 +134,6 @@ export const usePostLogin = (): void => {
     // Detect transition from not authenticated to authenticated
     if (isAuthenticated && !wasAuthenticated.current) {
       const action = consumePendingAction();
-
-      console.info('[Auth] usePostLogin: auth transition to authenticated', {
-        hadPendingAction: !!action,
-        actionType: action?.type,
-      });
-
       executePendingAction(action);
     }
 

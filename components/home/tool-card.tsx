@@ -6,28 +6,16 @@ import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import React from 'react';
 
-/** Props for ToolCard component */
 interface ToolCardProps {
-  /** Unique identifier for the tool */
   id: string;
-  /** Title displayed on the card (supports line breaks with \n) */
   title: string;
-  /** Description text below the title */
   description: string;
-  /** Navigation link when card is clicked */
   href: string;
-  /** Optional image path for the tool illustration */
   imagePath?: string;
-  /** Fallback icon when no image is provided */
   fallbackIcon?: LucideIcon;
-  /** Animation delay index for staggered animations */
   index: number;
 }
 
-/**
- * Tool card component for Tools & Calculators section
- * Displays a clickable card with title, description, and illustration
- */
 const ToolCard = ({
   title,
   description,
@@ -51,52 +39,53 @@ const ToolCard = ({
     >
       <Link
         href={href}
-        className="group block h-full rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200"
+        className="group block h-full rounded-xl border border-gray-100 bg-white  shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200"
       >
         <div className="flex flex-col h-full">
-          {/* Text Content */}
-          <div className="flex-1">
-            <h3 className="text-sm font-medium leading-tight mb-1">
-              {title.split('\n').map((line, idx) => (
-                <span key={idx}>
-                  {line}
-                  {idx < title.split('\n').length - 1 && <br />}
-                </span>
-              ))}
-            </h3>
-            <p className="text-xs text-gray-500 leading-snug">
-              {description}
-            </p>
-          </div>
-
-          {/* Image/Icon Container */}
-          <div className="flex justify-end mt-3">
-            <motion.div
-              className="w-16 h-16 relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            >
-              {imagePath ? (
-                <Image
-                  src={imagePath}
-                  alt={title.replace('\n', ' ')}
-                  fill
-                  className="object-contain"
-                />
-              ) : FallbackIcon ? (
-                <div className="w-full h-full rounded-xl bg-linear-to-br from-wc-blue-50 to-wc-blue-100 flex items-center justify-center">
-                  <FallbackIcon className="w-8 h-8 text-wc-blue-500" strokeWidth={1.5} />
-                </div>
-              ) : (
-                <div className="w-full h-full rounded-xl bg-linear-to-br from-wc-blue-50 to-wc-blue-100" />
-              )}
-            </motion.div>
-          </div>
+  
+  {/* Row: Image + Title */}
+  <div className="flex items-center gap-1 px-1 mt-2">
+    <motion.div
+      className="w-14 h-14 md:w-18 md:h-18 relative flex-shrink-0"
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+    >
+      {imagePath ? (
+        <Image
+          src={imagePath}
+          alt={title.replace('\n', ' ')}
+          fill
+          className="object-contain"
+          sizes="48px"
+        />
+      ) : FallbackIcon ? (
+        <div className="w-full h-full rounded-xl bg-linear-to-br from-wc-blue-50 to-wc-blue-100 flex items-center justify-center">
+          <FallbackIcon className="w-6 h-6 text-wc-blue-500" strokeWidth={1.5} />
         </div>
+      ) : (
+        <div className="w-full h-full rounded-xl bg-linear-to-br from-wc-blue-50 to-wc-blue-100" />
+      )}
+    </motion.div>
+
+    <h3 className="text-sm font-medium leading-tight">
+      {title.split('\n').map((line, idx) => (
+        <span key={idx}>
+          {line}
+          {idx < title.split('\n').length - 1 && <br />}
+        </span>
+      ))}
+    </h3>
+  </div>
+
+  {/* Description */}
+  <p className="text-xs text-gray-500 leading-snug mt-0 mb-4 mx-2">
+    {description}
+  </p>
+
+</div>
       </Link>
     </motion.div>
   );
 };
 
 export default ToolCard;
-

@@ -26,7 +26,6 @@ const StickyApplyButton = (): JSX.Element => {
 	const handleApplyClick = useCallback((): void => {
 		// Guard against store method being undefined (worst-case scenario)
 		if (!triggerApplyFlow) {
-			console.error('[StickyApplyButton] triggerApplyFlow is not available');
 			return;
 		}
 

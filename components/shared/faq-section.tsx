@@ -30,7 +30,7 @@ const FaqAccordionItem = ({
 }: FaqAccordionItemProps): React.ReactNode => {
 	return (
 		<motion.div
-			className="border border-gray-200 overflow-hidden bg-[#0000000D] rounded-sm"
+			className="overflow-hidden bg-blue-200/20 rounded-sm"
 			initial={{ opacity: 0, y: 10 }}
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true }}
@@ -39,10 +39,10 @@ const FaqAccordionItem = ({
 			<button
 				type="button"
 				onClick={onToggle}
-				className="w-full px-4 sm:px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+				className="w-full px-4 sm:px-5 py-2 flex items-center justify-between text-left hover:bg-blue-50 transition-colors"
 				aria-expanded={isExpanded}
 			>
-				<span className="text-sm sm:text-base pr-4 text-gray-500">
+				<span className="text-sm sm:text-[14px] pr-4 text-black-500">
 					{item.question}
 				</span>
 				<ChevronDown
@@ -61,7 +61,7 @@ const FaqAccordionItem = ({
 						className="overflow-hidden"
 					>
 						<div className="px-4 sm:px-5 pb-4 pt-1">
-							<p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+							<p className="text-sm text-black-600 leading-relaxed whitespace-pre-line">
 								{item.answer}
 							</p>
 						</div>
@@ -87,7 +87,7 @@ const FaqSection = (): React.ReactNode => {
 		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
 			{/* Section Title */}
 			<motion.h2
-				className="text-lg sm:text-xl md:text-2xl font-medium text-center mb-6 sm:mb-8"
+				className="text-lg md:text-[18px] md:text-2xl font-medium text-center mb-6 sm:mb-8"
 				initial={{ opacity: 0, y: 10 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: true }}

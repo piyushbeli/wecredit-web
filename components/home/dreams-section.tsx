@@ -11,7 +11,7 @@ const DreamsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-4 sm:py-10 md:py-12 px-4">
       <motion.div
-        className="max-w-4xl mx-auto text-left"
+        className="max-w-7xl mx-auto text-left md:px-4"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}

@@ -47,7 +47,6 @@ export const PersonalLoanContent = (): JSX.Element => {
   const runCheckDedupeAfterAuth = useCallback(async (): Promise<void> => {
     const mobile = getCookie(STORAGE_MOBILE) as string;
     if (!mobile) {
-      console.error('[PersonalLoan] No mobile number found after authentication');
       didInitiateCheckOffers.current = false;
       return;
     }
@@ -162,7 +161,6 @@ export const PersonalLoanContent = (): JSX.Element => {
     
     const mobile = getCookie(STORAGE_MOBILE) as string;
     if (!mobile) {
-      console.error('[PersonalLoan] No mobile number found in cookies');
       didInitiateCheckOffers.current = false;
       return;
     }
