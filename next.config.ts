@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         destination: 'https://blog.wecredit.co.in/',
         permanent: true,
       },
+      {
+        source: '/terms',
+        destination: 'https://www.wecredit.co.in/terms-of-service',
+        permanent: true,
+      },
     ];
   },
 
