@@ -25,6 +25,10 @@ interface EnvironmentConfig {
   multilenderHeaders: EnvironmentHeaders;
 }
 
+export const APPCONFIG = {
+  playstoreUrl: 'https://play.google.com/store/apps/details?id=com.zapcash.loan',
+}
+
 /** Environment configurations */
 const ENVIRONMENTS: Record<EnvironmentType, EnvironmentConfig> = {
   staging: {
