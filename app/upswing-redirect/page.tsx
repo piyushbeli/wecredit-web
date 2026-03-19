@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { forwardUpswingRedirect } from '@/lib/api/wecredit';
 import { toast } from 'sonner';
+import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
+import { getCookie } from 'cookies-next';
 
 const isValidMobile = (mobile: string | null): mobile is string => {
   if (!mobile) return false;
@@ -31,8 +33,10 @@ const UpswingRedirectPage = () => {
 
     const runRedirect = async () => {
       try {
+        const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
+
         // forwardUpswingRedirect handles the HTML response and navigation internally
-        const result = await forwardUpswingRedirect(mobileParam);
+        const result = await forwardUpswingRedirect(mobileParam, token);
 
         if (!result.success) {
           const message = result.error || 'Unable to start Upswing journey. Please try again.';
