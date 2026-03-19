@@ -22,6 +22,7 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
+import { APPCONFIG } from '@/lib/config';
 
 /**
  * Offers View Component
@@ -103,6 +104,7 @@ useEffect(() => {
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
+
   // For non-INITIATED offers in explore screen, navigate to status page
   if (offer.wcStatus !== 'INITIATED') {
     router.push('/offers/status');
@@ -120,6 +122,13 @@ useEffect(() => {
   // LNT special flow
   if (lenderName.toLowerCase() === 'lnt') {
     void forwardUpswingRedirect(mobile, token);
+    return;
+  }
+
+  // Zapcash special flow
+  if (lenderName.toLowerCase() === 'zapcash') {
+    console.log('Zapcash special flow');
+    window.open(APPCONFIG.playstoreUrl, '_blank');
     return;
   }
 
