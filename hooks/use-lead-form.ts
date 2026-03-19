@@ -22,7 +22,7 @@ const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
   1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
   3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
-  4: ['pan', 'consent'],
+  4: ['pan', 'isCreditCard', 'creditCardLimit', 'consent'],
 };
 
 /** Hidden fields - auto-filled, never shown in UI */
@@ -51,6 +51,10 @@ const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
   }
   if (fieldKey === 'pincode' || fieldKey === 'companyPincode') {
     return sanitizeNumericInput(value, 6);
+  }
+  // Max limit can be large (e.g. lakhs); cap digits to avoid accidental paste abuse.
+  if (fieldKey === 'creditCardLimit') {
+    return sanitizeNumericInput(value, 12);
   }
   return value;
 };

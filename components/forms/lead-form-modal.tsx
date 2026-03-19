@@ -124,6 +124,32 @@ function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): Form
   });
 }
 
+/**
+ * Multi-lender flow: credit card max limit must be a positive amount when user has a card.
+ */
+function isValidCreditCardMaxAmountInput(raw: string | undefined): boolean {
+  const normalized = (raw ?? '').replace(/,/g, '').trim();
+  if (!normalized) return false;
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) && parsed > 0;
+}
+
+/**
+ * Whether credit card questions are complete for submit (all-lenders only).
+ */
+function isMultiLenderCreditCardSectionComplete(
+  isAllLenders: boolean,
+  isCreditCard: string | undefined,
+  creditCardLimit: string | undefined
+): boolean {
+  if (!isAllLenders) return true;
+  if (isCreditCard !== 'true' && isCreditCard !== 'false') return false;
+  if (isCreditCard === 'true') {
+    return isValidCreditCardMaxAmountInput(creditCardLimit);
+  }
+  return true;
+}
+
 const LeadFormModal = ({
   isOpen,
   onClose,
@@ -264,6 +290,18 @@ const LeadFormModal = ({
       return dateStr;
     };
 
+    // Multi-lender: enforce credit card answers before hitting the API (also reflected in disabled Submit).
+    if (
+      isAllLenders
+      && !isMultiLenderCreditCardSectionComplete(
+        true,
+        formValues.isCreditCard,
+        formValues.creditCardLimit
+      )
+    ) {
+      return;
+    }
+
     const formData: LeadFormData = {
       name: formValues.name || '',
       mobile: formValues.mobile || '',
@@ -290,6 +328,14 @@ const LeadFormModal = ({
       consent: formValues.consent || 'false',
       ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
+      ...(isAllLenders
+        && (formValues.isCreditCard === 'true' || formValues.isCreditCard === 'false')
+        && {
+          isCreditCard: formValues.isCreditCard,
+          ...(formValues.isCreditCard === 'true'
+            ? { creditCardLimit: formValues.creditCardLimit ?? '' }
+            : {}),
+        }),
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName);
@@ -297,7 +343,21 @@ const LeadFormModal = ({
       setShowSuccess(true);
       window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
     }
-  }, [formValues, userIp, createLead, effectivePartnerCode, lenderName, onSuccess, router, onClose, fields, partner, originSubLender]);
+  }, [
+    formValues,
+    userIp,
+    createLead,
+    effectivePartnerCode,
+    lenderName,
+    onSuccess,
+    router,
+    onClose,
+    fields,
+    partner,
+    originSubLender,
+    isAllLenders,
+    lntCompanyName,
+  ]);
 
 
   const renderSubmitError = (): React.ReactElement | null => {
@@ -338,7 +398,13 @@ const LeadFormModal = ({
       lenderName !== 'lnt' ||
       LNT_CONSENTS.every(c => formValues[c.key] === 'true');
 
-    const isSubmitDisabled = !hasConsent || !hasLntConsents;
+    const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
+      isAllLenders,
+      formValues.isCreditCard,
+      formValues.creditCardLimit
+    );
+
+    const isSubmitDisabled = !hasConsent || !hasLntConsents || !isCreditCardSectionComplete;
 
     return (
       <ActionButton
@@ -472,6 +538,69 @@ const LeadFormModal = ({
 
             </div>
           ))}
+          {isAllLenders && (
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <p className="lead-form-label" id="credit-card-question-label">
+                  Do you have a credit card?
+                </p>
+                <div
+                  className="flex gap-3"
+                  role="group"
+                  aria-labelledby="credit-card-question-label"
+                >
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      handleFieldChange('isCreditCard', 'true');
+                    }}
+                    className={`flex-1 py-3 rounded-lg border text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      formValues.isCreditCard === 'true'
+                        ? 'border-blue-600 bg-blue-50 text-blue-900'
+                        : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400'
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      handleFieldChange('isCreditCard', 'false');
+                      handleFieldChange('creditCardLimit', '');
+                    }}
+                    className={`flex-1 py-3 rounded-lg border text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      formValues.isCreditCard === 'false'
+                        ? 'border-blue-600 bg-blue-50 text-blue-900'
+                        : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400'
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+              {formValues.isCreditCard === 'true' && (
+                <div className="space-y-2">
+                  <label htmlFor="creditCardLimit" className="lead-form-label">
+                    What is the maximum limit on your credit card?
+                  </label>
+                  <input
+                    id="creditCardLimit"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={formValues.creditCardLimit || ''}
+                    onChange={(e) =>
+                      handleFieldChange('creditCardLimit', e.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="Enter amount in rupees"
+                    className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <DynamicField
             field={{
               key: 'consent',

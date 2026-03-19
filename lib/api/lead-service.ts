@@ -85,6 +85,17 @@ function convertDateToApiFormat(dateStr: string): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Parse multi-lender credit card max limit from form string (digits / optional commas).
+ * Returns undefined when empty or invalid so we never send bad numbers downstream.
+ */
+function parseCreditCardMaxAmount(value: string | undefined): number | undefined {
+  const raw = (value ?? '').replace(/,/g, '').trim();
+  if (!raw) return undefined;
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 // ============================================
 // Header Builders
 // ============================================
@@ -283,6 +294,19 @@ async function createLead(
 
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
+
+      // Multi-lender personal loan: credit card questions (omit entirely for single-lender flows)
+      ...(formData.isCreditCard === 'true' || formData.isCreditCard === 'false'
+        ? {
+            isCreditCard: formData.isCreditCard === 'true',
+            ...(formData.isCreditCard === 'true'
+              ? (() => {
+                  const maxAmount = parseCreditCardMaxAmount(formData.creditCardLimit);
+                  return maxAmount !== undefined ? { creditCardLimit: maxAmount } : {};
+                })()
+              : {}),
+          }
+        : {}),
 
       // Add consents ONLY for LNT
       ...(lenderName?.toLowerCase() === "lnt" && {
