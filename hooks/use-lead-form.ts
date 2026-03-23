@@ -17,13 +17,19 @@ interface WizardStep {
   fieldKeys: FormFieldKey[];
 }
 
-/** Step configuration - maps step numbers to field keys */
+/** Steps 1–3: fixed field order per wizard screen */
 const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
   1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
   3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
-  4: ['pan', 'consent'],
 };
+
+/**
+ * Step 4 includes PAN + credit card fields + consent.
+ * API-driven fields are still filtered by keys and flow-level gating is handled in the modal.
+ */
+const getStep4FieldKeys = (): FormFieldKey[] =>
+  ['pan', 'isCreditCard', 'creditCardLimit', 'consent'];
 
 /** Hidden fields - auto-filled, never shown in UI */
 const HIDDEN_FIELDS: FormFieldKey[] = ['ConsentIp', 'ConsentDateTime'];
@@ -51,6 +57,10 @@ const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
   }
   if (fieldKey === 'pincode' || fieldKey === 'companyPincode') {
     return sanitizeNumericInput(value, 6);
+  }
+  // Max limit can be large (e.g. lakhs); cap digits to avoid accidental paste abuse.
+  if (fieldKey === 'creditCardLimit') {
+    return sanitizeNumericInput(value, 12);
   }
   return value;
 };
@@ -87,7 +97,8 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
    * Get current step configuration
    */
   const getCurrentStepConfig = useCallback((): WizardStep => {
-    const fieldKeys = STEP_FIELD_MAPPING[currentStep] || [];
+    const fieldKeys =
+      currentStep === 4 ? getStep4FieldKeys() : STEP_FIELD_MAPPING[currentStep] || [];
     const titles: Record<number, string> = {
       1: 'Personal Information',
       2: 'Address Information',

@@ -85,6 +85,43 @@ function convertDateToApiFormat(dateStr: string): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Parse multi-lender credit card max limit from form string (digits / optional commas).
+ * Returns undefined when empty or invalid so we never send bad numbers downstream.
+ */
+function parseCreditCardMaxAmount(value: string | undefined): number | undefined {
+  const raw = (value ?? '').replace(/,/g, '').trim();
+  if (!raw) return undefined;
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+/**
+ * Multi-lender personal loan: maps credit card answers for create-lead.
+ * Returns an empty object when the form did not ask (single-lender flows).
+ */
+function buildMultiLenderCreditCardPayload(
+  formData: Pick<LeadFormData, 'isCreditCard' | 'creditCardLimit'>
+): Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> {
+  const { isCreditCard, creditCardLimit } = formData;
+  if (isCreditCard !== 'true' && isCreditCard !== 'false') {
+    return {};
+  }
+
+  const payload: Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> = {
+    isCreditCard: isCreditCard === 'true',
+  };
+
+  if (isCreditCard === 'true') {
+    const maxAmount = parseCreditCardMaxAmount(creditCardLimit);
+    if (maxAmount !== undefined) {
+      payload.creditCardLimit = maxAmount;
+    }
+  }
+
+  return payload;
+}
+
 // ============================================
 // Header Builders
 // ============================================
@@ -283,6 +320,8 @@ async function createLead(
 
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
+
+      ...buildMultiLenderCreditCardPayload(formData),
 
       // Add consents ONLY for LNT
       ...(lenderName?.toLowerCase() === "lnt" && {

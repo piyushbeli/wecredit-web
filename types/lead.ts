@@ -32,7 +32,9 @@ export type FormFieldKey =
   | 'ConsentIp'
   | 'ConsentDateTime'
   | 'consent'
-  | 'consentPrivacyPolicy';
+  | 'consentPrivacyPolicy'
+  | 'isCreditCard'
+  | 'creditCardLimit';
 
 /** Field types returned by the API */
 export type FormFieldType = 'string' | 'number' | 'float' | 'boolean';
@@ -163,6 +165,10 @@ export interface CreateLeadRequest {
   lenderName?: string[];
   /** Sub-lender reference */
   originSubLender?: string;
+  /** Whether the user has a credit card (multi-lender flow) */
+  isCreditCard?: boolean;
+  /** Max credit limit on the user's card when they have one (multi-lender flow) */
+  creditCardLimit?: number;
 }
 
 /** Response from create-lead API */
@@ -229,6 +235,10 @@ export interface LeadFormData {
   consent?: string;
   /** Sub-lender reference from URL */
   originSubLender?: string;
+  /** Whether the user has a credit card (multi-lender flow; stored as 'true' | 'false' in UI) */
+  isCreditCard?: string;
+  /** Max credit limit as entered by the user (multi-lender flow) */
+  creditCardLimit?: string;
 }
 
 /** Form validation errors */
