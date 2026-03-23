@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
+import { UNITY_CONSENT } from '@/lib/constants/common';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 import DynamicField from './dynamic-field';
 
@@ -173,6 +174,8 @@ const LeadFormModal = ({
   
   // Use partner from URL if available and not yet consumed, otherwise use prop or default
   const effectivePartnerCode =  partner ? partner : partnerCode;
+  const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
+  const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
 
   const {
     currentStep,
@@ -452,7 +455,7 @@ const LeadFormModal = ({
     }
 
     // Render fields dynamically
-    // Always show consent checkbox in last step, with Unity-specific text if lenderName === 'unity'
+    // Always show consent checkbox in last step, with Unity-specific text for the single-lender Unity flow
     if (isLastStep) {
       // Ensure consent is 'true' initially
       if (formValues['consent'] === undefined) {
@@ -604,13 +607,13 @@ const LeadFormModal = ({
           <DynamicField
             field={{
               key: 'consent',
-              title: 'Consent',
+              title: consentTitle,
               type: 'boolean',
               options: [],
               value: 'true',
               isMandatory: true,
               order: 999,
-              lenderName: lenderName === 'unity' ? 'unity' : undefined,
+              lenderName: isUnitySingleLender ? 'unity' : undefined,
             }}
             value={formValues['consent'] || 'true'}
             onChange={(val) => handleFieldChange('consent', val)}

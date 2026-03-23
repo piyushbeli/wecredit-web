@@ -30,7 +30,7 @@ export const PersonalLoanContent = (): JSX.Element => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isOpen: isLeadFormModalOpen, openModal: openLeadFormModal, closeModal: closeLeadFormModal } = useModal();
-  const { isAuthenticated, openModal }: { isAuthenticated: boolean; openModal: () => void } = useAuthStore();
+  const { isAuthenticated, openModal, logout } = useAuthStore();
   const { triggerApply, resetTrigger, setApplyLoading } = useLoanApplicationStore();
   const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response, error }: UseCheckDedupeResult = useCheckDedupe();
   const hasCheckedDedupe = useRef<boolean>(false);
@@ -47,12 +47,15 @@ export const PersonalLoanContent = (): JSX.Element => {
   const runCheckDedupeAfterAuth = useCallback(async (): Promise<void> => {
     const mobile = getCookie(STORAGE_MOBILE) as string;
     if (!mobile) {
+      // Post-login but cookie still absent — force clean re-login
       didInitiateCheckOffers.current = false;
+      logout();
+      openModal();
       return;
     }
     await checkDedupe(mobile, PARTNER_CODE);
     hasCheckedDedupe.current = true;
-  }, [checkDedupe]);
+  }, [checkDedupe, logout, openModal]);
 
   const handleDedupeResponse = useCallback((): void => {
     if (!response || isCheckingDedupe || !hasCheckedDedupe.current) {
@@ -161,7 +164,10 @@ export const PersonalLoanContent = (): JSX.Element => {
     
     const mobile = getCookie(STORAGE_MOBILE) as string;
     if (!mobile) {
+      // Cookie expired/cleared while Zustand still thinks user is logged in — force re-login
       didInitiateCheckOffers.current = false;
+      logout();
+      openModal();
       return;
     }
     

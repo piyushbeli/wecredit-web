@@ -30,7 +30,7 @@ const GrievanceContactContent = (): React.ReactNode => {
 
         <div className="space-y-2 text-zinc-500 text-sm font-normal font-['Poppins'] leading-4">
           <p>Name: Abhay Padoor</p>
-          <p>Address - 6th Floor, Wing A, Let’s Work, Corporate Centre, J.B. Nagar, Chakala, Andheri (E), Mumbai 400059</p>
+          <p>Address - 6th floor, Wing A, Let's Work, Corporate Centre, J.B Nagar, Chakala, Andheri East, Mumbai - 400059</p>
           <p>Email: care@wecredit.co.in</p>
           <p>Contact: +91 9240259585</p>
         </div>

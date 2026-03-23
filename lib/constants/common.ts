@@ -128,3 +128,6 @@ export const TESTIMONIALS: Testimonial[] = [
     customerName: 'Amit P.',
   },
 ];
+
+
+export const UNITY_CONSENT = `I hereby give my consent to Unity Small Finance Bank Limited. as lender to collect, store and verify my credit report from Credit Bureaus and KYC details for the processing of my loan application and contact me through SMS / WhatsApp / Call with reference to my loan application.`

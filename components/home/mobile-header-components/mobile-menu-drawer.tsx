@@ -162,7 +162,7 @@ export const MobileMenuDrawer = ({
                                         exit="exit"
                                     >
                                         <Link
-                                            href="/offers/status"
+                                            href="/offers"
                                             onClick={closeMenu}
                                             className="flex items-center gap-3 px-3 py-3 text-white rounded-lg hover:bg-white/10 transition-colors"
                                         >
