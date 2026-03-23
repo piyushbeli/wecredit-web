@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { getCookie } from 'cookies-next';
 import { STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { sanitizeNumericInput, sanitizePanInput } from '@/lib/utils/form-helpers';
+import { clientConfig } from '@/lib/config/client-config';
 
 interface WizardStep {
   stepNumber: number;
@@ -17,13 +18,21 @@ interface WizardStep {
   fieldKeys: FormFieldKey[];
 }
 
-/** Step configuration - maps step numbers to field keys */
+/** Steps 1–3: fixed field order per wizard screen */
 const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
   1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
   3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
-  4: ['pan', 'isCreditCard', 'creditCardLimit', 'consent'],
 };
+
+/**
+ * Step 4 includes optional credit card fields when `clientConfig.enableCreditCard` is on
+ * (multi-lender flow). Keeps PAN + consent always; API-driven fields still filtered by keys.
+ */
+const getStep4FieldKeys = (): FormFieldKey[] =>
+  clientConfig.enableCreditCard
+    ? ['pan', 'isCreditCard', 'creditCardLimit', 'consent']
+    : ['pan', 'consent'];
 
 /** Hidden fields - auto-filled, never shown in UI */
 const HIDDEN_FIELDS: FormFieldKey[] = ['ConsentIp', 'ConsentDateTime'];
@@ -91,7 +100,8 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
    * Get current step configuration
    */
   const getCurrentStepConfig = useCallback((): WizardStep => {
-    const fieldKeys = STEP_FIELD_MAPPING[currentStep] || [];
+    const fieldKeys =
+      currentStep === 4 ? getStep4FieldKeys() : STEP_FIELD_MAPPING[currentStep] || [];
     const titles: Record<number, string> = {
       1: 'Personal Information',
       2: 'Address Information',

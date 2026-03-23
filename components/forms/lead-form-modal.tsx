@@ -19,6 +19,7 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
+import { clientConfig } from '@/lib/config/client-config';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import { UNITY_CONSENT } from '@/lib/constants/common';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
@@ -136,14 +137,14 @@ function isValidCreditCardMaxAmountInput(raw: string | undefined): boolean {
 }
 
 /**
- * Whether credit card questions are complete for submit (all-lenders only).
+ * Whether credit card questions are complete for submit when that flow is enabled.
  */
 function isMultiLenderCreditCardSectionComplete(
-  isAllLenders: boolean,
+  isCreditCardFlowEnabled: boolean,
   isCreditCard: string | undefined,
   creditCardLimit: string | undefined
 ): boolean {
-  if (!isAllLenders) return true;
+  if (!isCreditCardFlowEnabled) return true;
   if (isCreditCard !== 'true' && isCreditCard !== 'false') return false;
   if (isCreditCard === 'true') {
     return isValidCreditCardMaxAmountInput(creditCardLimit);
@@ -176,6 +177,9 @@ const LeadFormModal = ({
   const effectivePartnerCode =  partner ? partner : partnerCode;
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
+  /** Same condition as API: only all-lenders + feature flag */
+  const isMultiLenderCreditCardEnabled =
+    isAllLenders && clientConfig.enableCreditCard;
 
   const {
     currentStep,
@@ -293,11 +297,10 @@ const LeadFormModal = ({
       return dateStr;
     };
 
-    // Multi-lender: enforce credit card answers before hitting the API (also reflected in disabled Submit).
+    // Multi-lender + flag: enforce credit card answers before hitting the API.
     if (
-      isAllLenders
-      && !isMultiLenderCreditCardSectionComplete(
-        true,
+      !isMultiLenderCreditCardSectionComplete(
+        isMultiLenderCreditCardEnabled,
         formValues.isCreditCard,
         formValues.creditCardLimit
       )
@@ -331,7 +334,7 @@ const LeadFormModal = ({
       consent: formValues.consent || 'false',
       ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
-      ...(isAllLenders
+      ...(isMultiLenderCreditCardEnabled
         && (formValues.isCreditCard === 'true' || formValues.isCreditCard === 'false')
         && {
           isCreditCard: formValues.isCreditCard,
@@ -359,6 +362,7 @@ const LeadFormModal = ({
     partner,
     originSubLender,
     isAllLenders,
+    isMultiLenderCreditCardEnabled,
     lntCompanyName,
   ]);
 
@@ -402,7 +406,7 @@ const LeadFormModal = ({
       LNT_CONSENTS.every(c => formValues[c.key] === 'true');
 
     const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
-      isAllLenders,
+      isMultiLenderCreditCardEnabled,
       formValues.isCreditCard,
       formValues.creditCardLimit
     );
@@ -541,7 +545,7 @@ const LeadFormModal = ({
 
             </div>
           ))}
-          {isAllLenders && (
+          {isMultiLenderCreditCardEnabled && (
             <div className="space-y-4 pt-2">
               <div className="space-y-2">
                 <p className="lead-form-label" id="credit-card-question-label">

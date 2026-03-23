@@ -21,6 +21,7 @@ import type {
   AddressTypeValue,
   MaritalStatusValue,
 } from '@/types/lead';
+import { clientConfig } from '@/lib/config/client-config';
 
 /** Lead API endpoint - uses /api/forward for lead operations */
 const LEAD_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
@@ -94,6 +95,32 @@ function parseCreditCardMaxAmount(value: string | undefined): number | undefined
   if (!raw) return undefined;
   const parsed = Number.parseFloat(raw);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+/**
+ * Multi-lender personal loan: maps credit card answers for create-lead.
+ * Returns an empty object when the form did not ask (single-lender flows).
+ */
+function buildMultiLenderCreditCardPayload(
+  formData: Pick<LeadFormData, 'isCreditCard' | 'creditCardLimit'>
+): Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> {
+  const { isCreditCard, creditCardLimit } = formData;
+  if (isCreditCard !== 'true' && isCreditCard !== 'false') {
+    return {};
+  }
+
+  const payload: Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> = {
+    isCreditCard: isCreditCard === 'true',
+  };
+
+  if (isCreditCard === 'true') {
+    const maxAmount = parseCreditCardMaxAmount(creditCardLimit);
+    if (maxAmount !== undefined) {
+      payload.creditCardLimit = maxAmount;
+    }
+  }
+
+  return payload;
 }
 
 // ============================================
@@ -295,18 +322,7 @@ async function createLead(
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
 
-      // Multi-lender personal loan: credit card questions (omit entirely for single-lender flows)
-      ...(formData.isCreditCard === 'true' || formData.isCreditCard === 'false'
-        ? {
-            isCreditCard: formData.isCreditCard === 'true',
-            ...(formData.isCreditCard === 'true'
-              ? (() => {
-                  const maxAmount = parseCreditCardMaxAmount(formData.creditCardLimit);
-                  return maxAmount !== undefined ? { creditCardLimit: maxAmount } : {};
-                })()
-              : {}),
-          }
-        : {}),
+      ...(clientConfig.enableCreditCard ? buildMultiLenderCreditCardPayload(formData) : {}),
 
       // Add consents ONLY for LNT
       ...(lenderName?.toLowerCase() === "lnt" && {
