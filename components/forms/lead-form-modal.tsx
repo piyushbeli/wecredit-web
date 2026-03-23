@@ -19,7 +19,6 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
-import { clientConfig } from '@/lib/config/client-config';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import { UNITY_CONSENT } from '@/lib/constants/common';
 import {
@@ -158,12 +157,11 @@ const LeadFormModal = ({
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
   /**
    * Credit card questions are only valid for all-lenders flow when:
-   * 1) feature flag is enabled and
-   * 2) user chose to proceed without full details fetch.
+   * user chose to proceed without full details fetch.
    * This single gate controls UI + validation + payload inclusion.
    */
   const isMultiLenderCreditCardEnabled =
-    isAllLenders && !fetchDetails && clientConfig.enableCreditCard;
+    isAllLenders && !fetchDetails;
 
   const {
     currentStep,

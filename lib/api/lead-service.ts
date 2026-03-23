@@ -21,7 +21,6 @@ import type {
   AddressTypeValue,
   MaritalStatusValue,
 } from '@/types/lead';
-import { clientConfig } from '@/lib/config/client-config';
 
 /** Lead API endpoint - uses /api/forward for lead operations */
 const LEAD_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
@@ -322,7 +321,7 @@ async function createLead(
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
 
-      ...(clientConfig.enableCreditCard ? buildMultiLenderCreditCardPayload(formData) : {}),
+      ...buildMultiLenderCreditCardPayload(formData),
 
       // Add consents ONLY for LNT
       ...(lenderName?.toLowerCase() === "lnt" && {

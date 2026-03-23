@@ -10,7 +10,6 @@ import { useAuth } from '@/hooks/use-auth';
 import { getCookie } from 'cookies-next';
 import { STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { sanitizeNumericInput, sanitizePanInput } from '@/lib/utils/form-helpers';
-import { clientConfig } from '@/lib/config/client-config';
 
 interface WizardStep {
   stepNumber: number;
@@ -26,13 +25,11 @@ const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
 };
 
 /**
- * Step 4 includes optional credit card fields when `clientConfig.enableCreditCard` is on
- * (multi-lender flow). Keeps PAN + consent always; API-driven fields still filtered by keys.
+ * Step 4 includes PAN + credit card fields + consent.
+ * API-driven fields are still filtered by keys and flow-level gating is handled in the modal.
  */
 const getStep4FieldKeys = (): FormFieldKey[] =>
-  clientConfig.enableCreditCard
-    ? ['pan', 'isCreditCard', 'creditCardLimit', 'consent']
-    : ['pan', 'consent'];
+  ['pan', 'isCreditCard', 'creditCardLimit', 'consent'];
 
 /** Hidden fields - auto-filled, never shown in UI */
 const HIDDEN_FIELDS: FormFieldKey[] = ['ConsentIp', 'ConsentDateTime'];
