@@ -3,7 +3,9 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   output: 'standalone',
   trailingSlash: true,
-
+  compiler: {
+    removeConsole: process.env.NEXT_PUBLIC_ENVIRONMENT === 'production',
+  },
   async redirects() {
     return [
       {
