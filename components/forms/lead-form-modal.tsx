@@ -22,7 +22,12 @@ import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { clientConfig } from '@/lib/config/client-config';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import { UNITY_CONSENT } from '@/lib/constants/common';
+import {
+  buildCreditCardPayload,
+  isMultiLenderCreditCardSectionComplete,
+} from '@/lib/utils/form-helpers';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
+import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
 
 interface LeadFormModalProps {
@@ -126,32 +131,6 @@ function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): Form
   });
 }
 
-/**
- * Multi-lender flow: credit card max limit must be a positive amount when user has a card.
- */
-function isValidCreditCardMaxAmountInput(raw: string | undefined): boolean {
-  const normalized = (raw ?? '').replace(/,/g, '').trim();
-  if (!normalized) return false;
-  const parsed = Number.parseFloat(normalized);
-  return Number.isFinite(parsed) && parsed > 0;
-}
-
-/**
- * Whether credit card questions are complete for submit when that flow is enabled.
- */
-function isMultiLenderCreditCardSectionComplete(
-  isCreditCardFlowEnabled: boolean,
-  isCreditCard: string | undefined,
-  creditCardLimit: string | undefined
-): boolean {
-  if (!isCreditCardFlowEnabled) return true;
-  if (isCreditCard !== 'true' && isCreditCard !== 'false') return false;
-  if (isCreditCard === 'true') {
-    return isValidCreditCardMaxAmountInput(creditCardLimit);
-  }
-  return true;
-}
-
 const LeadFormModal = ({
   isOpen,
   onClose,
@@ -177,9 +156,14 @@ const LeadFormModal = ({
   const effectivePartnerCode =  partner ? partner : partnerCode;
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
-  /** Same condition as API: only all-lenders + feature flag */
+  /**
+   * Credit card questions are only valid for all-lenders flow when:
+   * 1) feature flag is enabled and
+   * 2) user chose to proceed without full details fetch.
+   * This single gate controls UI + validation + payload inclusion.
+   */
   const isMultiLenderCreditCardEnabled =
-    isAllLenders && clientConfig.enableCreditCard;
+    isAllLenders && !fetchDetails && clientConfig.enableCreditCard;
 
   const {
     currentStep,
@@ -334,14 +318,11 @@ const LeadFormModal = ({
       consent: formValues.consent || 'false',
       ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
-      ...(isMultiLenderCreditCardEnabled
-        && (formValues.isCreditCard === 'true' || formValues.isCreditCard === 'false')
-        && {
-          isCreditCard: formValues.isCreditCard,
-          ...(formValues.isCreditCard === 'true'
-            ? { creditCardLimit: formValues.creditCardLimit ?? '' }
-            : {}),
-        }),
+      ...buildCreditCardPayload(
+        isMultiLenderCreditCardEnabled,
+        formValues.isCreditCard,
+        formValues.creditCardLimit
+      ),
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName);
@@ -546,67 +527,12 @@ const LeadFormModal = ({
             </div>
           ))}
           {isMultiLenderCreditCardEnabled && (
-            <div className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <p className="lead-form-label" id="credit-card-question-label">
-                  Do you have a credit card?
-                </p>
-                <div
-                  className="flex gap-3"
-                  role="group"
-                  aria-labelledby="credit-card-question-label"
-                >
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                      handleFieldChange('isCreditCard', 'true');
-                    }}
-                    className={`flex-1 py-3 rounded-lg border text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      formValues.isCreditCard === 'true'
-                        ? 'border-blue-600 bg-blue-50 text-blue-900'
-                        : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400'
-                    }`}
-                  >
-                    Yes
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                      handleFieldChange('isCreditCard', 'false');
-                      handleFieldChange('creditCardLimit', '');
-                    }}
-                    className={`flex-1 py-3 rounded-lg border text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      formValues.isCreditCard === 'false'
-                        ? 'border-blue-600 bg-blue-50 text-blue-900'
-                        : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400'
-                    }`}
-                  >
-                    No
-                  </button>
-                </div>
-              </div>
-              {formValues.isCreditCard === 'true' && (
-                <div className="space-y-2">
-                  <label htmlFor="creditCardLimit" className="lead-form-label">
-                    What is the maximum limit on your credit card?
-                  </label>
-                  <input
-                    id="creditCardLimit"
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    value={formValues.creditCardLimit || ''}
-                    onChange={(e) =>
-                      handleFieldChange('creditCardLimit', e.target.value)}
-                    disabled={isSubmitting}
-                    placeholder="Enter amount in rupees"
-                    className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              )}
-            </div>
+            <CreditCardSection
+              isCreditCard={formValues.isCreditCard}
+              creditCardLimit={formValues.creditCardLimit || ''}
+              onFieldChange={handleFieldChange}
+              disabled={isSubmitting}
+            />
           )}
           <DynamicField
             field={{
