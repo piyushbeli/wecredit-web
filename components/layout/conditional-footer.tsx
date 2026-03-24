@@ -16,7 +16,7 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/grievance-redressal/',
   '/calculator/personal-loan',
   '/our-partners/',
-  '/blog/',
+  // '/blog/',
   '/offers' // Exclude /offers route
 ];
 
