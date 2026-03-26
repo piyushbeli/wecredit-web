@@ -81,6 +81,11 @@ interface AuthState {
   error: string | null;
   /** Pending action to execute after successful login (PDF Step 5A) */
   pendingAction: PendingAction | null;
+  /**
+   * When true, AuthModal opened on OTP step with a known phone (e.g. Upswing URL);
+   * useAuthHandlers sends OTP once then clears this flag.
+   */
+  shouldAutoSendOtp: boolean;
 }
 
 /**
@@ -91,6 +96,13 @@ interface AuthActions {
   openModal: () => void;
   /** Open auth modal with a pending action to execute after login */
   openModalWithPendingAction: (action: PendingAction) => void;
+  /**
+   * Open modal on OTP step with phone pre-filled (e.g. Upswing ?mobile=...).
+   * Triggers a one-time sendOtp via shouldAutoSendOtp in useAuthHandlers.
+   */
+  openModalWithPendingActionAtOtp: (action: PendingAction, phoneNumber: string) => void;
+  /** Cleared after auto-send starts so Strict Mode does not double-send */
+  clearShouldAutoSendOtp: () => void;
   /** Close the auth modal and reset state */
   closeModal: () => void;
   /** Set current auth step */
@@ -125,6 +137,7 @@ const initialModalState = {
   isLoading: false,
   error: null,
   pendingAction: null as PendingAction | null,
+  shouldAutoSendOtp: false,
 };
 
 /** Initial auth state */
@@ -147,7 +160,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         ...initialModalState,
         ...initialAuthState,
 
-        openModal: () => set({ isModalOpen: true, error: null }),
+        openModal: () =>
+          set({ isModalOpen: true, error: null, shouldAutoSendOtp: false }),
 
         /** Open modal with pending action - used when user clicks offer without being logged in */
         openModalWithPendingAction: (action: PendingAction) =>
@@ -155,7 +169,22 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             isModalOpen: true,
             error: null,
             pendingAction: action,
+            currentStep: 'phone',
+            phoneNumber: '',
+            shouldAutoSendOtp: false,
           }),
+
+        openModalWithPendingActionAtOtp: (action: PendingAction, phoneNumber: string) =>
+          set({
+            isModalOpen: true,
+            error: null,
+            pendingAction: action,
+            phoneNumber: phoneNumber.trim(),
+            currentStep: 'otp',
+            shouldAutoSendOtp: true,
+          }),
+
+        clearShouldAutoSendOtp: () => set({ shouldAutoSendOtp: false }),
 
         closeModal: () =>
           set({
@@ -177,6 +206,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             phoneNumber: '',
             isLoading: false,
             error: null,
+            shouldAutoSendOtp: false,
             // Note: pendingAction is NOT cleared here - it's consumed by the component
           }),
 
