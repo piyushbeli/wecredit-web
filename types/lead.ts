@@ -32,7 +32,8 @@ export type FormFieldKey =
   | 'ConsentIp'
   | 'ConsentDateTime'
   | 'consent'
-  | 'consentPrivacyPolicy';
+  | 'consentPrivacyPolicy'
+  | 'consentPartnerTerms';
 
 /** Field types returned by the API */
 export type FormFieldType = 'string' | 'number' | 'float' | 'boolean';
@@ -227,6 +228,8 @@ export interface LeadFormData {
   ConsentDateTime: string;
   /** Consent checkbox value */
   consent?: string;
+  /** Multi-lender partner terms checkbox value */
+  consentPartnerTerms?: string;
   /** Sub-lender reference from URL */
   originSubLender?: string;
 }
