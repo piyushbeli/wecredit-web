@@ -158,6 +158,10 @@ const DynamicField = ({
 }: DynamicFieldProps) => {
   const { title, key, type, options, isMandatory } = field;
 
+  // Some lender form payloads omit `options` for `modeOfSalary` (leaving it as a free-text input).
+  // For better UX, we fall back to a 3-option button group when options are missing.
+  const shouldUseModeOfSalaryFallbackOptions = key === 'modeOfSalary' && options.length === 0;
+
   // Skip hidden fields (ConsentIp, ConsentDateTime - auto-filled)
   if (HIDDEN_FIELDS.includes(key)) {
     return null;
@@ -171,12 +175,12 @@ const DynamicField = ({
       return (
         <div className="space-y-2">
           <div className="flex items-start gap-3">
-            <input
+              <input
               type="checkbox"
               id={key}
               checked={isChecked}
               onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
-className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"            />
+className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"            />
            <label htmlFor={key} className="text-sm text-gray-700 leading-relaxed">
   {title}
 </label>
@@ -201,12 +205,12 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
           <label htmlFor={key} className="text-sm text-gray-700">
   {key === 'consent' ? (
     <>
-      I agree to the{' '}
-      <a href="/terms-of-service" className="text-blue-600 underline">
-        Terms of Service
-      </a>{' '}
-      of WeCredit.
-    </>
+    I agree to the{' '}
+    <a href="/terms-of-service" className="text-blue-600 underline">
+      Terms of Service
+    </a>{' '}
+    of WeCredit.
+  </>
   ) : (
     title
   )}
@@ -220,13 +224,24 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
   }
 
   // Handle selection fields with options
-  if (options.length > 0) {
+  const resolvedOptions = shouldUseModeOfSalaryFallbackOptions
+    ? ['cash', 'upi', 'bankTransfer']
+    : options;
+
+  if (resolvedOptions.length > 0) {
     // Use ButtonGroup for 2-4 options (better UX for small sets)
-    if (options.length >= 2 && options.length <= 4) {
-      const buttonOptions = options.map((opt) => ({
-        value: opt,
-        label: capitalizeOption(opt),
-      }));
+    if (resolvedOptions.length >= 2 && resolvedOptions.length <= 4) {
+      const buttonOptions =
+        shouldUseModeOfSalaryFallbackOptions
+          ? [
+              { value: 'cash', label: 'Cash' },
+              { value: 'upi', label: 'UPi' },
+              { value: 'bankTransfer', label: 'Bank Transfer' },
+            ]
+          : resolvedOptions.map((opt) => ({
+              value: opt,
+              label: capitalizeOption(opt),
+            }));
 
       return (
         <div className="space-y-2">
@@ -270,7 +285,7 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
             <option value="" disabled>
               Select {title}
             </option>
-            {options.map((option) => (
+            {resolvedOptions.map((option) => (
               <option key={option} value={option}>
                 {capitalizeOption(option)}
               </option>

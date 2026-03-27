@@ -29,6 +29,7 @@ const footerSections: FooterSection[] = [
     links: [
       { label: 'About Us', href: '/about-us' },
       { label: 'Partner with Us', href: '/partner-with-us' },
+      { label: 'Partner Terms & Conditions', href: '/partner-terms-and-conditions' },
     ],
   },
   {
