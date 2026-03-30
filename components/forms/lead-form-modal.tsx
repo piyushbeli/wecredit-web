@@ -372,6 +372,7 @@ const LeadFormModal = ({
       window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
     }
   }, [
+    formValues,
     validateCurrentStep,
     fields,
     formValues,
@@ -432,7 +433,7 @@ const LeadFormModal = ({
       formValues.creditCardLimit
     );
 
-    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !hasWeCreditConsent || !canSubmitMultiLender;
+    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender ;
 
     return (
       <ActionButton
@@ -563,8 +564,8 @@ const LeadFormModal = ({
                     : sectionFields.map((field) => renderField(field))}
                   {section.title === 'Identity Verification' && (
                     <>
-                     {/* Multi-lender uses single-page layout; CreditCardSection must live here — not under isLastStep, which this flow never reaches. */}
-                     {isMultiLenderCreditCardEnabled && (
+                      {/* Multi-lender uses single-page layout; CreditCardSection must live here — not under isLastStep, which this flow never reaches. */}
+                      {isMultiLenderCreditCardEnabled && (
                         <CreditCardSection
                           isCreditCard={formValues.isCreditCard}
                           creditCardLimit={formValues.creditCardLimit || ''}

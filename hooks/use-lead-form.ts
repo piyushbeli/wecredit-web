@@ -111,6 +111,8 @@ export const useLeadForm = (
   const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
   const { isAuthenticated, user } = useAuth();
 
+  // Single-page flow shows all steps at once; include step 4 keys (PAN, credit card, consent)
+  // so validation and field filtering match the multi-step wizard.
   const mergedSinglePageFieldKeys = useMemo<FormFieldKey[]>(() => {
     const orderedKeys: FormFieldKey[] = [];
     SINGLE_PAGE_STEPS.forEach((stepNumber) => {
@@ -120,6 +122,11 @@ export const useLeadForm = (
         }
       });
     });
+    getStep4FieldKeys().forEach((fieldKey) => {
+      if (!orderedKeys.includes(fieldKey)) {
+        orderedKeys.push(fieldKey);
+      }
+    });
     return orderedKeys;
   }, []);
 
@@ -127,14 +134,20 @@ export const useLeadForm = (
    * Get current step configuration
    */
   const getCurrentStepConfig = useCallback((): WizardStep => {
-    const stepNumber = singlePage ? 1 : currentStep;
-    const fieldKeys = singlePage
-      ? mergedSinglePageFieldKeys
-      : (STEP_FIELD_MAPPING[currentStep] || []);
-    
+    if (singlePage) {
+      return {
+        stepNumber: 1,
+        title: STEP_TITLES[1] || 'Step 1',
+        fieldKeys: mergedSinglePageFieldKeys,
+      };
+    }
+
+    const fieldKeys =
+      currentStep === 4 ? getStep4FieldKeys() : STEP_FIELD_MAPPING[currentStep] || [];
+
     return {
-      stepNumber,
-      title: STEP_TITLES[stepNumber] || `Step ${stepNumber}`,
+      stepNumber: currentStep,
+      title: STEP_TITLES[currentStep] || `Step ${currentStep}`,
       fieldKeys,
     };
   }, [currentStep, mergedSinglePageFieldKeys, singlePage]);
