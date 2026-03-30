@@ -146,7 +146,7 @@ function buildFetchFormFieldsHeaders(
     ...buildDefaultHeaders(),
     'Authorization': `Bearer ${token || ''}`,
     'mobile': String(mobile || ''),
-    'lenderName': lenderName,
+    'lendername': lenderName,
     'fetchDetails': fetchDetails.toString(),
     ...getAttributionHeadersCommon(
       hasExplicitLenderName ? { omitLender: true } : undefined
@@ -241,9 +241,11 @@ async function fetchFormFields(
     partnerCode: getEffectivePartnerCode(),
   };
   try {
+    const headers = buildFetchFormFieldsHeaders(lenderName, fetchDetails);
+    console.log('[headers]:', headers);
     const response = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
-      headers: buildFetchFormFieldsHeaders(lenderName, fetchDetails),
+      headers,
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) {
