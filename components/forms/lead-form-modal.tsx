@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
@@ -20,11 +20,11 @@ import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
-import { UNITY_CONSENT } from '@/lib/constants/common';
 import {
   buildCreditCardPayload,
   isMultiLenderCreditCardSectionComplete,
 } from '@/lib/utils/form-helpers';
+import { MULTILENDER_PARTNER_TERMS_HREF, UNITY_CONSENT } from '@/lib/constants/common';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
@@ -41,6 +41,26 @@ interface LeadFormModalProps {
 
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
+const MULTI_LENDER_PARTNER_CONSENT_KEY: FormFieldKey = 'consentPartnerTerms';
+
+const STEP_SECTIONS: Array<{ title: string; fieldKeys: FormFieldKey[] }> = [
+  {
+    title: 'Personal Information',
+    fieldKeys: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
+  },
+  {
+    title: 'Address Information',
+    fieldKeys: ['addressType', 'permanentAddress', 'pincode'],
+  },
+  {
+    title: 'Employment & Income',
+    fieldKeys: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
+  },
+  {
+    title: 'Identity Verification',
+    fieldKeys: ['pan', 'consent'],
+  },
+];
 
 /* LNT CONSENTS */
 const LNT_CONSENTS = [
@@ -83,6 +103,12 @@ const LNT_CONSENTS = [
     uiText: 'I hereby consent that my household income is greater than Rs 3,00,000',
   },
 ];
+
+interface LntConsentPayload {
+  consentCode: string;
+  consentText: string;
+  submittedAt: string;
+}
 
 const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   name: 'Test User',
@@ -136,10 +162,8 @@ const LeadFormModal = ({
   lenderName,
   partnerCode = PARTNER_CODE,
   isAllLenders = false,
-  onSuccess,
   fetchDetails = true,
 }: LeadFormModalProps) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const { partner, originSubLender  } = useUrlParamsStore();
@@ -148,6 +172,7 @@ const LeadFormModal = ({
   const [userIp, setUserIp] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [lntCompanyName, setLntCompanyName] = useState('');
+  const [showPartnerConsentError, setShowPartnerConsentError] = useState(false);
 
   const isIpFetchInFlight = useRef(false);
   
@@ -172,12 +197,16 @@ const LeadFormModal = ({
     handleFieldChange,
     handleNext,
     handleBack,
+    validateCurrentStep,
     validateField,
     initializeFormValues,
-  } = useLeadForm(fields);
+    isSinglePage,
+  } = useLeadForm(fields, { singlePage: isAllLenders });
 
   const isFirstStep = currentStep === 1;
-  const isLastStep = currentStep === 4;
+  const isLastStep = isSinglePage || currentStep === 4;
+  const hasWeCreditConsent = formValues.consent === 'true';
+  const hasPartnerConsent = formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] === 'true';
   const isPrefillEnabled = process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production'
     && searchParams?.get(PREFILL_QUERY_KEY) === PREFILL_QUERY_VALUE;
   // Use visual viewport height to keep CTA visible above iOS Safari toolbars.
@@ -191,6 +220,7 @@ const LeadFormModal = ({
   useEffect(() => {
     if (isOpen) return;
     setShowSuccess(false);
+    setShowPartnerConsentError(false);
     setUserIp('');
     isIpFetchInFlight.current = false;
     resetFields();
@@ -236,26 +266,38 @@ const LeadFormModal = ({
   useBodyScrollLock(isOpen);
 
   const handleHeaderBackClick = useCallback((): void => {
-    if (isFirstStep) {
+    if (isAllLenders || isFirstStep) {
       onClose();
     } else {
       handleBack();
     }
-  }, [isFirstStep, onClose, handleBack]);
+  }, [isAllLenders, isFirstStep, onClose, handleBack]);
 
   const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
+    setShowPartnerConsentError(false);
+
+    if (!validateCurrentStep()) {
+      const firstError = document.querySelector('.border-red-300, input:invalid');
+      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     // Check consent - always enforce when consent field is present, regardless of backend isMandatory flag.
     // This guarantees the user must actively agree before their personal data is submitted.
     const consentField = fields.find(f => f.key === 'consent');
 
     if (consentField) {
-      const hasConsent = formValues.consent === 'true';
-      if (!hasConsent) return;
+      if (!hasWeCreditConsent) return;
     }
 
-    let consents: any[] = [];
+    if (isAllLenders && !hasPartnerConsent) {
+      // Partner terms consent is FE-only for now and must be explicitly checked.
+      setShowPartnerConsentError(true);
+      return;
+    }
+
+    let consents: LntConsentPayload[] = [];
 
     if (lenderName === 'lnt') {
 
@@ -314,6 +356,7 @@ const LeadFormModal = ({
       ConsentIp: userIp || formValues.ConsentIp || '',
       ConsentDateTime: getCurrentDateTime(),
       consent: formValues.consent || 'false',
+      consentPartnerTerms: formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] || 'false',
       ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
       ...buildCreditCardPayload(
@@ -329,20 +372,18 @@ const LeadFormModal = ({
       window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
     }
   }, [
+    validateCurrentStep,
+    fields,
     formValues,
+    hasPartnerConsent,
+    hasWeCreditConsent,
+    isAllLenders,
     userIp,
     createLead,
     effectivePartnerCode,
     lenderName,
-    onSuccess,
-    router,
-    onClose,
-    fields,
-    partner,
-    originSubLender,
-    isAllLenders,
-    isMultiLenderCreditCardEnabled,
     lntCompanyName,
+    originSubLender,
   ]);
 
 
@@ -365,7 +406,7 @@ const LeadFormModal = ({
   };
 
   const renderFooterButton = (): React.ReactElement => {
-    if (!isLastStep) {
+    if (!isSinglePage && !isLastStep) {
       return (
         <ActionButton
           type="button"
@@ -379,10 +420,11 @@ const LeadFormModal = ({
     }
 
     // Always require consent in last step
-    const hasConsent = formValues.consent === 'true';
     const hasLntConsents =
       lenderName !== 'lnt' ||
       LNT_CONSENTS.every(c => formValues[c.key] === 'true');
+    const requiresPartnerConsent = isAllLenders;
+    const canSubmitMultiLender = !requiresPartnerConsent || hasPartnerConsent;
 
     const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
       isMultiLenderCreditCardEnabled,
@@ -390,7 +432,7 @@ const LeadFormModal = ({
       formValues.creditCardLimit
     );
 
-    const isSubmitDisabled = !hasConsent || !hasLntConsents || !isCreditCardSectionComplete;
+    const isSubmitDisabled = !hasConsent || !hasLntConsents || !isCreditCardSectionComplete || !hasWeCreditConsent || !canSubmitMultiLender;
 
     return (
       <ActionButton
@@ -405,6 +447,71 @@ const LeadFormModal = ({
       </ActionButton>
     );
   };
+
+  const renderField = (field: FormField): React.ReactElement => (
+    <DynamicField
+      key={field.key}
+      field={field}
+      value={formValues[field.key] || ''}
+      onChange={(val) => handleFieldChange(field.key, val)}
+      onBlur={() => validateField(field.key)}
+      error={formErrors[field.key]}
+      disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
+    />
+  );
+
+  const renderMultiLenderPartnerConsent = (): React.ReactElement | null => {
+    if (!isAllLenders) return null;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id={MULTI_LENDER_PARTNER_CONSENT_KEY}
+            checked={hasPartnerConsent}
+            onChange={(event) => {
+              const value = event.target.checked ? 'true' : 'false';
+              handleFieldChange(MULTI_LENDER_PARTNER_CONSENT_KEY, value);
+              if (event.target.checked) {
+                setShowPartnerConsentError(false);
+              }
+            }}
+            className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+          />
+          <label htmlFor={MULTI_LENDER_PARTNER_CONSENT_KEY} className="text-sm text-gray-700 leading-relaxed">
+            I agree to the{' '}
+            <a href={MULTILENDER_PARTNER_TERMS_HREF} className="text-blue-600 underline">
+              Terms & Conditions
+            </a>{' '}
+            of the partners of WeCredit.
+          </label>
+        </div>
+        {showPartnerConsentError && (
+          <p className="text-xs text-red-600 ml-8">Please accept partner terms to continue.</p>
+        )}
+      </div>
+    );
+  };
+
+  const renderMultiLenderWeCreditConsent = (): React.ReactElement => (
+    <DynamicField
+      field={{
+        key: 'consent',
+        title: consentTitle,
+        type: 'boolean',
+        options: [],
+        value: 'true',
+        isMandatory: true,
+        order: 999,
+        lenderName: isUnitySingleLender ? 'unity' : undefined,
+      }}
+      value={formValues.consent || 'true'}
+      onChange={(val) => handleFieldChange('consent', val)}
+      onBlur={() => validateField('consent')}
+      error={formErrors.consent}
+      disabled={isSubmitting}
+    />
+  );
 
   const renderStepContent = (): React.ReactElement | null => {
     // Debug logging
@@ -437,6 +544,37 @@ const LeadFormModal = ({
       );
     }
 
+    if (isSinglePage) {
+      return (
+        <div className="space-y-8">
+          {STEP_SECTIONS.map((section) => {
+            const sectionFields = currentStepFields.filter((field) => section.fieldKeys.includes(field.key));
+            if (sectionFields.length === 0) {
+              return null;
+            }
+            return (
+              <section key={section.title} className="space-y-4">
+                <h3 className="lead-form-heading">{section.title}</h3>
+                <div className="space-y-5">
+                  {section.title === 'Identity Verification'
+                    ? sectionFields
+                      .filter((field) => field.key !== 'consent')
+                      .map((field) => renderField(field))
+                    : sectionFields.map((field) => renderField(field))}
+                  {section.title === 'Identity Verification' && (
+                    <>
+                      {renderMultiLenderWeCreditConsent()}
+                      {renderMultiLenderPartnerConsent()}
+                    </>
+                  )}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      );
+    }
+
     // Render fields dynamically
     // Always show consent checkbox in last step, with Unity-specific text for the single-lender Unity flow
     if (isLastStep) {
@@ -448,18 +586,7 @@ const LeadFormModal = ({
         <>
           {visibleFields
             .filter(field => field.key !== 'consent')
-            .map((field) => (
-              <DynamicField
-                key={field.key}
-                field={field}
-                value={formValues[field.key] || ''}
-                onChange={(val) => handleFieldChange(field.key, val)}
-                onBlur={() => validateField(field.key)}
-                error={formErrors[field.key]}
-                disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
-              />
-            ))
-            }
+            .map((field) => renderField(field))}
           {lenderName === 'lnt' && (
             <div className="space-y-2">
               <label className="lead-form-label">
@@ -555,19 +682,7 @@ const LeadFormModal = ({
     // Default: render all fields
     return (
       <>
-        {visibleFields.map((field) => {
-          return (
-            <DynamicField
-              key={field.key}
-              field={field}
-              value={formValues[field.key] || ''}
-              onChange={(val) => handleFieldChange(field.key, val)}
-              onBlur={() => validateField(field.key)}
-              error={formErrors[field.key]}
-              disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
-            />
-          );
-        })}
+        {visibleFields.map((field) => renderField(field))}
       </>
     );
   };
@@ -620,12 +735,12 @@ const LeadFormModal = ({
             type="button"
             onClick={handleHeaderBackClick}
             className="p-1 text-gray-700 hover:text-gray-900"
-            aria-label={isFirstStep ? 'Close' : 'Back'}
+            aria-label={isAllLenders || isFirstStep ? 'Close' : 'Back'}
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h1 className="text-base font-medium text-gray-900">
-            Personal Loan ({currentStep}/4)
+            {isAllLenders ? 'Personal Loan' : `Personal Loan (${currentStep}/4)`}
           </h1>
         </div>
 
@@ -665,22 +780,35 @@ const LeadFormModal = ({
             <>
               <div className="flex-1 overflow-y-auto">
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                  <h2 className="lead-form-heading">
-                    {currentStepConfig.title}
-                  </h2>
+                  {!isSinglePage && (
+                    <h2 className="lead-form-heading">
+                      {currentStepConfig.title}
+                    </h2>
+                  )}
 
-                  <AnimatePresence mode="wait">
+                  {isSinglePage ? (
                     <motion.div
-                      key={currentStep}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       transition={{ duration: 0.2 }}
                       className="space-y-5"
                     >
                       {renderStepContent()}
                     </motion.div>
-                  </AnimatePresence>
+                  ) : (
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                        className="space-y-5"
+                      >
+                        {renderStepContent()}
+                      </motion.div>
+                    </AnimatePresence>
+                  )}
 
                   {renderSubmitError()}
                 </form>

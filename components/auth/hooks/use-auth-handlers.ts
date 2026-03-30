@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { authService, setAuthToken, setMobile } from '@/lib/api';
 import { useLoading } from '@/hooks/use-loading';
@@ -29,6 +29,9 @@ interface UseAuthHandlersReturn {
 export const useAuthHandlers = (): UseAuthHandlersReturn => {
   const {
     phoneNumber,
+    isModalOpen,
+    currentStep,
+    shouldAutoSendOtp,
     isLoading,
     error,
     setStep,
@@ -36,11 +39,60 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
     setUser,
     setLoading,
     setError,
+    clearShouldAutoSendOtp,
   } = useAuthStore();
   const { showLoading, hideLoading } = useLoading();
 
   const [otpValue, setOtpValue] = useState('');
   const isVerifyingOtpRef = useRef<boolean>(false);
+
+  /**
+   * Upswing / OTP-first entry: modal opens on OTP with phone pre-filled; we must still
+   * call sendOtp (same as tapping Continue on the phone step). Clears shouldAutoSendOtp
+   * synchronously before the async send so Strict Mode does not double-send.
+   */
+  useEffect(() => {
+    if (!isModalOpen || !shouldAutoSendOtp || currentStep !== 'otp') {
+      return;
+    }
+
+    const trimmed = phoneNumber.trim();
+    const isValidForOtp =
+      trimmed.length === 10 && /^[6-9]/.test(trimmed) && /^\d{10}$/.test(trimmed);
+    if (!isValidForOtp) {
+      clearShouldAutoSendOtp();
+      setError('Enter a valid 10-digit mobile number starting with 6–9.');
+      return;
+    }
+
+    clearShouldAutoSendOtp();
+
+    setLoading(true);
+    setError(null);
+    showLoading('Sending OTP...', 'We are verifying your phone number.');
+    void (async () => {
+      try {
+        const result = await authService.sendOtp(trimmed);
+        if (result.success) {
+          setLoading(false);
+        } else {
+          setError(result.error || 'Failed to send OTP. Please try again.');
+        }
+      } finally {
+        hideLoading();
+      }
+    })();
+  }, [
+    isModalOpen,
+    shouldAutoSendOtp,
+    currentStep,
+    phoneNumber,
+    clearShouldAutoSendOtp,
+    setError,
+    setLoading,
+    showLoading,
+    hideLoading,
+  ]);
 
   /** Handle phone number change */
   const handlePhoneChange = useCallback(

@@ -1,41 +1,79 @@
- 'use client';
+'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { forwardUpswingRedirect } from '@/lib/api/wecredit';
 import { toast } from 'sonner';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { getCookie } from 'cookies-next';
+import { useAuthStore } from '@/stores/auth-store';
 
+/** Same rule as phone step: 10 digits starting with 6–9 (India mobile). */
 const isValidMobile = (mobile: string | null): mobile is string => {
   if (!mobile) return false;
   const trimmed = mobile.trim();
-  return /^\d{10}$/.test(trimmed);
+  return /^[6-9]\d{9}$/.test(trimmed);
+};
+
+/** Builds the current page URL for post-login navigation (navigate_to_offer pending action). */
+const buildUpswingRedirectHref = (pathname: string, searchParams: URLSearchParams): string => {
+  const qs = searchParams.toString();
+  return qs ? `${pathname}?${qs}` : pathname;
 };
 
 const UpswingRedirectPage = () => {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthInitialized, isAuthenticated, openModalWithPendingActionAtOtp } = useAuthStore();
+  const hasAutoOpenedAuthModal = useRef(false);
+  const lastMobileParam = useRef<string | null>(null);
 
   useEffect(() => {
     const mobileParam = searchParams.get('mobile');
 
-    // Guard against missing or invalid mobile values before hitting the API
+    if (lastMobileParam.current !== mobileParam) {
+      hasAutoOpenedAuthModal.current = false;
+      lastMobileParam.current = mobileParam;
+    }
+
+    if (!isAuthInitialized) {
+      return;
+    }
+
     if (!isValidMobile(mobileParam)) {
-      const message = 'A valid 10-digit mobile number is required to continue.';
+      const message =
+        'A valid 10-digit mobile number starting with 6–9 is required to continue.';
       setError(message);
       setIsLoading(false);
       toast.error(message);
       return;
     }
 
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      const returnHref = buildUpswingRedirectHref(pathname, searchParams);
+      if (!hasAutoOpenedAuthModal.current) {
+        hasAutoOpenedAuthModal.current = true;
+        openModalWithPendingActionAtOtp(
+          {
+            type: 'navigate_to_offer',
+            href: returnHref,
+          },
+          mobileParam
+        );
+      }
+      return;
+    }
+
+    setIsLoading(true);
+
     const runRedirect = async () => {
       try {
         const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
 
-        // forwardUpswingRedirect handles the HTML response and navigation internally
         const result = await forwardUpswingRedirect(mobileParam, token);
 
         if (!result.success) {
@@ -56,7 +94,33 @@ const UpswingRedirectPage = () => {
     };
 
     void runRedirect();
-  }, [searchParams]);
+  }, [isAuthInitialized, isAuthenticated, pathname, searchParams, openModalWithPendingActionAtOtp]);
+
+  const mobileParam = searchParams.get('mobile');
+  const hasValidMobile = isValidMobile(mobileParam);
+
+  const handleOpenSignIn = (): void => {
+    const returnHref = buildUpswingRedirectHref(pathname, searchParams);
+    if (!isValidMobile(mobileParam)) {
+      return;
+    }
+    openModalWithPendingActionAtOtp(
+      {
+        type: 'navigate_to_offer',
+        href: returnHref,
+      },
+      mobileParam
+    );
+  };
+
+  if (!isAuthInitialized) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center px-4">
+        <h1 className="mb-2 text-xl font-semibold">Checking your session...</h1>
+        <p className="text-sm text-muted-foreground">Please wait a moment.</p>
+      </main>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -65,6 +129,25 @@ const UpswingRedirectPage = () => {
         <p className="text-sm text-muted-foreground">
           Please wait while we securely connect you to the Upswing page.
         </p>
+      </main>
+    );
+  }
+
+  if (hasValidMobile && !isAuthenticated && !error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center px-4">
+        <h1 className="mb-2 text-xl font-semibold">Sign in to continue</h1>
+        <p className="mb-6 max-w-md text-center text-sm text-muted-foreground">
+          You need to be signed in with OTP to open your Upswing offer. Use the sign-in screen if it
+          is not visible, or tap below to open it again.
+        </p>
+        <button
+          type="button"
+          onClick={handleOpenSignIn}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+        >
+          Sign in with OTP
+        </button>
       </main>
     );
   }
@@ -91,4 +174,3 @@ const UpswingRedirectPage = () => {
 };
 
 export default UpswingRedirectPage;
-
