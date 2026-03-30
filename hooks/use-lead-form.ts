@@ -17,19 +17,16 @@ interface WizardStep {
   fieldKeys: FormFieldKey[];
 }
 
-/** Steps 1–3: fixed field order per wizard screen */
+/**
+ * Fixed field order per wizard screen (steps 1–4).
+ * API-driven fields are filtered by these keys; flow-level gating (e.g. credit card) lives in the modal.
+ */
 const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
   1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
   3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
+  4: ['pan', 'isCreditCard', 'creditCardLimit', 'consent'],
 };
-
-/**
- * Step 4 includes PAN + credit card fields + consent.
- * API-driven fields are still filtered by keys and flow-level gating is handled in the modal.
- */
-const getStep4FieldKeys = (): FormFieldKey[] =>
-  ['pan', 'isCreditCard', 'creditCardLimit', 'consent'];
 
 /** Hidden fields - auto-filled, never shown in UI */
 const HIDDEN_FIELDS: FormFieldKey[] = ['ConsentIp', 'ConsentDateTime'];
@@ -111,8 +108,7 @@ export const useLeadForm = (
   const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
   const { isAuthenticated, user } = useAuth();
 
-  // Single-page flow shows all steps at once; include step 4 keys (PAN, credit card, consent)
-  // so validation and field filtering match the multi-step wizard.
+  // Single-page flow shows all steps at once; merge keys from STEP_FIELD_MAPPING (1–4) in order.
   const mergedSinglePageFieldKeys = useMemo<FormFieldKey[]>(() => {
     const orderedKeys: FormFieldKey[] = [];
     SINGLE_PAGE_STEPS.forEach((stepNumber) => {
@@ -121,11 +117,6 @@ export const useLeadForm = (
           orderedKeys.push(fieldKey);
         }
       });
-    });
-    getStep4FieldKeys().forEach((fieldKey) => {
-      if (!orderedKeys.includes(fieldKey)) {
-        orderedKeys.push(fieldKey);
-      }
     });
     return orderedKeys;
   }, []);
@@ -142,8 +133,7 @@ export const useLeadForm = (
       };
     }
 
-    const fieldKeys =
-      currentStep === 4 ? getStep4FieldKeys() : STEP_FIELD_MAPPING[currentStep] || [];
+    const fieldKeys = STEP_FIELD_MAPPING[currentStep] || [];
 
     return {
       stepNumber: currentStep,
