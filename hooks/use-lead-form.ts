@@ -46,6 +46,11 @@ const MINIMUM_AGE_YEARS = 18;
  * Normalize values that must stay numeric or uppercased even on prefill.
  */
 const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
+  if (fieldKey === 'name') {
+    // Name should not contain digits; remove numbers while preserving letters/spaces.
+    // This keeps the controlled input clean and avoids sending invalid data to backend.
+    return value.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim();
+  }
   if (fieldKey === 'pan') {
     return sanitizePanInput(value);
   }
@@ -415,7 +420,12 @@ export const useLeadForm = (
       
       const rawValue = field.value ?? '';
 
-      if (field.key === 'pan' || field.key === 'pincode' || field.key === 'companyPincode') {
+      if (
+        field.key === 'pan'
+        || field.key === 'name'
+        || field.key === 'pincode'
+        || field.key === 'companyPincode'
+      ) {
         // Keep PAN and pincode values normalized even when the API pre-fills them.
         initialValues[field.key] = normalizeLeadFieldValue(field.key, rawValue);
         return;

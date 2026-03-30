@@ -259,4 +259,8 @@ export interface CreateLeadHeaders {
   Authorization: string;
   mobile: string;
   utm_url?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  lendername?: string;
 }

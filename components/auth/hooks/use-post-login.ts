@@ -12,6 +12,7 @@ import {
   HOME_LOAN_SUBMIT_SUCCESS_EVENT,
   GOLD_LOAN_SUBMIT_SUCCESS_EVENT,
 } from '@/lib/constants/events';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
 
 type SubmitFn<TPayload> = (payload: TPayload) => Promise<boolean>;
 
@@ -72,6 +73,11 @@ export const usePostLogin = (): void => {
         if (action.href) {
           router.push(action.href);
         }
+        break;
+
+      case 'open_personal_loan_apply':
+        // Home /personal-loan pages mount PersonalLoanContent which watches this flag.
+        useLoanApplicationStore.getState().triggerApplyFlow();
         break;
 
       case 'check_eligibility':

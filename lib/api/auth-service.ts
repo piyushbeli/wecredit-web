@@ -6,8 +6,10 @@
 
 import { getCookie, deleteCookie } from 'cookies-next';
 import { wecreditConfig } from '@/lib/config';
-import { PARTNER_CODE, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 import type { User } from '@/stores/auth-store';
+import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
 
 /** Auth API endpoint - all auth operations use this single endpoint */
 const AUTH_ENDPOINT = `${wecreditConfig.apiUrl}/api/auth`;
@@ -195,16 +197,6 @@ async function fetchUserIp(): Promise<string> {
 }
 
 /**
- * Gets the current page URL for utm_url header
- */
-function getUtmUrl(): string {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-  return window.location.href;
-}
-
-/**
  * Gets device info from localStorage
  */
 function getDeviceInfo(): string {
@@ -274,7 +266,7 @@ function buildDefaultHeaders(): Record<string, string> {
   return {
     ...wecreditConfig.headers,
     'Accept': 'application/json',
-    'utm_url': getUtmUrl(),
+    ...getAttributionHeadersCommon(),
   };
 }
 
@@ -361,12 +353,12 @@ async function authGet<T>(endpoint?: string): Promise<{ data: T | null; error: s
 /**
  * Send OTP to the given mobile number
  * @param mobile - 10 digit mobile number (must start with 6-9)
- * @param lenderName - Partner/lender code (default: WC001)
+ * @param lenderName - Partner/lender code (default: affiliate `partner` query when set, else WC001)
  * @returns Result with success status and message
  */
 async function sendOtp(
   mobile: string,
-  lenderName: string = PARTNER_CODE
+  lenderName: string = getEffectivePartnerCode()
 ): Promise<AuthResult<SendOtpResponse>> {
   const payload: SendOtpRequest = {
     mobile,

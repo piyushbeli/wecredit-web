@@ -1,10 +1,14 @@
 'use client';
 
 import { getCookie } from 'cookies-next';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
 import { useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
+import {
+  buildOffersPathClearingLenderFilter,
+  buildOffersPathWithQuery,
+} from '@/lib/utils/offers-navigation';
 
 import {
   OfferCard,
@@ -57,11 +61,17 @@ export const OffersView = () => {
   const lenderNameParam =
     rawLender.toLowerCase() === 'lnt'
       ? 'lnt'
-      : rawLender; useEffect(() => { return () => { reset(); }; }, [reset]);
-      const pollingMessage = lenderNameParam
-  ? `Please wait while we fetch offer from ${lenderNameParam.charAt(0).toUpperCase() + lenderNameParam.slice(1)} for you.`
-  : 'Please wait while we fetch the best offers for you.';
-  useEffect(() => { return () => {reset();}; }, [reset]);
+      : rawLender;
+
+  const pollingMessage = lenderNameParam
+    ? `Please wait while we fetch offer from ${lenderNameParam.charAt(0).toUpperCase() + lenderNameParam.slice(1)} for you.`
+    : 'Please wait while we fetch the best offers for you.';
+
+  useEffect(() => {
+    return () => {
+      reset();
+    };
+  }, [reset]);
   const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply } = useOffers();
 
   // Memoized filtered offers for lenderName(single Lender flow having both explore and status offers for deciding whether lenerName in URL has non-INITIATED offer or not. To decide the redirection to status page using singleLenderHasNonInitiatedOffer)
@@ -94,18 +104,18 @@ useEffect(() => {
   useEffect(() => {
     if (!lenderNameParam) return;
     if (singleLenderHasNonInitiatedOffer) {
-      router.replace('/offers/status');
+      router.replace(buildOffersPathWithQuery('/offers/status', searchParams));
     }
-  }, [lenderNameParam, singleLenderHasNonInitiatedOffer, router]);
+  }, [lenderNameParam, singleLenderHasNonInitiatedOffer, router, searchParams]);
 
   const handleExploreMore = () => {
-    window.location.replace('/offers'); // removes lenderName from URL and reloads the page to show all offers   
+    window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
   // For non-INITIATED offers in explore screen, navigate to status page
   if (offer.wcStatus !== 'INITIATED') {
-    router.push('/offers/status');
+    router.push(buildOffersPathWithQuery('/offers/status', searchParams));
     return;
   }
 
@@ -144,10 +154,10 @@ useEffect(() => {
 
   const handleRecentlyClickedOfferClick = (offer: LenderOfferStatus): void => {
     // For recently clicked offers, navigate to status page
-    router.replace('/offers/status');
+    router.replace(buildOffersPathWithQuery('/offers/status', searchParams));
   };
   const handleCheckStatus = (): void => {
-    router.replace('/offers/status');
+    router.replace(buildOffersPathWithQuery('/offers/status', searchParams));
   };
   const handleGoBack = (): void => {
     router.push('/');
