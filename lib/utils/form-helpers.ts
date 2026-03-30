@@ -166,3 +166,49 @@ export function splitFullName(fullName: string | undefined): { firstName: string
   const lastName = parts.slice(1).join(' ') ?? '';
   return { firstName, lastName };
 }
+
+/**
+ * Validate credit card max amount input for multi-lender flow.
+ * Accepts values with optional commas and requires a positive number.
+ */
+export function isValidCreditCardMaxAmountInput(raw: string | undefined): boolean {
+  const normalized = (raw ?? '').replace(/,/g, '').trim();
+  if (!normalized) return false;
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) && parsed > 0;
+}
+
+/**
+ * Whether multi-lender credit card section is complete for submission.
+ */
+export function isMultiLenderCreditCardSectionComplete(
+  isCreditCardFlowEnabled: boolean,
+  isCreditCard: string | undefined,
+  creditCardLimit: string | undefined
+): boolean {
+  if (!isCreditCardFlowEnabled) return true;
+  if (isCreditCard !== 'true' && isCreditCard !== 'false') return false;
+  if (isCreditCard === 'true') {
+    return isValidCreditCardMaxAmountInput(creditCardLimit);
+  }
+  return true;
+}
+
+/**
+ * Build lead API payload fields for the multi-lender credit card section.
+ * Returns an empty object when flow is disabled or user has not answered yet.
+ */
+export function buildCreditCardPayload(
+  isEnabled: boolean,
+  isCreditCard: string | undefined,
+  creditCardLimit: string | undefined
+): Partial<Record<'isCreditCard' | 'creditCardLimit', string>> {
+  if (!isEnabled || (isCreditCard !== 'true' && isCreditCard !== 'false')) {
+    return {};
+  }
+
+  return {
+    isCreditCard,
+    ...(isCreditCard === 'true' ? { creditCardLimit: creditCardLimit ?? '' } : {}),
+  };
+}

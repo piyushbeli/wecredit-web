@@ -20,8 +20,13 @@ import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
+import {
+  buildCreditCardPayload,
+  isMultiLenderCreditCardSectionComplete,
+} from '@/lib/utils/form-helpers';
 import { MULTILENDER_PARTNER_TERMS_HREF, UNITY_CONSENT } from '@/lib/constants/common';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
+import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
 
 interface LeadFormModalProps {
@@ -175,6 +180,13 @@ const LeadFormModal = ({
   const effectivePartnerCode =  partner ? partner : partnerCode;
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
+  /**
+   * Credit card questions are only valid for all-lenders flow when:
+   * user chose to proceed without full details fetch.
+   * This single gate controls UI + validation + payload inclusion.
+   */
+  const isMultiLenderCreditCardEnabled =
+    isAllLenders && !fetchDetails;
 
   const {
     currentStep,
@@ -309,6 +321,17 @@ const LeadFormModal = ({
       return dateStr;
     };
 
+    // Multi-lender + flag: enforce credit card answers before hitting the API.
+    if (
+      !isMultiLenderCreditCardSectionComplete(
+        isMultiLenderCreditCardEnabled,
+        formValues.isCreditCard,
+        formValues.creditCardLimit
+      )
+    ) {
+      return;
+    }
+
     const formData: LeadFormData = {
       name: formValues.name || '',
       mobile: formValues.mobile || '',
@@ -336,6 +359,11 @@ const LeadFormModal = ({
       consentPartnerTerms: formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] || 'false',
       ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
+      ...buildCreditCardPayload(
+        isMultiLenderCreditCardEnabled,
+        formValues.isCreditCard,
+        formValues.creditCardLimit
+      ),
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName);
@@ -344,6 +372,7 @@ const LeadFormModal = ({
       window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
     }
   }, [
+    formValues,
     validateCurrentStep,
     fields,
     formValues,
@@ -398,7 +427,13 @@ const LeadFormModal = ({
     const requiresPartnerConsent = isAllLenders;
     const canSubmitMultiLender = !requiresPartnerConsent || hasPartnerConsent;
 
-    const isSubmitDisabled = !hasWeCreditConsent || !hasLntConsents || !canSubmitMultiLender;
+    const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
+      isMultiLenderCreditCardEnabled,
+      formValues.isCreditCard,
+      formValues.creditCardLimit
+    );
+
+    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender ;
 
     return (
       <ActionButton
@@ -529,6 +564,15 @@ const LeadFormModal = ({
                     : sectionFields.map((field) => renderField(field))}
                   {section.title === 'Identity Verification' && (
                     <>
+                      {/* Multi-lender uses single-page layout; CreditCardSection must live here — not under isLastStep, which this flow never reaches. */}
+                      {isMultiLenderCreditCardEnabled && (
+                        <CreditCardSection
+                          isCreditCard={formValues.isCreditCard}
+                          creditCardLimit={formValues.creditCardLimit || ''}
+                          onFieldChange={handleFieldChange}
+                          disabled={isSubmitting}
+                        />
+                      )}
                       {renderMultiLenderWeCreditConsent()}
                       {renderMultiLenderPartnerConsent()}
                     </>
