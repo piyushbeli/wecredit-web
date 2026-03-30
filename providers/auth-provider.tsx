@@ -78,12 +78,22 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       const lendername = normalizeParam(
         searchParams?.get('lendername') ?? searchParams?.get('lender_name')
       );
+
+      // If there are no partner or attribution params in the URL, keep existing store
+      // values so we do not clear attribution on in-app navigations to plain URLs.
+      const hasAnyParams =
+        partner || originSubLender || utm_source || utm_medium || utm_campaign || lendername;
+
+      if (!hasAnyParams) {
+        return;
+      }
+
       const hasAttribution = Boolean(utm_source || utm_medium || utm_campaign || lendername);
       const utm_url =
         hasAttribution && typeof window !== 'undefined' ? window.location.href : null;
 
-      // Keep store in sync with CURRENT URL every time this runs.
-      // Writing explicit nulls prevents stale affiliate/UTM values from previous landings.
+      // When this URL includes relevant params, sync the store; explicit nulls for missing
+      // fields prevent stale affiliate/UTM values from a previous landing with params.
       setUrlParams(partner ?? null, originSubLender ?? null);
       setAttributionParams(utm_url, utm_source, utm_medium, utm_campaign, lendername);
 
