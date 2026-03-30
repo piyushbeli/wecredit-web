@@ -432,7 +432,7 @@ const LeadFormModal = ({
       formValues.creditCardLimit
     );
 
-    const isSubmitDisabled = !hasConsent || !hasLntConsents || !isCreditCardSectionComplete || !hasWeCreditConsent || !canSubmitMultiLender;
+    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !hasWeCreditConsent || !canSubmitMultiLender;
 
     return (
       <ActionButton
@@ -563,6 +563,15 @@ const LeadFormModal = ({
                     : sectionFields.map((field) => renderField(field))}
                   {section.title === 'Identity Verification' && (
                     <>
+                     {/* Multi-lender uses single-page layout; CreditCardSection must live here — not under isLastStep, which this flow never reaches. */}
+                     {isMultiLenderCreditCardEnabled && (
+                        <CreditCardSection
+                          isCreditCard={formValues.isCreditCard}
+                          creditCardLimit={formValues.creditCardLimit || ''}
+                          onFieldChange={handleFieldChange}
+                          disabled={isSubmitting}
+                        />
+                      )}
                       {renderMultiLenderWeCreditConsent()}
                       {renderMultiLenderPartnerConsent()}
                     </>
@@ -651,14 +660,6 @@ const LeadFormModal = ({
 
             </div>
           ))}
-          {isMultiLenderCreditCardEnabled && (
-            <CreditCardSection
-              isCreditCard={formValues.isCreditCard}
-              creditCardLimit={formValues.creditCardLimit || ''}
-              onFieldChange={handleFieldChange}
-              disabled={isSubmitting}
-            />
-          )}
           <DynamicField
             field={{
               key: 'consent',
