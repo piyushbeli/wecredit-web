@@ -433,11 +433,7 @@ const LeadFormModal = ({
       formValues.creditCardLimit
     );
 
-    const isSubmitDisabled =
-      !hasWeCreditConsent
-      || !hasLntConsents
-      || !isCreditCardSectionComplete
-      || !canSubmitMultiLender;
+    const isSubmitDisabled = !hasWeCreditConsent || !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender ;
 
     return (
       <ActionButton
@@ -566,14 +562,6 @@ const LeadFormModal = ({
                       .filter((field) => field.key !== 'consent')
                       .map((field) => renderField(field))
                     : sectionFields.map((field) => renderField(field))}
-                  {section.title === 'Identity Verification' && isMultiLenderCreditCardEnabled && (
-                    <CreditCardSection
-                      isCreditCard={formValues.isCreditCard}
-                      creditCardLimit={formValues.creditCardLimit || ''}
-                      onFieldChange={handleFieldChange}
-                      disabled={isSubmitting}
-                    />
-                  )}
                   {section.title === 'Identity Verification' && (
                     <>
                       {renderMultiLenderWeCreditConsent()}
