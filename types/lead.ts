@@ -34,7 +34,8 @@ export type FormFieldKey =
   | 'consent'
   | 'consentPrivacyPolicy'
   | 'isCreditCard'
-  | 'creditCardLimit';
+  | 'creditCardLimit'
+  | 'consentPartnerTerms';
 
 /** Field types returned by the API */
 export type FormFieldType = 'string' | 'number' | 'float' | 'boolean';
@@ -233,6 +234,8 @@ export interface LeadFormData {
   ConsentDateTime: string;
   /** Consent checkbox value */
   consent?: string;
+  /** Multi-lender partner terms checkbox value */
+  consentPartnerTerms?: string;
   /** Sub-lender reference from URL */
   originSubLender?: string;
   /** Whether the user has a credit card (multi-lender flow; stored as 'true' | 'false' in UI) */
