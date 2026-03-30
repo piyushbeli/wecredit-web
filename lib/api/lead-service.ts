@@ -141,12 +141,16 @@ function buildFetchFormFieldsHeaders(
 ): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
   const mobile = getCookie(STORAGE_MOBILE);
+  const hasExplicitLenderName = lenderName.trim().length > 0;
   return {
     ...buildDefaultHeaders(),
     'Authorization': `Bearer ${token || ''}`,
     'mobile': String(mobile || ''),
     'lenderName': lenderName,
     'fetchDetails': fetchDetails.toString(),
+    ...getAttributionHeadersCommon(
+      hasExplicitLenderName ? { omitLender: true } : undefined
+    ),
   };
 }
 

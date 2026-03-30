@@ -22,7 +22,16 @@ export function getAttributionUtmUrl(): string {
   return window.location.href;
 }
 
-export function getAttributionHeaders(): Record<string, string> {
+export type GetAttributionHeadersOptions = {
+  /**
+   * When true, omit `lendername` from URL attribution (e.g. caller already sends `lenderName`).
+   */
+  omitLender?: boolean;
+};
+
+export function getAttributionHeaders(
+  options?: GetAttributionHeadersOptions
+): Record<string, string> {
   // This helper is used in API services that can run in SSR contexts too.
   // In those cases, session-based attribution isn't available.
   if (typeof window === 'undefined') {
@@ -35,14 +44,17 @@ export function getAttributionHeaders(): Record<string, string> {
   if (utm_source) headers["utm_source"] = utm_source;
   if (utm_medium) headers["utm_medium"] = utm_medium;
   if (utm_campaign) headers["utm_campaign"] = utm_campaign;
-  if (lendername) headers["lendername"] = lendername;
+  // Avoid duplicate lender signals: explicit header elsewhere wins when omitLender is set.
+  if (lendername && !options?.omitLender) headers["lendername"] = lendername;
 
   return headers;
 }
 
-export function getAttributionHeadersCommon(): Record<string, string> {
+export function getAttributionHeadersCommon(
+  options?: GetAttributionHeadersOptions
+): Record<string, string> {
   return {
-    ...getAttributionHeaders(),
+    ...getAttributionHeaders(options),
     'utm_url': getAttributionUtmUrl(),
   };
 }
