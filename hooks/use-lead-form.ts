@@ -4,7 +4,7 @@
  * Dynamically renders fields based on API response
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FormField, FormFieldKey } from '@/types/lead';
 import { useAuth } from '@/hooks/use-auth';
 import { getCookie } from 'cookies-next';
@@ -76,6 +76,7 @@ interface UseLeadFormReturn {
   currentStepFields: FormField[];
   canGoBack: boolean;
   canGoNext: boolean;
+  isSinglePage: boolean;
   
   // Actions
   handleFieldChange: (key: string, value: string) => void;
@@ -86,32 +87,70 @@ interface UseLeadFormReturn {
   initializeFormValues: (fields: FormField[], userIp: string) => void;
 }
 
-export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
+interface UseLeadFormOptions {
+  singlePage?: boolean;
+}
+
+const STEP_TITLES: Record<number, string> = {
+  1: 'Personal Information',
+  2: 'Address Information',
+  3: 'Employment & Income',
+  4: 'Identity Verification',
+};
+
+const SINGLE_PAGE_STEPS = [1, 2, 3, 4] as const;
+
+export const useLeadForm = (
+  fields: FormField[],
+  options: UseLeadFormOptions = {}
+): UseLeadFormReturn => {
+  const { singlePage = false } = options;
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
   const { isAuthenticated, user } = useAuth();
 
+  // Single-page flow shows all steps at once; include step 4 keys (PAN, credit card, consent)
+  // so validation and field filtering match the multi-step wizard.
+  const mergedSinglePageFieldKeys = useMemo<FormFieldKey[]>(() => {
+    const orderedKeys: FormFieldKey[] = [];
+    SINGLE_PAGE_STEPS.forEach((stepNumber) => {
+      (STEP_FIELD_MAPPING[stepNumber] || []).forEach((fieldKey) => {
+        if (!orderedKeys.includes(fieldKey)) {
+          orderedKeys.push(fieldKey);
+        }
+      });
+    });
+    getStep4FieldKeys().forEach((fieldKey) => {
+      if (!orderedKeys.includes(fieldKey)) {
+        orderedKeys.push(fieldKey);
+      }
+    });
+    return orderedKeys;
+  }, []);
+
   /**
    * Get current step configuration
    */
   const getCurrentStepConfig = useCallback((): WizardStep => {
+    if (singlePage) {
+      return {
+        stepNumber: 1,
+        title: STEP_TITLES[1] || 'Step 1',
+        fieldKeys: mergedSinglePageFieldKeys,
+      };
+    }
+
     const fieldKeys =
       currentStep === 4 ? getStep4FieldKeys() : STEP_FIELD_MAPPING[currentStep] || [];
-    const titles: Record<number, string> = {
-      1: 'Personal Information',
-      2: 'Address Information',
-      3: 'Employment & Income',
-      4: 'Identity Verification',
-    };
-    
+
     return {
       stepNumber: currentStep,
-      title: titles[currentStep] || `Step ${currentStep}`,
+      title: STEP_TITLES[currentStep] || `Step ${currentStep}`,
       fieldKeys,
     };
-  }, [currentStep]);
+  }, [currentStep, mergedSinglePageFieldKeys, singlePage]);
 
   /**
    * Get fields for current step, filtered and sorted
@@ -123,7 +162,7 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
       .sort((a, b) => a.order - b.order);
     
     return stepFields;
-  }, [currentStep, fields, getCurrentStepConfig]);
+  }, [fields, getCurrentStepConfig]);
 
   /**
    * Handle field value change
@@ -306,6 +345,9 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
    * Auto-skips empty steps
    */
   const handleNext = useCallback((): void => {
+    if (singlePage) {
+      return;
+    }
     if (!validateCurrentStep()) {
       scrollToFirstError();
       return;
@@ -319,15 +361,18 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
     }
     
     setCurrentStep(prev => Math.min(prev + 1, 4));
-  }, [validateCurrentStep, scrollToFirstError, getCurrentStepFields, currentStep]);
+  }, [validateCurrentStep, scrollToFirstError, getCurrentStepFields, currentStep, singlePage]);
 
   /**
    * Handle back step navigation
    */
   const handleBack = useCallback((): void => {
+    if (singlePage) {
+      return;
+    }
     setCurrentStep(prev => Math.max(prev - 1, 1));
     setFormErrors({});
-  }, []);
+  }, [singlePage]);
 
   /**
    * Initialize form values from API fields
@@ -403,8 +448,15 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
       initialValues[field.key] = rawValue.trim();
     });
     
+    // Multi-lender one-page flow needs both consents regardless of API payload.
+    // Default WeCredit consent to checked and partner consent to unchecked.
+    if (singlePage) {
+      initialValues.consent = 'true';
+      initialValues.consentPartnerTerms = 'true';
+    }
+
     setFormValues(initialValues);
-  }, []);
+  }, [singlePage]);
 
   /**
    * Auth prefill for mobile/phone:
@@ -460,6 +512,10 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
       return;
     }
     
+    if (singlePage) {
+      return;
+    }
+
     const stepFields = getCurrentStepFields();
     // Only skip if current step has no fields AND we're not on step 1
     // Always show step 1 first, even if it has no fields
@@ -470,7 +526,7 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, getCurrentStepFields, fieldsLoaded, fields.length]);
+  }, [currentStep, getCurrentStepFields, fieldsLoaded, fields.length, singlePage]);
 
   return {
     currentStep,
@@ -478,8 +534,9 @@ export const useLeadForm = (fields: FormField[]): UseLeadFormReturn => {
     formErrors,
     currentStepConfig: getCurrentStepConfig(),
     currentStepFields: getCurrentStepFields(),
-    canGoBack: currentStep > 1,
-    canGoNext: currentStep < 4,
+    canGoBack: singlePage ? false : currentStep > 1,
+    canGoNext: singlePage ? false : currentStep < 4,
+    isSinglePage: singlePage,
     handleFieldChange,
     handleNext,
     handleBack,
