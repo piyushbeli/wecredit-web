@@ -6,6 +6,7 @@
 
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS } from '@/lib/constants/api-keys';
+import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
 
 /** Auth API endpoint - same as auth-service (clicks_counter is an auth endpoint) */
 const AUTH_ENDPOINT = `${wecreditConfig.apiUrl}/api/auth`;
@@ -44,12 +45,11 @@ export interface CreditCardAnalyticsResult {
  * Matches auth-service: Content-Type, Accept, utm_url, plus env-specific headers.
  */
 function buildClicksCounterHeaders(): Record<string, string> {
-  const utmUrl = typeof window !== 'undefined' ? window.location.href : '';
   return {
     ...wecreditConfig.headers,
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'utm_url': utmUrl,
+    ...getAttributionHeadersCommon(),
   };
 }
 

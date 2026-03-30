@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
@@ -156,6 +156,45 @@ function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): Form
   });
 }
 
+/**
+ * Builds `/offers` navigation with `newLead=true`, optional `lenderName` from the form,
+ * and affiliate / tracking params preserved from the current page query and session store
+ * (so UTM, partner, etc. survive after submit when they were present on the landing URL).
+ */
+function buildOffersPathAfterLeadSuccess(
+  lenderNameProp: string,
+  searchParams: ReadonlyURLSearchParams | null,
+): string {
+  const qs = new URLSearchParams(searchParams?.toString() ?? '');
+  qs.delete('pre_auth');
+  qs.delete('mn');
+  qs.set('newLead', 'true');
+  if (lenderNameProp) {
+    qs.set('lenderName', lenderNameProp);
+  }
+
+  const st = useUrlParamsStore.getState();
+  const mergeIfMissing = (key: string, value: string | null): void => {
+    if (!value?.trim()) return;
+    if (!qs.has(key)) {
+      qs.set(key, value.trim());
+    }
+  };
+  mergeIfMissing('partner', st.partner);
+  mergeIfMissing('originSubLender', st.originSubLender);
+  mergeIfMissing('utm_source', st.utm_source);
+  mergeIfMissing('utm_medium', st.utm_medium);
+  mergeIfMissing('utm_campaign', st.utm_campaign);
+
+  if (!lenderNameProp && st.lendername) {
+    if (!qs.has('lenderName') && !qs.has('lendername')) {
+      qs.set('lenderName', st.lendername);
+    }
+  }
+
+  return `/offers?${qs.toString()}`;
+}
+
 const LeadFormModal = ({
   isOpen,
   onClose,
@@ -166,6 +205,7 @@ const LeadFormModal = ({
 }: LeadFormModalProps) => {
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const { partner, originSubLender  } = useUrlParamsStore();
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
@@ -369,7 +409,7 @@ const LeadFormModal = ({
     const success = await createLead(formData, effectivePartnerCode, lenderName);
     if (success) {
       setShowSuccess(true);
-      window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
+      router.push(buildOffersPathAfterLeadSuccess(lenderName, searchParams));
     }
   }, [
     formValues,
@@ -385,6 +425,8 @@ const LeadFormModal = ({
     lenderName,
     lntCompanyName,
     originSubLender,
+    router,
+    searchParams,
   ]);
 
 

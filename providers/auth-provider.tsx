@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { authService } from '@/lib/api';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { isValidMobile } from '@/lib/utils/common-helper';
 
 /**
  * Props for AuthProvider component
@@ -35,10 +36,81 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
   const preAuthHandled = useRef(false);
+  const mnAffiliateOtpOpenedRef = useRef(false);
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isAuthenticated, logout, setLoading, setUser, setAuthInitialized } = useAuthStore();
-  const { setUrlParams } = useUrlParamsStore();
+  // Stable dependency for effects: `searchParams` object identity may not change on SPA navigation.
+  const searchParamsString = searchParams?.toString() ?? '';
+  const {
+    isAuthenticated,
+    logout,
+    setLoading,
+    setUser,
+    setAuthInitialized,
+    openModalWithPendingActionAtOtp,
+  } = useAuthStore();
+  const { setUrlParams, setAttributionParams } = useUrlParamsStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
+
+  /**
+   * Normalizes query params into either a trimmed non-empty string or `null`.
+   * This prevents sending empty header values (e.g. `utm_medium=`) to the backend.
+   */
+  const normalizeParam = useCallback((value: string | null): string | null => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }, []);
+
+  /**
+   * Captures partner + marketing attribution params from URL into the session store.
+   * Called for both pre-auth links and regular landing flows.
+   */
+  const captureAttributionFromUrl = useCallback(
+    (options?: { cleanUrl?: boolean }): void => {
+      const partner = normalizeParam(searchParams?.get('partner'));
+      const originSubLender = normalizeParam(searchParams?.get('originSubLender'));
+
+      const utm_source = normalizeParam(searchParams?.get('utm_source'));
+      const utm_medium = normalizeParam(searchParams?.get('utm_medium'));
+      const utm_campaign = normalizeParam(searchParams?.get('utm_campaign'));
+      // Affiliates may use `lendername` or `lender_name`; store a single canonical value.
+      const lendername = normalizeParam(
+        searchParams?.get('lendername') ?? searchParams?.get('lender_name')
+      );
+
+      // If there are no partner or attribution params in the URL, keep existing store
+      // values so we do not clear attribution on in-app navigations to plain URLs.
+      const hasAnyParams =
+        partner || originSubLender || utm_source || utm_medium || utm_campaign || lendername;
+
+      if (!hasAnyParams) {
+        return;
+      }
+
+      const hasAttribution = Boolean(utm_source || utm_medium || utm_campaign || lendername);
+      const utm_url =
+        hasAttribution && typeof window !== 'undefined' ? window.location.href : null;
+
+      // When this URL includes relevant params, sync the store; explicit nulls for missing
+      // fields prevent stale affiliate/UTM values from a previous landing with params.
+      setUrlParams(partner ?? null, originSubLender ?? null);
+      setAttributionParams(utm_url, utm_source, utm_medium, utm_campaign, lendername);
+
+      if (options?.cleanUrl && typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('partner');
+        url.searchParams.delete('originSubLender');
+        url.searchParams.delete('utm_source');
+        url.searchParams.delete('utm_medium');
+        url.searchParams.delete('utm_campaign');
+        url.searchParams.delete('lendername');
+        url.searchParams.delete('lender_name');
+        window.history.replaceState({}, '', url.toString());
+      }
+    },
+    [normalizeParam, searchParams, setAttributionParams, setUrlParams]
+  );
   /**
    * Handle pre-authentication from URL parameters
    * Extracts pre_auth, mn, partner, and originSubLender from query params
@@ -47,8 +119,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const handlePreAuth = useCallback((): boolean => {
     const preAuth = searchParams?.get('pre_auth');
     const mobile = searchParams?.get('mn');
-    const partner = searchParams?.get('partner');
-    const originSubLender = searchParams?.get('originSubLender');
 
     
     // Both pre_auth and mobile must be present for authentication
@@ -57,6 +127,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       return false;
     }
 
+    // Capture partner + marketing attribution params for API calls.
+    captureAttributionFromUrl({ cleanUrl: false });
+
     // Only skip if we've already handled THIS EXACT pre_auth in this session
     // Compare against stored values to allow new pre-auth params
     if (typeof window !== 'undefined') {
@@ -64,16 +137,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       const storedMobile = sessionStorage.getItem('pre_auth_mobile');
       if (storedPreAuth === preAuth && storedMobile === mobile) {
         // Same user → only update attribution
-        if (partner) {
-          setUrlParams(partner, originSubLender ?? null);
-        }
 
-        // clean URL
+        // Remove only the token from the URL; keep affiliate params visible for partners.
         const url = new URL(window.location.href);
         url.searchParams.delete('pre_auth');
-        url.searchParams.delete('mn');
-        url.searchParams.delete('partner');
-        url.searchParams.delete('originSubLender');
         window.history.replaceState({}, '', url.toString());
 
         return true;
@@ -90,11 +157,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // Clear old auth cookies to prevent stale data
     deleteCookie(STORAGE_AUTH_TOKEN);
     deleteCookie(STORAGE_MOBILE);
-
-    // Store URL params if present (they'll be used in lead form)
-    if (partner) {
-      setUrlParams(partner, originSubLender ?? null);
-    }
 
     // Set auth token in cookie
     setCookie(STORAGE_AUTH_TOKEN, preAuth, {
@@ -119,18 +181,14 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       triggerApplyFlow();
     }, 100);
 
-    // Clean up URL parameters without breaking browser history
-    // Use replaceState to prevent back button from showing the auth params
+    // Remove only the pre_auth token from the URL; keep affiliate query params.
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       url.searchParams.delete('pre_auth');
-      url.searchParams.delete('mn');
-      url.searchParams.delete('partner');
-      url.searchParams.delete('originSubLender');
       window.history.replaceState({}, '', url.toString());
     }
     return true; // Pre-auth was applied
-  }, [searchParams, setUser, setUrlParams, triggerApplyFlow]);
+  }, [captureAttributionFromUrl, searchParams, setUser, triggerApplyFlow]);
 
   /**
    * Validates the existing auth token on app mount
@@ -144,6 +202,11 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       setAuthInitialized(true);
       return;
     }
+
+    // Capture attribution params for regular landing flows as well.
+    // This makes campaign URLs work even when `pre_auth` is not present.
+    captureAttributionFromUrl({ cleanUrl: false });
+
     // Check if token exists in cookies
     const token = getCookie(STORAGE_AUTH_TOKEN);
     const mobile = getCookie(STORAGE_MOBILE);
@@ -152,6 +215,26 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       if (isAuthenticated) {
         logout();
       }
+
+      // Affiliate deep link: ?mn=... without pre_auth → OTP, then open PL apply flow on home / PL hub.
+      // Scoped to `/` and `/personal-loan` only so `/personal-loan/lender/...` and `/upswing-redirect` keep their own flows.
+      const normalizedPath = (pathname || '/').replace(/\/$/, '') || '/';
+      const isHomeOrPersonalLoanHub =
+        normalizedPath === '/' || normalizedPath === '/personal-loan';
+      const mnParam = searchParams?.get('mn');
+      if (
+        isHomeOrPersonalLoanHub
+        && !searchParams?.get('pre_auth')
+        && isValidMobile(mnParam)
+        && !mnAffiliateOtpOpenedRef.current
+      ) {
+        mnAffiliateOtpOpenedRef.current = true;
+        openModalWithPendingActionAtOtp(
+          { type: 'open_personal_loan_apply' },
+          mnParam.trim()
+        );
+      }
+
       setAuthInitialized(true);
       return;
     }
@@ -184,7 +267,18 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       setLoading(false);
       setAuthInitialized(true);
     }
-  }, [handlePreAuth, isAuthenticated, logout, setAuthInitialized, setLoading, setUser]);
+  }, [
+    captureAttributionFromUrl,
+    handlePreAuth,
+    isAuthenticated,
+    logout,
+    openModalWithPendingActionAtOtp,
+    pathname,
+    searchParams,
+    setAuthInitialized,
+    setLoading,
+    setUser,
+  ]);
 
   useEffect(() => {
     // Only run once on mount
@@ -194,6 +288,16 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // Initialize auth validation
     initializeAuth();
   }, [initializeAuth]);
+
+  /**
+   * Re-sync affiliate + UTM store on every client-side navigation (SPA).
+   * Full page loads are covered by `initializeAuth`; without this, sessionStorage
+   * could keep stale partner/UTM after `router.push` or `<Link>` removes query params.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    captureAttributionFromUrl({ cleanUrl: false });
+  }, [pathname, searchParamsString, captureAttributionFromUrl]);
 
   return <>{children}</>;
 }

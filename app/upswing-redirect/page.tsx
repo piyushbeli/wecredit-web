@@ -7,13 +7,7 @@ import { toast } from 'sonner';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { getCookie } from 'cookies-next';
 import { useAuthStore } from '@/stores/auth-store';
-
-/** Same rule as phone step: 10 digits starting with 6–9 (India mobile). */
-const isValidMobile = (mobile: string | null): mobile is string => {
-  if (!mobile) return false;
-  const trimmed = mobile.trim();
-  return /^[6-9]\d{9}$/.test(trimmed);
-};
+import { isValidMobile } from '@/lib/utils/common-helper';
 
 /** Builds the current page URL for post-login navigation (navigate_to_offer pending action). */
 const buildUpswingRedirectHref = (pathname: string, searchParams: URLSearchParams): string => {
@@ -32,7 +26,7 @@ const UpswingRedirectPage = () => {
   const lastMobileParam = useRef<string | null>(null);
 
   useEffect(() => {
-    const mobileParam = searchParams.get('mobile');
+    const mobileParam = searchParams.get('mn');
 
     if (lastMobileParam.current !== mobileParam) {
       hasAutoOpenedAuthModal.current = false;
@@ -96,7 +90,7 @@ const UpswingRedirectPage = () => {
     void runRedirect();
   }, [isAuthInitialized, isAuthenticated, pathname, searchParams, openModalWithPendingActionAtOtp]);
 
-  const mobileParam = searchParams.get('mobile');
+  const mobileParam = searchParams.get('mn');
   const hasValidMobile = isValidMobile(mobileParam);
 
   const handleOpenSignIn = (): void => {

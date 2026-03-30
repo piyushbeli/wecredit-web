@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { PARTNER_CODE, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
 
 type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
 
@@ -33,6 +34,16 @@ export const PersonalLoanContent = (): JSX.Element => {
   const { isAuthenticated, openModal, logout } = useAuthStore();
   const { triggerApply, resetTrigger, setApplyLoading } = useLoanApplicationStore();
   const { needsForm, checkDedupe, isLoading: isCheckingDedupe, response, error }: UseCheckDedupeResult = useCheckDedupe();
+  const { partner, lendername: lendernameFromStore } = useUrlParamsStore();
+  const effectivePartnerCode = partner || PARTNER_CODE;
+
+  // Affiliate query e.g. ?lendername=unity → Unity single-lender flow (wizard + Unity consent), not multi-lender one-page.
+  const affiliateLenderSlug = (
+    (searchParams?.get('lendername') ?? searchParams?.get('lender_name') ?? lendernameFromStore ?? '')
+      .trim()
+      .toLowerCase()
+  );
+  const isUnitySingleLenderFromAffiliate = affiliateLenderSlug === 'unity';
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);
   const didInitiateCheckOffers = useRef<boolean>(false);
@@ -53,9 +64,9 @@ export const PersonalLoanContent = (): JSX.Element => {
       openModal();
       return;
     }
-    await checkDedupe(mobile, PARTNER_CODE);
+    await checkDedupe(mobile, effectivePartnerCode);
     hasCheckedDedupe.current = true;
-  }, [checkDedupe, logout, openModal]);
+  }, [checkDedupe, effectivePartnerCode, logout, openModal]);
 
   const handleDedupeResponse = useCallback((): void => {
     if (!response || isCheckingDedupe || !hasCheckedDedupe.current) {
@@ -68,7 +79,7 @@ export const PersonalLoanContent = (): JSX.Element => {
       }
     } else if (!error) {
       // Only redirect to offers if there is NO error (i.e., checkStatusAll succeeded and user has offers)
-      router.push('/offers');
+      router.push(buildOffersPathWithQuery('/offers', searchParams));
     }
     // If there is an error, do not redirect; error UI will be shown elsewhere
     didInitiateCheckOffers.current = false;
@@ -172,7 +183,7 @@ export const PersonalLoanContent = (): JSX.Element => {
     }
     
     hasCheckedDedupe.current = true;
-    await checkDedupe(mobile, PARTNER_CODE);
+    await checkDedupe(mobile, effectivePartnerCode);
   };
 
   return (
@@ -206,8 +217,8 @@ export const PersonalLoanContent = (): JSX.Element => {
       <LeadFormModal
         isOpen={isLeadFormModalOpen}
         onClose={closeLeadFormModal}
-        lenderName=""
-        isAllLenders={true}
+        lenderName={isUnitySingleLenderFromAffiliate ? 'unity' : ''}
+        isAllLenders={!isUnitySingleLenderFromAffiliate}
         fetchDetails={fetchDetails}
       />
     </>

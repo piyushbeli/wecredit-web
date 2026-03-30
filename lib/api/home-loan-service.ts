@@ -6,7 +6,8 @@
 import { getCookie } from 'cookies-next';
 import { toast } from 'sonner';
 import { wecreditConfig } from '@/lib/config';
-import { PARTNER_CODE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
+import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
+import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 import { getErrorMessage, isAbortError } from '@/lib/utils/error-helpers';
 import {
   getLoanFormStatus,
@@ -72,7 +73,7 @@ export async function fetchHomeLoanStatus(
 
   const requestBody: HomeLoanStatusRequestBody = {
     endpoint: 'fetch-hl-lead',
-    partnerCode: PARTNER_CODE,
+    partnerCode: getEffectivePartnerCode(),
   };
 
   const url = new URL(HOME_LOAN_ENDPOINT);
@@ -156,7 +157,7 @@ export async function submitHomeLoanEnquiry(
 
   const requestBody: HomeLoanSubmitRequestBody = {
     endpoint: 'hl-leads',
-    partnerCode: PARTNER_CODE,
+    partnerCode: getEffectivePartnerCode(),
     fullName: payload.name,
     mobileNumber: Number(phoneDigits),
     permanentPincode: Number(payload.permanentPincode),

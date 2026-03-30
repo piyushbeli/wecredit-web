@@ -19,6 +19,8 @@ import type {
   LenderOfferStatus,
   LenderHandlingResult,
 } from '@/types/wecredit';
+import { getAttributionHeadersCommon, getAttributionHeaders } from './attribution-headers';
+import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 
 /** Options for WeCredit API requests */
 export interface WeCreditOptions {
@@ -54,6 +56,7 @@ function buildHeaders(options: WeCreditOptions): Record<string, string> {
     ...(mobile && { [HEADER_MOBILE]: mobile }),
     ...(authorization && { Authorization: `Bearer ${authorization}` }),
     ...headers,
+    ...getAttributionHeadersCommon(),
   };
 }
 
@@ -70,6 +73,7 @@ function buildUtmClickedHeaders(
     [HEADER_MOBILE]: mobile,
     lendername: lenderName,
     ...(authorization && { Authorization: `Bearer ${authorization}` }),
+    ...getAttributionHeadersCommon(),
   };
 }
 
@@ -85,7 +89,7 @@ export async function fetchActiveLenders(
 ): Promise<ActiveLendersResponse> {
   const requestBody = {
     endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
-    partnerCode: wecreditConfig.partnerCode,
+    partnerCode: getEffectivePartnerCode(),
   };
   try {
     const data = await withApiLogging<ActiveLendersResponse>(
@@ -131,7 +135,7 @@ export async function fetchActiveLendersForUser(
   }
   const requestBody = {
     endpoint: ENDPOINTS.PUBLIC.ACTIVE_LENDERS,
-    partnerCode: wecreditConfig.partnerCode,
+    partnerCode: getEffectivePartnerCode(),
   };
   try {
     const data = await withApiLogging<ActiveLendersResponse>(
@@ -197,7 +201,7 @@ export async function checkStatusAll(
   const requestBody = {
     mobile: Number(mobile),
     endpoint: ENDPOINTS.PUBLIC.CHECK_STATUS_ALL,
-    partnerCode: wecreditConfig.partnerCode,
+    partnerCode: getEffectivePartnerCode(),
   };
   try {
     // Build fetch options - only include signal if it's a valid AbortSignal
@@ -319,7 +323,7 @@ export async function forwardUpswingRedirect(
 
   const requestBody = {
     endpoint: 'upswing-redirect',
-    partnerCode: wecreditConfig.partnerCode,
+    partnerCode: getEffectivePartnerCode(),
   };
 
   const url = `${UPSWING_REDIRECT_ENDPOINT}?mobile=${mobile}`;
@@ -473,7 +477,7 @@ export async function hitAllLenders(
   const requestBody = {
     mobile: Number(mobile),
     endpoint: ENDPOINTS.PUBLIC.HIT_ALL_LENDERS,
-    partnerCode: wecreditConfig.partnerCode,
+    partnerCode: getEffectivePartnerCode(),
   };
   try {
     const controller = new AbortController();

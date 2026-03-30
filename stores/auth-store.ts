@@ -29,6 +29,8 @@ type AuthStep = 'phone' | 'otp';
 type PendingActionType =
   | 'navigate_to_offer'
   | 'check_eligibility'
+  /** After OTP on home/personal-loan, run the same apply flow as the CTA (dedupe → lead form). */
+  | 'open_personal_loan_apply'
   | 'submit_business_loan'
   | 'submit_car_loan'
   | 'submit_home_loan'
