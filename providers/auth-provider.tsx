@@ -8,7 +8,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { authService } from '@/lib/api';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { isValidMobile } from '@/lib/utils/common-helper';
+import { runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
 
 /**
  * Props for AuthProvider component
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     setAuthInitialized,
     openModalWithPendingActionAtOtp,
   } = useAuthStore();
-  const { setUrlParams, setAttributionParams } = useUrlParamsStore();
+  const { setUrlParams, setAttributionParams, clearParams } = useUrlParamsStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
 
   /**
@@ -79,12 +79,15 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         searchParams?.get('lendername') ?? searchParams?.get('lender_name')
       );
 
-      // If there are no partner or attribution params in the URL, keep existing store
-      // values so we do not clear attribution on in-app navigations to plain URLs.
+      // If the visible URL has no affiliate/UTM params, reset the persisted session store so
+      // `getEffectivePartnerCode()` returns WC001 and headers stay aligned with the URL after
+      // SPA navigations (e.g. Link to `/` strips `?partner=` but sessionStorage would otherwise
+      // keep the old code).
       const hasAnyParams =
         partner || originSubLender || utm_source || utm_medium || utm_campaign || lendername;
 
       if (!hasAnyParams) {
+        clearParams();
         return;
       }
 
@@ -109,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         window.history.replaceState({}, '', url.toString());
       }
     },
-    [normalizeParam, searchParams, setAttributionParams, setUrlParams]
+    [clearParams, normalizeParam, searchParams, setAttributionParams, setUrlParams]
   );
   /**
    * Handle pre-authentication from URL parameters
@@ -207,6 +210,22 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // This makes campaign URLs work even when `pre_auth` is not present.
     captureAttributionFromUrl({ cleanUrl: false });
 
+    // Affiliate `mn` hub flow (see `runAffiliateMnFlow` in lib/auth).
+    const affiliateHandled = runAffiliateMnFlow(
+      pathname,
+      searchParams,
+      mnAffiliateOtpOpenedRef,
+      {
+        logout,
+        captureAttributionFromUrl,
+        openModalWithPendingActionAtOtp,
+        setAuthInitialized,
+      }
+    );
+    if (affiliateHandled) {
+      return;
+    }
+
     // Check if token exists in cookies
     const token = getCookie(STORAGE_AUTH_TOKEN);
     const mobile = getCookie(STORAGE_MOBILE);
@@ -214,25 +233,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       // No token in cookies - ensure clean logout state
       if (isAuthenticated) {
         logout();
-      }
-
-      // Affiliate deep link: ?mn=... without pre_auth → OTP, then open PL apply flow on home / PL hub.
-      // Scoped to `/` and `/personal-loan` only so `/personal-loan/lender/...` and `/upswing-redirect` keep their own flows.
-      const normalizedPath = (pathname || '/').replace(/\/$/, '') || '/';
-      const isHomeOrPersonalLoanHub =
-        normalizedPath === '/' || normalizedPath === '/personal-loan';
-      const mnParam = searchParams?.get('mn');
-      if (
-        isHomeOrPersonalLoanHub
-        && !searchParams?.get('pre_auth')
-        && isValidMobile(mnParam)
-        && !mnAffiliateOtpOpenedRef.current
-      ) {
-        mnAffiliateOtpOpenedRef.current = true;
-        openModalWithPendingActionAtOtp(
-          { type: 'open_personal_loan_apply' },
-          mnParam.trim()
-        );
       }
 
       setAuthInitialized(true);
@@ -260,7 +260,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
           );
         }
       }
-    } catch (error) {
+    } catch {
       // On error, clear auth for safety
       logout();
     } finally {
@@ -291,8 +291,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
 
   /**
    * Re-sync affiliate + UTM store on every client-side navigation (SPA).
-   * Full page loads are covered by `initializeAuth`; without this, sessionStorage
-   * could keep stale partner/UTM after `router.push` or `<Link>` removes query params.
+   * Full page loads are covered by `initializeAuth`; `captureAttributionFromUrl` clears the
+   * store when the URL has no params so partner code does not outlive the query string.
    */
   useEffect(() => {
     if (typeof window === 'undefined') return;

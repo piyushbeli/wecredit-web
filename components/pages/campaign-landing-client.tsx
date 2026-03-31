@@ -77,13 +77,16 @@ export const CampaignLandingClient = ({
     const mobile = searchParams.get('mn');
 
     if (mobile && isAuthenticated && !alreadyLoggedInToastRef.current) {
-      alreadyLoggedInToastRef.current = true;
       const existingDigits = (user?.phoneNumber || '').replace(/\D/g, '');
-      const displayNumber = existingDigits || user?.phoneNumber || '';
-      const message = displayNumber
-        ? `You are logged in with mobile ${displayNumber}. To login using url with a different number, please log out first.`
-        : 'You are already logged in.';
-      toast.info(message);
+      const mobileDigits = mobile.replace(/\D/g, '');
+
+      // Only show the info toast when URL mn is different from the logged-in mobile.
+      if (existingDigits && existingDigits !== mobileDigits) {
+        alreadyLoggedInToastRef.current = true;
+        const displayNumber = existingDigits || user?.phoneNumber || '';
+        const message = `You are logged in with mobile ${displayNumber}. To login using url with a different number, please log out first.`;
+        toast.info(message);
+      }
     }
 
     if (mobile && !isAuthenticated && !loginTriggeredRef.current) {
