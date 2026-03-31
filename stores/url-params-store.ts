@@ -13,6 +13,16 @@ interface UrlParamsState {
   partner: string | null;
   /** Origin sub-lender ID from URL */
   originSubLender: string | null;
+  /** UTM source attribution from URL */
+  utm_source: string | null;
+  /** UTM medium attribution from URL */
+  utm_medium: string | null;
+  /** UTM campaign attribution from URL */
+  utm_campaign: string | null;
+  /** Lender name attribution from URL */
+  lendername: string | null;
+  /** Full URL used for `utm_url` header (captures before we clean URL) */
+  utm_url: string | null;
   /** Whether URL params have been permanently consumed (no longer usable) */
   isConsumed: boolean;
 }
@@ -23,6 +33,14 @@ interface UrlParamsState {
 interface UrlParamsActions {
   /** Set partner and originSubLender from URL (called once when URL is read) */
   setUrlParams: (partner: string | null, originSubLender: string | null) => void;
+  /** Set marketing/affiliate attribution params from URL */
+  setAttributionParams: (
+    utm_url: string | null,
+    utm_source: string | null,
+    utm_medium: string | null,
+    utm_campaign: string | null,
+    lendername: string | null
+  ) => void;
   /** Permanently consume params - called after successful lead creation or offers redirect */
   /** Clear all URL params (called on logout) */
   clearParams: () => void;
@@ -31,6 +49,11 @@ interface UrlParamsActions {
 const initialState: UrlParamsState = {
   partner: null,
   originSubLender: null,
+  utm_source: null,
+  utm_medium: null,
+  utm_campaign: null,
+  lendername: null,
+  utm_url: null,
   isConsumed: false,
 };
 
@@ -56,6 +79,25 @@ export const useUrlParamsStore = create<UrlParamsState & UrlParamsActions>()(
             originSubLender, 
             isConsumed: false 
           }, false, 'setUrlParams'),
+        setAttributionParams: (
+          utm_url: string | null,
+          utm_source: string | null,
+          utm_medium: string | null,
+          utm_campaign: string | null,
+          lendername: string | null
+        ) =>
+          set(
+            {
+              utm_source,
+              utm_medium,
+              utm_campaign,
+              lendername,
+              utm_url,
+              isConsumed: false,
+            },
+            false,
+            'setAttributionParams'
+          ),
         clearParams: () => 
           set(initialState, false, 'clearParams'),
       }),

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
@@ -20,9 +20,15 @@ import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
+import {
+  buildCreditCardPayload,
+  isMultiLenderCreditCardSectionComplete,
+} from '@/lib/utils/form-helpers';
 import { MULTILENDER_PARTNER_TERMS_HREF, UNITY_CONSENT } from '@/lib/constants/common';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
+import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
+import Link from 'next/link';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -151,6 +157,45 @@ function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): Form
   });
 }
 
+/**
+ * Builds `/offers` navigation with `newLead=true`, optional `lenderName` from the form,
+ * and affiliate / tracking params preserved from the current page query and session store
+ * (so UTM, partner, etc. survive after submit when they were present on the landing URL).
+ */
+function buildOffersPathAfterLeadSuccess(
+  lenderNameProp: string,
+  searchParams: ReadonlyURLSearchParams | null,
+): string {
+  const qs = new URLSearchParams(searchParams?.toString() ?? '');
+  qs.delete('pre_auth');
+  qs.delete('mn');
+  qs.set('newLead', 'true');
+  if (lenderNameProp) {
+    qs.set('lenderName', lenderNameProp);
+  }
+
+  const st = useUrlParamsStore.getState();
+  const mergeIfMissing = (key: string, value: string | null): void => {
+    if (!value?.trim()) return;
+    if (!qs.has(key)) {
+      qs.set(key, value.trim());
+    }
+  };
+  mergeIfMissing('partner', st.partner);
+  mergeIfMissing('originSubLender', st.originSubLender);
+  mergeIfMissing('utm_source', st.utm_source);
+  mergeIfMissing('utm_medium', st.utm_medium);
+  mergeIfMissing('utm_campaign', st.utm_campaign);
+
+  if (!lenderNameProp && st.lendername) {
+    if (!qs.has('lenderName') && !qs.has('lendername')) {
+      qs.set('lenderName', st.lendername);
+    }
+  }
+
+  return `/offers?${qs.toString()}`;
+}
+
 const LeadFormModal = ({
   isOpen,
   onClose,
@@ -161,6 +206,7 @@ const LeadFormModal = ({
 }: LeadFormModalProps) => {
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const { partner, originSubLender  } = useUrlParamsStore();
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
@@ -175,6 +221,13 @@ const LeadFormModal = ({
   const effectivePartnerCode =  partner ? partner : partnerCode;
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
+  /**
+   * Credit card questions are only valid for all-lenders flow when:
+   * user chose to proceed without full details fetch.
+   * This single gate controls UI + validation + payload inclusion.
+   */
+  const isMultiLenderCreditCardEnabled =
+    isAllLenders && !fetchDetails;
 
   const {
     currentStep,
@@ -309,6 +362,17 @@ const LeadFormModal = ({
       return dateStr;
     };
 
+    // Multi-lender + flag: enforce credit card answers before hitting the API.
+    if (
+      !isMultiLenderCreditCardSectionComplete(
+        isMultiLenderCreditCardEnabled,
+        formValues.isCreditCard,
+        formValues.creditCardLimit
+      )
+    ) {
+      return;
+    }
+
     const formData: LeadFormData = {
       name: formValues.name || '',
       mobile: formValues.mobile || '',
@@ -336,14 +400,20 @@ const LeadFormModal = ({
       consentPartnerTerms: formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] || 'false',
       ...(lenderName === 'lnt' && { consents }),
       ...(originSubLender && { originSubLender }),
+      ...buildCreditCardPayload(
+        isMultiLenderCreditCardEnabled,
+        formValues.isCreditCard,
+        formValues.creditCardLimit
+      ),
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName);
     if (success) {
       setShowSuccess(true);
-      window.location.replace(`/offers?newLead=true${lenderName ? `&lenderName=${lenderName}` : ''}`);
+      router.push(buildOffersPathAfterLeadSuccess(lenderName, searchParams));
     }
   }, [
+    formValues,
     validateCurrentStep,
     fields,
     formValues,
@@ -356,6 +426,8 @@ const LeadFormModal = ({
     lenderName,
     lntCompanyName,
     originSubLender,
+    router,
+    searchParams,
   ]);
 
 
@@ -398,7 +470,13 @@ const LeadFormModal = ({
     const requiresPartnerConsent = isAllLenders;
     const canSubmitMultiLender = !requiresPartnerConsent || hasPartnerConsent;
 
-    const isSubmitDisabled = !hasWeCreditConsent || !hasLntConsents || !canSubmitMultiLender;
+    const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
+      isMultiLenderCreditCardEnabled,
+      formValues.isCreditCard,
+      formValues.creditCardLimit
+    );
+
+    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender ;
 
     return (
       <ActionButton
@@ -446,9 +524,9 @@ const LeadFormModal = ({
           />
           <label htmlFor={MULTI_LENDER_PARTNER_CONSENT_KEY} className="text-sm text-gray-700 leading-relaxed">
             I agree to the{' '}
-            <a href={MULTILENDER_PARTNER_TERMS_HREF} className="text-blue-600 underline">
+            <Link target="_blank" href={MULTILENDER_PARTNER_TERMS_HREF} className="text-blue-600 underline">
               Terms & Conditions
-            </a>{' '}
+            </Link>{' '}
             of the partners of WeCredit.
           </label>
         </div>
@@ -529,6 +607,15 @@ const LeadFormModal = ({
                     : sectionFields.map((field) => renderField(field))}
                   {section.title === 'Identity Verification' && (
                     <>
+                      {/* Multi-lender uses single-page layout; CreditCardSection must live here — not under isLastStep, which this flow never reaches. */}
+                      {isMultiLenderCreditCardEnabled && (
+                        <CreditCardSection
+                          isCreditCard={formValues.isCreditCard}
+                          creditCardLimit={formValues.creditCardLimit || ''}
+                          onFieldChange={handleFieldChange}
+                          disabled={isSubmitting}
+                        />
+                      )}
                       {renderMultiLenderWeCreditConsent()}
                       {renderMultiLenderPartnerConsent()}
                     </>

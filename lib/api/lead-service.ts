@@ -6,8 +6,10 @@
 
 import { getCookie } from 'cookies-next';
 import { wecreditConfig } from '@/lib/config';
-import { ENDPOINTS, PARTNER_CODE, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { ENDPOINTS, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 import { toast } from 'sonner';
+import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
 import type {
   FormField,
   FetchFormFieldsResponse,
@@ -40,15 +42,9 @@ interface LeadServiceResult<T> {
 // Utility Functions
 // ============================================
 
-/**
- * Gets the current page URL for utm_url header
- */
-function getUtmUrl(): string {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-  return window.location.href;
-}
+// Note: we intentionally do not use `window.location.href` directly for `utm_url` header,
+// because we sometimes clean URL query params via `history.replaceState` immediately after capture.
+// Instead, we capture the original URL in the session store and reuse it.
 
 /**
  * Gets user IP address from ipify.org
@@ -85,6 +81,43 @@ function convertDateToApiFormat(dateStr: string): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Parse multi-lender credit card max limit from form string (digits / optional commas).
+ * Returns undefined when empty or invalid so we never send bad numbers downstream.
+ */
+function parseCreditCardMaxAmount(value: string | undefined): number | undefined {
+  const raw = (value ?? '').replace(/,/g, '').trim();
+  if (!raw) return undefined;
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+/**
+ * Multi-lender personal loan: maps credit card answers for create-lead.
+ * Returns an empty object when the form did not ask (single-lender flows).
+ */
+function buildMultiLenderCreditCardPayload(
+  formData: Pick<LeadFormData, 'isCreditCard' | 'creditCardLimit'>
+): Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> {
+  const { isCreditCard, creditCardLimit } = formData;
+  if (isCreditCard !== 'true' && isCreditCard !== 'false') {
+    return {};
+  }
+
+  const payload: Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> = {
+    isCreditCard: isCreditCard === 'true',
+  };
+
+  if (isCreditCard === 'true') {
+    const maxAmount = parseCreditCardMaxAmount(creditCardLimit);
+    if (maxAmount !== undefined) {
+      payload.creditCardLimit = maxAmount;
+    }
+  }
+
+  return payload;
+}
+
 // ============================================
 // Header Builders
 // ============================================
@@ -108,12 +141,16 @@ function buildFetchFormFieldsHeaders(
 ): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
   const mobile = getCookie(STORAGE_MOBILE);
+  const hasExplicitLenderName = lenderName.trim().length > 0;
   return {
     ...buildDefaultHeaders(),
     'Authorization': `Bearer ${token || ''}`,
     'mobile': String(mobile || ''),
-    'lenderName': lenderName,
+    'lendername': lenderName,
     'fetchDetails': fetchDetails.toString(),
+    ...getAttributionHeadersCommon(
+      hasExplicitLenderName ? { omitLender: true } : undefined
+    ),
   };
 }
 
@@ -127,7 +164,7 @@ function buildCreateLeadHeaders(): Record<string, string> {
     ...buildDefaultHeaders(),
     'Authorization': `Bearer ${token || ''}`,
     'mobile': String(mobile || ''),
-    'utm_url': getUtmUrl(),
+    ...getAttributionHeadersCommon(),
   };
 }
 
@@ -138,12 +175,12 @@ function buildCreateLeadHeaders(): Record<string, string> {
 /**
  * Checks if user exists in system and needs to fill form
  * @param mobile - User's mobile number (10 digits)
- * @param partnerCode - Partner code (default: WC001)
+ * @param partnerCode - Partner code (default: affiliate `partner` query when set, else WC001)
  * @returns Result with dedupe response (statusCode 1003 = needs form)
  */
 async function checkDedupe(
   mobile: string,
-  partnerCode: string = PARTNER_CODE
+  partnerCode: string = getEffectivePartnerCode()
 ): Promise<LeadServiceResult<CheckDedupeResponse>> {
   const requestBody: CheckDedupeRequest = {
     mobile,
@@ -158,6 +195,7 @@ async function checkDedupe(
         ...buildDefaultHeaders(),
         'Authorization': `Bearer ${token || ''}`,
         'mobile': mobile,
+        ...getAttributionHeadersCommon(),
       },
       body: JSON.stringify(requestBody),
     });
@@ -200,12 +238,14 @@ async function fetchFormFields(
 ): Promise<LeadServiceResult<FormField[]>> {
   const requestBody = {
     endpoint: ENDPOINTS.PUBLIC.LENDERS_FORM_FILLED,
-    partnerCode: PARTNER_CODE,
+    partnerCode: getEffectivePartnerCode(),
   };
   try {
+    const headers = buildFetchFormFieldsHeaders(lenderName, fetchDetails);
+    console.log('[headers]:', headers);
     const response = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
-      headers: buildFetchFormFieldsHeaders(lenderName, fetchDetails),
+      headers,
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) {
@@ -240,13 +280,13 @@ async function fetchFormFields(
 /**
  * Creates a new lead with the provided form data
  * @param formData - User-filled form data (from dynamic form)
- * @param partnerCode - Partner code (default: WC001)
+ * @param partnerCode - Partner code (default: affiliate `partner` query when set, else WC001)
  * @param lenderName - Optional specific lender for campaign forms
  * @returns Result with lead ID and status
  */
 async function createLead(
   formData: LeadFormData,
-  partnerCode: string = PARTNER_CODE,
+  partnerCode: string = getEffectivePartnerCode(),
   lenderName?: string
 ): Promise<LeadServiceResult<CreateLeadResponse>> {
   try {
@@ -283,6 +323,8 @@ async function createLead(
 
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
+
+      ...buildMultiLenderCreditCardPayload(formData),
 
       // Add consents ONLY for LNT
       ...(lenderName?.toLowerCase() === "lnt" && {

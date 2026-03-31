@@ -60,7 +60,7 @@ const partners: PartnerCardProps[] = [
   {
     id: 'lt-finance',
     partnerName: 'L&T Finance',
-    logoSrc: '/assets/images/l%26t.png',
+    logoSrc: '/assets/images/lAndT.png',
     consentContent: [
       {
         type: 'text',

@@ -17,12 +17,15 @@ interface WizardStep {
   fieldKeys: FormFieldKey[];
 }
 
-/** Step configuration - maps step numbers to field keys */
+/**
+ * Fixed field order per wizard screen (steps 1–4).
+ * API-driven fields are filtered by these keys; flow-level gating (e.g. credit card) lives in the modal.
+ */
 const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
   1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
   3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
-  4: ['pan', 'consent'],
+  4: ['pan', 'isCreditCard', 'creditCardLimit', 'consent'],
 };
 
 /** Hidden fields - auto-filled, never shown in UI */
@@ -46,11 +49,20 @@ const MINIMUM_AGE_YEARS = 18;
  * Normalize values that must stay numeric or uppercased even on prefill.
  */
 const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
+  if (fieldKey === 'name') {
+    // Name should not contain digits; remove numbers while preserving letters/spaces.
+    // This keeps the controlled input clean and avoids sending invalid data to backend.
+    return value.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim();
+  }
   if (fieldKey === 'pan') {
     return sanitizePanInput(value);
   }
   if (fieldKey === 'pincode' || fieldKey === 'companyPincode') {
     return sanitizeNumericInput(value, 6);
+  }
+  // Max limit can be large (e.g. lakhs); cap digits to avoid accidental paste abuse.
+  if (fieldKey === 'creditCardLimit') {
+    return sanitizeNumericInput(value, 12);
   }
   return value;
 };
@@ -101,6 +113,7 @@ export const useLeadForm = (
   const [fieldsLoaded, setFieldsLoaded] = useState<boolean>(false);
   const { isAuthenticated, user } = useAuth();
 
+  // Single-page flow shows all steps at once; merge keys from STEP_FIELD_MAPPING (1–4) in order.
   const mergedSinglePageFieldKeys = useMemo<FormFieldKey[]>(() => {
     const orderedKeys: FormFieldKey[] = [];
     SINGLE_PAGE_STEPS.forEach((stepNumber) => {
@@ -117,14 +130,19 @@ export const useLeadForm = (
    * Get current step configuration
    */
   const getCurrentStepConfig = useCallback((): WizardStep => {
-    const stepNumber = singlePage ? 1 : currentStep;
-    const fieldKeys = singlePage
-      ? mergedSinglePageFieldKeys
-      : (STEP_FIELD_MAPPING[currentStep] || []);
-    
+    if (singlePage) {
+      return {
+        stepNumber: 1,
+        title: STEP_TITLES[1] || 'Step 1',
+        fieldKeys: mergedSinglePageFieldKeys,
+      };
+    }
+
+    const fieldKeys = STEP_FIELD_MAPPING[currentStep] || [];
+
     return {
-      stepNumber,
-      title: STEP_TITLES[stepNumber] || `Step ${stepNumber}`,
+      stepNumber: currentStep,
+      title: STEP_TITLES[currentStep] || `Step ${currentStep}`,
       fieldKeys,
     };
   }, [currentStep, mergedSinglePageFieldKeys, singlePage]);
@@ -415,7 +433,12 @@ export const useLeadForm = (
       
       const rawValue = field.value ?? '';
 
-      if (field.key === 'pan' || field.key === 'pincode' || field.key === 'companyPincode') {
+      if (
+        field.key === 'pan'
+        || field.key === 'name'
+        || field.key === 'pincode'
+        || field.key === 'companyPincode'
+      ) {
         // Keep PAN and pincode values normalized even when the API pre-fills them.
         initialValues[field.key] = normalizeLeadFieldValue(field.key, rawValue);
         return;

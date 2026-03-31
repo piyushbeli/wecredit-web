@@ -5,6 +5,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ConsentCheckboxProps {
   id: string;
@@ -33,9 +34,9 @@ const ConsentCheckbox = ({
         />
         <label htmlFor={id} className="text-sm text-gray-700">
           I agree to the{' '}
-          <a href="/terms-of-service" className="text-blue-600 underline">
+          <Link target="_blank" href="/terms-of-service" className="text-blue-600 underline">
             Terms of Service {' '}
-          </a>
+          </Link>
           of WeCredit. {' '}
         </label>
       </div>

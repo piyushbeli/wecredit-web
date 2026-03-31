@@ -15,7 +15,9 @@ import { updateUtmClicked } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
+import { buildOffersPathClearingLenderFilter } from '@/lib/utils/offers-navigation';
 
 
 /**
@@ -24,6 +26,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
  */
 export const OffersStatusView = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply } = useOffers();
  const { triggerApplyFlow } = useLoanApplicationStore();
 const hasTriggeredRef = useRef(false);
@@ -67,8 +70,8 @@ useEffect(() => {
   };
 
   const hasStatusOffers = statusOffers.length > 0;
- const handleExploreMore = () => {
-    window.location.replace('/offers'); // removes lenderName from URL and reloads the page to show all offers   
+  const handleExploreMore = () => {
+    window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
   
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
