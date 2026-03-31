@@ -15,6 +15,7 @@ import {
 import type { FormField, FormFieldKey } from '@/types/lead';
 import ButtonGroup from './button-group';
 import ConsentCheckbox from './consent-checkbox';
+import Link from 'next/link';
 
 interface DynamicFieldProps {
   /** Field configuration from API */
@@ -206,9 +207,9 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
   {key === 'consent' ? (
     <>
     I agree to the{' '}
-    <a href="/terms-of-service" className="text-blue-600 underline">
+    <Link target="_blank" href="/terms-of-service" className="text-blue-600 underline">
       Terms of Service
-    </a>{' '}
+    </Link>{' '}
     of WeCredit.
   </>
   ) : (

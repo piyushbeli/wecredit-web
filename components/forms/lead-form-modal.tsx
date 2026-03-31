@@ -28,6 +28,7 @@ import { MULTILENDER_PARTNER_TERMS_HREF, UNITY_CONSENT } from '@/lib/constants/c
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
+import Link from 'next/link';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -523,9 +524,9 @@ const LeadFormModal = ({
           />
           <label htmlFor={MULTI_LENDER_PARTNER_CONSENT_KEY} className="text-sm text-gray-700 leading-relaxed">
             I agree to the{' '}
-            <a href={MULTILENDER_PARTNER_TERMS_HREF} className="text-blue-600 underline">
+            <Link target="_blank" href={MULTILENDER_PARTNER_TERMS_HREF} className="text-blue-600 underline">
               Terms & Conditions
-            </a>{' '}
+            </Link>{' '}
             of the partners of WeCredit.
           </label>
         </div>
