@@ -107,6 +107,7 @@ const TrendingOffersSection = ({
                     href={lender.utmLink || `/offers/${id}`}
                     index={colIndex * 3 + rowIndex}
                     skipAnimation={skipAnimation}
+                    lenderType={lender?.lenderType || null}
                   />
                 ))}
               </div>

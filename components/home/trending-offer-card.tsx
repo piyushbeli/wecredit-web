@@ -11,7 +11,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { ActionButton } from '../shared';
 import { checkStatusAll } from '@/lib/api/wecredit';
 import { STORAGE_MOBILE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
-import type { LenderOfferStatus } from '@/types/wecredit';
+import type { LenderOfferStatus, LenderType } from '@/types/wecredit';
+import { getAmountUptoLabel } from '@/lib/lender-display';
 
 /** Props for TrendingOfferCard component */
 interface TrendingOfferCardProps {
@@ -35,6 +36,8 @@ interface TrendingOfferCardProps {
   index: number;
   /** Skip animation for carousel scrolling */
   skipAnimation?: boolean;
+  /** From API `lenderType`; drives amount-line copy. */
+  lenderType?: LenderType | null;
 }
 
 /**
@@ -56,7 +59,9 @@ const TrendingOfferCard = ({
   href,
   index,
   skipAnimation = false,
+  lenderType,
 }: TrendingOfferCardProps): React.ReactNode => {
+  const amountUptoLabel = getAmountUptoLabel(lenderType);
   /**
    * Validate logo path for Next.js Image.
    * 
@@ -360,7 +365,7 @@ const TrendingOfferCard = ({
           <>
             {/* Amount - Italic blue text */}
             <h3 className="font-medium text-sm leading-[120%] mb-2">
-            Amount upto {amount}
+            {amountUptoLabel} {amount}
             </h3>
 
             {/* Rate & Tenure - With proper icons */}
