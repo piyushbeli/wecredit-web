@@ -3,6 +3,9 @@
  * Types for the WeCredit lender/offers API
  */
 
+/** Product type from API; used for dynamic labels (e.g. amount line on offer cards). */
+export type LenderType = 'business_loan' | 'personal_loan' | 'creditcard';
+
 /** Raw lender data from the API response */
 export interface Lender {
   id: number;
@@ -28,6 +31,8 @@ export interface Lender {
   backColour: string | null;
   topColour: string | null;
   watermark: string | null;
+  /** When null or omitted, generic copy is used (e.g. "Amount upto"). */
+  lenderType?: LenderType | null;
 }
 
 /** API response structure for active-lenders endpoint */
@@ -93,6 +98,8 @@ export interface LenderOfferStatus {
   subtitle?: string;
   /** Human-readable status message */
   statusMessage?: string;
+  /** Mirrors active-lenders `lenderType` when present in check-status payloads. */
+  lenderType?: LenderType | null;
   /** Approval chance percentage (0-100) */
   approvalRate?: number;
   /** Webhook sent flag: 2 = sent via webhook */
