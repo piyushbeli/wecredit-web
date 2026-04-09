@@ -290,6 +290,7 @@ async function createLead(
   lenderName?: string
 ): Promise<LeadServiceResult<CreateLeadResponse>> {
   try {
+    const isLntLenderOrUpswignLntLender = lenderName?.toLowerCase() === 'lnt' || lenderName?.toLowerCase() === 'upswing_lnt';
     const mobile = getCookie(STORAGE_MOBILE) as string || formData.mobile;
     // Use ConsentIp and ConsentDateTime from form if available, otherwise fetch/generate
     const consentIp = formData.ConsentIp || await fetchUserIp();
@@ -327,7 +328,7 @@ async function createLead(
       ...buildMultiLenderCreditCardPayload(formData),
 
       // Add consents ONLY for LNT
-      ...(lenderName?.toLowerCase() === "lnt" && {
+      ...(isLntLenderOrUpswignLntLender && {
   consents: [
     {
       consentCode: "HARD_PULL",

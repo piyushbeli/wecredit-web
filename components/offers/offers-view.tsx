@@ -58,8 +58,10 @@ export const OffersView = () => {
     searchParams.get('lendername') ??
     '';
 
+  const isLntLender = rawLender.toLowerCase() === 'lnt';
+  const isLntLenderOrUpswignLntLender = isLntLender || rawLender.toLowerCase() === 'upswing_lnt';
   const lenderNameParam =
-    rawLender.toLowerCase() === 'lnt'
+    isLntLender
       ? 'lnt'
       : rawLender;
 
@@ -128,7 +130,7 @@ useEffect(() => {
   }
 
   // LNT special flow
-  if (lenderName.toLowerCase() === 'lnt') {
+  if (isLntLenderOrUpswignLntLender) {
     void forwardUpswingRedirect(mobile, token);
     return;
   }

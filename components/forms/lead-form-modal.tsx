@@ -221,6 +221,7 @@ const LeadFormModal = ({
   const effectivePartnerCode =  partner ? partner : partnerCode;
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
+  const isLntLenderOrUpswignLntLender = lenderName?.toLowerCase() === 'lnt' || lenderName?.toLowerCase() === 'upswing_lnt';
   /**
    * Credit card questions are only valid for all-lenders flow when:
    * user chose to proceed without full details fetch.
@@ -340,7 +341,7 @@ const LeadFormModal = ({
 
     let consents: LntConsentPayload[] = [];
 
-    if (lenderName === 'lnt') {
+    if (isLntLenderOrUpswignLntLender) {
 
       const allChecked = LNT_CONSENTS.every(c => formValues[c.key] === 'true');
       if (!allChecked) return;
@@ -391,14 +392,14 @@ const LeadFormModal = ({
       addressType: formValues.addressType || '',
       permanentAddress: formValues.permanentAddress || '',
       modeOfSalary: formValues.modeOfSalary || '',
-      companyName: lenderName === 'lnt' ? lntCompanyName : formValues.companyName || '',
+      companyName: isLntLenderOrUpswignLntLender ? lntCompanyName : formValues.companyName || '',
       companyAddress: formValues.companyAddress || '',
       companyPincode: formValues.companyPincode || '',
       ConsentIp: userIp || formValues.ConsentIp || '',
       ConsentDateTime: getCurrentDateTime(),
       consent: formValues.consent || 'false',
       consentPartnerTerms: formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] || 'false',
-      ...(lenderName === 'lnt' && { consents }),
+      ...(isLntLenderOrUpswignLntLender && { consents }),
       ...(originSubLender && { originSubLender }),
       ...buildCreditCardPayload(
         isMultiLenderCreditCardEnabled,
@@ -465,7 +466,7 @@ const LeadFormModal = ({
 
     // Always require consent in last step
     const hasLntConsents =
-      lenderName !== 'lnt' ||
+      !isLntLenderOrUpswignLntLender ||
       LNT_CONSENTS.every(c => formValues[c.key] === 'true');
     const requiresPartnerConsent = isAllLenders;
     const canSubmitMultiLender = !requiresPartnerConsent || hasPartnerConsent;
@@ -640,7 +641,7 @@ const LeadFormModal = ({
           {visibleFields
             .filter(field => field.key !== 'consent')
             .map((field) => renderField(field))}
-          {lenderName === 'lnt' && (
+          {isLntLenderOrUpswignLntLender && (
             <div className="space-y-2">
               <label className="lead-form-label">
                 Company Name
@@ -656,7 +657,7 @@ const LeadFormModal = ({
               />
             </div>
           )}
-          {lenderName === 'lnt' && LNT_CONSENTS.map(consent => (
+            {isLntLenderOrUpswignLntLender && LNT_CONSENTS.map(consent => (
             <div key={consent.key} className="space-y-1">
 
               <DynamicField
