@@ -30,7 +30,6 @@ export const PARTNERS: Partner[] = [
     name: "Hero Fincorp",
     logo: `${IMAGES.PARTNERS.BASE_PATH}/HERO FINCORPV.png`,
   },
-  { name: "CreditSea", logo: `${IMAGES.PARTNERS.BASE_PATH}/CREDIT SEA.png` },
   {
     name: "Poonawalla Fincorp",
     logo: `${IMAGES.PARTNERS.BASE_PATH}/Poonawala fincorp.png`,
