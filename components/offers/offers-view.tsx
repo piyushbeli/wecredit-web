@@ -26,26 +26,7 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
-
-/**
- * Offers View Component
- * Handles the interactive part of the offers page
- */
-const parseAmountToNumber = (amount: string | number | undefined): number => {
-  if (!amount) return 0;
-
-  const value = String(amount).toLowerCase().trim();
-
-  // Handle lakh / lakhs
-  if (value.includes('lakh')) {
-    const numeric = parseFloat(value.replace(/[^\d.]/g, ''));
-    return isNaN(numeric) ? 0 : numeric * 100000;
-  }
-
-  // Handle normal numbers like 50000 or ₹1,20,000
-  const numeric = parseFloat(value.replace(/[^\d.]/g, ''));
-  return isNaN(numeric) ? 0 : numeric;
-};
+import { mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
 
 export const OffersView = () => {
   const router = useRouter();
@@ -58,10 +39,9 @@ export const OffersView = () => {
     searchParams.get('lendername') ??
     '';
 
-  const lenderNameParam =
-    rawLender.toLowerCase() === 'lnt'
-      ? 'lnt'
-      : rawLender;
+  const isLntLender = rawLender.toLowerCase() === 'lnt';
+  const isLntLenderOrUpswignLntLender = isLntLender || rawLender.toLowerCase() === 'upswing_lnt';
+  const lenderNameParam = mapingLenderNameToLenderCode(rawLender);
 
   const pollingMessage = lenderNameParam
     ? `Please wait while we fetch offer from ${lenderNameParam.charAt(0).toUpperCase() + lenderNameParam.slice(1)} for you.`
@@ -127,8 +107,8 @@ useEffect(() => {
     return;
   }
 
-  // LNT special flow
-  if (lenderName.toLowerCase() === 'lnt') {
+  // LNT & Upswing LNT special flow
+  if (isLntLenderOrUpswignLntLender) {
     void forwardUpswingRedirect(mobile, token);
     return;
   }

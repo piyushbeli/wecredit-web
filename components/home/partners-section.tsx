@@ -21,7 +21,7 @@ const PartnersSection = (): React.ReactNode => {
 	const placeholders = Array.from({ length: Math.max(0, placeholderCount) }, (): PartnerGridItem => null);
 	const partnerGridItems = [...gridPartners, ...placeholders];
 	return (
-		<section className="bg-white py-4 sm:py-10 md:py-5 overflow-hidden">
+		<section className="bg-white py-4 sm:mt-5 md:py-5 overflow-hidden">
 			{/* Container with blue left border accent */}
 			{/* Section Title */}
 			<h2 className="text-xl sm:text-2xl md:text-[18px] font-medium mb-6 sm:mb-6 text-center">
