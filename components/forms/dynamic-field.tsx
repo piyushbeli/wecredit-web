@@ -236,7 +236,7 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
         shouldUseModeOfSalaryFallbackOptions
           ? [
               { value: 'cash', label: 'Cash' },
-              { value: 'upi', label: 'UPi' },
+              { value: 'upi', label: 'UPI' },
               { value: 'bankTransfer', label: 'Bank Transfer' },
             ]
           : resolvedOptions.map((opt) => ({
