@@ -15,7 +15,11 @@ function normalizePath(pathname: string | null): string {
   return (pathname || '/').replace(/\/$/, '') || '/';
 }
 
-function isAffiliateMnHubPath(pathname: string | null): boolean {
+/**
+ * Hub routes where `PersonalLoanContent` is mounted (`/` and `/personal-loan`).
+ * Shared by affiliate `?mn=` flow and partner/lender attribution auto-apply.
+ */
+export function isAffiliateMnHubPath(pathname: string | null): boolean {
   return AFFILIATE_MN_HUB_PATHS.has(normalizePath(pathname));
 }
 
