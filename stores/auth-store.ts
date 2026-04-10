@@ -4,6 +4,7 @@ import type { BusinessLoanEnquiryPayload } from '@/lib/api/business-loan-service
 import type { CarLoanEnquiryPayload } from '@/components/car-loan/car-loan-form.config';
 import type { HomeLoanEnquiryPayload } from '@/components/home-loan/home-loan-form.config';
 import type { GoldLoanEnquiryPayload } from '@/components/gold-loan/gold-loan-form.config';
+import type { PrimeplLeadEnquiryPayload } from '@/components/primepl-lead/primepl-lead-form.config';
 import { useOfferStore } from './offer-store';
 import { useUrlParamsStore } from './url-params-store';
 
@@ -34,7 +35,8 @@ type PendingActionType =
   | 'submit_business_loan'
   | 'submit_car_loan'
   | 'submit_home_loan'
-  | 'submit_gold_loan';
+  | 'submit_gold_loan'
+  | 'submit_primepl_lead';
 
 /**
  * Pending action data structure
@@ -57,6 +59,8 @@ interface PendingAction {
   homeLoanPayload?: HomeLoanEnquiryPayload;
   /** Form payload for submit_gold_loan - used after OTP to call gold loan API */
   goldLoanPayload?: GoldLoanEnquiryPayload;
+  /** Form payload for submit_primepl_lead - used after OTP to call Primepl lead API */
+  primeplLeadPayload?: PrimeplLeadEnquiryPayload;
 }
 
 /**
