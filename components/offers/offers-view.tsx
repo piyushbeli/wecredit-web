@@ -93,6 +93,7 @@ useEffect(() => {
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
+  const isLntOffer = offer.lenderName?.toLowerCase() === 'lnt';
   // For non-INITIATED offers in explore screen, navigate to status page
   if (offer.wcStatus !== 'INITIATED') {
     router.push(buildOffersPathWithQuery('/offers/status', searchParams));
@@ -106,9 +107,8 @@ useEffect(() => {
   if (!mobile) {
     return;
   }
-
   // LNT & Upswing LNT special flow
-  if (isLntLenderOrUpswignLntLender) {
+  if (isLntOffer ) {
     void forwardUpswingRedirect(mobile, token);
     return;
   }
