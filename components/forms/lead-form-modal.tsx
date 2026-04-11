@@ -375,7 +375,7 @@ const LeadFormModal = ({
     }
 
     const formData: LeadFormData = {
-      name: formValues.name || '',
+      name: (formValues.name || '').trim(),
       mobile: formValues.mobile || '',
       phone: formValues.phone || '',
       dob: formatDateForApi(formValues.dob || ''),
