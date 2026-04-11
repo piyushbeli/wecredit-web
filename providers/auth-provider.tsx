@@ -8,7 +8,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { authService } from '@/lib/api';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
+import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
 
 /**
  * Props for AuthProvider component
@@ -37,6 +37,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
   const preAuthHandled = useRef(false);
   const mnAffiliateOtpOpenedRef = useRef(false);
+  /** Prevents double-opening apply auth when partner/lender query is present (Strict Mode / retries). */
+  const partnerLenderApplyModalOpenedRef = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   // Stable dependency for effects: `searchParams` object identity may not change on SPA navigation.
@@ -48,6 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     setUser,
     setAuthInitialized,
     openModalWithPendingActionAtOtp,
+    openModalWithPendingAction,
   } = useAuthStore();
   const { setUrlParams, setAttributionParams, clearParams } = useUrlParamsStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
@@ -74,9 +77,11 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       const utm_source = normalizeParam(searchParams?.get('utm_source'));
       const utm_medium = normalizeParam(searchParams?.get('utm_medium'));
       const utm_campaign = normalizeParam(searchParams?.get('utm_campaign'));
-      // Affiliates may use `lendername` or `lender_name`; store a single canonical value.
+      // Affiliates may use `lendername`, `lender_name`, or `lenderName`; store one canonical value.
       const lendername = normalizeParam(
-        searchParams?.get('lendername') ?? searchParams?.get('lender_name')
+        searchParams?.get('lendername') ??
+          searchParams?.get('lender_name') ??
+          searchParams?.get('lenderName')
       );
 
       // If the visible URL has no affiliate/UTM params, reset the persisted session store so
@@ -109,6 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         url.searchParams.delete('utm_campaign');
         url.searchParams.delete('lendername');
         url.searchParams.delete('lender_name');
+        url.searchParams.delete('lenderName');
         window.history.replaceState({}, '', url.toString());
       }
     },
@@ -233,6 +239,24 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       // No token in cookies - ensure clean logout state
       if (isAuthenticated) {
         logout();
+        // `logout()` clears url-params store; re-sync from URL so attribution survives for lead APIs.
+        captureAttributionFromUrl({ cleanUrl: false });
+      }
+
+      // Partner / lender in URL on PL hub: same post-login pipeline as affiliate `?mn=` (apply → dedupe → lead form).
+      const partnerParam = normalizeParam(searchParams?.get('partner'));
+      const lenderParam = normalizeParam(
+        searchParams?.get('lendername') ??
+          searchParams?.get('lender_name') ??
+          searchParams?.get('lenderName')
+      );
+      if (
+        isAffiliateMnHubPath(pathname) &&
+        !partnerLenderApplyModalOpenedRef.current &&
+        (partnerParam || lenderParam)
+      ) {
+        partnerLenderApplyModalOpenedRef.current = true;
+        openModalWithPendingAction({ type: 'open_personal_loan_apply' });
       }
 
       setAuthInitialized(true);
@@ -272,12 +296,14 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     handlePreAuth,
     isAuthenticated,
     logout,
+    openModalWithPendingAction,
     openModalWithPendingActionAtOtp,
     pathname,
     searchParams,
     setAuthInitialized,
     setLoading,
     setUser,
+    normalizeParam,
   ]);
 
   useEffect(() => {
