@@ -68,6 +68,16 @@ export const PersonalLoanContent = (): JSX.Element => {
     hasCheckedDedupe.current = true;
   }, [checkDedupe, effectivePartnerCode, logout, openModal]);
 
+  const getLenderName = useCallback((): string => {
+    if (isUnitySingleLenderFromAffiliate) {
+      return 'unity';
+    }
+    if (affiliateLenderSlug) {
+      return affiliateLenderSlug;
+    }
+    return '';
+  }, [isUnitySingleLenderFromAffiliate, affiliateLenderSlug]);
+
   const handleDedupeResponse = useCallback((): void => {
     if (!response || isCheckingDedupe || !hasCheckedDedupe.current) {
       return;
@@ -217,8 +227,8 @@ export const PersonalLoanContent = (): JSX.Element => {
       <LeadFormModal
         isOpen={isLeadFormModalOpen}
         onClose={closeLeadFormModal}
-        lenderName={isUnitySingleLenderFromAffiliate ? 'unity' : ''}
-        isAllLenders={!isUnitySingleLenderFromAffiliate}
+        lenderName={getLenderName()}
+        isAllLenders={!isUnitySingleLenderFromAffiliate && !affiliateLenderSlug}
         fetchDetails={fetchDetails}
       />
     </>
