@@ -13,6 +13,8 @@ interface UrlParamsState {
   partner: string | null;
   /** Origin sub-lender ID from URL */
   originSubLender: string | null;
+  /** Lender unique ID from URL — forwarded as `lenderUniqueId` header on create-lead */
+  lenderUniqueId: string | null;
   /** UTM source attribution from URL */
   utm_source: string | null;
   /** UTM medium attribution from URL */
@@ -31,15 +33,20 @@ interface UrlParamsState {
  * URL Parameters Store Actions
  */
 interface UrlParamsActions {
-  /** Set partner and originSubLender from URL (called once when URL is read) */
-  setUrlParams: (partner: string | null, originSubLender: string | null) => void;
+  /** Set partner, originSubLender, and lenderUniqueId from URL (called when URL is read) */
+  setUrlParams: (
+    partner: string | null,
+    originSubLender: string | null,
+    lenderUniqueId: string | null
+  ) => void;
   /** Set marketing/affiliate attribution params from URL */
   setAttributionParams: (
     utm_url: string | null,
     utm_source: string | null,
     utm_medium: string | null,
     utm_campaign: string | null,
-    lendername: string | null
+    lendername: string | null,
+    lenderUniqueId: string | null
   ) => void;
   /** Permanently consume params - called after successful lead creation or offers redirect */
   /** Clear all URL params (called on logout) */
@@ -49,6 +56,7 @@ interface UrlParamsActions {
 const initialState: UrlParamsState = {
   partner: null,
   originSubLender: null,
+  lenderUniqueId: null,
   utm_source: null,
   utm_medium: null,
   utm_campaign: null,
@@ -59,7 +67,7 @@ const initialState: UrlParamsState = {
 
 /**
  * Zustand store for managing URL query parameters
- * Used to pass partner code and originSubLender from URL to create-lead API
+ * Used to pass partner code, originSubLender, and lenderUniqueId from URL to create-lead API
  * 
  * Session behavior:
  * - Params persist throughout the session (user can retry form multiple times)
@@ -73,18 +81,28 @@ export const useUrlParamsStore = create<UrlParamsState & UrlParamsActions>()(
       (set) => ({
         ...initialState,
 
-        setUrlParams: (partner: string | null, originSubLender: string | null) => 
-          set({ 
-            partner, 
-            originSubLender, 
-            isConsumed: false 
-          }, false, 'setUrlParams'),
+        setUrlParams: (
+          partner: string | null,
+          originSubLender: string | null,
+          lenderUniqueId: string | null
+        ) =>
+          set(
+            {
+              partner,
+              originSubLender,
+              lenderUniqueId,
+              isConsumed: false,
+            },
+            false,
+            'setUrlParams'
+          ),
         setAttributionParams: (
           utm_url: string | null,
           utm_source: string | null,
           utm_medium: string | null,
           utm_campaign: string | null,
-          lendername: string | null
+          lendername: string | null,
+          lenderUniqueId: string | null
         ) =>
           set(
             {
@@ -92,6 +110,7 @@ export const useUrlParamsStore = create<UrlParamsState & UrlParamsActions>()(
               utm_medium,
               utm_campaign,
               lendername,
+              lenderUniqueId,
               utm_url,
               isConsumed: false,
             },
