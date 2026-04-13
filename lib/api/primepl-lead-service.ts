@@ -135,8 +135,10 @@ export async function fetchPrimeplLeadStatus(
     });
     return { hasExistingLead: false, error: errorMessage, data: responseData };
   } catch (error) {
+    // Re-throw so callers (e.g. useLoanModalState) can ignore stale cancelled checks;
+    // returning "no lead" would race with a newer request and flip UI incorrectly.
     if (isAbortError(error)) {
-      return { hasExistingLead: false };
+      throw error;
     }
     const errorMessage = getErrorMessage(error, 'Network error occurred');
     toast.error(errorMessage, {

@@ -1,6 +1,6 @@
 /**
  * Primepl lead form: state shape, validation, and API payload builder.
- * Submit body aligns with forward API `prime-pl-leads` contract.
+ * Submit body aligns with forward API `prime-pl-leads` contract (consent is not part of it).
  */
 
 import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
@@ -27,6 +27,9 @@ export interface PrimeplLeadFormState {
   occupation: PrimeplOccupation;
   /** Rupees per month — stored as digits string, sent as number. */
   netSalaryPm: string;
+  /**
+   * FE-only: checkbox for terms/privacy; validated before submit but never sent to the API.
+   */
   consent: boolean;
 }
 
@@ -104,7 +107,10 @@ export const validatePrimeplLeadForm = (
   return nextErrors;
 };
 
-/** Payload after validation; used for post-login pending action and submit API. */
+/**
+ * Payload after validation; used for post-login pending action and submit API.
+ * Excludes consent — that stays on the form state for UI/validation only.
+ */
 export interface PrimeplLeadEnquiryPayload {
   fullName: string;
   /** 10-digit mobile; sent as string in JSON per API sample. */
@@ -115,7 +121,6 @@ export interface PrimeplLeadEnquiryPayload {
   occupation: string;
   netSalaryPm: number;
   sourceChannel: string;
-  consent: boolean;
 }
 
 export const buildPrimeplLeadPayload = (
@@ -135,6 +140,5 @@ export const buildPrimeplLeadPayload = (
     occupation: values.occupation,
     netSalaryPm,
     sourceChannel: PRIMEPL_DEFAULT_SOURCE_CHANNEL,
-    consent: values.consent,
   };
 };

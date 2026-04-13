@@ -13,7 +13,7 @@ const PrimeplLeadPageContent = (): React.ReactNode => {
   const router = useRouter();
 
   const handleCloseModal = useCallback(() => {
-    router.push('/');
+    router.replace('/');
   }, [router]);
 
   return (
