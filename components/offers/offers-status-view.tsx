@@ -17,7 +17,7 @@ import { ActionButton, PageHeader } from '@/components/shared';
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
-import { buildOffersPathClearingLenderFilter } from '@/lib/utils/offers-navigation';
+import { buildOffersPathClearingLenderFilter, buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
 
 
 /**
@@ -73,6 +73,10 @@ useEffect(() => {
   const handleExploreMore = () => {
     window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
+
+  const handleGoBack = () => {
+    router.push(buildOffersPathWithQuery('/offers',searchParams));
+  };
   
   const renderOfferSection = (title: string, offerList: LenderOfferStatus[]) => {
     if (offerList.length === 0) {
@@ -112,7 +116,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen">
-      <PageHeader title="Loan Status" />
+      <PageHeader title="Loan Status"  isOfferStatus={true} onBack={handleGoBack} />
       {hasStatusOffers && <OffersHero eligibleAmount="₹1,00,000" offerCount={statusOffers.length} />}
 
       <div className="px-4 pb-4 max-w-xl mx-auto">

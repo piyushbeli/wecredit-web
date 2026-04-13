@@ -9,6 +9,7 @@ import { authService } from '@/lib/api';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
+import { isValidMobile } from '@/lib/utils/common-helper';
 
 /**
  * Props for AuthProvider component
@@ -37,7 +38,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
   const preAuthHandled = useRef(false);
   const mnAffiliateOtpOpenedRef = useRef(false);
-  /** Prevents double-opening apply auth when partner/lender query is present (Strict Mode / retries). */
+  /**
+   * Prevents double-opening apply (guest modal or logged-in triggerApplyFlow) when affiliate
+   * query is present (Strict Mode / retries).
+   */
   const partnerLenderApplyModalOpenedRef = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -282,7 +286,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         logout();
        
       } else {
-        
+        const wasUnauthenticated = !isAuthenticated;
+
         if (!isAuthenticated) {
           setUser(
             {
@@ -292,6 +297,34 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
             },
             token.toString()
           );
+        }
+
+        // Logged-in (or just re-hydrated) session: same UX as post-OTP `open_personal_loan_apply`
+        // — open dedupe / lead pipeline when landing on PL hub with affiliate params.
+        const partnerParam = normalizeParam(searchParams?.get('partner'));
+        const lenderParam = normalizeParam(
+          searchParams?.get('lendername') ??
+            searchParams?.get('lender_name') ??
+            searchParams?.get('lenderName')
+        );
+        const mnParam = searchParams?.get('mn');
+        const mobileTrimmed = mobile.toString().trim();
+        const mnMatchesSession =
+          isValidMobile(mnParam) && mnParam.trim() === mobileTrimmed;
+
+        const shouldTriggerAffiliateApply =
+          isAffiliateMnHubPath(pathname) &&
+          !partnerLenderApplyModalOpenedRef.current &&
+          !searchParams?.get('pre_auth') &&
+          (Boolean(partnerParam) || Boolean(lenderParam) || mnMatchesSession);
+
+        if (shouldTriggerAffiliateApply) {
+          partnerLenderApplyModalOpenedRef.current = true;
+          // If we just called setUser, wait for Zustand + children to see authenticated state.
+          const delayMs = wasUnauthenticated ? 100 : 0;
+          setTimeout(() => {
+            triggerApplyFlow();
+          }, delayMs);
         }
       }
     } catch {
@@ -314,6 +347,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     setLoading,
     setUser,
     normalizeParam,
+    triggerApplyFlow,
   ]);
 
   useEffect(() => {
