@@ -3,7 +3,7 @@
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   buildOffersPathClearingLenderFilter,
@@ -183,7 +183,61 @@ useEffect(() => {
       </section>
     );
   };
-  
+
+  /**
+   * Main explore area: either filtered by `lenderName` in the URL, or the default multi-lender list.
+   * Non-initiated single-lender case is handled by redirect; we render nothing here while that runs.
+   */
+  const renderMainOffersContent = (): ReactNode => {
+    if (lenderNameParam) {
+      if (singleLenderHasNonInitiatedOffer) {
+        return null;
+      }
+      if (filteredExploreOffers.length > 0) {
+        return (
+          <div className="space-y-6 max-w-xl mx-auto">
+            {renderOfferSection('', filteredExploreOffers)}
+            {/* <p className="text-[14px] text-gray-600">
+              More lenders might have exciting offers waiting for you. Take a moment to explore your options.
+            </p>
+            <div className="flex justify-center w-full ">
+              <ActionButton
+                type="button"
+                onClick={handleExploreMore}
+                className="w-[200px] px-10"
+                rightIcon="🔍"
+              >
+                Explore More Offers
+              </ActionButton>
+            </div> */}
+          </div>
+        );
+      }
+      return (
+        <div className="flex flex-col items-center justify-center text-center ">
+          <EmptyState title="No offers available from this lender" description=" " />
+          <ActionButton
+            type="button"
+            onClick={handleExploreMore}
+            className="w-full max-w-xs"
+          >
+            Explore Other Offers
+          </ActionButton>
+        </div>
+      );
+    }
+
+    if (!hasOffers) {
+      return null;
+    }
+    return (
+      <div className="space-y-6 max-w-xl mx-auto">
+        {renderOfferSection('', exploreOffers)}
+        <UnmatchedOffersSection />
+      </div>
+    );
+  };
+
   // Show loading skeleton while: initial loading, polling, or re-hitting lenders
 if (isLoading || isReHitting) {
     return (
@@ -258,45 +312,7 @@ if (isLoading || isReHitting) {
         <div className="flex flex-col items-start justify-center text-center py-0 space-y-0">
           {!lenderNameParam && showEmpty && <EmptyState />}
         </div>
-        {
-          lenderNameParam ? (
-            // 🔹 If lenderName exists in URL
-            singleLenderHasNonInitiatedOffer ? <></> : filteredExploreOffers.length > 0 ? (
-              <div className="space-y-6 max-w-xl mx-auto">
-                {renderOfferSection('', filteredExploreOffers)}
-                <p className="text-[14px] text-gray-600">More lenders might have exciting offers waiting for you. Take a moment to explore your options.</p>
-                <div className="flex justify-center w-full ">
-                  <ActionButton
-                    type="button"
-                    onClick={handleExploreMore}
-                    className="w-[200px] px-10"
-                    rightIcon="🔍"
-                  >
-                    Explore More Offers
-                  </ActionButton></div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center ">
-                <EmptyState title="No offers available from this lender" description=' ' />
-
-                <ActionButton
-                  type="button"
-                  onClick={handleExploreMore}
-                  className="w-full max-w-xs"
-                >
-                  Explore Other Offers
-                </ActionButton>
-              </div>
-            )
-          ) : (
-            // 🔹 Normal flow (no lenderName in URL)
-            hasOffers && (
-              <div className="space-y-6 max-w-xl mx-auto">
-                {renderOfferSection('', exploreOffers)}
-                <UnmatchedOffersSection />
-              </div>
-            )
-          )}
+        {renderMainOffersContent()}
       </div>
       {hasStatusOffers && !lenderNameParam && (
         <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">

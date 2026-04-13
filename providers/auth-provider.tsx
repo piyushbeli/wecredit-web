@@ -73,6 +73,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     (options?: { cleanUrl?: boolean }): void => {
       const partner = normalizeParam(searchParams?.get('partner'));
       const originSubLender = normalizeParam(searchParams?.get('originSubLender'));
+      const lenderUniqueId = normalizeParam(
+        searchParams?.get('lenderUniqueId') ?? searchParams?.get('lenderUniqueId') ?? searchParams?.get('lenderuniqueid')
+      );
 
       const utm_source = normalizeParam(searchParams?.get('utm_source'));
       const utm_medium = normalizeParam(searchParams?.get('utm_medium'));
@@ -81,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       const lendername = normalizeParam(
         searchParams?.get('lendername') ??
           searchParams?.get('lender_name') ??
-          searchParams?.get('lenderName')
+          searchParams?.get('lenderName') 
       );
 
       // If the visible URL has no affiliate/UTM params, reset the persisted session store so
@@ -89,7 +92,13 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       // SPA navigations (e.g. Link to `/` strips `?partner=` but sessionStorage would otherwise
       // keep the old code).
       const hasAnyParams =
-        partner || originSubLender || utm_source || utm_medium || utm_campaign || lendername;
+        partner ||
+        originSubLender ||
+        lenderUniqueId ||
+        utm_source ||
+        utm_medium ||
+        utm_campaign ||
+        lendername;
 
       if (!hasAnyParams) {
         clearParams();
@@ -102,8 +111,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
 
       // When this URL includes relevant params, sync the store; explicit nulls for missing
       // fields prevent stale affiliate/UTM values from a previous landing with params.
-      setUrlParams(partner ?? null, originSubLender ?? null);
-      setAttributionParams(utm_url, utm_source, utm_medium, utm_campaign, lendername);
+      setUrlParams(partner ?? null, originSubLender ?? null, lenderUniqueId ?? null);
+      setAttributionParams(utm_url, utm_source, utm_medium, utm_campaign, lendername, lenderUniqueId);
 
       if (options?.cleanUrl && typeof window !== 'undefined') {
         const url = new URL(window.location.href);
@@ -115,6 +124,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         url.searchParams.delete('lendername');
         url.searchParams.delete('lender_name');
         url.searchParams.delete('lenderName');
+        url.searchParams.delete('lenderUniqueId');
         window.history.replaceState({}, '', url.toString());
       }
     },

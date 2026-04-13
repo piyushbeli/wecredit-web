@@ -9,6 +9,7 @@ import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 import { toast } from 'sonner';
+import { useUrlParamsStore } from '@/stores/url-params-store';
 import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
 import type {
   FormField,
@@ -155,17 +156,27 @@ function buildFetchFormFieldsHeaders(
 }
 
 /**
- * Builds headers for create lead API
+ * Builds headers for create lead API.
+ * Adds `lenderUniqueId` when the session captured it from URL query (see AuthProvider + url-params-store).
  */
 function buildCreateLeadHeaders(): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
   const mobile = getCookie(STORAGE_MOBILE);
-  return {
+  const lenderUniqueIdFromUrl = useUrlParamsStore.getState().lenderUniqueId;
+
+  const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
     'Authorization': `Bearer ${token || ''}`,
     'mobile': String(mobile || ''),
     ...getAttributionHeadersCommon(),
   };
+
+  // Backend expects this header only when the landing URL carried the id (avoid empty / noise).
+  if (lenderUniqueIdFromUrl) {
+    headers['lenderUniqueId'] = lenderUniqueIdFromUrl;
+  }
+
+  return headers;
 }
 
 // ============================================

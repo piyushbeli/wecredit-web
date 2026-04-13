@@ -57,6 +57,12 @@ const OTPInput = ({
   const [otp, setOtp] = useState(controlledValue || '');
   const [resendTimer, setResendTimer] = useState(RESEND_TIMER_SECONDS);
   const [canResend, setCanResend] = useState(false);
+  /**
+   * Bumps when the user resends so the countdown effect re-runs.
+   * The interval clears itself when the timer hits 0; without a new effect run,
+   * resetting `resendTimer` to 30 would leave no active interval (UI stuck on "30s").
+   */
+  const [resendTimerEpoch, setResendTimerEpoch] = useState(0);
 
   /** Sync with controlled value */
   useEffect(() => {
@@ -65,7 +71,7 @@ const OTPInput = ({
     }
   }, [controlledValue]);
 
-  /** Start resend timer on mount */
+  /** Start / restart resend countdown (mount + each resend) */
   useEffect(() => {
     if (!showResend) return;
     const timer = setInterval(() => {
@@ -79,7 +85,7 @@ const OTPInput = ({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [showResend]);
+  }, [showResend, resendTimerEpoch]);
 
   /** Handle OTP change */
   const handleOtpChange = useCallback(
@@ -99,6 +105,7 @@ const OTPInput = ({
     setOtp('');
     setResendTimer(RESEND_TIMER_SECONDS);
     setCanResend(false);
+    setResendTimerEpoch((n) => n + 1);
     onResend?.();
   };
 
