@@ -42,7 +42,7 @@ export const DEFAULT_PRIMEPL_LEAD_FORM_STATE: PrimeplLeadFormState = {
 };
 
 /** Default `sourceChannel` for the forward API (matches sample integration). */
-export const PRIMEPL_DEFAULT_SOURCE_CHANNEL = 'd';
+export const PRIMEPL_DEFAULT_SOURCE_CHANNEL = 'web';
 
 function parsePositiveInt(raw: string, fieldLabel: string): { value: number; error?: string } {
   const digits = raw.replace(/\D/g, '');
