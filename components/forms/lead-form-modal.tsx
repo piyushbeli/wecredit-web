@@ -208,7 +208,8 @@ const LeadFormModal = ({
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  const { partner, originSubLender  } = useUrlParamsStore();
+  const { partner, originSubLender } = useUrlParamsStore();
+  const lenderUniqueId = useUrlParamsStore.getState().lenderUniqueId ?? '';
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
@@ -410,7 +411,7 @@ const LeadFormModal = ({
       ),
     };
 
-    const success = await createLead(formData, effectivePartnerCode, lenderName);
+    const success = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
     if (success) {
       setShowSuccess(true);
       router.push(buildOffersPathAfterLeadSuccess(lenderName, searchParams));

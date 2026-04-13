@@ -298,7 +298,8 @@ async function fetchFormFields(
 async function createLead(
   formData: LeadFormData,
   partnerCode: string = getEffectivePartnerCode(),
-  lenderName?: string
+  lenderName?: string,
+  lenderUniqueIdFromUrl?: string
 ): Promise<LeadServiceResult<CreateLeadResponse>> {
   try {
     const isLntLenderOrUpswignLntLender = lenderName?.toLowerCase() === 'lnt' || lenderName?.toLowerCase() === 'upswing_lnt';
@@ -332,7 +333,7 @@ async function createLead(
       ConsentDateTime: consentDateTime,
       endpoint: 'create-lead',
       partnerCode: partnerCode,
-
+      ...(lenderUniqueIdFromUrl && { lenderUniqueId: [lenderUniqueIdFromUrl] }),
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
 

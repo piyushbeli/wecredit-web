@@ -122,7 +122,7 @@ const PrimeplLeadFields = ({
 
       <div>
         <label className="lead-form-label">
-          Occupation <span className="text-red-500">*</span>
+          Employment Type <span className="text-red-500">*</span>
         </label>
         <ButtonGroup
           options={occupationOptions}

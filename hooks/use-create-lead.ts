@@ -24,7 +24,8 @@ interface UseCreateLeadReturn {
   createLead: (
     formData: LeadFormData,
     partnerCode: string,
-    lenderName?: string
+    lenderName?: string,
+    lenderUniqueId?: string
   ) => Promise<boolean>;
   /** Reset the hook state */
   reset: () => void;
@@ -55,7 +56,8 @@ export function useCreateLead(): UseCreateLeadReturn {
   const createLead = useCallback(async (
     formData: LeadFormData,
     partnerCode: string,
-    lenderName?: string
+    lenderName?: string,
+    lenderUniqueId?: string
   ): Promise<boolean> => {
     setIsLoading(true);
     setIsCreated(false);
@@ -63,7 +65,7 @@ export function useCreateLead(): UseCreateLeadReturn {
     setLeadId(null);
     showLoading('Submitting application...', 'Please wait while we process your details.');
     try {
-      const result = await leadService.createLead(formData, partnerCode, lenderName);
+      const result = await leadService.createLead(formData, partnerCode, lenderName, lenderUniqueId );
       if (result.success && result.data) {
         setLeadId(result.data.leadId);
         setIsCreated(true);
