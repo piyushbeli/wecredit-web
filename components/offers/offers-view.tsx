@@ -45,6 +45,7 @@ export const OffersView = () => {
   // Hide "Explore more" for affiliate flows (?partner=…) and LNT single-lender view
   const { isAffiliate } = useInfoSearchParams();
   const hideExploreMoreOffersCta = isAffiliate || isLntLender;
+  const hideExploreOtherOffersCta = !isAffiliate && !isLntLender;
   const lenderNameParam = mapingLenderNameToLenderCode(rawLender);
 
   const pollingMessage = lenderNameParam
@@ -224,7 +225,7 @@ export const OffersView = () => {
       return (
         <div className="flex flex-col items-center justify-center text-center ">
           <EmptyState title="No offers available from this lender" description=" " />
-          {!isAffiliate && (
+          {hideExploreOtherOffersCta && (
             <ActionButton
               type="button"
               onClick={handleExploreMore}
