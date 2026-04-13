@@ -9,7 +9,7 @@ import { authService } from '@/lib/api';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
-import { isValidMobile } from '@/lib/utils/common-helper';
+import { getLoggedInAffiliateApplyTrigger } from '@/lib/auth/logged-in-affiliate-apply-trigger';
 
 /**
  * Props for AuthProvider component
@@ -299,29 +299,17 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
           );
         }
 
-        // Logged-in (or just re-hydrated) session: same UX as post-OTP `open_personal_loan_apply`
-        // — open dedupe / lead pipeline when landing on PL hub with affiliate params.
-        const partnerParam = normalizeParam(searchParams?.get('partner'));
-        const lenderParam = normalizeParam(
-          searchParams?.get('lendername') ??
-            searchParams?.get('lender_name') ??
-            searchParams?.get('lenderName')
+        const { shouldTrigger, delayMs } = getLoggedInAffiliateApplyTrigger(
+          pathname,
+          searchParams,
+          mobile.toString(),
+          normalizeParam,
+          partnerLenderApplyModalOpenedRef.current,
+          wasUnauthenticated
         );
-        const mnParam = searchParams?.get('mn');
-        const mobileTrimmed = mobile.toString().trim();
-        const mnMatchesSession =
-          isValidMobile(mnParam) && mnParam.trim() === mobileTrimmed;
 
-        const shouldTriggerAffiliateApply =
-          isAffiliateMnHubPath(pathname) &&
-          !partnerLenderApplyModalOpenedRef.current &&
-          !searchParams?.get('pre_auth') &&
-          (Boolean(partnerParam) || Boolean(lenderParam) || mnMatchesSession);
-
-        if (shouldTriggerAffiliateApply) {
+        if (shouldTrigger) {
           partnerLenderApplyModalOpenedRef.current = true;
-          // If we just called setUser, wait for Zustand + children to see authenticated state.
-          const delayMs = wasUnauthenticated ? 100 : 0;
           setTimeout(() => {
             triggerApplyFlow();
           }, delayMs);
