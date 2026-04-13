@@ -50,9 +50,9 @@ const MINIMUM_AGE_YEARS = 18;
  */
 const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
   if (fieldKey === 'name') {
-    // Name should not contain digits; remove numbers while preserving letters/spaces.
-    // This keeps the controlled input clean and avoids sending invalid data to backend.
-    return value.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim();
+    // Strip digits and collapse runs of spaces. Do not trim() — that removes the trailing
+    // space while the user is typing between words (e.g. "asb " before "jain").
+    return value.replace(/[0-9]/g, '').replace(/\s+/g, ' ');
   }
   if (fieldKey === 'pan') {
     return sanitizePanInput(value);
@@ -440,7 +440,9 @@ export const useLeadForm = (
         || field.key === 'companyPincode'
       ) {
         // Keep PAN and pincode values normalized even when the API pre-fills them.
-        initialValues[field.key] = normalizeLeadFieldValue(field.key, rawValue);
+        const normalized = normalizeLeadFieldValue(field.key, rawValue);
+        // Prefill name once so API whitespace does not linger; live typing no longer trims (see normalizeLeadFieldValue).
+        initialValues[field.key] = field.key === 'name' ? normalized.trim() : normalized;
         return;
       }
 
