@@ -41,6 +41,10 @@ export const OffersView = () => {
 
   const isLntLender = rawLender.toLowerCase() === 'lnt';
   const isLntLenderOrUpswignLntLender = isLntLender || rawLender.toLowerCase() === 'upswing_lnt';
+  // Hide "Explore more" for affiliate flows (?partner=…) and LNT single-lender view
+  const partnerFromQuery = searchParams.get('partner')?.trim() ?? '';
+  const hasValidPartnerInQuery = partnerFromQuery.length > 0;
+  const hideExploreMoreOffersCta = hasValidPartnerInQuery || isLntLender;
   const lenderNameParam = mapingLenderNameToLenderCode(rawLender);
 
   const pollingMessage = lenderNameParam
@@ -197,19 +201,23 @@ useEffect(() => {
         return (
           <div className="space-y-6 max-w-xl mx-auto">
             {renderOfferSection('', filteredExploreOffers)}
-            {/* <p className="text-[14px] text-gray-600">
-              More lenders might have exciting offers waiting for you. Take a moment to explore your options.
-            </p>
-            <div className="flex justify-center w-full ">
-              <ActionButton
-                type="button"
-                onClick={handleExploreMore}
-                className="w-[200px] px-10"
-                rightIcon="🔍"
-              >
-                Explore More Offers
-              </ActionButton>
-            </div> */}
+            {!hideExploreMoreOffersCta && (
+              <>
+                <p className="text-[14px] text-gray-600">
+                  More lenders might have exciting offers waiting for you. Take a moment to explore your options.
+                </p>
+                <div className="flex justify-center w-full ">
+                  <ActionButton
+                    type="button"
+                    onClick={handleExploreMore}
+                    className="w-[200px] px-10"
+                    rightIcon="🔍"
+                  >
+                    Explore More Offers
+                  </ActionButton>
+                </div>
+              </>
+            )}
           </div>
         );
       }
