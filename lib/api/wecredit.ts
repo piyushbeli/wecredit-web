@@ -12,7 +12,7 @@ import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
 import { toast } from 'sonner';
-import { buildUpswingForwardRequestUrl } from './upswing-navigation-event';
+import { buildUpswingForwardRequestUrl, notifyForwardNavigationEvent } from './upswing-navigation-event';
 import type {
   ActiveLendersResponse,
   CheckStatusAllResponse,
@@ -311,7 +311,8 @@ export async function updateUtmClicked(
 export async function forwardUpswingRedirect(
   mobile: string,
   authorization?: string,
-  signal?: AbortSignal
+  utmLink?: string,
+  signal?: AbortSignal,
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
 
   if (!mobile) {
@@ -374,7 +375,9 @@ export async function forwardUpswingRedirect(
       }
 
     } catch {
-
+      if (utmLink) {
+        notifyForwardNavigationEvent(mobile, utmLink);
+      }
       window.history.replaceState(null, "", "/");
 
       const blob = new Blob([text], { type: "text/html" });
