@@ -28,12 +28,14 @@ import { useOfferStore } from '@/stores/offer-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
+import { useUrlParamsStore } from '@/stores/url-params-store';
 
 export const OffersView = () => {
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
   const reset = useOfferStore((state) => state.reset);
   const searchParams = useSearchParams();
+  const {partner} = useUrlParamsStore()
   const newLead = searchParams.get('newLead') || searchParams.get('newlead');
   const rawLender =
     searchParams.get('lenderName') ??
@@ -74,6 +76,10 @@ export const OffersView = () => {
   );
 
   useEffect(() => {
+
+    // If partner is present, don't trigger apply flow
+    if (partner) return;
+
     if (!shouldTriggerApply) return;
     // Step 1: Go to home
     router.replace('/');
