@@ -12,6 +12,7 @@ import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
 import { toast } from 'sonner';
+import { buildUpswingForwardRequestUrl } from './upswing-navigation-event';
 import type {
   ActiveLendersResponse,
   CheckStatusAllResponse,
@@ -186,7 +187,6 @@ export async function fetchActiveLendersForUser(
 const CHECK_STATUS_ALL_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 /** Lead API endpoint - uses /api/forward for offer click updates */
 const UPDATE_UTM_CLICKED_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
-const UPSWING_REDIRECT_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 export async function checkStatusAll(
   mobile: string,
   authorization?: string,
@@ -326,7 +326,7 @@ export async function forwardUpswingRedirect(
     partnerCode: getEffectivePartnerCode(),
   };
 
-  const url = `${UPSWING_REDIRECT_ENDPOINT}?mobile=${mobile}`;
+  const url = buildUpswingForwardRequestUrl(mobile);
 
   try {
 

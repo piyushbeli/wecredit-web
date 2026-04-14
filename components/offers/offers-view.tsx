@@ -22,6 +22,7 @@ import {
 import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { forwardUpswingRedirect, updateUtmClicked } from '@/lib/api/wecredit';
+import { notifyForwardNavigationEvent } from '@/lib/api/upswing-navigation-event';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
@@ -104,7 +105,8 @@ export const OffersView = () => {
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
-    const isLntOffer = offer.lenderName?.toLowerCase() === 'lnt';
+    const offerLenderName = offer.lenderName?.toLowerCase();
+    const isLntOffer = offerLenderName === 'lnt' || offerLenderName === 'upswing_lnt';
     // For non-INITIATED offers in explore screen, navigate to status page
     if (offer.wcStatus !== 'INITIATED') {
       router.push(buildOffersPathWithQuery('/offers/status', searchParams));
@@ -120,6 +122,7 @@ export const OffersView = () => {
     }
     // LNT & Upswing LNT special flow
     if (isLntOffer) {
+      notifyForwardNavigationEvent(mobile);
       void forwardUpswingRedirect(mobile, token);
       return;
     }
