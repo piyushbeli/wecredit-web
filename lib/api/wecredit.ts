@@ -12,6 +12,7 @@ import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
 import { toast } from 'sonner';
+import { buildUpswingForwardRequestUrl, notifyForwardNavigationEvent } from './upswing-navigation-event';
 import type {
   ActiveLendersResponse,
   CheckStatusAllResponse,
@@ -49,7 +50,7 @@ const DEFAULT_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
  * Builds headers for WeCredit API request
  * Includes environment-specific headers (X-Agent-Host in dev/staging)
  */
-function buildHeaders(options: WeCreditOptions): Record<string, string> {
+export function buildHeaders(options: WeCreditOptions): Record<string, string> {
   const { mobile, authorization, headers = {} } = options;
   return {
     ...wecreditConfig.headers,
@@ -186,7 +187,6 @@ export async function fetchActiveLendersForUser(
 const CHECK_STATUS_ALL_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 /** Lead API endpoint - uses /api/forward for offer click updates */
 const UPDATE_UTM_CLICKED_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
-const UPSWING_REDIRECT_ENDPOINT = `${wecreditConfig.apiUrl}/api/forward`;
 export async function checkStatusAll(
   mobile: string,
   authorization?: string,
@@ -311,7 +311,8 @@ export async function updateUtmClicked(
 export async function forwardUpswingRedirect(
   mobile: string,
   authorization?: string,
-  signal?: AbortSignal
+  utmLink?: string,
+  signal?: AbortSignal,
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
 
   if (!mobile) {
@@ -326,7 +327,7 @@ export async function forwardUpswingRedirect(
     partnerCode: getEffectivePartnerCode(),
   };
 
-  const url = `${UPSWING_REDIRECT_ENDPOINT}?mobile=${mobile}`;
+  const url = buildUpswingForwardRequestUrl(mobile);
 
   try {
 
@@ -374,7 +375,9 @@ export async function forwardUpswingRedirect(
       }
 
     } catch {
-
+      if (utmLink) {
+        notifyForwardNavigationEvent(mobile, utmLink);
+      }
       window.history.replaceState(null, "", "/");
 
       const blob = new Blob([text], { type: "text/html" });

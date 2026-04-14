@@ -12,6 +12,7 @@ import {
 } from '@/components/offers';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { updateUtmClicked } from '@/lib/api/wecredit';
+import { notifyForwardNavigationEvent } from '@/lib/api/upswing-navigation-event';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useEffect, useRef } from 'react';
@@ -54,6 +55,8 @@ useEffect(() => {
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
+    const offerLenderName = offer.lenderName?.toLowerCase();
+    const isLntOffer = offerLenderName === 'lnt' || offerLenderName === 'upswing_lnt';
     if (!utmLink) {
       return;
     }
@@ -64,6 +67,10 @@ useEffect(() => {
 
     if (lenderName && mobile && !isUtmClicked) {
       //void updateUtmClicked(mobile, lenderName, token);
+    }
+
+    if (mobile && isLntOffer) {
+      notifyForwardNavigationEvent(mobile, utmLink);
     }
     window.open(utmLink, '_blank'); 
 
