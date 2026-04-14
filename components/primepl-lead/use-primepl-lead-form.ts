@@ -125,7 +125,6 @@ export const usePrimeplLeadForm = (
 
     setFormValues((prev) => ({
       ...prev,
-      ...(user.name && !prev.name ? { name: user.name } : {}),
       ...(user.phoneNumber && !prev.mobile ? { mobile: user.phoneNumber } : {}),
     }));
   }, [isAuthenticated, user]);
