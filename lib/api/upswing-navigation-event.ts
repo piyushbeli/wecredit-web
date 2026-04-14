@@ -1,7 +1,6 @@
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS } from '@/lib/constants/api-keys';
 
-const UPSWING_NAVIGATION_EVENT_PATH = '/api/v2/sublender/upswing-navigation-event';
 const UPSWING_FORWARD_PATH = '/api/forward';
 const UPSWING_JOURNEY = 'upswing';
 const UPSWING_EVENT_TYPE = 'button_click';
@@ -30,12 +29,12 @@ const buildUpswingNavigationEventBody = (
     buttonName: UPSWING_BUTTON_NAME,
     buttonUrl,
     frontendTimestamp: new Date().toISOString(),
-    apiEndpoint:'/upswing/landing'
+    apiEndpoint:ENDPOINTS.PUBLIC.UPSWING_NAVIGATION_EVENT
   };
 };
 
 const getUpswingNavigationEventUrl = (): string => {
-  return `${wecreditConfig.apiUrl}${UPSWING_NAVIGATION_EVENT_PATH}`;
+  return `${wecreditConfig.apiUrl}${UPSWING_FORWARD_PATH}`;
 };
 
 export const buildUpswingForwardRequestUrl = (mobile: string): string => {
@@ -52,9 +51,6 @@ const getButtonUrl = (kind: UpswingButtonUrlKind, mobile: string): string => {
 export const postUpswingNavigationEvent = async (
   payload: UpswingNavigationEventPayload
 ): Promise<void> => {
-  if (!payload.mobile) {
-    return;
-  }
 
   try {
     await fetch(getUpswingNavigationEventUrl(), {

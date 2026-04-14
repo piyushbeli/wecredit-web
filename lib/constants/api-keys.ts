@@ -67,6 +67,8 @@ export const ENDPOINTS = {
 
     /** Endpoint identifier for credit card Apply Now click tracking */
     CLICKS_COUNTER: 'clicks_counter',
+
+    UPSWING_NAVIGATION_EVENT: 'upswing-navigation-event',
   },
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',
