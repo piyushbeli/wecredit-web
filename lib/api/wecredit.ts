@@ -375,8 +375,9 @@ export async function forwardUpswingRedirect(
       }
 
     } catch {
+      // Non-JSON body: treat as HTML redirect. Await analytics so navigation does not abort the event request.
       if (utmLink) {
-        notifyForwardNavigationEvent(mobile, utmLink);
+        await notifyForwardNavigationEvent(mobile, utmLink);
       }
       window.history.replaceState(null, "", "/");
 

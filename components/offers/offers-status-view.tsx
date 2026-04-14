@@ -70,7 +70,7 @@ useEffect(() => {
     }
 
     if (mobile && isLntOffer) {
-      notifyForwardNavigationEvent(mobile, utmLink);
+      void notifyForwardNavigationEvent(mobile, utmLink);
     }
     window.open(utmLink, '_blank'); 
 
