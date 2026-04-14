@@ -11,6 +11,7 @@ import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 import { toast } from 'sonner';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
+import { notifyCreateLeadNavigationEvent } from './upswing-navigation-event';
 import type {
   FormField,
   FetchFormFieldsResponse,
@@ -331,7 +332,7 @@ async function createLead(
       maritalStatus: (formData.maritalStatus as MaritalStatusValue) || undefined,
       ConsentIp: consentIp,
       ConsentDateTime: consentDateTime,
-      endpoint: 'create-lead',
+      endpoint: ENDPOINTS.PUBLIC.CREATE_LEAD,
       partnerCode: partnerCode,
       ...(lenderUniqueIdFromUrl && { lenderUniqueId: [lenderUniqueIdFromUrl] }),
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
@@ -396,6 +397,12 @@ async function createLead(
         success: false,
         error: errorMsg,
       };
+    }
+
+    if (isLntLenderOrUpswignLntLender && mobile) {
+      // This event should not affect lead creation success path.
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+      notifyCreateLeadNavigationEvent(mobile);
     }
 
     return {
