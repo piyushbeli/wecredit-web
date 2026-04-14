@@ -8,12 +8,7 @@ import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { getCookie } from 'cookies-next';
 import { useAuthStore } from '@/stores/auth-store';
 import { isValidMobile } from '@/lib/utils/common-helper';
-
-/** Builds the current page URL for post-login navigation (navigate_to_offer pending action). */
-const buildUpswingRedirectHref = (pathname: string, searchParams: URLSearchParams): string => {
-  const qs = searchParams.toString();
-  return qs ? `${pathname}?${qs}` : pathname;
-};
+import { buildPathWithQuery } from '@/lib/utils/path-with-query';
 
 const UpswingRedirectPage = () => {
   const pathname = usePathname();
@@ -48,7 +43,7 @@ const UpswingRedirectPage = () => {
 
     if (!isAuthenticated) {
       setIsLoading(false);
-      const returnHref = buildUpswingRedirectHref(pathname, searchParams);
+      const returnHref = buildPathWithQuery(pathname, searchParams.toString());
       if (!hasAutoOpenedAuthModal.current) {
         hasAutoOpenedAuthModal.current = true;
         openModalWithPendingActionAtOtp(
@@ -94,7 +89,7 @@ const UpswingRedirectPage = () => {
   const hasValidMobile = isValidMobile(mobileParam);
 
   const handleOpenSignIn = (): void => {
-    const returnHref = buildUpswingRedirectHref(pathname, searchParams);
+    const returnHref = buildPathWithQuery(pathname, searchParams.toString());
     if (!isValidMobile(mobileParam)) {
       return;
     }

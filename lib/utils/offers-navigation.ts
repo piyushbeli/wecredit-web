@@ -1,4 +1,5 @@
 import type { ReadonlyURLSearchParams } from 'next/navigation';
+import { buildPathWithQuery } from '@/lib/utils/path-with-query';
 
 /**
  * Client navigations between `/offers` and `/offers/status` must keep the current query string
@@ -8,8 +9,7 @@ export function buildOffersPathWithQuery(
   pathname: '/offers' | '/offers/status',
   searchParams: ReadonlyURLSearchParams | null
 ): string {
-  const qs = searchParams?.toString() ?? '';
-  return qs ? `${pathname}?${qs}` : pathname;
+  return buildPathWithQuery(pathname, searchParams?.toString() ?? '');
 }
 
 /**
@@ -22,6 +22,5 @@ export function buildOffersPathClearingLenderFilter(
   const qs = new URLSearchParams(searchParams?.toString() ?? '');
   qs.delete('lenderName');
   qs.delete('lendername');
-  const s = qs.toString();
-  return s ? `/offers?${s}` : '/offers';
+  return buildPathWithQuery('/offers', qs.toString());
 }
