@@ -1,7 +1,8 @@
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS } from '@/lib/constants/api-keys';
+import { getEffectivePartnerCode } from '../utils/effective-partner-code';
 
-const UPSWING_FORWARD_PATH = '/api/forward';
+const UPSWING_FORWARD_PATH = '/api/public';
 const UPSWING_JOURNEY = 'upswing';
 const UPSWING_EVENT_TYPE = 'button_click';
 const UPSWING_BUTTON_NAME = 'apply_now';
@@ -14,6 +15,7 @@ export interface UpswingNavigationEventPayload {
   eventType: string;
   buttonName: string;
   buttonUrl: string;
+  partnerCode: string;
   frontendTimestamp: string;
   apiEndpoint: string;
 }
@@ -28,6 +30,7 @@ const buildUpswingNavigationEventBody = (
     eventType: UPSWING_EVENT_TYPE,
     buttonName: UPSWING_BUTTON_NAME,
     buttonUrl,
+    partnerCode: getEffectivePartnerCode(),
     frontendTimestamp: new Date().toISOString(),
     apiEndpoint:ENDPOINTS.PUBLIC.UPSWING_NAVIGATION_EVENT
   };
