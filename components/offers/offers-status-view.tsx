@@ -18,6 +18,7 @@ import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { buildOffersPathClearingLenderFilter, buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
+import { useUrlParamsStore } from '@/stores/url-params-store';
 
 
 /**
@@ -26,12 +27,14 @@ import { buildOffersPathClearingLenderFilter, buildOffersPathWithQuery } from '@
  */
 export const OffersStatusView = () => {
   const router = useRouter();
+const {partner} = useUrlParamsStore()
   const searchParams = useSearchParams();
   const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply } = useOffers();
  const { triggerApplyFlow } = useLoanApplicationStore();
 const hasTriggeredRef = useRef(false);
 
 useEffect(() => {
+  if (partner) return;
   if (!shouldTriggerApply) return;
   if (hasTriggeredRef.current) return;
 
