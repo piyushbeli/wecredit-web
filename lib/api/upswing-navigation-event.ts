@@ -1,6 +1,7 @@
 import { wecreditConfig } from '@/lib/config';
 import { ENDPOINTS } from '@/lib/constants/api-keys';
 import { getEffectivePartnerCode } from '../utils/effective-partner-code';
+import { buildHeaders } from './wecredit';
 
 const UPSWING_FORWARD_PATH = '/api/public';
 const UPSWING_JOURNEY = 'upswing';
@@ -17,7 +18,7 @@ export interface UpswingNavigationEventPayload {
   buttonUrl: string;
   partnerCode: string;
   frontendTimestamp: string;
-  apiEndpoint: string;
+  endpoint: string;
 }
 
 const buildUpswingNavigationEventBody = (
@@ -32,7 +33,7 @@ const buildUpswingNavigationEventBody = (
     buttonUrl,
     partnerCode: getEffectivePartnerCode(),
     frontendTimestamp: new Date().toISOString(),
-    apiEndpoint:ENDPOINTS.PUBLIC.UPSWING_NAVIGATION_EVENT
+    endpoint:ENDPOINTS.PUBLIC.UPSWING_NAVIGATION_EVENT
   };
 };
 
@@ -56,11 +57,10 @@ export const postUpswingNavigationEvent = async (
 ): Promise<void> => {
 
   try {
+    const header = buildHeaders({});
     await fetch(getUpswingNavigationEventUrl(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: header,
       body: JSON.stringify(payload),
       cache: 'no-store',
     });

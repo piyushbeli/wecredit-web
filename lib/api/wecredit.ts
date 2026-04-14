@@ -50,7 +50,7 @@ const DEFAULT_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
  * Builds headers for WeCredit API request
  * Includes environment-specific headers (X-Agent-Host in dev/staging)
  */
-function buildHeaders(options: WeCreditOptions): Record<string, string> {
+export function buildHeaders(options: WeCreditOptions): Record<string, string> {
   const { mobile, authorization, headers = {} } = options;
   return {
     ...wecreditConfig.headers,
