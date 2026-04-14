@@ -55,11 +55,12 @@ useEffect(() => {
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
+    const offerLenderName = offer.lenderName?.toLowerCase();
+    const isLntOffer = offerLenderName === 'lnt' || offerLenderName === 'upswing_lnt';
     if (!utmLink) {
       return;
     }
     const lenderName: string = offer.lenderName || '';
-    const isLntOffer = lenderName.toLowerCase() === 'lnt' || lenderName.toLowerCase() === 'upswing_lnt';
     const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
     const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
     const isUtmClicked: boolean = offer.wcStatus === 'UTM_CLICKED';
@@ -67,8 +68,9 @@ useEffect(() => {
     if (lenderName && mobile && !isUtmClicked) {
       //void updateUtmClicked(mobile, lenderName, token);
     }
+
     if (mobile && isLntOffer) {
-      notifyForwardNavigationEvent(mobile);
+      notifyForwardNavigationEvent(mobile, utmLink);
     }
     window.open(utmLink, '_blank'); 
 

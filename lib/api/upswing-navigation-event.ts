@@ -3,7 +3,8 @@ import { ENDPOINTS } from '@/lib/constants/api-keys';
 import { getEffectivePartnerCode } from '../utils/effective-partner-code';
 import { buildHeaders } from './wecredit';
 
-const UPSWING_FORWARD_PATH = '/api/public';
+const UPSWING_PUBLIC_PATH = '/api/public';
+const UPSWING_FORWARD_PATH = '/api/forward'
 const UPSWING_JOURNEY = 'upswing';
 const UPSWING_EVENT_TYPE = 'button_click';
 const UPSWING_BUTTON_NAME = 'apply_now';
@@ -24,12 +25,13 @@ export interface UpswingNavigationEventPayload {
 const buildUpswingNavigationEventBody = (
   mobile: string,
   buttonUrl: string,
+  buttonName: string,
 ): UpswingNavigationEventPayload => {
   return {
     mobile,
     journey: UPSWING_JOURNEY,
     eventType: UPSWING_EVENT_TYPE,
-    buttonName: UPSWING_BUTTON_NAME,
+    buttonName,
     buttonUrl,
     partnerCode: getEffectivePartnerCode(),
     frontendTimestamp: new Date().toISOString(),
@@ -38,7 +40,7 @@ const buildUpswingNavigationEventBody = (
 };
 
 const getUpswingNavigationEventUrl = (): string => {
-  return `${wecreditConfig.apiUrl}${UPSWING_FORWARD_PATH}`;
+  return `${wecreditConfig.apiUrl}${UPSWING_PUBLIC_PATH}`;
 };
 
 export const buildUpswingForwardRequestUrl = (mobile: string): string => {
@@ -47,7 +49,7 @@ export const buildUpswingForwardRequestUrl = (mobile: string): string => {
 
 const getButtonUrl = (kind: UpswingButtonUrlKind, mobile: string): string => {
   if (kind === 'createLead') {
-    return ENDPOINTS.PUBLIC.CREATE_LEAD;
+    return '/api/v2/sublender/create-lead';
   }
   return buildUpswingForwardRequestUrl(mobile);
 };
@@ -76,16 +78,19 @@ export const notifyCreateLeadNavigationEvent = (
   const payload = buildUpswingNavigationEventBody(
     mobile,
     getButtonUrl('createLead', mobile),
+    "create_lead",
   );
   void postUpswingNavigationEvent(payload);
 };
 
 export const notifyForwardNavigationEvent = (
   mobile: string,
+  utmLink: string,
 ): void => {
   const payload = buildUpswingNavigationEventBody(
     mobile,
-    getButtonUrl('forward', mobile),
+    utmLink,
+    "apply_now",
   );
   void postUpswingNavigationEvent(payload);
 };

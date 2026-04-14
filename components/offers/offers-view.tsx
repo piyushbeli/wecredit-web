@@ -120,18 +120,18 @@ export const OffersView = () => {
     if (!mobile) {
       return;
     }
-    // LNT & Upswing LNT special flow
-    if (isLntOffer) {
-      notifyForwardNavigationEvent(mobile);
-      void forwardUpswingRedirect(mobile, token);
-      return;
-    }
 
+    // LNT & Upswing LNT special flow
     // For INITIATED offers, open UTM link
     const utmLink: string | undefined = offer.utmLink;
     if (!utmLink) {
       return;
     }
+    if (isLntOffer) {
+      void forwardUpswingRedirect(mobile, token, utmLink);
+      return;
+    }
+
 
     // Update UTM clicked status
     if (lenderName && mobile) {

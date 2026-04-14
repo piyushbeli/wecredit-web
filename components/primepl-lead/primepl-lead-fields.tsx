@@ -71,10 +71,10 @@ const PrimeplLeadFields = ({
 
       <div>
         <label className="lead-form-label">
-          Address <span className="text-red-500">*</span>
+          City <span className="text-red-500">*</span>
         </label>
         <InputField
-          label="Address"
+          label="City"
           value={formValues.address}
           onChange={(value) => handleFieldChange('address', value)}
           onBlur={() => handleFieldBlur('address')}
