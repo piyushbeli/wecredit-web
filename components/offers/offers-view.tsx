@@ -3,7 +3,7 @@
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
 import { useOffers } from '@/hooks/use-offers';
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   buildOffersPathClearingLenderFilter,
@@ -27,12 +27,15 @@ import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
+import { useInfoSearchParams } from '@/hooks/use-info-search-params';
+import { useUrlParamsStore } from '@/stores/url-params-store';
 
 export const OffersView = () => {
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
   const reset = useOfferStore((state) => state.reset);
   const searchParams = useSearchParams();
+  const {partner} = useUrlParamsStore()
   const newLead = searchParams.get('newLead') || searchParams.get('newlead');
   const rawLender =
     searchParams.get('lenderName') ??
@@ -41,6 +44,10 @@ export const OffersView = () => {
 
   const isLntLender = rawLender.toLowerCase() === 'lnt';
   const isLntLenderOrUpswignLntLender = isLntLender || rawLender.toLowerCase() === 'upswing_lnt';
+  // Hide "Explore more" for affiliate flows (?partner=…) and LNT single-lender view
+  const { isAffiliate } = useInfoSearchParams();
+  const hideExploreMoreOffersCta = isAffiliate || isLntLender;
+  const hideExploreOtherOffersCta = !isAffiliate && !isLntLender;
   const lenderNameParam = mapingLenderNameToLenderCode(rawLender);
 
   const pollingMessage = lenderNameParam
@@ -68,17 +75,21 @@ export const OffersView = () => {
     [lenderNameParam, filteredExploreOffers]
   );
 
-useEffect(() => {
-  if (!shouldTriggerApply) return;
-  // Step 1: Go to home
-  router.replace('/');
+  useEffect(() => {
 
-  // Step 2: Trigger apply AFTER navigation
-  Promise.resolve().then(() => {
-  triggerApplyFlow();
-});
+    // If partner is present, don't trigger apply flow
+    if (partner) return;
 
-}, [shouldTriggerApply, triggerApplyFlow, router]);
+    if (!shouldTriggerApply) return;
+    // Step 1: Go to home
+    router.replace('/');
+
+    // Step 2: Trigger apply AFTER navigation
+    Promise.resolve().then(() => {
+      triggerApplyFlow();
+    });
+
+  }, [shouldTriggerApply, triggerApplyFlow, router]);
 
   // If lenderName is present and the matching offer is non-INITIATED, redirect to status page
   useEffect(() => {
@@ -93,44 +104,44 @@ useEffect(() => {
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
-  const isLntOffer = offer.lenderName?.toLowerCase() === 'lnt';
-  // For non-INITIATED offers in explore screen, navigate to status page
-  if (offer.wcStatus !== 'INITIATED') {
-    router.push(buildOffersPathWithQuery('/offers/status', searchParams));
-    return;
-  }
+    const isLntOffer = offer.lenderName?.toLowerCase() === 'lnt';
+    // For non-INITIATED offers in explore screen, navigate to status page
+    if (offer.wcStatus !== 'INITIATED') {
+      router.push(buildOffersPathWithQuery('/offers/status', searchParams));
+      return;
+    }
 
-  const lenderName: string = offer.lenderName || '';
-  const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
-  const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
+    const lenderName: string = offer.lenderName || '';
+    const mobile: string | undefined = getCookie(STORAGE_MOBILE) as string | undefined;
+    const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
 
-  if (!mobile) {
-    return;
-  }
-  // LNT & Upswing LNT special flow
-  if (isLntOffer ) {
-    void forwardUpswingRedirect(mobile, token);
-    return;
-  }
+    if (!mobile) {
+      return;
+    }
+    // LNT & Upswing LNT special flow
+    if (isLntOffer) {
+      void forwardUpswingRedirect(mobile, token);
+      return;
+    }
 
-  // For INITIATED offers, open UTM link
-  const utmLink: string | undefined = offer.utmLink;
-  if (!utmLink) {
-    return;
-  }
+    // For INITIATED offers, open UTM link
+    const utmLink: string | undefined = offer.utmLink;
+    if (!utmLink) {
+      return;
+    }
 
-  // Update UTM clicked status
-  if (lenderName && mobile) {
-    void updateUtmClicked(mobile, lenderName, token);
-  }
+    // Update UTM clicked status
+    if (lenderName && mobile) {
+      void updateUtmClicked(mobile, lenderName, token);
+    }
 
-  window.open(utmLink, '_blank');
+    window.open(utmLink, '_blank');
 
-  // Refresh offers after 2 seconds to reflect status change
-  setTimeout(() => {
-    fetchOffers();
-  }, 2000);
-};
+    // Refresh offers after 2 seconds to reflect status change
+    setTimeout(() => {
+      fetchOffers();
+    }, 2000);
+  };
 
   const handleRecentlyClickedOfferClick = (offer: LenderOfferStatus): void => {
     // For recently clicked offers, navigate to status page
@@ -148,15 +159,15 @@ useEffect(() => {
   const hasInitiatedOffers = exploreOffers.length > 0;
   const maxInitiatedAmount = useMemo(() => {
     // Find the maximum uptoAmount from INITIATED offers, optionally filtered by lenderName
-  return exploreOffers
-    .filter((offer) => lenderNameParam ? (offer.lenderName === lenderNameParam && offer.wcStatus === 'INITIATED') : (offer.wcStatus === 'INITIATED') && offer.uptoAmount)
-    .map((offer) => parseAmountToNumber(offer.uptoAmount))
-    .reduce((max, current) => Math.max(max, current), 0);
+    return exploreOffers
+      .filter((offer) => lenderNameParam ? (offer.lenderName === lenderNameParam && offer.wcStatus === 'INITIATED') : (offer.wcStatus === 'INITIATED') && offer.uptoAmount)
+      .map((offer) => parseAmountToNumber(offer.uptoAmount))
+      .reduce((max, current) => Math.max(max, current), 0);
   }, [exploreOffers, lenderNameParam]);
   const formattedMaxAmount = useMemo(() => {
-  return maxInitiatedAmount > 0
-    ? `₹${maxInitiatedAmount.toLocaleString('en-IN')}`
-    : null;
+    return maxInitiatedAmount > 0
+      ? `₹${maxInitiatedAmount.toLocaleString('en-IN')}`
+      : null;
   }, [maxInitiatedAmount]);
   // Only show the status CTA once we have non-initiated offers to check.
   // const hasStatusOffers = statusOffers.length > 0;
@@ -183,9 +194,68 @@ useEffect(() => {
       </section>
     );
   };
-  
+
+  /**
+   * Main explore area: either filtered by `lenderName` in the URL, or the default multi-lender list.
+   * Non-initiated single-lender case is handled by redirect; we render nothing here while that runs.
+   */
+  const renderMainOffersContent = (): ReactNode => {
+    if (lenderNameParam) {
+      if (singleLenderHasNonInitiatedOffer) {
+        return null;
+      }
+      if (filteredExploreOffers.length > 0) {
+        return (
+          <div className="space-y-6 max-w-xl mx-auto">
+            {renderOfferSection('', filteredExploreOffers)}
+            {!hideExploreMoreOffersCta && (
+              <>
+                <p className="text-[14px] text-gray-600">
+                  More lenders might have exciting offers waiting for you. Take a moment to explore your options.
+                </p>
+                <div className="flex justify-center w-full ">
+                  <ActionButton
+                    type="button"
+                    onClick={handleExploreMore}
+                    className="w-[200px] px-10"
+                    rightIcon="🔍"
+                  >
+                    Explore More Offers
+                  </ActionButton>
+                </div>
+              </>
+            )}
+          </div>
+        );
+      }
+      return (
+        <div className="flex flex-col items-center justify-center text-center ">
+          <EmptyState title="No offers available from this lender" description=" " />
+          {hideExploreOtherOffersCta && (
+            <ActionButton
+              type="button"
+              onClick={handleExploreMore}
+              className="w-full max-w-xs"
+            >
+              Explore Other Offers
+            </ActionButton>)}
+        </div>
+      );
+    }
+
+    if (!hasOffers) {
+      return null;
+    }
+    return (
+      <div className="space-y-6 max-w-xl mx-auto">
+        {renderOfferSection('', exploreOffers)}
+        <UnmatchedOffersSection />
+      </div>
+    );
+  };
+
   // Show loading skeleton while: initial loading, polling, or re-hitting lenders
-if (isLoading || isReHitting) {
+  if (isLoading || isReHitting) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <PollingState message={pollingMessage} />
@@ -200,7 +270,7 @@ if (isLoading || isReHitting) {
           <PollingState message={pollingMessage} />
         ) : (
           <PollingState />
-        ) }
+        )}
       </div>
     );
   }
@@ -258,45 +328,7 @@ if (isLoading || isReHitting) {
         <div className="flex flex-col items-start justify-center text-center py-0 space-y-0">
           {!lenderNameParam && showEmpty && <EmptyState />}
         </div>
-        {
-          lenderNameParam ? (
-            // 🔹 If lenderName exists in URL
-            singleLenderHasNonInitiatedOffer ? <></> : filteredExploreOffers.length > 0 ? (
-              <div className="space-y-6 max-w-xl mx-auto">
-                {renderOfferSection('', filteredExploreOffers)}
-                <p className="text-[14px] text-gray-600">More lenders might have exciting offers waiting for you. Take a moment to explore your options.</p>
-                <div className="flex justify-center w-full ">
-                  <ActionButton
-                    type="button"
-                    onClick={handleExploreMore}
-                    className="w-[200px] px-10"
-                    rightIcon="🔍"
-                  >
-                    Explore More Offers
-                  </ActionButton></div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center ">
-                <EmptyState title="No offers available from this lender" description=' ' />
-
-                <ActionButton
-                  type="button"
-                  onClick={handleExploreMore}
-                  className="w-full max-w-xs"
-                >
-                  Explore Other Offers
-                </ActionButton>
-              </div>
-            )
-          ) : (
-            // 🔹 Normal flow (no lenderName in URL)
-            hasOffers && (
-              <div className="space-y-6 max-w-xl mx-auto">
-                {renderOfferSection('', exploreOffers)}
-                <UnmatchedOffersSection />
-              </div>
-            )
-          )}
+        {renderMainOffersContent()}
       </div>
       {hasStatusOffers && !lenderNameParam && (
         <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10">

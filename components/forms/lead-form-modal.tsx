@@ -29,6 +29,7 @@ import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
 import Link from 'next/link';
+import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -207,13 +208,15 @@ const LeadFormModal = ({
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  const { partner, originSubLender  } = useUrlParamsStore();
+  const { partner, originSubLender } = useUrlParamsStore();
+  const lenderUniqueId = useUrlParamsStore.getState().lenderUniqueId ?? '';
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
   const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [lntCompanyName, setLntCompanyName] = useState('');
   const [showPartnerConsentError, setShowPartnerConsentError] = useState(false);
+  const {isAffiliate} = useInfoSearchParams();
 
   const isIpFetchInFlight = useRef(false);
   
@@ -408,7 +411,7 @@ const LeadFormModal = ({
       ),
     };
 
-    const success = await createLead(formData, effectivePartnerCode, lenderName);
+    const success = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
     if (success) {
       setShowSuccess(true);
       router.push(buildOffersPathAfterLeadSuccess(lenderName, searchParams));
@@ -777,14 +780,14 @@ const LeadFormModal = ({
 
         {/* Header */}
         <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
-          <button
+          {!isAffiliate &&<button
             type="button"
             onClick={handleHeaderBackClick}
             className="p-1 text-gray-700 hover:text-gray-900"
             aria-label={isAllLenders || isFirstStep ? 'Close' : 'Back'}
           >
             <ArrowLeft className="w-6 h-6" />
-          </button>
+          </button>}
           <h1 className="text-base font-medium text-gray-900">
             {isAllLenders ? 'Personal Loan' : `Personal Loan (${currentStep}/4)`}
           </h1>

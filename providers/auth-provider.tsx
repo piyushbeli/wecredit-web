@@ -9,6 +9,7 @@ import { authService } from '@/lib/api';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
+import { getLoggedInAffiliateApplyTrigger } from '@/lib/auth/logged-in-affiliate-apply-trigger';
 
 /**
  * Props for AuthProvider component
@@ -37,7 +38,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
   const preAuthHandled = useRef(false);
   const mnAffiliateOtpOpenedRef = useRef(false);
-  /** Prevents double-opening apply auth when partner/lender query is present (Strict Mode / retries). */
+  /**
+   * Prevents double-opening apply (guest modal or logged-in triggerApplyFlow) when affiliate
+   * query is present (Strict Mode / retries).
+   */
   const partnerLenderApplyModalOpenedRef = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,6 +77,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     (options?: { cleanUrl?: boolean }): void => {
       const partner = normalizeParam(searchParams?.get('partner'));
       const originSubLender = normalizeParam(searchParams?.get('originSubLender'));
+      const lenderUniqueId = normalizeParam(
+        searchParams?.get('lenderUniqueId') ?? searchParams?.get('lenderUniqueId') ?? searchParams?.get('lenderuniqueid')
+      );
 
       const utm_source = normalizeParam(searchParams?.get('utm_source'));
       const utm_medium = normalizeParam(searchParams?.get('utm_medium'));
@@ -81,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       const lendername = normalizeParam(
         searchParams?.get('lendername') ??
           searchParams?.get('lender_name') ??
-          searchParams?.get('lenderName')
+          searchParams?.get('lenderName') 
       );
 
       // If the visible URL has no affiliate/UTM params, reset the persisted session store so
@@ -89,7 +96,13 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
       // SPA navigations (e.g. Link to `/` strips `?partner=` but sessionStorage would otherwise
       // keep the old code).
       const hasAnyParams =
-        partner || originSubLender || utm_source || utm_medium || utm_campaign || lendername;
+        partner ||
+        originSubLender ||
+        lenderUniqueId ||
+        utm_source ||
+        utm_medium ||
+        utm_campaign ||
+        lendername;
 
       if (!hasAnyParams) {
         clearParams();
@@ -102,8 +115,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
 
       // When this URL includes relevant params, sync the store; explicit nulls for missing
       // fields prevent stale affiliate/UTM values from a previous landing with params.
-      setUrlParams(partner ?? null, originSubLender ?? null);
-      setAttributionParams(utm_url, utm_source, utm_medium, utm_campaign, lendername);
+      setUrlParams(partner ?? null, originSubLender ?? null, lenderUniqueId ?? null);
+      setAttributionParams(utm_url, utm_source, utm_medium, utm_campaign, lendername, lenderUniqueId);
 
       if (options?.cleanUrl && typeof window !== 'undefined') {
         const url = new URL(window.location.href);
@@ -115,6 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         url.searchParams.delete('lendername');
         url.searchParams.delete('lender_name');
         url.searchParams.delete('lenderName');
+        url.searchParams.delete('lenderUniqueId');
         window.history.replaceState({}, '', url.toString());
       }
     },
@@ -272,7 +286,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         logout();
        
       } else {
-        
+        const wasUnauthenticated = !isAuthenticated;
+
         if (!isAuthenticated) {
           setUser(
             {
@@ -282,6 +297,22 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
             },
             token.toString()
           );
+        }
+
+        const { shouldTrigger, delayMs } = getLoggedInAffiliateApplyTrigger(
+          pathname,
+          searchParams,
+          mobile.toString(),
+          normalizeParam,
+          partnerLenderApplyModalOpenedRef.current,
+          wasUnauthenticated
+        );
+
+        if (shouldTrigger) {
+          partnerLenderApplyModalOpenedRef.current = true;
+          setTimeout(() => {
+            triggerApplyFlow();
+          }, delayMs);
         }
       }
     } catch {
@@ -304,6 +335,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     setLoading,
     setUser,
     normalizeParam,
+    triggerApplyFlow,
   ]);
 
   useEffect(() => {

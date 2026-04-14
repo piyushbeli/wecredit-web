@@ -6,11 +6,13 @@ import { submitBusinessLoanEnquiry } from '@/lib/api/business-loan-service';
 import { submitCarLoanEnquiry } from '@/lib/api/car-loan-service';
 import { submitHomeLoanEnquiry } from '@/lib/api/home-loan-service';
 import { submitGoldLoanEnquiry } from '@/lib/api/gold-loan-service';
+import { submitPrimeplLeadEnquiry } from '@/lib/api/primepl-lead-service';
 import {
   BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT,
   CAR_LOAN_SUBMIT_SUCCESS_EVENT,
   HOME_LOAN_SUBMIT_SUCCESS_EVENT,
   GOLD_LOAN_SUBMIT_SUCCESS_EVENT,
+  PRIMEPL_LEAD_SUBMIT_SUCCESS_EVENT,
 } from '@/lib/constants/events';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 
@@ -123,6 +125,16 @@ export const usePostLogin = (): void => {
           '[GL]',
           'gold loan',
           '[GL] usePostLogin: submit_gold_loan but no goldLoanPayload'
+        );
+        break;
+      case 'submit_primepl_lead':
+        submitLoanPayload(
+          action.primeplLeadPayload,
+          submitPrimeplLeadEnquiry,
+          PRIMEPL_LEAD_SUBMIT_SUCCESS_EVENT,
+          '[Primepl]',
+          'primepl lead',
+          '[Primepl] usePostLogin: submit_primepl_lead but no primeplLeadPayload'
         );
         break;
       default:
