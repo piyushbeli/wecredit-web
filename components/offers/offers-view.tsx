@@ -22,7 +22,6 @@ import {
 import { UnmatchedOffersSection } from './unmatched-offers-section';
 import type { LenderOfferStatus } from '@/types/wecredit';
 import { forwardUpswingRedirect, updateUtmClicked } from '@/lib/api/wecredit';
-import { notifyForwardNavigationEvent } from '@/lib/api/upswing-navigation-event';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';

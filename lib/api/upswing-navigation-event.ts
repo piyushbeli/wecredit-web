@@ -83,14 +83,15 @@ export const notifyCreateLeadNavigationEvent = (
   void postUpswingNavigationEvent(payload);
 };
 
-export const notifyForwardNavigationEvent = (
+/** Resolves after the event POST completes (or fails silently). Use before navigation when the request must not be aborted by a redirect. */
+export const notifyForwardNavigationEvent = async (
   mobile: string,
   utmLink: string,
-): void => {
+): Promise<void> => {
   const payload = buildUpswingNavigationEventBody(
     mobile,
     utmLink,
     "apply_now",
   );
-  void postUpswingNavigationEvent(payload);
+  await postUpswingNavigationEvent(payload);
 };
