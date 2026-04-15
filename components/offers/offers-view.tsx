@@ -48,10 +48,11 @@ export const OffersView = () => {
   const { isAffiliate } = useInfoSearchParams();
   const hideExploreMoreOffersCta = isAffiliate || isLntLender;
   const hideExploreOtherOffersCta = !isAffiliate && !isLntLender;
-  const lenderNameParam = mapingLenderNameToLenderCode(rawLender);
+  const lenderNameParam = (rawLender);
+  const lenderNameParamPollMessage = mapingLenderNameToLenderCode(rawLender);
 
-  const pollingMessage = lenderNameParam
-    ? `Please wait while we fetch offer from ${lenderNameParam.charAt(0).toUpperCase() + lenderNameParam.slice(1)} for you.`
+  const pollingMessage = lenderNameParamPollMessage
+    ? `Please wait while we fetch offer from ${lenderNameParamPollMessage.charAt(0).toUpperCase() + lenderNameParamPollMessage.slice(1)} for you.`
     : 'Please wait while we fetch the best offers for you.';
 
   useEffect(() => {
@@ -202,6 +203,7 @@ export const OffersView = () => {
    * Non-initiated single-lender case is handled by redirect; we render nothing here while that runs.
    */
   const renderMainOffersContent = (): ReactNode => {
+    debugger;
     if (lenderNameParam) {
       if (singleLenderHasNonInitiatedOffer) {
         return null;
