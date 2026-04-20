@@ -65,7 +65,7 @@ const PrimeplLeadFormModal = ({ onClose }: PrimeplLeadFormModalProps): React.Rea
         );
 
       case 'form':
-        return <PrimeplLeadForm onClose={onClose} isModal onSuccess={transitionToSuccess} />;
+        return <PrimeplLeadForm isModal onSuccess={transitionToSuccess} />;
 
       default:
         return <LoadingScreen />;

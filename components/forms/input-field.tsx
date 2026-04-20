@@ -7,6 +7,10 @@ import { cn } from '@/lib/utils';
 
 interface InputFieldProps {
   label: string;
+  /** Associates a visible <label htmlFor="..."> with this control; required for autofill hints in DevTools. */
+  id?: string;
+  /** Submitted field name; also helps browsers autofill when paired with autocomplete. */
+  name?: string;
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -24,6 +28,8 @@ interface InputFieldProps {
 
 const InputField = ({
   label,
+  id,
+  name,
   value,
   onChange,
   onBlur,
@@ -38,6 +44,8 @@ const InputField = ({
   required,
   autoComplete,
 }: InputFieldProps) => {
+  const errorId = id ? `${id}-error` : undefined;
+
   return (
     <div className="space-y-2">
       {/* <label className="block text-sm font-medium text-gray-900">
@@ -45,6 +53,8 @@ const InputField = ({
       </label> */}
 
       <input
+        id={id}
+        name={name}
         type={type}
         inputMode={inputMode}
         value={value}
@@ -55,6 +65,8 @@ const InputField = ({
         placeholder={placeholder}
         maxLength={maxLength}
         autoComplete={autoComplete}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error && errorId ? errorId : undefined}
         className={cn(
           'w-full px-4 py-3 rounded-lg border text-base transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -70,7 +82,9 @@ const InputField = ({
       )}
 
       {error && (
-        <p className="text-xs text-red-600">{error}</p>
+        <p id={errorId} className="text-xs text-red-600" role="alert">
+          {error}
+        </p>
       )}
     </div>
   );

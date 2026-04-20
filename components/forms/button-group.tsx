@@ -18,6 +18,8 @@ interface ButtonGroupProps {
   error?: string;
   className?: string;
   buttonClassName?: string;
+  /** id of a heading/label element; exposes this group to assistive tech like a labeled fieldset. */
+  ariaLabelledBy?: string;
 }
 
 const ButtonGroup = ({ 
@@ -28,9 +30,10 @@ const ButtonGroup = ({
   error,
   className,
   buttonClassName,
+  ariaLabelledBy,
 }: ButtonGroupProps) => {
   return (
-    <div>
+    <div role="group" aria-labelledby={ariaLabelledBy}>
       <div className={cn('flex gap-2', className)}>
         {options.map((option) => (
           <button
