@@ -45,6 +45,7 @@ const config = {
         // Legacy WeCredit Brand Colors (for backward compatibility)
         wc: {
           blue: {
+            heading: '#1163D1',
             50: '#EBF2FF',
             100: '#D6E4FF',
             200: '#ADC8FF',
@@ -54,7 +55,7 @@ const config = {
             600: '#1850C7',
             700: '#1240A8',
             800: '#0C3189',
-            900: '#0A1B3D'
+            900: '#0A1B3D',
           },
           dark: '#0A1B3D',
           accent: '#3B82F6',

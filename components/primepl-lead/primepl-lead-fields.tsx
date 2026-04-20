@@ -34,10 +34,12 @@ const PrimeplLeadFields = ({
   return (
     <>
       <div>
-        <label className="lead-form-label">
+        <label className="lead-form-label" htmlFor="primepl-lead-name">
           Name <span className="text-red-500">*</span>
         </label>
         <InputField
+          id="primepl-lead-name"
+          name="name"
           label="Name"
           value={formValues.name}
           onChange={(value) => handleFieldChange('name', value)}
@@ -50,10 +52,12 @@ const PrimeplLeadFields = ({
       </div>
 
       <div>
-        <label className="lead-form-label">
+        <label className="lead-form-label" htmlFor="primepl-lead-mobile">
           Phone number <span className="text-red-500">*</span>
         </label>
         <InputField
+          id="primepl-lead-mobile"
+          name="mobile"
           label="Phone number"
           value={formValues.mobile}
           onChange={(value) => handleFieldChange('mobile', sanitizeNumericInput(value, 10))}
@@ -70,10 +74,12 @@ const PrimeplLeadFields = ({
       </div>
 
       <div>
-        <label className="lead-form-label">
+        <label className="lead-form-label" htmlFor="primepl-lead-address">
           City <span className="text-red-500">*</span>
         </label>
         <InputField
+          id="primepl-lead-address"
+          name="address"
           label="City"
           value={formValues.address}
           onChange={(value) => handleFieldChange('address', value)}
@@ -86,10 +92,12 @@ const PrimeplLeadFields = ({
       </div>
 
       <div>
-        <label className="lead-form-label">
+        <label className="lead-form-label" htmlFor="primepl-lead-areaPincode">
           Area pincode <span className="text-red-500">*</span>
         </label>
         <InputField
+          id="primepl-lead-areaPincode"
+          name="areaPincode"
           label="Area pincode"
           value={formValues.areaPincode}
           onChange={(value) => handleFieldChange('areaPincode', sanitizeNumericInput(value, 6))}
@@ -104,10 +112,12 @@ const PrimeplLeadFields = ({
       </div>
 
       <div>
-        <label className="lead-form-label">
+        <label className="lead-form-label" htmlFor="primepl-lead-loanAmount">
           Required loan amount (₹) <span className="text-red-500">*</span>
         </label>
         <InputField
+          id="primepl-lead-loanAmount"
+          name="loanAmount"
           label="Required loan amount"
           value={formValues.loanAmount}
           onChange={(value) => handleFieldChange('loanAmount', sanitizeNumericInput(value, 12))}
@@ -121,10 +131,12 @@ const PrimeplLeadFields = ({
       </div>
 
       <div>
-        <label className="lead-form-label">
+        {/* div + id: not a <label> because the control is a button group, not a single focusable input. */}
+        <div id="primepl-lead-occupation-label" className="lead-form-label">
           Employment Type <span className="text-red-500">*</span>
-        </label>
+        </div>
         <ButtonGroup
+          ariaLabelledBy="primepl-lead-occupation-label"
           options={occupationOptions}
           value={formValues.occupation}
           onChange={(value) =>
@@ -135,10 +147,12 @@ const PrimeplLeadFields = ({
       </div>
 
       <div>
-        <label className="lead-form-label">
+        <label className="lead-form-label" htmlFor="primepl-lead-netSalaryPm">
           Net salary per month (₹) <span className="text-red-500">*</span>
         </label>
         <InputField
+          id="primepl-lead-netSalaryPm"
+          name="netSalaryPm"
           label="Net salary per month"
           value={formValues.netSalaryPm}
           onChange={(value) => handleFieldChange('netSalaryPm', sanitizeNumericInput(value, 12))}
