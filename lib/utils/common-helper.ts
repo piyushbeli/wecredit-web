@@ -28,7 +28,13 @@ export const mapingLenderNameToLenderCode = (lenderName: string): string => {
             return 'L&T';
         case 'upswing_lnt':
             return 'Upswing L&T';
+        case 'upswing_dmi':
+            return 'DMI';
         default:
             return lenderName;
     }
+};
+
+export const isUpswingRedirectAllowed = (lenderName: string): boolean => {
+    return lenderName.toLowerCase() === 'lnt' || lenderName.toLowerCase() === 'upswing_lnt' || lenderName.toLowerCase() === 'upswing_dmi';
 };
