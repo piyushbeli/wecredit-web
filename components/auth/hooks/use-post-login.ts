@@ -7,6 +7,7 @@ import { submitCarLoanEnquiry } from '@/lib/api/car-loan-service';
 import { submitHomeLoanEnquiry } from '@/lib/api/home-loan-service';
 import { submitGoldLoanEnquiry } from '@/lib/api/gold-loan-service';
 import { submitPrimeplLeadEnquiry } from '@/lib/api/primepl-lead-service';
+import { pushPrimeplFormSubmission } from '@/lib/gtm';
 import {
   BUSINESS_LOAN_SUBMIT_SUCCESS_EVENT,
   CAR_LOAN_SUBMIT_SUCCESS_EVENT,
@@ -23,11 +24,13 @@ async function submitAndDispatch<TPayload>(
   submit: SubmitFn<TPayload>,
   eventName: string,
   logPrefix: string,
-  apiLabel: string
+  apiLabel: string,
+  onSuccess?: (payload: TPayload) => void
 ): Promise<void> {
   try {
     const success = await submit(payload);
     if (success) {
+      onSuccess?.(payload);
       window.dispatchEvent(new CustomEvent(eventName));
     }
   } catch (err) {
@@ -41,7 +44,8 @@ function submitLoanPayload<TPayload>(
   eventName: string,
   logPrefix: string,
   apiLabel: string,
-  missingPayloadMessage: string
+  missingPayloadMessage: string,
+  onSuccess?: (payload: TPayload) => void
 ): void {
   // Guard against incomplete pending actions (e.g., cleared state or bad payload).
   if (!payload) {
@@ -49,7 +53,7 @@ function submitLoanPayload<TPayload>(
     return;
   }
 
-  void submitAndDispatch(payload, submit, eventName, logPrefix, apiLabel);
+  void submitAndDispatch(payload, submit, eventName, logPrefix, apiLabel, onSuccess);
 }
 
 /**
@@ -134,7 +138,14 @@ export const usePostLogin = (): void => {
           PRIMEPL_LEAD_SUBMIT_SUCCESS_EVENT,
           '[Primepl]',
           'primepl lead',
-          '[Primepl] usePostLogin: submit_primepl_lead but no primeplLeadPayload'
+          '[Primepl] usePostLogin: submit_primepl_lead but no primeplLeadPayload',
+          (payload) => {
+            pushPrimeplFormSubmission({
+              status: 'success',
+              declaredSalary: payload.netSalaryPm,
+              empType: payload.occupation,
+            });
+          }
         );
         break;
       default:

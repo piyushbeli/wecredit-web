@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { submitPrimeplLeadEnquiry } from '@/lib/api/primepl-lead-service';
+import { pushPrimeplFormSubmission } from '@/lib/gtm';
 import { useLoadingStore } from '@/stores/loading-store';
 import {
   DEFAULT_PRIMEPL_LEAD_FORM_STATE,
@@ -101,6 +102,11 @@ export const usePrimeplLeadForm = (
       const success = await submitPrimeplLeadEnquiry(payload);
 
       if (success) {
+        pushPrimeplFormSubmission({
+          status: 'success',
+          declaredSalary: payload.netSalaryPm,
+          empType: payload.occupation,
+        });
         if (onSuccess) {
           onSuccess();
         }
