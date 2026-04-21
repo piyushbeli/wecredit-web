@@ -8,7 +8,6 @@ import {
   sanitizeNumericInput,
   type PrimeplLeadFormState,
 } from './primepl-lead-form.config';
-import { useAuth } from '@/hooks/use-auth';
 
 const occupationOptions = PRIMEPL_OCCUPATION_OPTIONS.map((option) => ({
   value: option,
@@ -29,7 +28,6 @@ const PrimeplLeadFields = ({
   handleFieldBlur,
 }: PrimeplLeadFieldsProps): React.ReactNode => {
   const consentError = formErrors.consent;
-  const { isAuthenticated } = useAuth();
 
   return (
     <>
@@ -68,7 +66,6 @@ const PrimeplLeadFields = ({
           inputMode="numeric"
           maxLength={10}
           required
-          disabled={isAuthenticated}
           autoComplete="tel"
         />
       </div>

@@ -18,26 +18,34 @@ interface FeatureFlagProviderProps {
 }
 
 /**
- * Check if we're in development mode
+ * Whether the floating panel and localStorage-backed flag toggles are active.
+ *
+ * Important: `NEXT_PUBLIC_*` values are inlined at `next build` time. For deployed staging,
+ * your pipeline must set `NEXT_PUBLIC_ENVIRONMENT=staging` (see Dockerfile.staging) or
+ * `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true` before building — setting them only at runtime has no effect.
  */
-const isDevelopment = (): boolean => {
-  // Check NEXT_PUBLIC_ENVIRONMENT
+const shouldShowFeatureFlagDevTools = (): boolean => {
+  // Local `next dev` — no .env required (unlike relying only on NEXT_PUBLIC_*).
+  if (process.env.NODE_ENV === 'development') {
+    return true;
+  }
+
   if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
     return true;
   }
-  
-  // Check for explicit dev tools flag
-  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === 'true') {
+
+  // Explicit opt-in for non-local builds (e.g. staging preview URL with dev tools).
+  if (process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === 'true') {
     return true;
   }
-  
+
   return false;
 };
 
 /**
  * Feature Flag Provider Component
  * Wraps the app and provides feature flag functionality
- * Only active in development mode
+ * Active when: local dev (`next dev`), staging build, or `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`
  * 
  * @example
  * <FeatureFlagProvider>
@@ -53,7 +61,7 @@ export function FeatureFlagProvider({ children }: FeatureFlagProviderProps): Rea
    * Set dev mode status and load flags from localStorage
    */
   useEffect(() => {
-    const devMode = isDevelopment();
+    const devMode = shouldShowFeatureFlagDevTools();
     setDevMode(devMode);
 
     if (devMode) {
@@ -72,7 +80,7 @@ export function FeatureFlagProvider({ children }: FeatureFlagProviderProps): Rea
     <>
       {children}
       
-      {/* Only render dev tools in development mode */}
+      {/* Dev panel + toggles when shouldShowFeatureFlagDevTools() is true */}
       {isDevMode && (
         <>
           <FloatingToggleButton />
