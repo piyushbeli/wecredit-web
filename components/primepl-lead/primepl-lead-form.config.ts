@@ -4,6 +4,7 @@
  */
 
 import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
+import { isValidMobile } from '@/lib/utils/common-helper';
 
 export { sanitizeNumericInput };
 
@@ -71,8 +72,9 @@ export const validatePrimeplLeadForm = (
   const mobileDigits = values.mobile.replace(/\D/g, '');
   if (!mobileDigits) {
     nextErrors.mobile = 'Phone number is required';
-  } else if (mobileDigits.length !== 10) {
-    nextErrors.mobile = 'Enter a valid 10-digit phone number';
+  } else if (!isValidMobile(mobileDigits)) {
+    // Same rule as auth / other lead forms: 10 digits, Indian mobile prefix 6–9.
+    nextErrors.mobile = 'Enter a valid 10-digit mobile number starting with 6–9';
   }
 
   if (!values.address.trim()) {

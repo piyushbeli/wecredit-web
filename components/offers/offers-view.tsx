@@ -26,7 +26,7 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
-import { mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
+import { isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 
@@ -106,7 +106,7 @@ export const OffersView = () => {
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const offerLenderName = offer.lenderName?.toLowerCase();
-    const isLntOffer = offerLenderName === 'lnt' || offerLenderName === 'upswing_lnt';
+    const isUpswingRedirectAllowedLender = isUpswingRedirectAllowed(offerLenderName);
     // For non-INITIATED offers in explore screen, navigate to status page
     if (offer.wcStatus !== 'INITIATED') {
       router.push(buildOffersPathWithQuery('/offers/status', searchParams));
@@ -127,7 +127,7 @@ export const OffersView = () => {
     if (!utmLink) {
       return;
     }
-    if (isLntOffer) {
+    if (isUpswingRedirectAllowedLender) {
       void forwardUpswingRedirect(mobile, token, utmLink);
       return;
     }
@@ -203,7 +203,6 @@ export const OffersView = () => {
    * Non-initiated single-lender case is handled by redirect; we render nothing here while that runs.
    */
   const renderMainOffersContent = (): ReactNode => {
-    debugger;
     if (lenderNameParam) {
       if (singleLenderHasNonInitiatedOffer) {
         return null;
