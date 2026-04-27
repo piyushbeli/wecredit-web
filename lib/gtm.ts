@@ -8,12 +8,24 @@ declare global {
 
 export const GTM_EVENTS = {
   primeplFormSubmission: 'primeplformsubmission',
+  leadFormSubmissionSuccess: 'lead_form_submission_success',
+  offerpage: 'offerpage',
 } as const;
 
 interface PrimeplFormSubmissionPayload {
   status: string;
   declaredSalary: number;
   empType: string;
+}
+
+interface LeadFormSubmissionSuccessPayload {
+  declaredSalary: number;
+  empType: string;
+}
+
+interface OfferpagePayload {
+  offerList: string[];
+  maxLoanAmount: number;
 }
 
 export const pushToDataLayer = (payload: DataLayerEntry): void => {
@@ -36,5 +48,27 @@ export const pushPrimeplFormSubmission = ({
     status,
     declaredSalary,
     empType,
+  });
+};
+
+export const pushLeadFormSubmissionSuccess = ({
+  declaredSalary,
+  empType,
+}: LeadFormSubmissionSuccessPayload): void => {
+  pushToDataLayer({
+    event: GTM_EVENTS.leadFormSubmissionSuccess,
+    declaredSalary,
+    empType,
+  });
+};
+
+export const pushOfferpageEvent = ({
+  offerList,
+  maxLoanAmount,
+}: OfferpagePayload): void => {
+  pushToDataLayer({
+    event: GTM_EVENTS.offerpage,
+    offer_list: offerList,
+    max_loan_amount: maxLoanAmount,
   });
 };

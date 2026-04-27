@@ -29,6 +29,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useUrlParamsStore } from '@/stores/url-params-store';
+import { pushOfferpageEvent } from '@/lib/gtm';
 
 export const OffersView = () => {
   const router = useRouter();
@@ -50,6 +51,7 @@ export const OffersView = () => {
   const hideExploreOtherOffersCta = !isAffiliate && !isLntLender;
   const lenderNameParam = (rawLender);
   const lenderNameParamPollMessage = mapingLenderNameToLenderCode(rawLender);
+  const hasFiredOfferpageEventRef = useRef(false);
 
   const pollingMessage = lenderNameParamPollMessage
     ? `Please wait while we fetch offer from ${lenderNameParamPollMessage.charAt(0).toUpperCase() + lenderNameParamPollMessage.slice(1)} for you.`
@@ -172,6 +174,36 @@ export const OffersView = () => {
       ? `₹${maxInitiatedAmount.toLocaleString('en-IN')}`
       : null;
   }, [maxInitiatedAmount]);
+
+  useEffect(() => {
+    if (isLoading || isPolling || isReHitting || hasFiredOfferpageEventRef.current) {
+      return;
+    }
+
+    // In lender-filtered flows, we only report cards for the selected lender.
+    const sourceOffers = lenderNameParam ? filteredExploreOffers : exploreOffers;
+    const lenderNames = Array.from(
+      new Set(
+        sourceOffers
+          .map((offer) => offer.lenderName?.trim())
+          .filter((lenderName): lenderName is string => Boolean(lenderName))
+      )
+    );
+
+    pushOfferpageEvent({
+      offerList: lenderNames,
+      maxLoanAmount: maxInitiatedAmount,
+    });
+    hasFiredOfferpageEventRef.current = true;
+  }, [
+    lenderNameParam,
+    filteredExploreOffers,
+    exploreOffers,
+    isLoading,
+    isPolling,
+    isReHitting,
+    maxInitiatedAmount,
+  ]);
   // Only show the status CTA once we have non-initiated offers to check.
   // const hasStatusOffers = statusOffers.length > 0;
   const hasStatusOffers = statusOffers.length > 0;
