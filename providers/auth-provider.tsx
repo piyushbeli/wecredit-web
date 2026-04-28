@@ -55,6 +55,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     setAuthInitialized,
     openModalWithPendingActionAtOtp,
     openModalWithPendingAction,
+    syncWithCookies,
   } = useAuthStore();
   const { setUrlParams, setAttributionParams, clearParams } = useUrlParamsStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
@@ -350,6 +351,26 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // Initialize auth validation
     initializeAuth();
   }, [initializeAuth]);
+
+  /**
+   * Sync auth state with cookies when tab becomes visible.
+   * Catches cases where cookies were cleared while tab was hidden or in another tab.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleVisibilityChange = (): void => {
+      if (document.visibilityState === 'visible') {
+        // Tab became visible - verify cookies and localStorage are in sync
+        syncWithCookies();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [syncWithCookies]);
 
   /**
    * Re-sync affiliate + UTM store on every client-side navigation (SPA).
