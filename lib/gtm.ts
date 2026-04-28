@@ -26,6 +26,19 @@ interface OfferpagePayload {
 
 type OfferpageDeclaredSalary = number | 'undetermined';
 
+/**
+ * Parses a numeric string for analytics after stripping thousands separators.
+ * `Number.parseFloat("50,000")` stops at the comma and yields 50, not 50000.
+ */
+const parseSalaryNumericString = (raw: string): number | undefined => {
+  const normalized = raw.trim().replace(/,/g, '');
+  if (!normalized) {
+    return undefined;
+  }
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 const normalizeOfferpageDeclaredSalary = (
   declaredSalary?: number | string | null
 ): OfferpageDeclaredSalary => {
@@ -34,8 +47,8 @@ const normalizeOfferpageDeclaredSalary = (
   }
 
   if (typeof declaredSalary === 'string') {
-    const parsedSalary = Number.parseFloat(declaredSalary.trim());
-    if (Number.isFinite(parsedSalary)) {
+    const parsedSalary = parseSalaryNumericString(declaredSalary);
+    if (parsedSalary !== undefined) {
       return parsedSalary;
     }
   }
