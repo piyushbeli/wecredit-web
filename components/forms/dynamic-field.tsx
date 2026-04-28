@@ -45,7 +45,7 @@ const DATE_FIELDS: FormFieldKey[] = ['dob'];
 const PHONE_FIELDS: FormFieldKey[] = ['mobile', 'phone'];
 
 /** Fields that should use numeric input mode */
-const NUMERIC_FIELDS: FormFieldKey[] = ['pincode', 'companyPincode', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount'];
+const NUMERIC_FIELDS: FormFieldKey[] = ['pincode', 'companyPincode', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'requiredLoanAmount', 'creditCardLimit'];
 
 /**
  * Capitalizes first letter of each word for display
@@ -97,6 +97,7 @@ function getMaxLength(key: FormFieldKey): number | undefined {
   if (PHONE_FIELDS.includes(key)) return 10;
   if (key === 'pan') return 10;
   if (key === 'pincode' || key === 'companyPincode') return 6;
+  if (key === 'loanAmount' || key === 'requiredLoanAmount' || key === 'creditCardLimit') return 12;
   return undefined;
 }
 
@@ -159,6 +160,30 @@ const DynamicField = ({
 }: DynamicFieldProps) => {
   const { title, key, type, options, isMandatory } = field;
 
+  if (key === 'hasCreditCard') {
+    return (
+      <div className="space-y-2">
+        <p className="lead-form-label" id={`${key}-label`}>
+          {title} {isMandatory && <span className="text-red-500">*</span>}
+        </p>
+        <div role="group" aria-labelledby={`${key}-label`}>
+          <ButtonGroup
+            options={[
+              { value: 'true', label: 'Yes' },
+              { value: 'false', label: 'No' },
+            ]}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            error={error}
+            className="gap-3"
+            buttonClassName="py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Some lender form payloads omit `options` for `modeOfSalary` (leaving it as a free-text input).
   // For better UX, we fall back to a 3-option button group when options are missing.
   const shouldUseModeOfSalaryFallbackOptions = key === 'modeOfSalary' && options.length === 0;
@@ -201,7 +226,7 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
             id={key}
             checked={isChecked}
             onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
-            className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+            className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
           />
           <label htmlFor={key} className="text-sm text-gray-700">
   {key === 'consent' ? (

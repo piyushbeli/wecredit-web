@@ -22,6 +22,7 @@ export type FormFieldKey =
   | 'monthlyIncome'
   | 'declaredIncome'
   | 'loanAmount'
+  | 'requiredLoanAmount'
   | 'companyName'
   | 'companyAddress'
   | 'companyPincode'
@@ -33,7 +34,7 @@ export type FormFieldKey =
   | 'ConsentDateTime'
   | 'consent'
   | 'consentPrivacyPolicy'
-  | 'isCreditCard'
+  | 'hasCreditCard'
   | 'creditCardLimit'
   | 'consentPartnerTerms';
 
@@ -167,9 +168,11 @@ export interface CreateLeadRequest {
   /** Sub-lender reference */
   originSubLender?: string;
   /** Whether the user has a credit card (multi-lender flow) */
-  isCreditCard?: boolean;
+  hasCreditCard?: boolean;
   /** Max credit limit on the user's card when they have one (multi-lender flow) */
   creditCardLimit?: number;
+  /** Required loan amount when captured on the dynamic lead form */
+  requiredLoanAmount?: number;
 }
 
 /** Response from create-lead API */
@@ -214,6 +217,8 @@ export interface LeadFormData {
   declaredIncome?: string;
   /** Loan amount */
   loanAmount?: string;
+  /** Required loan amount (lenders-form-filled API) */
+  requiredLoanAmount?: string;
   /** Lowercase: single, married */
   maritalStatus: string;
   /** Lowercase: current, permanent */
@@ -239,7 +244,7 @@ export interface LeadFormData {
   /** Sub-lender reference from URL */
   originSubLender?: string;
   /** Whether the user has a credit card (multi-lender flow; stored as 'true' | 'false' in UI) */
-  isCreditCard?: string;
+  hasCreditCard?: boolean;
   /** Max credit limit as entered by the user (multi-lender flow) */
   creditCardLimit?: string;
 }

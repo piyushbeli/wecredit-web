@@ -183,32 +183,13 @@ export function isValidCreditCardMaxAmountInput(raw: string | undefined): boolea
  */
 export function isMultiLenderCreditCardSectionComplete(
   isCreditCardFlowEnabled: boolean,
-  isCreditCard: string | undefined,
+  hasCreditCard: string | undefined,
   creditCardLimit: string | undefined
 ): boolean {
   if (!isCreditCardFlowEnabled) return true;
-  if (isCreditCard !== 'true' && isCreditCard !== 'false') return false;
-  if (isCreditCard === 'true') {
+  if (hasCreditCard !== 'true' && hasCreditCard !== 'false') return false;
+  if (hasCreditCard === 'true') {
     return isValidCreditCardMaxAmountInput(creditCardLimit);
   }
   return true;
-}
-
-/**
- * Build lead API payload fields for the multi-lender credit card section.
- * Returns an empty object when flow is disabled or user has not answered yet.
- */
-export function buildCreditCardPayload(
-  isEnabled: boolean,
-  isCreditCard: string | undefined,
-  creditCardLimit: string | undefined
-): Partial<Record<'isCreditCard' | 'creditCardLimit', string>> {
-  if (!isEnabled || (isCreditCard !== 'true' && isCreditCard !== 'false')) {
-    return {};
-  }
-
-  return {
-    isCreditCard,
-    ...(isCreditCard === 'true' ? { creditCardLimit: creditCardLimit ?? '' } : {}),
-  };
 }

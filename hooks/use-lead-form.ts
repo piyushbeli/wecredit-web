@@ -9,7 +9,11 @@ import type { FormField, FormFieldKey } from '@/types/lead';
 import { useAuth } from '@/hooks/use-auth';
 import { getCookie } from 'cookies-next';
 import { STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import { sanitizeNumericInput, sanitizePanInput } from '@/lib/utils/form-helpers';
+import {
+  isValidCreditCardMaxAmountInput,
+  sanitizeNumericInput,
+  sanitizePanInput,
+} from '@/lib/utils/form-helpers';
 
 interface WizardStep {
   stepNumber: number;
@@ -24,8 +28,8 @@ interface WizardStep {
 const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
   1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
-  3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
-  4: ['pan', 'isCreditCard', 'creditCardLimit', 'consent'],
+  3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'requiredLoanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
+  4: ['pan', 'hasCreditCard', 'creditCardLimit', 'consent'],
 };
 
 /** Hidden fields - auto-filled, never shown in UI */
@@ -62,6 +66,9 @@ const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
   }
   // Max limit can be large (e.g. lakhs); cap digits to avoid accidental paste abuse.
   if (fieldKey === 'creditCardLimit') {
+    return sanitizeNumericInput(value, 12);
+  }
+  if (fieldKey === 'requiredLoanAmount' || fieldKey === 'loanAmount') {
     return sanitizeNumericInput(value, 12);
   }
   return value;
@@ -164,7 +171,19 @@ export const useLeadForm = (
    */
   const handleFieldChange = useCallback((key: string, value: string): void => {
     const normalizedValue = normalizeLeadFieldValue(key, value);
-    setFormValues((prev) => ({ ...prev, [key]: normalizedValue }));
+    setFormValues((prev) => {
+      const nextValues = { ...prev, [key]: normalizedValue };
+
+      if (key === 'hasCreditCard') {
+        nextValues.hasCreditCard = normalizedValue;
+
+        if (normalizedValue === 'false') {
+          nextValues.creditCardLimit = '';
+        }
+      }
+
+      return nextValues;
+    });
     
     // Clear error for this field when user starts typing
     if (formErrors[key]) {
@@ -240,6 +259,16 @@ export const useLeadForm = (
    * Get format validation error for a field
    */
   const getFieldFormatError = useCallback((fieldKey: string, value: string): string => {
+    if (fieldKey === 'creditCardLimit') {
+      const resolvedHasCreditCard = formValues.hasCreditCard;
+      if (resolvedHasCreditCard !== 'true') {
+        return '';
+      }
+      return isValidCreditCardMaxAmountInput(value)
+        ? ''
+        : 'Please enter a valid credit card limit amount';
+    }
+
     if (fieldKey === 'dob') {
       return getDobValidationError(value);
     }
@@ -267,7 +296,7 @@ export const useLeadForm = (
     }
     
     return '';
-  }, [getDobValidationError]);
+  }, [formValues.hasCreditCard, getDobValidationError]);
 
   /**
    * Validate a single field on blur

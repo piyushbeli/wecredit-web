@@ -21,12 +21,10 @@ import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import {
-  buildCreditCardPayload,
   isMultiLenderCreditCardSectionComplete,
 } from '@/lib/utils/form-helpers';
 import { MULTILENDER_PARTNER_TERMS_HREF, UNITY_CONSENT } from '@/lib/constants/common';
 import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
-import CreditCardSection from './credit-card-section';
 import DynamicField from './dynamic-field';
 import Link from 'next/link';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
@@ -56,11 +54,11 @@ const STEP_SECTIONS: Array<{ title: string; fieldKeys: FormFieldKey[] }> = [
   },
   {
     title: 'Employment & Income',
-    fieldKeys: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
+    fieldKeys: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'requiredLoanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
   },
   {
     title: 'Identity Verification',
-    fieldKeys: ['pan', 'consent'],
+    fieldKeys: ['pan', 'hasCreditCard', 'creditCardLimit', 'consent'],
   },
 ];
 
@@ -126,6 +124,7 @@ const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
   monthlyIncome: '50000',
   declaredIncome: '50000',
   loanAmount: '100000',
+  requiredLoanAmount: '100000',
   companyName: 'Test Company',
   companyAddress: '123 Test Street',
   companyPincode: '560001',
@@ -156,6 +155,26 @@ function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): Form
     if (!prefillValue) return field;
     return { ...field, value: prefillValue };
   });
+}
+
+/**
+ * Maps Yes/No strings from the dynamic form to the boolean on LeadFormData.
+ * Returns undefined when the lender did not ask the question or the answer is not yet Yes/No.
+ */
+function resolveHasCreditCardForLeadPayload(
+  hasCreditCardQuestionField: boolean,
+  creditCardAnswer: string | undefined,
+): boolean | undefined {
+  if (!hasCreditCardQuestionField) {
+    return undefined;
+  }
+  if (creditCardAnswer === 'true') {
+    return true;
+  }
+  if (creditCardAnswer === 'false') {
+    return false;
+  }
+  return undefined;
 }
 
 /**
@@ -230,8 +249,7 @@ const LeadFormModal = ({
    * user chose to proceed without full details fetch.
    * This single gate controls UI + validation + payload inclusion.
    */
-  const isMultiLenderCreditCardEnabled =
-    isAllLenders && !fetchDetails;
+  const hasCreditCardQuestionField = fields.some((field) => field.key === 'hasCreditCard');
 
   const {
     currentStep,
@@ -247,6 +265,10 @@ const LeadFormModal = ({
     initializeFormValues,
     isSinglePage,
   } = useLeadForm(fields, { singlePage: isAllLenders });
+
+  /** UI stores Yes/No as 'true' | 'false' strings — never use Boolean(string) here. */
+  const creditCardAnswer = formValues.hasCreditCard;
+  const isCreditCardYes = creditCardAnswer === 'true';
 
   const isFirstStep = currentStep === 1;
   const isLastStep = isSinglePage || currentStep === 4;
@@ -369,13 +391,18 @@ const LeadFormModal = ({
     // Multi-lender + flag: enforce credit card answers before hitting the API.
     if (
       !isMultiLenderCreditCardSectionComplete(
-        isMultiLenderCreditCardEnabled,
-        formValues.isCreditCard,
-        formValues.creditCardLimit
+        hasCreditCardQuestionField,
+        creditCardAnswer,
+        formValues.creditCardLimit,
       )
     ) {
       return;
     }
+
+    const creditCardBool = resolveHasCreditCardForLeadPayload(
+      hasCreditCardQuestionField,
+      creditCardAnswer,
+    );
 
     const formData: LeadFormData = {
       name: (formValues.name || '').trim(),
@@ -391,6 +418,7 @@ const LeadFormModal = ({
       monthlyIncome: formValues.monthlyIncome || '',
       declaredIncome: formValues.declaredIncome || '',
       loanAmount: formValues.loanAmount || '',
+      requiredLoanAmount: formValues.requiredLoanAmount || '',
       maritalStatus: formValues.maritalStatus || '',
       addressType: formValues.addressType || '',
       permanentAddress: formValues.permanentAddress || '',
@@ -404,11 +432,8 @@ const LeadFormModal = ({
       consentPartnerTerms: formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] || 'false',
       ...(isLntLenderOrUpswignLntLender && { consents }),
       ...(originSubLender && { originSubLender }),
-      ...buildCreditCardPayload(
-        isMultiLenderCreditCardEnabled,
-        formValues.isCreditCard,
-        formValues.creditCardLimit
-      ),
+      hasCreditCard: creditCardBool,
+      creditCardLimit: formValues.creditCardLimit || '',
     };
 
     const success = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
@@ -475,9 +500,9 @@ const LeadFormModal = ({
     const canSubmitMultiLender = !requiresPartnerConsent || hasPartnerConsent;
 
     const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
-      isMultiLenderCreditCardEnabled,
-      formValues.isCreditCard,
-      formValues.creditCardLimit
+      hasCreditCardQuestionField,
+      creditCardAnswer,
+      formValues.creditCardLimit,
     );
 
     const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender ;
@@ -600,26 +625,22 @@ const LeadFormModal = ({
             if (sectionFields.length === 0) {
               return null;
             }
+
+            const fieldsToRender =
+              section.title === 'Identity Verification'
+                ? sectionFields.filter((field) => field.key !== 'creditCardLimit' || isCreditCardYes)
+                : sectionFields;
             return (
               <section key={section.title} className="space-y-4">
                 <h3 className="lead-form-heading">{section.title}</h3>
                 <div className="space-y-5">
                   {section.title === 'Identity Verification'
-                    ? sectionFields
+                    ? fieldsToRender
                       .filter((field) => field.key !== 'consent')
                       .map((field) => renderField(field))
-                    : sectionFields.map((field) => renderField(field))}
+                    : fieldsToRender.map((field) => renderField(field))}
                   {section.title === 'Identity Verification' && (
                     <>
-                      {/* Multi-lender uses single-page layout; CreditCardSection must live here — not under isLastStep, which this flow never reaches. */}
-                      {isMultiLenderCreditCardEnabled && (
-                        <CreditCardSection
-                          isCreditCard={formValues.isCreditCard}
-                          creditCardLimit={formValues.creditCardLimit || ''}
-                          onFieldChange={handleFieldChange}
-                          disabled={isSubmitting}
-                        />
-                      )}
                       {renderMultiLenderWeCreditConsent()}
                       {renderMultiLenderPartnerConsent()}
                     </>

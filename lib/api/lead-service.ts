@@ -99,22 +99,26 @@ function parseCreditCardMaxAmount(value: string | undefined): number | undefined
  * Returns an empty object when the form did not ask (single-lender flows).
  */
 function buildMultiLenderCreditCardPayload(
-  formData: Pick<LeadFormData, 'isCreditCard' | 'creditCardLimit'>
-): Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> {
-  const { isCreditCard, creditCardLimit } = formData;
-  if (isCreditCard !== 'true' && isCreditCard !== 'false') {
+  formData: Pick<LeadFormData, 'hasCreditCard' | 'creditCardLimit'>
+): Partial<Pick<CreateLeadRequest, 'hasCreditCard' | 'creditCardLimit'>> {
+  const { hasCreditCard, creditCardLimit } = formData;
+
+  // Dynamic form did not include a credit-card question for this lender.
+  if (hasCreditCard === undefined) {
     return {};
   }
 
-  const payload: Partial<Pick<CreateLeadRequest, 'isCreditCard' | 'creditCardLimit'>> = {
-    isCreditCard: isCreditCard === 'true',
+  if (hasCreditCard === false) {
+    return { hasCreditCard: false };
+  }
+
+  const payload: Partial<Pick<CreateLeadRequest, 'hasCreditCard' | 'creditCardLimit'>> = {
+    hasCreditCard: true,
   };
 
-  if (isCreditCard === 'true') {
-    const maxAmount = parseCreditCardMaxAmount(creditCardLimit);
-    if (maxAmount !== undefined) {
-      payload.creditCardLimit = maxAmount;
-    }
+  const maxAmount = parseCreditCardMaxAmount(creditCardLimit);
+  if (maxAmount !== undefined) {
+    payload.creditCardLimit = maxAmount;
   }
 
   return payload;
@@ -312,6 +316,10 @@ async function createLead(
     // Transform LNT lender name only
     const transformedLenderName =lenderName?.toLowerCase() === "lnt"? "upswing_lnt": lenderName;
 
+    const requiredLoanAmountRaw = formData.requiredLoanAmount?.replace(/,/g, '').trim();
+    const requiredLoanAmountParsed =
+      requiredLoanAmountRaw ? Number.parseFloat(requiredLoanAmountRaw) : undefined;
+
     // Transform form data to API format
     const requestBody: CreateLeadRequest = {
       mobile: mobile,
@@ -337,6 +345,9 @@ async function createLead(
       ...(lenderUniqueIdFromUrl && { lenderUniqueId: [lenderUniqueIdFromUrl] }),
       ...(transformedLenderName && { lenderName: [transformedLenderName] }),
       ...(formData.originSubLender && { originSubLender: formData.originSubLender }),
+      ...(requiredLoanAmountParsed !== undefined
+        && Number.isFinite(requiredLoanAmountParsed)
+        && { requiredLoanAmount: requiredLoanAmountParsed }),
 
       ...buildMultiLenderCreditCardPayload(formData),
 
