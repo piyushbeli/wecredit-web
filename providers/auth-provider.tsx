@@ -5,9 +5,9 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
-import { authService } from '@/lib/api';
-import { getCookie, setCookie, deleteCookie } from 'cookies-next';
-import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { authService, setAuthToken, setMobile } from '@/lib/api';
+import { getCookie, deleteCookie } from 'cookies-next';
+import { AUTH_COOKIE_OPTIONS, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
 import { getLoggedInAffiliateApplyTrigger } from '@/lib/auth/logged-in-affiliate-apply-trigger';
 
@@ -178,17 +178,12 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     }
 
     // Clear old auth cookies to prevent stale data
-    deleteCookie(STORAGE_AUTH_TOKEN);
-    deleteCookie(STORAGE_MOBILE);
+    deleteCookie(STORAGE_AUTH_TOKEN, { path: AUTH_COOKIE_OPTIONS.path });
+    deleteCookie(STORAGE_MOBILE, { path: AUTH_COOKIE_OPTIONS.path });
 
-    // Set auth token in cookie
-    setCookie(STORAGE_AUTH_TOKEN, preAuth, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
-    // Set mobile in cookie
-    setCookie(STORAGE_MOBILE, mobile, {
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    // Use centralized helpers so cookie path/security settings stay consistent across flows.
+    setAuthToken(preAuth);
+    setMobile(mobile);
     // Update auth store
     setUser(
       {
@@ -249,9 +244,15 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // Check if token exists in cookies
     const token = getCookie(STORAGE_AUTH_TOKEN);
     const mobile = getCookie(STORAGE_MOBILE);
+    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
     if (!token || !mobile) {
       // No token in cookies - ensure clean logout state
       if (isAuthenticated) {
+        // Preserve in-memory session while offline; cookie re-check can recover after connectivity returns.
+        if (isOffline) {
+          setAuthInitialized(true);
+          return;
+        }
         logout();
         // `logout()` clears url-params store; re-sync from URL so attribution survives for lead APIs.
         captureAttributionFromUrl({ cleanUrl: false });
@@ -281,10 +282,13 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     try {
       const result = await authService.validateToken();
       if (!result.isValid) {
-        // Token is invalid - clear auth state
-        // authService.validateToken already calls clearAllAuthData()
+        // Only force logout when backend explicitly marks token invalid.
+        // For network/unknown failures, keep session to avoid false logouts on poor connectivity.
+        if (result.failureReason !== 'invalid_token') {
+          setAuthInitialized(true);
+          return;
+        }
         logout();
-       
       } else {
         const wasUnauthenticated = !isAuthenticated;
 
@@ -316,8 +320,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
         }
       }
     } catch {
-      // On error, clear auth for safety
-      logout();
+      // Runtime/network edge cases should not force logout; user can continue/retry.
+      setAuthInitialized(true);
     } finally {
       setLoading(false);
       setAuthInitialized(true);

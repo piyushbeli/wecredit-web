@@ -16,6 +16,14 @@ export const CONTENT_TYPE_JSON = 'application/json';
 export const STORAGE_AUTH_TOKEN = 'auth_token';
 export const STORAGE_MOBILE = 'mobile';
 
+/** Auth cookie configuration (7 days) shared across all auth flows */
+export const AUTH_COOKIE_OPTIONS = {
+  maxAge: 60 * 60 * 24 * 7,
+  path: '/',
+  sameSite: 'lax' as const,
+  secure: process.env.NEXT_PUBLIC_ENVIRONMENT === 'production',
+};
+
 /** API parameter keys */
 export const PARAM_SOURCE = 'source';
 export const PARAM_AGENT_ID = 'agentId';
