@@ -2,7 +2,7 @@
 
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
-import { useOffers } from '@/hooks/use-offers';
+import { isAutoHitAllLendersEnabled, useOffers } from '@/hooks/use-offers';
 import { useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -64,7 +64,7 @@ export const OffersView = () => {
       reset();
     };
   }, [reset]);
-  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply } = useOffers();
+  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply, reHitLenders, canReHit } = useOffers();
 
   // Memoized filtered offers for lenderName(single Lender flow having both explore and status offers for deciding whether lenerName in URL has non-INITIATED offer or not. To decide the redirection to status page using singleLenderHasNonInitiatedOffer)
   const filteredExploreOffers = useMemo(() => {
@@ -104,7 +104,10 @@ export const OffersView = () => {
     }
   }, [lenderNameParam, singleLenderHasNonInitiatedOffer, router, searchParams]);
 
-  const handleExploreMore = () => {
+  const handleExploreMore = async () => {
+    if (!isAutoHitAllLendersEnabled) {
+      await reHitLenders();
+    }
     window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
 
@@ -290,6 +293,14 @@ export const OffersView = () => {
     return (
       <div className="space-y-6 max-w-xl mx-auto">
         {renderOfferSection('', exploreOffers)}
+        {canReHit && <ActionButton
+          type="button"
+          onClick={handleExploreMore}
+          rightIcon="🔍"
+          fullWidth
+        >
+          Explore More Offers
+        </ActionButton>}
         <UnmatchedOffersSection />
       </div>
     );

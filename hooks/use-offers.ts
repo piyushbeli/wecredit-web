@@ -16,6 +16,7 @@ import { UseOffersReturn } from '@/types/offer';
 const POLL_INTERVAL = 15000; // 15 seconds
 const MAX_POLL_DURATION = 90000; // 90 seconds
 const API_TIMEOUT = 15000; // 15 seconds
+export const isAutoHitAllLendersEnabled = process.env.NEXT_PUBLIC_AUTO_HIT_ALL_LENDERS !== 'false';
 
 /**
  * Hook for managing loan offers
@@ -77,8 +78,9 @@ export function useOffers(): UseOffersReturn {
   /* ---------------- API CALLS ----------------------- */
   /* -------------------------------------------------- */
 
-  const executeHitAllLenders = useCallback(async (): Promise<boolean> => {
-    if (shouldSkipRehit) return false;
+  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<boolean> => {
+    // Single-lender pages should not auto-hit, but explicit user actions (Explore More) can force it.
+    if (shouldSkipRehit && !force) return false;
     if (enableMockData) return true;
 
     const mobile = getCookie(STORAGE_MOBILE) as string;
@@ -254,7 +256,9 @@ export function useOffers(): UseOffersReturn {
           executePoll();
         }
         else if (!shouldSkipRehit && pathname !== '/offers/status/') {
-          await executeHitAllLenders();
+          if (isAutoHitAllLendersEnabled) {
+            await executeHitAllLenders();
+          }
           setIsPolling(true);
           pollStartTimeRef.current = Date.now();
           executePoll();
@@ -263,10 +267,12 @@ export function useOffers(): UseOffersReturn {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
         if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
-          await executeHitAllLenders();
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
+          if (isAutoHitAllLendersEnabled) {
+            await executeHitAllLenders();
+            setIsPolling(true);
+            pollStartTimeRef.current = Date.now();
+            executePoll();
+          }
         }
       }
 
@@ -325,7 +331,9 @@ export function useOffers(): UseOffersReturn {
     isReHitting,
     statusCode,
     fetchOffers,
-    reHitLenders: async () => { },
+    reHitLenders: async () => {
+      await executeHitAllLenders({ force: true });
+    },
     filterByStatus: (status) => selectFilteredOffers(offers, status),
     statusCounts: selectStatusCounts(offers),
     selectedStatus,

@@ -2,7 +2,7 @@
 
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
-import { useOffers } from '@/hooks/use-offers';
+import { isAutoHitAllLendersEnabled, useOffers } from '@/hooks/use-offers';
 import {
   OfferCard,
   OffersLoadingSkeleton,
@@ -30,7 +30,7 @@ export const OffersStatusView = () => {
   const router = useRouter();
 const {partner} = useUrlParamsStore()
   const searchParams = useSearchParams();
-  const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply } = useOffers();
+  const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply, reHitLenders } = useOffers();
  const { triggerApplyFlow } = useLoanApplicationStore();
 const hasTriggeredRef = useRef(false);
 
@@ -80,7 +80,10 @@ useEffect(() => {
   };
 
   const hasStatusOffers = statusOffers.length > 0;
-  const handleExploreMore = () => {
+  const handleExploreMore = async () => {
+    if (!isAutoHitAllLendersEnabled) {
+      await reHitLenders();
+    }
     window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
 

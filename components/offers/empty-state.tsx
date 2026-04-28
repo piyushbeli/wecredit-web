@@ -5,7 +5,7 @@ export const EmptyState = ({ title, description }: { title?: string; description
   const defaultTitle = 'No Offers Available';
   const defaultDescription = "We couldn't find any loan offers at the moment.";
   return (
-    <div className="px-4 pt-12 text-center h-full flex flex-col items-center justify-center">
+    <div className="w-full px-4 pt-12 text-center h-full flex flex-col items-center justify-center">
       <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
         <span className="text-5xl">📋</span>
       </div>
