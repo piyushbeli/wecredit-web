@@ -77,11 +77,15 @@ export const pushOfferpageEvent = ({
   declaredSalary,
   empType,
 }: OfferpagePayload): void => {
-  pushToDataLayer({
+
+  const payload = {
     event: GTM_EVENTS.offerpage,
+    status: 'success',
     offer_list: offerList,
     max_loan_amount: maxLoanAmount,
     declaredSalary: normalizeOfferpageDeclaredSalary(declaredSalary),
     empType: normalizeOfferpageEmpType(empType),
-  });
+  };
+
+  pushToDataLayer(payload);
 };
