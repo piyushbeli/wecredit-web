@@ -273,9 +273,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             // Force logout to clear stale localStorage state
             useOfferStore.getState().reset();
             useUrlParamsStore.getState().clearParams();
+            // Keep isAuthInitialized true: AuthProvider only runs initializeAuth once on mount;
+            // resetting it here would strand the app in "never initialized" after tab sync.
             set({
               ...initialAuthState,
               ...initialModalState,
+              isAuthInitialized: true,
             });
             return false;
           }
