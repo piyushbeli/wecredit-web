@@ -178,6 +178,16 @@ function resolveHasCreditCardForLeadPayload(
 }
 
 /**
+ * Hide credit limit until the user selects Yes, regardless of single-page or stepper layout.
+ */
+function shouldRenderFieldGivenCreditCardChoice(
+  field: FormField,
+  isCreditCardYes: boolean,
+): boolean {
+  return field.key !== 'creditCardLimit' || isCreditCardYes;
+}
+
+/**
  * Builds `/offers` navigation with `newLead=true`, optional `lenderName` from the form,
  * and affiliate / tracking params preserved from the current page query and session store
  * (so UTM, partner, etc. survive after submit when they were present on the landing URL).
@@ -628,7 +638,7 @@ const LeadFormModal = ({
 
             const fieldsToRender =
               section.title === 'Identity Verification'
-                ? sectionFields.filter((field) => field.key !== 'creditCardLimit' || isCreditCardYes)
+                ? sectionFields.filter((field) => shouldRenderFieldGivenCreditCardChoice(field, isCreditCardYes))
                 : sectionFields;
             return (
               <section key={section.title} className="space-y-4">
@@ -660,11 +670,14 @@ const LeadFormModal = ({
       if (formValues['consent'] === undefined) {
         handleFieldChange('consent', 'true');
       }
+      const lastStepFieldsExcludingConsent = visibleFields.filter((field) => field.key !== 'consent');
+      // Match single-page behaviour: only show credit limit after user chooses Yes (API may include both on step 4).
+      const lastStepFieldsToRender = lastStepFieldsExcludingConsent.filter((field) =>
+        shouldRenderFieldGivenCreditCardChoice(field, isCreditCardYes),
+      );
       return (
         <>
-          {visibleFields
-            .filter(field => field.key !== 'consent')
-            .map((field) => renderField(field))}
+          {lastStepFieldsToRender.map((field) => renderField(field))}
           {isLntLenderOrUpswignLntLender && (
             <div className="space-y-2">
               <label className="lead-form-label">
