@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { getCookie } from 'cookies-next';
 import type { BusinessLoanEnquiryPayload } from '@/lib/api/business-loan-service';
 import type { CarLoanEnquiryPayload } from '@/components/car-loan/car-loan-form.config';
 import type { HomeLoanEnquiryPayload } from '@/components/home-loan/home-loan-form.config';
 import type { GoldLoanEnquiryPayload } from '@/components/gold-loan/gold-loan-form.config';
 import type { PrimeplLeadEnquiryPayload } from '@/components/primepl-lead/primepl-lead-form.config';
+import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { useOfferStore } from './offer-store';
 import { useUrlParamsStore } from './url-params-store';
 
@@ -133,6 +135,13 @@ interface AuthActions {
   clearPendingAction: () => void;
   /** Get and clear pending action (for consumption after login) */
   consumePendingAction: () => PendingAction | null;
+  /**
+   * Sync auth state with cookies - ensures localStorage and cookies stay aligned.
+   * If cookies are missing but localStorage says authenticated, forces logout.
+   * Called on app mount and when tab becomes visible.
+   * @returns true if state was in sync or corrected, false if logout was triggered
+   */
+  syncWithCookies: () => boolean;
 }
 
 /** Initial modal state */
@@ -247,19 +256,67 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }
           return action;
         },
+
+        /**
+         * Sync auth state with cookies.
+         * Cookies are the source of truth - if they're missing, clear localStorage state.
+         */
+        syncWithCookies: () => {
+          const token = getCookie(STORAGE_AUTH_TOKEN);
+          const mobile = getCookie(STORAGE_MOBILE);
+          const { isAuthenticated, user } = get();
+
+          const hasCookies = !!(token && mobile);
+
+          if (isAuthenticated && !hasCookies) {
+            // Mismatch: localStorage says authenticated but cookies are gone
+            // Force logout to clear stale localStorage state
+            useOfferStore.getState().reset();
+            useUrlParamsStore.getState().clearParams();
+            // Keep isAuthInitialized true: AuthProvider only runs initializeAuth once on mount;
+            // resetting it here would strand the app in "never initialized" after tab sync.
+            set({
+              ...initialAuthState,
+              ...initialModalState,
+              isAuthInitialized: true,
+            });
+            return false;
+          }
+
+          if (!isAuthenticated && hasCookies && !user) {
+            // Cookies exist but state not hydrated yet - this is normal on first load
+            // AuthProvider will handle setting user after validation
+            return true;
+          }
+
+          return true;
+        },
       }),
       {
         name: 'auth-storage',
-        // Only persist UI-related state, token is stored in secure cookies
+        // Only persist user data for display; isAuthenticated is derived from cookies at runtime.
+        // This ensures localStorage and cookies stay in sync - cookies are the source of truth.
         // pendingAction is NOT persisted - it's session-only
         partialize: (state) => ({
-          isAuthenticated: state.isAuthenticated,
           user: state.user,
         }),
         onRehydrateStorage: () => (state, error) => {
           if (error || !state) {
             state?.setAuthInitialized(true);
             return;
+          }
+          // After rehydrating from localStorage, sync with cookies to ensure consistency.
+          // If cookies are present, derive isAuthenticated from them.
+          const token = getCookie(STORAGE_AUTH_TOKEN);
+          const mobile = getCookie(STORAGE_MOBILE);
+          const hasCookies = !!(token && mobile);
+
+          if (hasCookies && state.user) {
+            // Cookies exist and we have user data - mark as authenticated
+            state.setUser(state.user, token?.toString() ?? '');
+          } else if (!hasCookies && state.user) {
+            // No cookies but user data exists - clear stale state
+            state.logout();
           }
           state.setAuthInitialized(true);
         },

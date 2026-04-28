@@ -1,5 +1,5 @@
 import { getCookie } from 'cookies-next';
-import { authService } from '@/lib/api';
+import { clearAuthData } from '@/lib/api';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isValidMobile } from '@/lib/utils/common-helper';
 import type { PendingAction } from '@/stores/auth-store';
@@ -72,7 +72,7 @@ export function runAffiliateMnFlow(
     const mobileTrimmed = mobile.toString().trim();
 
     if (mobileTrimmed !== mnTrimmed) {
-      authService.clearAllAuthData();
+      clearAuthData();
       actions.logout();
       actions.captureAttributionFromUrl({ cleanUrl: false });
 
