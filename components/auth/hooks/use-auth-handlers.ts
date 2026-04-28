@@ -139,7 +139,7 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
     setLoading(true);
     setError(null);
     try {
-      showLoading('Please wait...', 'We&apos;re preparing your WeCredit experience.');
+      showLoading('Please wait...', "We're preparing your WeCredit experience.");
       const result = await authService.verifyOtp(phoneNumber, otpToVerify);
       if (result.success && result.data) {
         setAuthToken(result.data.token);
