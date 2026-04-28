@@ -9,7 +9,6 @@ import { useState, useCallback } from 'react';
 import { leadService } from '@/lib/api/lead-service';
 import type { LeadFormData } from '@/types/lead';
 import { useLoading } from '@/hooks/use-loading';
-import { pushLeadFormSubmissionSuccess } from '@/lib/gtm';
 
 /** Return type for useCreateLead hook */
 interface UseCreateLeadReturn {
@@ -68,12 +67,6 @@ export function useCreateLead(): UseCreateLeadReturn {
     try {
       const result = await leadService.createLead(formData, partnerCode, lenderName, lenderUniqueId );
       if (result.success && result.data) {
-        // Keep GTM salary aligned with API transformation, while guarding malformed input.
-        const parsedSalary = parseFloat(formData.salary.replace(/,/g, ''));
-        pushLeadFormSubmissionSuccess({
-          declaredSalary: Number.isFinite(parsedSalary) ? parsedSalary : 0,
-          empType: formData.employmentType || '',
-        });
         setLeadId(result.data.leadId);
         setIsCreated(true);
         return true;
