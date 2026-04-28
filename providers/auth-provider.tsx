@@ -10,6 +10,7 @@ import { getCookie, deleteCookie } from 'cookies-next';
 import { AUTH_COOKIE_OPTIONS, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
 import { getLoggedInAffiliateApplyTrigger } from '@/lib/auth/logged-in-affiliate-apply-trigger';
+import { useAuthCookieSync } from '@/hooks/use-auth-cookie-sync';
 
 /**
  * Props for AuthProvider component
@@ -55,8 +56,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     setAuthInitialized,
     openModalWithPendingActionAtOtp,
     openModalWithPendingAction,
-    syncWithCookies,
   } = useAuthStore();
+
+  // Keep auth state (localStorage) in sync with cookies
+  useAuthCookieSync();
   const { setUrlParams, setAttributionParams, clearParams } = useUrlParamsStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
 
@@ -351,26 +354,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     // Initialize auth validation
     initializeAuth();
   }, [initializeAuth]);
-
-  /**
-   * Sync auth state with cookies when tab becomes visible.
-   * Catches cases where cookies were cleared while tab was hidden or in another tab.
-   */
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const handleVisibilityChange = (): void => {
-      if (document.visibilityState === 'visible') {
-        // Tab became visible - verify cookies and localStorage are in sync
-        syncWithCookies();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [syncWithCookies]);
 
   /**
    * Re-sync affiliate + UTM store on every client-side navigation (SPA).
