@@ -118,6 +118,10 @@ export interface CheckStatusAllResponse {
   lenders: LenderOfferStatus[];
   /** Re-hit flag: 0 = more lenders available, 1 = all checked */
   isRehitLenders: number;
+  /** Declared monthly salary from lead details when available. */
+  declaredSalary?: number | string | null;
+  /** Employment type from lead details when available. */
+  empType?: string | null;
 }
 
 /**

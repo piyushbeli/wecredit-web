@@ -25,6 +25,10 @@ interface OfferState {
   isReHitting: boolean;
   /** Status code from API */
   statusCode: string | null;
+  /** Optional salary value returned by check-status-all for GTM tracking. */
+  declaredSalary: number | string | null;
+  /** Optional employment type returned by check-status-all for GTM tracking. */
+  empType: string | null;
   /** Currently selected status filter */
   selectedStatus: StatusFilter;
 }
@@ -47,6 +51,8 @@ interface OfferActions {
   setIsReHitting: (isReHitting: boolean) => void;
   /** Set status code */
   setStatusCode: (statusCode: string | null) => void;
+  /** Save optional lead fields returned by check-status-all. */
+  setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null) => void;
   /** Set selected status filter */
   setSelectedStatus: (status: StatusFilter) => void;
   /** Reset store to initial state */
@@ -62,6 +68,8 @@ const initialState: OfferState = {
   canReHit: false,
   isReHitting: false,
   statusCode: null,
+  declaredSalary: null,
+  empType: null,
   selectedStatus: 'ALL',
 };
 
@@ -87,6 +95,9 @@ export const useOfferStore = create<OfferState & OfferActions>()(
       setIsReHitting: (isReHitting: boolean) => set({ isReHitting }, false, 'setIsReHitting'),
 
       setStatusCode: (statusCode: string | null) => set({ statusCode }, false, 'setStatusCode'),
+
+      setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null) =>
+        set({ declaredSalary, empType }, false, 'setOfferTrackingMeta'),
 
       setSelectedStatus: (selectedStatus: StatusFilter) =>
         set({ selectedStatus }, false, 'setSelectedStatus'),

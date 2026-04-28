@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCookie } from 'cookies-next';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { toast } from 'sonner';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
+import type { CheckStatusAllResponse } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import {
-  MOCK_REHIT_RESPONSE,
   MOCK_ALL_STATUSES_RESPONSE,
   simulateMockApiCall
 } from '@/lib/mock-data/offers';
-import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
+import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers } from '@/stores/offer-store';
 import { UseOffersReturn } from '@/types/offer';
 
 /** Polling constants */
@@ -55,6 +53,7 @@ export function useOffers(): UseOffersReturn {
     setCanReHit,
     setIsReHitting,
     setStatusCode,
+    setOfferTrackingMeta,
     setSelectedStatus,
   } = useOfferStore();
 
@@ -94,6 +93,16 @@ export function useOffers(): UseOffersReturn {
     }
   }, [shouldSkipRehit, enableMockData]);
 
+  const getOfferTrackingMeta = useCallback(
+    (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null } => {
+      // API payload shape is not always stable, so support both camelCase and snake_case keys.
+      const declaredSalary = response.declaredSalary ?? null;
+      const empType = response.empType ?? null;
+      return { declaredSalary, empType };
+    },
+    []
+  );
+
   const fetchOffers = useCallback(
     async (signal?: AbortSignal): Promise<void> => {
       setError(null);
@@ -105,6 +114,8 @@ export function useOffers(): UseOffersReturn {
         setOffers(mock.lenders || []);
         setCanReHit(mock.isRehitLenders === 0);
         setStatusCode(mock.statusCode);
+        const mockTrackingMeta = getOfferTrackingMeta(mock);
+        setOfferTrackingMeta(mockTrackingMeta.declaredSalary, mockTrackingMeta.empType);
         return;
       }
 
@@ -112,6 +123,7 @@ export function useOffers(): UseOffersReturn {
       const token = getCookie(STORAGE_AUTH_TOKEN) as string;
       if (!mobile) {
         setError('Mobile number not found.');
+        setOfferTrackingMeta(null, null);
         return;
       }
 
@@ -123,10 +135,14 @@ export function useOffers(): UseOffersReturn {
           setOffers(res.lenders || []);
           setCanReHit(res.isRehitLenders === 0);
           setStatusCode(res.statusCode);
+          const responseTrackingMeta = getOfferTrackingMeta(res);
+          setOfferTrackingMeta(responseTrackingMeta.declaredSalary, responseTrackingMeta.empType);
         } else {
           setError(result.error || 'Failed to load offers');
+          setOfferTrackingMeta(null, null);
         }
       } catch (err) {
+        setOfferTrackingMeta(null, null);
         if (!(err instanceof Error && err.name === 'AbortError')) {
           setError(
             err instanceof Error
@@ -136,7 +152,7 @@ export function useOffers(): UseOffersReturn {
         }
       }
     },
-    [enableMockData]
+    [enableMockData, getOfferTrackingMeta, setOfferTrackingMeta]
   );
 
   /* -------------------------------------------------- */

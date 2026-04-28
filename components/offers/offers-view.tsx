@@ -35,6 +35,8 @@ export const OffersView = () => {
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
   const reset = useOfferStore((state) => state.reset);
+  const declaredSalary = useOfferStore((state) => state.declaredSalary);
+  const empType = useOfferStore((state) => state.empType);
   const searchParams = useSearchParams();
   const {partner} = useUrlParamsStore()
   const newLead = searchParams.get('newLead') || searchParams.get('newlead');
@@ -193,6 +195,8 @@ export const OffersView = () => {
     pushOfferpageEvent({
       offerList: lenderNames,
       maxLoanAmount: maxInitiatedAmount,
+      declaredSalary,
+      empType,
     });
     hasFiredOfferpageEventRef.current = true;
   }, [
@@ -203,6 +207,8 @@ export const OffersView = () => {
     isPolling,
     isReHitting,
     maxInitiatedAmount,
+    declaredSalary,
+    empType,
   ]);
   // Only show the status CTA once we have non-initiated offers to check.
   // const hasStatusOffers = statusOffers.length > 0;
