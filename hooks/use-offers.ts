@@ -11,12 +11,13 @@ import {
 } from '@/lib/mock-data/offers';
 import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers } from '@/stores/offer-store';
 import { UseOffersReturn } from '@/types/offer';
+import { deploymentFeatures } from '@/lib/env-features';
 
 /** Polling constants */
 const POLL_INTERVAL = 15000; // 15 seconds
 const MAX_POLL_DURATION = 90000; // 90 seconds
 const API_TIMEOUT = 15000; // 15 seconds
-export const isAutoHitAllLendersEnabled = process.env.NEXT_PUBLIC_AUTO_HIT_ALL_LENDERS !== 'false';
+export const isAutoHitAllLendersEnabled = !deploymentFeatures.disableAutoHitAllLenders;  // true if not disabled
 
 /**
  * Hook for managing loan offers
@@ -38,6 +39,7 @@ export const isAutoHitAllLendersEnabled = process.env.NEXT_PUBLIC_AUTO_HIT_ALL_L
 // (ALL IMPORTS REMAIN EXACTLY THE SAME)
 
 export function useOffers(): UseOffersReturn {
+  console.log('[USE OFFERS] isAutoHitAllLendersEnabled', isAutoHitAllLendersEnabled);
   const {
     offers,
     isLoading,
