@@ -259,18 +259,24 @@ export function useOffers(): UseOffersReturn {
         }
         else if (!shouldSkipRehit && pathname !== '/offers/status/') {
           await executeHitAllLenders();
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
+          // In new PL, skip polling when initial fetch already has lenders (common on refresh).
+          if (!(newPLEnabled && currentState.offers.length > 0)) {
+            setIsPolling(true);
+            pollStartTimeRef.current = Date.now();
+            executePoll();
+          }
         }
       } else {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
         if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
           await executeHitAllLenders();
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
+          // In new PL, polling is only for the "no lenders yet" waiting state.
+          if (!(newPLEnabled && currentState.offers.length > 0)) {
+            setIsPolling(true);
+            pollStartTimeRef.current = Date.now();
+            executePoll();
+          }
         }
       }
 
@@ -301,6 +307,9 @@ export function useOffers(): UseOffersReturn {
 
     if (shouldSkipRehit) {
       if (offers.length > 0) stopPolling();
+    } else if (newPLEnabled) {
+      // New PL must stop as soon as lenders are available, even when re-hit remains enabled.
+      if (offers.length > 0) stopPolling();
     } else {
       if (offers.length > 0 && !canReHit) stopPolling();
     }
@@ -312,6 +321,7 @@ export function useOffers(): UseOffersReturn {
     shouldSkipRehit,
     statusCode,
     isNewLead,
+    newPLEnabled,
     stopPolling,
   ]);
   /* -------------------------------------------------- */
