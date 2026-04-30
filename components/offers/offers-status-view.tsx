@@ -2,7 +2,7 @@
 
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
-import { isAutoHitAllLendersEnabled, useOffers } from '@/hooks/use-offers';
+import { newPLEnabled, useOffers } from '@/hooks/use-offers';
 import {
   OfferCard,
   OffersLoadingSkeleton,
@@ -81,7 +81,7 @@ useEffect(() => {
 
   const hasStatusOffers = statusOffers.length > 0;
   const handleExploreMore = async () => {
-    if (!isAutoHitAllLendersEnabled) {
+    if (newPLEnabled) {
       await reHitLenders();
     }
     window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
