@@ -6,18 +6,19 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { CheckStatusAllResponse } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import {
+  MOCK_REHIT_RESPONSE,
   MOCK_ALL_STATUSES_RESPONSE,
   simulateMockApiCall
 } from '@/lib/mock-data/offers';
-import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers } from '@/stores/offer-store';
+import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
 
+export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
 const POLL_INTERVAL = 15000; // 15 seconds
 const MAX_POLL_DURATION = 90000; // 90 seconds
 const API_TIMEOUT = 15000; // 15 seconds
-export const isAutoHitAllLendersEnabled = !deploymentFeatures.disableAutoHitAllLenders;  // true if not disabled
 
 /**
  * Hook for managing loan offers
@@ -39,7 +40,6 @@ export const isAutoHitAllLendersEnabled = !deploymentFeatures.disableAutoHitAllL
 // (ALL IMPORTS REMAIN EXACTLY THE SAME)
 
 export function useOffers(): UseOffersReturn {
-  console.log('[USE OFFERS] isAutoHitAllLendersEnabled', isAutoHitAllLendersEnabled);
   const {
     offers,
     isLoading,
@@ -81,8 +81,8 @@ export function useOffers(): UseOffersReturn {
   /* -------------------------------------------------- */
 
   const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<boolean> => {
-    // Single-lender pages should not auto-hit, but explicit user actions (Explore More) can force it.
-    if (shouldSkipRehit && !force) return false;
+    if (newPLEnabled && !force) return false;
+    if (shouldSkipRehit) return false;
     if (enableMockData) return true;
 
     const mobile = getCookie(STORAGE_MOBILE) as string;
@@ -258,19 +258,21 @@ export function useOffers(): UseOffersReturn {
           executePoll();
         }
         else if (!shouldSkipRehit && pathname !== '/offers/status/') {
-          if (isAutoHitAllLendersEnabled) {
-            await executeHitAllLenders();
+          await executeHitAllLenders();
+          // In new PL, skip polling when initial fetch already has lenders (common on refresh).
+          if (!(newPLEnabled && currentState.offers.length > 0)) {
+            setIsPolling(true);
+            pollStartTimeRef.current = Date.now();
+            executePoll();
           }
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
         }
       } else {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
         if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
-          if (isAutoHitAllLendersEnabled) {
-            await executeHitAllLenders();
+          await executeHitAllLenders();
+          // In new PL, polling is only for the "no lenders yet" waiting state.
+          if (!(newPLEnabled && currentState.offers.length > 0)) {
             setIsPolling(true);
             pollStartTimeRef.current = Date.now();
             executePoll();
@@ -305,6 +307,9 @@ export function useOffers(): UseOffersReturn {
 
     if (shouldSkipRehit) {
       if (offers.length > 0) stopPolling();
+    } else if (newPLEnabled) {
+      // New PL must stop as soon as lenders are available, even when re-hit remains enabled.
+      if (offers.length > 0) stopPolling();
     } else {
       if (offers.length > 0 && !canReHit) stopPolling();
     }
@@ -316,6 +321,7 @@ export function useOffers(): UseOffersReturn {
     shouldSkipRehit,
     statusCode,
     isNewLead,
+    newPLEnabled,
     stopPolling,
   ]);
   /* -------------------------------------------------- */
@@ -343,6 +349,3 @@ export function useOffers(): UseOffersReturn {
     shouldTriggerApply,
   };
 }
-
-
-
