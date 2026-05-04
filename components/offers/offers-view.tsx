@@ -313,7 +313,7 @@ export const OffersView = () => {
         >
           Explore More Offers
         </ActionButton>}
-        <UnmatchedOffersSection offers={unmatchedOffers} />
+        {unmatchedOffers.length > 0 && <UnmatchedOffersSection offers={unmatchedOffers} />}
       </div>
     );
   };
