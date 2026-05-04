@@ -64,7 +64,19 @@ export const OffersView = () => {
       reset();
     };
   }, [reset]);
-  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply, reHitLenders, canReHit } = useOffers();
+  const {
+    exploreOffers,
+    isLoading,
+    isPolling,
+    error,
+    fetchOffers,
+    statusOffers,
+    unmatchedOffers,
+    isReHitting,
+    shouldTriggerApply,
+    reHitLenders,
+    canReHit,
+  } = useOffers();
 
   // Memoized filtered offers for lenderName(single Lender flow having both explore and status offers for deciding whether lenerName in URL has non-INITIATED offer or not. To decide the redirection to status page using singleLenderHasNonInitiatedOffer)
   const filteredExploreOffers = useMemo(() => {
@@ -163,9 +175,9 @@ export const OffersView = () => {
   const handleGoBack = (): void => {
     router.push('/');
   };
-  // Calculate total offers including recently clicked
+  // Includes explore + recently-clicked + API unmatched so we never show an empty shell when only unmatched exist
   const totalOffers = statusOffers.length + exploreOffers.length;
-  const hasOffers = totalOffers > 0;
+  const hasOffers = totalOffers > 0 || unmatchedOffers.length > 0;
   const hasInitiatedOffers = exploreOffers.length > 0;
   const maxInitiatedAmount = useMemo(() => {
     // Find the maximum uptoAmount from INITIATED offers, optionally filtered by lenderName
@@ -292,7 +304,7 @@ export const OffersView = () => {
     }
     return (
       <div className="space-y-6 max-w-xl mx-auto">
-        {renderOfferSection('', exploreOffers)}
+        {exploreOffers.length > 0 ? renderOfferSection('', exploreOffers) : null}
         {canReHit && newPLEnabled && <ActionButton
           type="button"
           onClick={handleExploreMore}
@@ -301,7 +313,7 @@ export const OffersView = () => {
         >
           Explore More Offers
         </ActionButton>}
-        <UnmatchedOffersSection />
+        <UnmatchedOffersSection offers={unmatchedOffers} />
       </div>
     );
   };
@@ -342,7 +354,8 @@ export const OffersView = () => {
   //   redirect('/offers/status');
   // }
 
-  const nonWebhookStatusOffers = statusOffers.filter((offer) => offer.isWebHookSent !== 2);
+  const recentStatusOffers = newPLEnabled ? statusOffers : statusOffers.filter((offer) => offer.isWebHookSent !== 2);
+  
   return (
     <div className="min-h-screen ">
       <PageHeader title="Offers for you" onBack={handleGoBack} />
@@ -351,9 +364,9 @@ export const OffersView = () => {
       {/*// Show carousel if there are status offers and no lender filter is applied (to avoid confusion in single lender view)*/}
       {/* Recently Clicked Offers Carousel - At the top */}
       {/* Show carousel only if there are non-webhook status offers and no lender filter */}
-      {nonWebhookStatusOffers.length > 0 && !lenderNameParam && (
+      {recentStatusOffers.length > 0 && !lenderNameParam && (
         <RecentlyClickedOffersCarousel
-          offers={nonWebhookStatusOffers}
+          offers={recentStatusOffers}
           onOfferClick={handleRecentlyClickedOfferClick}
         />
       )}

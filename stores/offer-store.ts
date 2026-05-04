@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
+import { categorizeOffers } from '@/lib/utils/offer-categorization';
 
 /**
  * Selected status filter type
@@ -124,20 +125,24 @@ export const selectFilteredOffers = (
 };
 
 /**
- * Selector: Get explore offers (INITIATED and UTM_CLICKED status - new offers to explore)
- * Includes clicked offers so they remain visible with updated CTA
+ * Selector: Explore list (INITIATED) for lenders with active lenderStatus (or legacy omit).
  */
 export const selectExploreOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
-  return offers.filter((offer) => 
-    offer.wcStatus === 'INITIATED'
-  );
+  return categorizeOffers(offers).explore;
 };
 
 /**
- * Selector: Get status offers (non-INITIATED - offers user has clicked/applied)
+ * Selector: Recently-clicked / status-tracked offers (non-INITIATED, non-DISBURSED) for active lenders.
  */
 export const selectStatusOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
-  return offers.filter((offer) => offer.wcStatus !== 'INITIATED');
+  return categorizeOffers(offers).recentlyClicked;
+};
+
+/**
+ * Selector: Rejected-style offers for inactive lenders (lenderStatus === false).
+ */
+export const selectUnmatchedOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
+  return categorizeOffers(offers).unmatched;
 };
 
 /**
