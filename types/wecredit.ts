@@ -78,6 +78,11 @@ export interface LenderOfferStatus {
   uptoAmount?: string;
   /** WeCredit application status */
   wcStatus: WcStatus;
+  /**
+   * When false, lender-led outcomes (e.g. REJECTED / NOT_PROCESSED) surface in Unmatched UI.
+   * When true or omitted, legacy behaviour: INITIATED in explore; DISBURSED hidden; other statuses in recently-clicked / status flows.
+   */
+  lenderStatus?: boolean;
   /** Direct application link (for INITIATED status) */
   utmLink?: string;
   /** Offered/requested loan amount */

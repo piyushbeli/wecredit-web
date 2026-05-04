@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCookie } from 'cookies-next';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
@@ -10,7 +10,8 @@ import {
   MOCK_ALL_STATUSES_RESPONSE,
   simulateMockApiCall
 } from '@/lib/mock-data/offers';
-import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
+import { useOfferStore, selectFilteredOffers, selectStatusCounts, type StatusFilter } from '@/stores/offer-store';
+import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
 
@@ -328,10 +329,13 @@ export function useOffers(): UseOffersReturn {
   /* ---------------- RETURN -------------------------- */
   /* -------------------------------------------------- */
 
+  const categorizedOffers = useMemo(() => categorizeOffers(offers), [offers]);
+
   return {
     offers,
-    exploreOffers: selectExploreOffers(offers),
-    statusOffers: selectStatusOffers(offers),
+    exploreOffers: categorizedOffers.explore,
+    statusOffers: categorizedOffers.recentlyClicked,
+    unmatchedOffers: categorizedOffers.unmatched,
     isLoading: isLoading || isInitializing,
     isPolling,
     error,
