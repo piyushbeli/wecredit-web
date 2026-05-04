@@ -18,6 +18,7 @@ export const isLenderStatusActive = (offer: LenderOfferStatus): boolean =>
 
 /**
  * Split offers by lenderStatus + wcStatus per product rules.
+ * REJECTED always goes to unmatched (even when the lender row is still "active").
  * Offers that belong in no bucket are omitted (e.g. DISBURSED when active, or stray statuses when inactive).
  */
 export const categorizeOffers = (
@@ -32,6 +33,12 @@ export const categorizeOffers = (
   }
 
   for (const offer of offers) {
+    // Product rule: rejected applications never appear in explore or recently-clicked carousels.
+    if (offer.wcStatus === 'REJECTED') {
+      unmatched.push(offer);
+      continue;
+    }
+
     if (isLenderStatusActive(offer)) {
       if (offer.wcStatus === 'INITIATED') {
         explore.push(offer);
@@ -45,7 +52,7 @@ export const categorizeOffers = (
       continue;
     }
 
-    if (offer.wcStatus === 'REJECTED' || offer.wcStatus === 'NOT_PROCESSED') {
+    if (offer.wcStatus === 'NOT_PROCESSED') {
       unmatched.push(offer);
     }
   }
