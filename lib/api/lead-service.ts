@@ -388,9 +388,12 @@ async function createLead(
       body: JSON.stringify(requestBody),
     });
 
-    const data: CreateLeadResponse = await response.json();
+    const raw = (await response.json()) as CreateLeadResponse & {
+      /** Some gateways serialize booleans with snake_case */
+      is_prime_pl_lead?: unknown;
+    };
 
-    const code = data?.statusCode?.toString();
+    const code = raw?.statusCode?.toString();
 
     if (
       !response.ok ||
@@ -398,7 +401,7 @@ async function createLead(
       code === "1003" ||
       code === "2006"
     ) {
-      const errorMsg = data.statusMessage || "Failed to create lead";
+      const errorMsg = raw.statusMessage || "Failed to create lead";
 
       toast.error(errorMsg, {
         description: "Unable to submit your application. Please try again.",
@@ -412,9 +415,25 @@ async function createLead(
 
     if (isLntLenderOrUpswignLntLender && mobile) {
       // This event should not affect lead creation success path.
-      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
       notifyCreateLeadNavigationEvent(mobile);
     }
+
+    const isPrimePlLeadResolved =
+      raw.isPrimePlLead === true || raw.is_prime_pl_lead === true;
+
+    const data: CreateLeadResponse = {
+      ...raw,
+      // Normalize snake_case so downstream UI only checks `isPrimePlLead === true`.
+      ...(isPrimePlLeadResolved ? { isPrimePlLead: true } : {}),
+    };
+
+    console.info('[lead-service:createLead]', {
+      phase: 'success',
+      statusCode: data.statusCode,
+      isPrimePlLead: data.isPrimePlLead === true,
+      rawCamelPresent: raw.isPrimePlLead !== undefined && raw.isPrimePlLead !== null,
+      rawSnakePresent: raw.is_prime_pl_lead !== undefined && raw.is_prime_pl_lead !== null,
+    });
 
     return {
       success: true,

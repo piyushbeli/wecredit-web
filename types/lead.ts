@@ -183,6 +183,8 @@ export interface CreateLeadResponse {
   statusCode: string;
   /** Human-readable status message */
   statusMessage: string;
+  /** True when lead is routed to Prime PL success path */
+  isPrimePlLead?: boolean;
 }
 
 // ============================================
