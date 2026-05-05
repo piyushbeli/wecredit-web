@@ -7,10 +7,12 @@ import { LenderOfferStatus, WcStatus } from "./wecredit";
 export interface UseOffersReturn {
     /** List of lender offers */
     offers: LenderOfferStatus[];
-    /** Explore offers (INITIATED status - new offers to explore) */
+    /** Explore offers: active lender + INITIATED (see offer-categorization) */
     exploreOffers: LenderOfferStatus[];
-    /** Status offers (non-INITIATED - offers user has clicked/applied) */
+    /** Recently clicked / in-journey: active lender, not INITIATED, not DISBURSED */
     statusOffers: LenderOfferStatus[];
+    /** Inactive-lender outcomes shown in the Unmatched section (REJECTED / NOT_PROCESSED when lenderStatus is false) */
+    unmatchedOffers: LenderOfferStatus[];
     /** Loading state for initial fetch */
     isLoading: boolean;
     /** Whether the hook is currently polling for offers */

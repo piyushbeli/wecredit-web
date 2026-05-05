@@ -4,10 +4,11 @@
  * Based on WeCredit OTP Authentication API documentation
  */
 
-import { getCookie, deleteCookie } from 'cookies-next';
+import { getCookie } from 'cookies-next';
 import { wecreditConfig } from '@/lib/config';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
+import { clearAuthData } from '@/lib/utils/api';
 import type { User } from '@/stores/auth-store';
 import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
 
@@ -126,6 +127,7 @@ interface ValidateTokenResponse {
   code?: number;
   requiresProfileCompletion?: boolean;
   message?: string;
+  failureReason?: 'network_error' | 'invalid_token' | 'unknown';
 }
 
 /** Response structure for logout */
@@ -497,10 +499,16 @@ async function resendOtp(mobile: string): Promise<AuthResult<ResendOtpResponse>>
  */
 async function validateToken(): Promise<ValidateTokenResponse> {
   const { data, error: networkError } = await authGet<AuthApiResponse>('validate');
-  if (networkError || !data) {
-    // On network error, clear auth data
-    clearAllAuthData();
-    return { isValid: false };
+  if (networkError) {
+    // A transient network issue should not force-logout a valid user session.
+    return {
+      isValid: false,
+      failureReason: 'network_error',
+      message: 'Unable to validate session due to network issue',
+    };
+  }
+  if (!data) {
+    return { isValid: false, failureReason: 'unknown' };
   }
   const isValidCode = VALID_TOKEN_CODES.includes(data.code as typeof VALID_TOKEN_CODES[number]);
   if (isValidCode) {
@@ -512,8 +520,8 @@ async function validateToken(): Promise<ValidateTokenResponse> {
     };
   }
   // Token invalid - clear stored data
-  clearAllAuthData();
-  return { isValid: false, code: data.code };
+  clearAuthData();
+  return { isValid: false, code: data.code, failureReason: 'invalid_token' };
 }
 
 /**
@@ -532,7 +540,7 @@ async function logout(mobile: string): Promise<AuthResult<LogoutResponse>> {
     // Continue with local logout even if API fails
   }
   // Always clear local data
-  clearAllAuthData();
+  clearAuthData();
   return {
     success: true,
     data: {
@@ -541,25 +549,6 @@ async function logout(mobile: string): Promise<AuthResult<LogoutResponse>> {
       code: AUTH_RESPONSE_CODES.SUCCESS,
     },
   };
-}
-
-/**
- * Clears all authentication data from storage
- * Removes auth cookies (token, mobile) and localStorage items (fingerprint, device info)
- * Called on logout or when token validation fails
- */
-function clearAllAuthData(): void {
-  // Clear auth cookies
-  deleteCookie(STORAGE_AUTH_TOKEN);
-  deleteCookie(STORAGE_MOBILE);
-  // Clear localStorage items (non-sensitive device data)
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('fingerprint');
-    localStorage.removeItem('ip');
-    localStorage.removeItem(DEVICE_INFO_STORAGE_KEY);
-  }
 }
 
 /**
@@ -581,7 +570,7 @@ export const authService = {
   validateToken,
   logout,
   isUserLoggedIn,
-  clearAllAuthData,
+  clearAuthData,
 };
 
 /** Export response code constants */

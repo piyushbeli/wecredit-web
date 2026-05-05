@@ -2,7 +2,7 @@
 
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
-import { useOffers } from '@/hooks/use-offers';
+import { newPLEnabled, useOffers } from '@/hooks/use-offers';
 import { useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -29,11 +29,14 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useUrlParamsStore } from '@/stores/url-params-store';
+import { pushOfferpageEvent } from '@/lib/gtm';
 
 export const OffersView = () => {
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
   const reset = useOfferStore((state) => state.reset);
+  const declaredSalary = useOfferStore((state) => state.declaredSalary);
+  const empType = useOfferStore((state) => state.empType);
   const searchParams = useSearchParams();
   const {partner} = useUrlParamsStore()
   const newLead = searchParams.get('newLead') || searchParams.get('newlead');
@@ -50,6 +53,7 @@ export const OffersView = () => {
   const hideExploreOtherOffersCta = !isAffiliate && !isLntLender;
   const lenderNameParam = (rawLender);
   const lenderNameParamPollMessage = mapingLenderNameToLenderCode(rawLender);
+  const hasFiredOfferpageEventRef = useRef(false);
 
   const pollingMessage = lenderNameParamPollMessage
     ? `Please wait while we fetch offer from ${lenderNameParamPollMessage.charAt(0).toUpperCase() + lenderNameParamPollMessage.slice(1)} for you.`
@@ -60,7 +64,19 @@ export const OffersView = () => {
       reset();
     };
   }, [reset]);
-  const { exploreOffers, isLoading, isPolling, error, fetchOffers, statusOffers, isReHitting, shouldTriggerApply } = useOffers();
+  const {
+    exploreOffers,
+    isLoading,
+    isPolling,
+    error,
+    fetchOffers,
+    statusOffers,
+    unmatchedOffers,
+    isReHitting,
+    shouldTriggerApply,
+    reHitLenders,
+    canReHit,
+  } = useOffers();
 
   // Memoized filtered offers for lenderName(single Lender flow having both explore and status offers for deciding whether lenerName in URL has non-INITIATED offer or not. To decide the redirection to status page using singleLenderHasNonInitiatedOffer)
   const filteredExploreOffers = useMemo(() => {
@@ -100,7 +116,10 @@ export const OffersView = () => {
     }
   }, [lenderNameParam, singleLenderHasNonInitiatedOffer, router, searchParams]);
 
-  const handleExploreMore = () => {
+  const handleExploreMore = async () => {
+    if (newPLEnabled) {
+      await reHitLenders();
+    }
     window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
 
@@ -156,9 +175,9 @@ export const OffersView = () => {
   const handleGoBack = (): void => {
     router.push('/');
   };
-  // Calculate total offers including recently clicked
+  // Includes explore + recently-clicked + API unmatched so we never show an empty shell when only unmatched exist
   const totalOffers = statusOffers.length + exploreOffers.length;
-  const hasOffers = totalOffers > 0;
+  const hasOffers = totalOffers > 0 || unmatchedOffers.length > 0;
   const hasInitiatedOffers = exploreOffers.length > 0;
   const maxInitiatedAmount = useMemo(() => {
     // Find the maximum uptoAmount from INITIATED offers, optionally filtered by lenderName
@@ -172,6 +191,40 @@ export const OffersView = () => {
       ? `₹${maxInitiatedAmount.toLocaleString('en-IN')}`
       : null;
   }, [maxInitiatedAmount]);
+
+  useEffect(() => {
+    if (isLoading || isPolling || isReHitting || hasFiredOfferpageEventRef.current) {
+      return;
+    }
+
+    // In lender-filtered flows, we only report cards for the selected lender.
+    const sourceOffers = lenderNameParam ? filteredExploreOffers : exploreOffers;
+    const lenderNames = Array.from(
+      new Set(
+        sourceOffers
+          .map((offer) => offer.lenderName?.trim())
+          .filter((lenderName): lenderName is string => Boolean(lenderName))
+      )
+    );
+
+    pushOfferpageEvent({
+      offerList: lenderNames,
+      maxLoanAmount: maxInitiatedAmount,
+      declaredSalary,
+      empType,
+    });
+    hasFiredOfferpageEventRef.current = true;
+  }, [
+    lenderNameParam,
+    filteredExploreOffers,
+    exploreOffers,
+    isLoading,
+    isPolling,
+    isReHitting,
+    maxInitiatedAmount,
+    declaredSalary,
+    empType,
+  ]);
   // Only show the status CTA once we have non-initiated offers to check.
   // const hasStatusOffers = statusOffers.length > 0;
   const hasStatusOffers = statusOffers.length > 0;
@@ -251,8 +304,16 @@ export const OffersView = () => {
     }
     return (
       <div className="space-y-6 max-w-xl mx-auto">
-        {renderOfferSection('', exploreOffers)}
-        <UnmatchedOffersSection />
+        {exploreOffers.length > 0 ? renderOfferSection('', exploreOffers) : null}
+        {canReHit && newPLEnabled && <ActionButton
+          type="button"
+          onClick={handleExploreMore}
+          rightIcon="🔍"
+          fullWidth
+        >
+          Explore More Offers
+        </ActionButton>}
+        {unmatchedOffers.length > 0 && <UnmatchedOffersSection offers={unmatchedOffers} />}
       </div>
     );
   };
@@ -293,7 +354,8 @@ export const OffersView = () => {
   //   redirect('/offers/status');
   // }
 
-  const nonWebhookStatusOffers = statusOffers.filter((offer) => offer.isWebHookSent !== 2);
+  const recentStatusOffers = newPLEnabled ? statusOffers : statusOffers.filter((offer) => offer.isWebHookSent !== 2);
+  
   return (
     <div className="min-h-screen ">
       <PageHeader title="Offers for you" onBack={handleGoBack} />
@@ -302,9 +364,9 @@ export const OffersView = () => {
       {/*// Show carousel if there are status offers and no lender filter is applied (to avoid confusion in single lender view)*/}
       {/* Recently Clicked Offers Carousel - At the top */}
       {/* Show carousel only if there are non-webhook status offers and no lender filter */}
-      {nonWebhookStatusOffers.length > 0 && !lenderNameParam && (
+      {recentStatusOffers.length > 0 && !lenderNameParam && (
         <RecentlyClickedOffersCarousel
-          offers={nonWebhookStatusOffers}
+          offers={recentStatusOffers}
           onOfferClick={handleRecentlyClickedOfferClick}
         />
       )}

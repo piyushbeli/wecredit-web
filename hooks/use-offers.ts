@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCookie } from 'cookies-next';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { toast } from 'sonner';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
-import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
+import type { CheckStatusAllResponse } from '@/types/wecredit';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import {
   MOCK_REHIT_RESPONSE,
   MOCK_ALL_STATUSES_RESPONSE,
   simulateMockApiCall
 } from '@/lib/mock-data/offers';
-import { useOfferStore, selectFilteredOffers, selectStatusCounts, selectExploreOffers, selectStatusOffers, type StatusFilter } from '@/stores/offer-store';
+import { useOfferStore, selectFilteredOffers, selectStatusCounts, type StatusFilter } from '@/stores/offer-store';
+import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
+import { deploymentFeatures } from '@/lib/env-features';
 
+export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
 const POLL_INTERVAL = 15000; // 15 seconds
 const MAX_POLL_DURATION = 90000; // 90 seconds
@@ -55,6 +57,7 @@ export function useOffers(): UseOffersReturn {
     setCanReHit,
     setIsReHitting,
     setStatusCode,
+    setOfferTrackingMeta,
     setSelectedStatus,
   } = useOfferStore();
 
@@ -78,7 +81,8 @@ export function useOffers(): UseOffersReturn {
   /* ---------------- API CALLS ----------------------- */
   /* -------------------------------------------------- */
 
-  const executeHitAllLenders = useCallback(async (): Promise<boolean> => {
+  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<boolean> => {
+    if (newPLEnabled && !force) return false;
     if (shouldSkipRehit) return false;
     if (enableMockData) return true;
 
@@ -94,6 +98,16 @@ export function useOffers(): UseOffersReturn {
     }
   }, [shouldSkipRehit, enableMockData]);
 
+  const getOfferTrackingMeta = useCallback(
+    (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null } => {
+      // API payload shape is not always stable, so support both camelCase and snake_case keys.
+      const declaredSalary = response.declaredSalary ?? null;
+      const empType = response.empType ?? null;
+      return { declaredSalary, empType };
+    },
+    []
+  );
+
   const fetchOffers = useCallback(
     async (signal?: AbortSignal): Promise<void> => {
       setError(null);
@@ -105,6 +119,8 @@ export function useOffers(): UseOffersReturn {
         setOffers(mock.lenders || []);
         setCanReHit(mock.isRehitLenders === 0);
         setStatusCode(mock.statusCode);
+        const mockTrackingMeta = getOfferTrackingMeta(mock);
+        setOfferTrackingMeta(mockTrackingMeta.declaredSalary, mockTrackingMeta.empType);
         return;
       }
 
@@ -112,6 +128,7 @@ export function useOffers(): UseOffersReturn {
       const token = getCookie(STORAGE_AUTH_TOKEN) as string;
       if (!mobile) {
         setError('Mobile number not found.');
+        setOfferTrackingMeta(null, null);
         return;
       }
 
@@ -123,10 +140,14 @@ export function useOffers(): UseOffersReturn {
           setOffers(res.lenders || []);
           setCanReHit(res.isRehitLenders === 0);
           setStatusCode(res.statusCode);
+          const responseTrackingMeta = getOfferTrackingMeta(res);
+          setOfferTrackingMeta(responseTrackingMeta.declaredSalary, responseTrackingMeta.empType);
         } else {
           setError(result.error || 'Failed to load offers');
+          setOfferTrackingMeta(null, null);
         }
       } catch (err) {
+        setOfferTrackingMeta(null, null);
         if (!(err instanceof Error && err.name === 'AbortError')) {
           setError(
             err instanceof Error
@@ -136,7 +157,7 @@ export function useOffers(): UseOffersReturn {
         }
       }
     },
-    [enableMockData]
+    [enableMockData, getOfferTrackingMeta, setOfferTrackingMeta]
   );
 
   /* -------------------------------------------------- */
@@ -239,18 +260,24 @@ export function useOffers(): UseOffersReturn {
         }
         else if (!shouldSkipRehit && pathname !== '/offers/status/') {
           await executeHitAllLenders();
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
+          // In new PL, skip polling when initial fetch already has lenders (common on refresh).
+          if (!(newPLEnabled && currentState.offers.length > 0)) {
+            setIsPolling(true);
+            pollStartTimeRef.current = Date.now();
+            executePoll();
+          }
         }
       } else {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
         if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
           await executeHitAllLenders();
-          setIsPolling(true);
-          pollStartTimeRef.current = Date.now();
-          executePoll();
+          // In new PL, polling is only for the "no lenders yet" waiting state.
+          if (!(newPLEnabled && currentState.offers.length > 0)) {
+            setIsPolling(true);
+            pollStartTimeRef.current = Date.now();
+            executePoll();
+          }
         }
       }
 
@@ -281,6 +308,9 @@ export function useOffers(): UseOffersReturn {
 
     if (shouldSkipRehit) {
       if (offers.length > 0) stopPolling();
+    } else if (newPLEnabled) {
+      // New PL must stop as soon as lenders are available, even when re-hit remains enabled.
+      if (offers.length > 0) stopPolling();
     } else {
       if (offers.length > 0 && !canReHit) stopPolling();
     }
@@ -292,16 +322,20 @@ export function useOffers(): UseOffersReturn {
     shouldSkipRehit,
     statusCode,
     isNewLead,
+    newPLEnabled,
     stopPolling,
   ]);
   /* -------------------------------------------------- */
   /* ---------------- RETURN -------------------------- */
   /* -------------------------------------------------- */
 
+  const categorizedOffers = useMemo(() => categorizeOffers(offers), [offers]);
+
   return {
     offers,
-    exploreOffers: selectExploreOffers(offers),
-    statusOffers: selectStatusOffers(offers),
+    exploreOffers: categorizedOffers.explore,
+    statusOffers: categorizedOffers.recentlyClicked,
+    unmatchedOffers: categorizedOffers.unmatched,
     isLoading: isLoading || isInitializing,
     isPolling,
     error,
@@ -309,7 +343,9 @@ export function useOffers(): UseOffersReturn {
     isReHitting,
     statusCode,
     fetchOffers,
-    reHitLenders: async () => { },
+    reHitLenders: async () => {
+      await executeHitAllLenders({ force: true });
+    },
     filterByStatus: (status) => selectFilteredOffers(offers, status),
     statusCounts: selectStatusCounts(offers),
     selectedStatus,
@@ -317,6 +353,3 @@ export function useOffers(): UseOffersReturn {
     shouldTriggerApply,
   };
 }
-
-
-

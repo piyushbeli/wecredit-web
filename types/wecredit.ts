@@ -78,6 +78,11 @@ export interface LenderOfferStatus {
   uptoAmount?: string;
   /** WeCredit application status */
   wcStatus: WcStatus;
+  /**
+   * When false, lender-led outcomes (e.g. REJECTED / NOT_PROCESSED) surface in Unmatched UI.
+   * When true or omitted, legacy behaviour: INITIATED in explore; DISBURSED hidden; other statuses in recently-clicked / status flows.
+   */
+  lenderStatus?: boolean;
   /** Direct application link (for INITIATED status) */
   utmLink?: string;
   /** Offered/requested loan amount */
@@ -118,6 +123,10 @@ export interface CheckStatusAllResponse {
   lenders: LenderOfferStatus[];
   /** Re-hit flag: 0 = more lenders available, 1 = all checked */
   isRehitLenders: number;
+  /** Declared monthly salary from lead details when available. */
+  declaredSalary?: number | string | null;
+  /** Employment type from lead details when available. */
+  empType?: string | null;
 }
 
 /**

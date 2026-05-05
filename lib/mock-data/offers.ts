@@ -169,6 +169,8 @@ export const MOCK_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
   statusCode: STATUS_CODES.OFFERS_FOUND,
   lenders: MOCK_OFFERS,
   isRehitLenders: 0, // More lenders available for re-hit
+  declaredSalary: 50000,
+  empType: 'salaried',
 };
 
 /**
@@ -179,6 +181,8 @@ export const MOCK_ALL_STATUSES_RESPONSE: CheckStatusAllResponse = {
   statusCode: STATUS_CODES.OFFERS_FOUND,
   lenders: MOCK_OFFERS_ALL_STATUSES,
   isRehitLenders: 1, // All lenders checked
+  declaredSalary: 50000,
+  empType: 'salaried',
 };
 
 /**
@@ -188,6 +192,8 @@ export const MOCK_NO_OFFERS_RESPONSE: CheckStatusAllResponse = {
   statusCode: STATUS_CODES.NO_OFFERS_CAN_REHIT,
   lenders: [],
   isRehitLenders: 0, // Can re-hit to check more lenders
+  declaredSalary: null,
+  empType: null,
 };
 
 /**
@@ -223,6 +229,8 @@ export const MOCK_REHIT_RESPONSE: CheckStatusAllResponse = {
   statusCode: STATUS_CODES.OFFERS_FOUND,
   lenders: [...MOCK_OFFERS, ...MOCK_REHIT_OFFERS],
   isRehitLenders: 1, // All lenders checked
+  declaredSalary: 50000,
+  empType: 'salaried',
 };
 
 /**

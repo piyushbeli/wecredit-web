@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { LenderOfferStatus, WcStatus } from '@/types/wecredit';
+import { categorizeOffers } from '@/lib/utils/offer-categorization';
 
 /**
  * Selected status filter type
@@ -25,6 +26,10 @@ interface OfferState {
   isReHitting: boolean;
   /** Status code from API */
   statusCode: string | null;
+  /** Optional salary value returned by check-status-all for GTM tracking. */
+  declaredSalary: number | string | null;
+  /** Optional employment type returned by check-status-all for GTM tracking. */
+  empType: string | null;
   /** Currently selected status filter */
   selectedStatus: StatusFilter;
 }
@@ -47,6 +52,8 @@ interface OfferActions {
   setIsReHitting: (isReHitting: boolean) => void;
   /** Set status code */
   setStatusCode: (statusCode: string | null) => void;
+  /** Save optional lead fields returned by check-status-all. */
+  setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null) => void;
   /** Set selected status filter */
   setSelectedStatus: (status: StatusFilter) => void;
   /** Reset store to initial state */
@@ -62,6 +69,8 @@ const initialState: OfferState = {
   canReHit: false,
   isReHitting: false,
   statusCode: null,
+  declaredSalary: null,
+  empType: null,
   selectedStatus: 'ALL',
 };
 
@@ -88,6 +97,9 @@ export const useOfferStore = create<OfferState & OfferActions>()(
 
       setStatusCode: (statusCode: string | null) => set({ statusCode }, false, 'setStatusCode'),
 
+      setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null) =>
+        set({ declaredSalary, empType }, false, 'setOfferTrackingMeta'),
+
       setSelectedStatus: (selectedStatus: StatusFilter) =>
         set({ selectedStatus }, false, 'setSelectedStatus'),
 
@@ -113,20 +125,24 @@ export const selectFilteredOffers = (
 };
 
 /**
- * Selector: Get explore offers (INITIATED and UTM_CLICKED status - new offers to explore)
- * Includes clicked offers so they remain visible with updated CTA
+ * Selector: Explore list (INITIATED) for lenders with active lenderStatus (or legacy omit).
  */
 export const selectExploreOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
-  return offers.filter((offer) => 
-    offer.wcStatus === 'INITIATED'
-  );
+  return categorizeOffers(offers).explore;
 };
 
 /**
- * Selector: Get status offers (non-INITIATED - offers user has clicked/applied)
+ * Selector: Recently-clicked / status-tracked offers (non-INITIATED, non-DISBURSED) for active lenders.
  */
 export const selectStatusOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
-  return offers.filter((offer) => offer.wcStatus !== 'INITIATED');
+  return categorizeOffers(offers).recentlyClicked;
+};
+
+/**
+ * Selector: Rejected-style offers for inactive lenders (lenderStatus === false).
+ */
+export const selectUnmatchedOffers = (offers: LenderOfferStatus[]): LenderOfferStatus[] => {
+  return categorizeOffers(offers).unmatched;
 };
 
 /**

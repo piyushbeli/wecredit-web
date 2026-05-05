@@ -19,21 +19,11 @@ import {
   TIMEOUT_PRODUCTION,
   STORAGE_AUTH_TOKEN,
   STORAGE_MOBILE,
+  AUTH_COOKIE_OPTIONS,
 } from '@/lib/constants/api-keys';
 
 /** Default timeout based on environment */
 const DEFAULT_TIMEOUT = environment.isDevelopment ? TIMEOUT_DEVELOPMENT : TIMEOUT_PRODUCTION;
-
-/** Cookie expiry duration: 7 days in seconds */
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-
-/** Default cookie options for secure auth data storage */
-const AUTH_COOKIE_OPTIONS = {
-  maxAge: COOKIE_MAX_AGE,
-  path: '/',
-  sameSite: 'lax' as const,
-  secure: process.env.NEXT_PUBLIC_ENVIRONMENT === 'production',
-};
 
 /** Request options interface */
 export interface RequestOptions {
@@ -102,13 +92,19 @@ export function setMobile(mobile: string): void {
  * Called during logout or when token validation fails
  */
 export function clearAuthData(): void {
-  deleteCookie(STORAGE_AUTH_TOKEN);
-  deleteCookie(STORAGE_MOBILE);
+  deleteCookie(STORAGE_AUTH_TOKEN, { path: AUTH_COOKIE_OPTIONS.path });
+  deleteCookie(STORAGE_MOBILE, { path: AUTH_COOKIE_OPTIONS.path });
 
   if (typeof window !== 'undefined') {
+    // Keep all auth cleanup in one place so every logout path behaves identically.
     sessionStorage.removeItem('pre_auth_handled');
     sessionStorage.removeItem('pre_auth_token');
     sessionStorage.removeItem('pre_auth_mobile');
+    localStorage.removeItem('device_fingerprint');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('fingerprint');
+    localStorage.removeItem('ip');
+    localStorage.removeItem('device');
   }
 }
 

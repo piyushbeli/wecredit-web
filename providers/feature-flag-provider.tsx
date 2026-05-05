@@ -30,10 +30,6 @@ const shouldShowFeatureFlagDevTools = (): boolean => {
     return true;
   }
 
-  if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
-    return true;
-  }
-
   // Explicit opt-in for non-local builds (e.g. staging preview URL with dev tools).
   if (process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === 'true') {
     return true;
