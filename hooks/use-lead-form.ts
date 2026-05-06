@@ -273,6 +273,17 @@ export const useLeadForm = (
       return getDobValidationError(value);
     }
 
+    // Reject 0 / non-positive amounts (no minimum-income rule here — see plan).
+    if (fieldKey === 'salary' || fieldKey === 'loanAmount' || fieldKey === 'requiredLoanAmount') {
+      const parsed = parseFloat(value.replace(/,/g, ''));
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        return fieldKey === 'salary'
+          ? 'Enter a valid monthly income'
+          : 'Enter a valid loan amount';
+      }
+      return '';
+    }
+
     const pattern = VALIDATION_PATTERNS[fieldKey];
     if (!pattern) return '';
 
