@@ -225,7 +225,16 @@ async function checkDedupe(
         error: errorMsg,
       };
     }
-    const data: CheckDedupeResponse = await response.json();
+    const raw = (await response.json()) as CheckDedupeResponse & {
+      /** Some gateways serialize booleans with snake_case */
+      is_prime_pl_lead?: unknown;
+    };
+    const isPrimePlLeadResolved =
+      raw.isPrimePlLead === true || raw.is_prime_pl_lead === true;
+    const data: CheckDedupeResponse = {
+      ...raw,
+      ...(isPrimePlLeadResolved ? { isPrimePlLead: true } : {}),
+    };
     return {
       success: true,
       data,

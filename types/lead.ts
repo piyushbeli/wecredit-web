@@ -91,6 +91,8 @@ export interface CheckDedupeResponse {
   statusCode: number | string;
   /** Human-readable status message */
   statusMessage: string;
+  /** True when user should see Prime PL thank-you overlay */
+  isPrimePlLead?: boolean;
 }
 
 // ============================================
