@@ -9,7 +9,7 @@
 import { JSX, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCookie } from 'cookies-next';
-import { Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { useCheckDedupe } from '@/hooks/use-check-dedupe';
@@ -19,6 +19,7 @@ import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { PARTNER_CODE, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
+import { ActionButton } from '@/components/shared';
 
 type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
 
@@ -51,6 +52,7 @@ export const PersonalLoanContent = (): JSX.Element => {
   // State for auto-fill modal and fetchDetails
   const [showAutoFillModal, setShowAutoFillModal] = useState<boolean>(false);
   const [fetchDetails, setFetchDetails] = useState<boolean>(true);
+  const [showPrimePlDedupeThankYou, setShowPrimePlDedupeThankYou] = useState<boolean>(false);
 
   // Debug mode: open AutoFillModal when ?debugAutoFill=true is in URL
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
@@ -80,6 +82,13 @@ export const PersonalLoanContent = (): JSX.Element => {
 
   const handleDedupeResponse = useCallback((): void => {
     if (!response || isCheckingDedupe || !hasCheckedDedupe.current) {
+      return;
+    }
+    // Prime PL flag is the source of truth for this special success path.
+    // It should take precedence over needsForm/offers routing.
+    if (!error && response.isPrimePlLead === true) {
+      setShowPrimePlDedupeThankYou(true);
+      didInitiateCheckOffers.current = false;
       return;
     }
     if (needsForm) {
@@ -207,6 +216,25 @@ export const PersonalLoanContent = (): JSX.Element => {
           <div className="bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
             <p className="text-sm text-gray-600 font-medium">Checking eligibility...</p>
+          </div>
+        </div>
+      )}
+
+      {showPrimePlDedupeThankYou && (
+        <div className="fixed inset-0 bg-white z-110 flex flex-col items-center justify-center">
+          <div className="text-center space-y-4">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">Thank you</h3>
+              <p className="text-gray-600 mt-2">Our team will contact you shortly.</p>
+              <ActionButton
+                type="button"
+                className="mt-8 min-w-[200px]"
+                onClick={() => setShowPrimePlDedupeThankYou(false)}
+              >
+                Continue
+              </ActionButton>
+            </div>
           </div>
         </div>
       )}

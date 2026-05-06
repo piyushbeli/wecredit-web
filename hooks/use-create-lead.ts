@@ -10,6 +10,11 @@ import { leadService } from '@/lib/api/lead-service';
 import type { LeadFormData } from '@/types/lead';
 import { useLoading } from '@/hooks/use-loading';
 
+/** Outcome of a single create-lead submission (for navigation / UI branching). */
+export type CreateLeadSubmissionResult =
+  | { success: true; leadId: string; isPrimePlLead: boolean }
+  | { success: false; error: string };
+
 /** Return type for useCreateLead hook */
 interface UseCreateLeadReturn {
   /** Loading state while creating lead */
@@ -20,13 +25,15 @@ interface UseCreateLeadReturn {
   leadId: string | null;
   /** Error message if creation failed */
   error: string | null;
+  /** True when the successful response indicates Prime PL path */
+  isPrimePlLeadSuccess: boolean;
   /** Function to create a lead with form data */
   createLead: (
     formData: LeadFormData,
     partnerCode: string,
     lenderName?: string,
     lenderUniqueId?: string
-  ) => Promise<boolean>;
+  ) => Promise<CreateLeadSubmissionResult>;
   /** Reset the hook state */
   reset: () => void;
 }
@@ -39,8 +46,8 @@ interface UseCreateLeadReturn {
  * const { createLead, isLoading, isCreated, error } = useCreateLead();
  *
  * const handleSubmit = async () => {
- *   const success = await createLead(formData, 'WC001', 'abfl');
- *   if (success) {
+ *   const result = await createLead(formData, 'WC001', 'abfl');
+ *   if (result.success && !result.isPrimePlLead) {
  *     router.push('/offers');
  *   }
  * };
@@ -51,6 +58,7 @@ export function useCreateLead(): UseCreateLeadReturn {
   const [isCreated, setIsCreated] = useState(false);
   const [leadId, setLeadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPrimePlLeadSuccess, setIsPrimePlLeadSuccess] = useState(false);
   const { showLoading, hideLoading } = useLoading();
 
   const createLead = useCallback(async (
@@ -58,21 +66,32 @@ export function useCreateLead(): UseCreateLeadReturn {
     partnerCode: string,
     lenderName?: string,
     lenderUniqueId?: string
-  ): Promise<boolean> => {
+  ): Promise<CreateLeadSubmissionResult> => {
     setIsLoading(true);
     setIsCreated(false);
     setError(null);
     setLeadId(null);
+    setIsPrimePlLeadSuccess(false);
     showLoading('Submitting application...', 'Please wait while we process your details.');
     try {
       const result = await leadService.createLead(formData, partnerCode, lenderName, lenderUniqueId );
       if (result.success && result.data) {
         setLeadId(result.data.leadId);
+        // Only strict true should switch UI copy; malformed values stay on default success text.
+        const isPrime = result.data.isPrimePlLead === true;
+        setIsPrimePlLeadSuccess(isPrime);
         setIsCreated(true);
-        return true;
+        console.info('[useCreateLead]', {
+          phase: 'success',
+          isPrimePlLead: isPrime,
+          leadIdLen: result.data.leadId?.length ?? 0,
+        });
+        return { success: true, leadId: result.data.leadId, isPrimePlLead: isPrime };
       }
-      setError(result.error || 'Failed to create lead');
-      return false;
+      const message = result.error || 'Failed to create lead';
+      setError(message);
+      console.info('[useCreateLead]', { phase: 'failure', error: message });
+      return { success: false, error: message };
     } finally {
       setIsLoading(false);
       hideLoading();
@@ -84,6 +103,7 @@ export function useCreateLead(): UseCreateLeadReturn {
     setIsCreated(false);
     setLeadId(null);
     setError(null);
+    setIsPrimePlLeadSuccess(false);
   }, []);
 
   return {
@@ -91,6 +111,7 @@ export function useCreateLead(): UseCreateLeadReturn {
     isCreated,
     leadId,
     error,
+    isPrimePlLeadSuccess,
     createLead,
     reset,
   };

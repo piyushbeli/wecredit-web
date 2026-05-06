@@ -240,7 +240,12 @@ const LeadFormModal = ({
   const { partner, originSubLender } = useUrlParamsStore();
   const lenderUniqueId = useUrlParamsStore.getState().lenderUniqueId ?? '';
   const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
-  const { createLead, isLoading: isSubmitting, error: submitError } = useCreateLead();
+  const {
+    createLead,
+    isLoading: isSubmitting,
+    error: submitError,
+    isPrimePlLeadSuccess,
+  } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [lntCompanyName, setLntCompanyName] = useState('');
@@ -446,10 +451,20 @@ const LeadFormModal = ({
       creditCardLimit: formValues.creditCardLimit || '',
     };
 
-    const success = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
-    if (success) {
+    const submission = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
+    if (submission.success) {
       setShowSuccess(true);
-      router.push(buildOffersPathAfterLeadSuccess(lenderName, searchParams));
+      // Immediate navigation unmounts this route's modal before the overlay paints; Prime PL stays here.
+      if (submission.isPrimePlLead) {
+        console.info('[LeadFormModal] Prime PL lead — skipping /offers navigation so success overlay stays visible.', {
+          lenderName: lenderName || '(all-lenders)',
+        });
+      } else {
+        console.info('[LeadFormModal] Standard lead — navigating to offers after success.', {
+          lenderName: lenderName || '(all-lenders)',
+        });
+        router.push(buildOffersPathAfterLeadSuccess(lenderName, searchParams));
+      }
     }
   }, [
     formValues,
@@ -786,7 +801,7 @@ const LeadFormModal = ({
         <AnimatePresence>
           {showSuccess && (
             <motion.div
-              className="absolute inset-0 bg-white z-50 flex items-center justify-center"
+              className="absolute inset-0 bg-white z-100 flex flex-col items-center justify-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -804,8 +819,23 @@ const LeadFormModal = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <h3 className="text-2xl font-bold text-gray-900">Success!</h3>
-                  <p className="text-gray-600 mt-2">Your application has been submitted</p>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {isPrimePlLeadSuccess ? 'Thank you' : 'Success!'}
+                  </h3>
+                  <p className="text-gray-600 mt-2">
+                    {isPrimePlLeadSuccess
+                      ? 'Our team will contact you shortly.'
+                      : 'Your application has been submitted'}
+                  </p>
+                  {isPrimePlLeadSuccess ? (
+                    <ActionButton
+                      type="button"
+                      className="mt-8 min-w-[200px]"
+                      onClick={onClose}
+                    >
+                      Continue
+                    </ActionButton>
+                  ) : null}
                 </motion.div>
               </div>
             </motion.div>
