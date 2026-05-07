@@ -28,6 +28,7 @@ import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 import DynamicField from './dynamic-field';
 import Link from 'next/link';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
+import { pushOfferpageEvent } from '@/lib/gtm';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -458,6 +459,12 @@ const LeadFormModal = ({
       if (submission.isPrimePlLead) {
         console.info('[LeadFormModal] Prime PL lead — skipping /offers navigation so success overlay stays visible.', {
           lenderName: lenderName || '(all-lenders)',
+        });
+        pushOfferpageEvent({
+          offerList: ['primepl'],
+          maxLoanAmount: 0,
+          declaredSalary: formValues.salary,
+          empType: formValues.employmentType,
         });
       } else {
         console.info('[LeadFormModal] Standard lead — navigating to offers after success.', {
