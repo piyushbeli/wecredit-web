@@ -3,6 +3,7 @@
 import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
 import { newPLEnabled, useOffers } from '@/hooks/use-offers';
+import { useAutoUpswingRedirectAfterLntLead } from '@/hooks/use-auto-upswing-redirect-after-lnt-lead';
 import { useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -39,7 +40,6 @@ export const OffersView = () => {
   const empType = useOfferStore((state) => state.empType);
   const searchParams = useSearchParams();
   const {partner} = useUrlParamsStore()
-  const newLead = searchParams.get('newLead') || searchParams.get('newlead');
   const rawLender =
     searchParams.get('lenderName') ??
     searchParams.get('lendername') ??
@@ -87,9 +87,14 @@ export const OffersView = () => {
   }, [exploreOffers, statusOffers, lenderNameParam]);
 
   // Memoized check for single lender non-initiated offer
-  const singleLenderHasNonInitiatedOffer = useMemo(() =>
-    lenderNameParam && filteredExploreOffers.length === 1 && filteredExploreOffers[0].wcStatus !== 'INITIATED',
-    [lenderNameParam, filteredExploreOffers]
+  const singleLenderHasNonInitiatedOffer = useMemo(
+    () =>
+      Boolean(
+        lenderNameParam &&
+          filteredExploreOffers.length === 1 &&
+          filteredExploreOffers[0].wcStatus !== 'INITIATED',
+      ),
+    [lenderNameParam, filteredExploreOffers],
   );
 
   useEffect(() => {
@@ -115,6 +120,16 @@ export const OffersView = () => {
       router.replace(buildOffersPathWithQuery('/offers/status', searchParams));
     }
   }, [lenderNameParam, singleLenderHasNonInitiatedOffer, router, searchParams]);
+
+  useAutoUpswingRedirectAfterLntLead({
+    isLntOrUpswingLntUrlLender: isLntLenderOrUpswignLntLender,
+    isLoading,
+    isReHitting,
+    isPolling,
+    error,
+    singleLenderHasNonInitiatedOffer,
+    filteredExploreOffers,
+  });
 
   const handleExploreMore = async () => {
     if (newPLEnabled) {
