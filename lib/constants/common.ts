@@ -58,6 +58,9 @@ export const PARTNERS: Partner[] = [
   },
   { name: "BrightLoans", logo: `${IMAGES.PARTNERS.BASE_PATH}/Bright loans.png` },
   { name: "FatakPay", logo: `${IMAGES.PARTNERS.BASE_PATH}/FATAK PAY.png` },
+  { name: "Dhanvarsha", logo: `${IMAGES.PARTNERS.BASE_PATH}/dhanvarsha.png` },
+  { name: "Fatafat", logo: `${IMAGES.PARTNERS.BASE_PATH}/fatafat.png` },
+  { name: "Loan Bazaar", logo: `${IMAGES.PARTNERS.BASE_PATH}/loan_bazaar.png` },
 ];
 
 /**
