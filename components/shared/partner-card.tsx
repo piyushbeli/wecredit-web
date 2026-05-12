@@ -78,6 +78,7 @@ const PartnerCard = ({ partner }: PartnerCardProps): JSX.Element => {
             alt={partner.companyName}
             width={80}
             height={24}
+            unoptimized
             className="h-6 w-auto max-w-[80px] object-contain"
             priority={false}
           />
