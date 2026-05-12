@@ -12,6 +12,7 @@ const PartnerCard = ({ partner }: { partner: Partner }): React.ReactNode => {
 				alt={partner.name}
 				width={520}
 				height={260}
+				unoptimized
 				className="object-contain max-h-full max-w-full"
 			/>
 		</div>
