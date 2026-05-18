@@ -61,7 +61,11 @@ export const PARTNERS: Partner[] = [
   { name: "Dhanvarsha", logo: `${IMAGES.PARTNERS.BASE_PATH}/dhanvarsha.png` },
   { name: "Fatafat", logo: `${IMAGES.PARTNERS.BASE_PATH}/fatafat.png` },
   { name: "Loan Bazaar", logo: `${IMAGES.PARTNERS.BASE_PATH}/loan_bazaar.png` },
+  { name: "TezCredit", logo: `${IMAGES.PARTNERS.BASE_PATH}/tezcredit.png` },
+  { name: "Cashvia", logo: `${IMAGES.PARTNERS.BASE_PATH}/cashvia.png` },
+  { name: "Branch", logo: `${IMAGES.PARTNERS.BASE_PATH}/branch.png` },
 ];
+
 
 /**
  * Split partners into rows for the marquee display

@@ -8,7 +8,7 @@ import PartnerCard from './partner-card';
  * Grid settings for partners layout.
  */
 const PARTNER_GRID_COLUMNS = 5;
-const PARTNER_GRID_ROWS = 5;
+const PARTNER_GRID_ROWS = 6;
 const PARTNER_GRID_ITEMS = PARTNER_GRID_COLUMNS * PARTNER_GRID_ROWS;
 type PartnerGridItem = Partner | null;
 
