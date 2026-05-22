@@ -1,5 +1,6 @@
 import React from 'react';
 import { BackToHomeButton } from './back-to-home-button';
+import { IMAGES } from '@/lib/constants/images';
 
 interface InfoCardProps {
   image: string;
@@ -19,12 +20,12 @@ const InfoCard = ({
   <div
     className={`w-full bg-white rounded-lg shadow-[1px_1px_4px_0px_#6666661A,-1px_-1px_4px_0px_#6666661A] overflow-hidden ${mb}`}
   >
-    <div className="w-full aspect-[361/261]">
+    <div className="w-full aspect-361/261">
       <img src={image} alt={alt} className="w-full h-full object-cover" />
     </div>
 
     <div className="p-3 text-center">
-      <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800">
+      <h3 className="font-['Poppins'] font-medium text-base leading-none tracking-normal text-zinc-800">
         {title}
       </h3>
 
@@ -36,6 +37,36 @@ const InfoCard = ({
           </p>
         </>
       )}
+    </div>
+  </div>
+);
+
+interface BrandCardProps {
+  name: string;
+  logo: string;
+  url: string;
+  displayUrl: string;
+}
+
+const BrandCard = ({ name, logo, url, displayUrl }: BrandCardProps) => (
+  <div className="w-full bg-white rounded-lg shadow-[1px_1px_4px_0px_#6666661A,-1px_-1px_4px_0px_#6666661A] overflow-hidden">
+    <div className="flex items-center justify-center h-24 p-4">
+      <img
+        src={logo}
+        alt={`${name} logo`}
+        className="max-h-full max-w-full object-contain"
+      />
+    </div>
+
+    <div className="p-3 text-center border-t border-zinc-100">
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-[#045BCF] hover:underline"
+      >
+        {displayUrl}
+      </a>
     </div>
   </div>
 );
@@ -85,15 +116,32 @@ const AboutUsContent = (): React.ReactNode => {
     },
   ];
 
+  const brands = [
+    {
+      name: 'LoansBazaar',
+      // Temporary placeholder — replace with IMAGES.BRANDS.LOANSBAZAAR when final logo is ready
+      logo: `${IMAGES.PARTNERS.BASE_PATH}/loanbazaar_new.png`,
+      url: 'https://loansbazaar.com',
+      displayUrl: 'LoansBazaar',
+    },
+    {
+      name: 'FatafatLoans',
+      // Temporary placeholder — replace with IMAGES.BRANDS.FATAFATLOANS when final logo is ready
+      logo: `${IMAGES.PARTNERS.BASE_PATH}/fatfatloans_dark.png`,
+      url: 'https://fatafatloans.com',
+      displayUrl: 'FatafatLoans',
+    },
+  ];
+
   return (
     <div className="w-full lg:-mt-10">
 
-      <div className="bg-[linear-gradient(96.83deg,_#CCDFFC_35.72%,_#FAFCFF_100%)] px-4 py-6 mb-4">
+      <div className="bg-[linear-gradient(96.83deg,#CCDFFC_35.72%,#FAFCFF_100%)] px-4 py-6 mb-4">
         <div className="">
           <BackToHomeButton />
         </div>
 
-        <h2 className="font-['Poppins'] font-medium text-2xl leading-[1] tracking-normal text-zinc-800">
+        <h2 className="font-['Poppins'] font-medium text-2xl leading-none tracking-normal text-zinc-800">
           About WeCredit
         </h2>
 
@@ -225,6 +273,25 @@ const AboutUsContent = (): React.ReactNode => {
               alt={item.title}
               title={item.title}
               description={item.description}
+            />
+          ))}
+        </div>
+
+        {/* Our Brands */}
+        <div className="mb-6 mt-8">
+          <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-black">
+            Our Brands
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {brands.map((brand) => (
+            <BrandCard
+              key={brand.name}
+              name={brand.name}
+              logo={brand.logo}
+              url={brand.url}
+              displayUrl={brand.displayUrl}
             />
           ))}
         </div>
