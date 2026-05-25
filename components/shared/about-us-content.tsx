@@ -124,6 +124,8 @@ const AboutUsContent = (): React.ReactNode => {
       url: 'https://loansbazaar.co',
       displayUrl: 'LoansBazaar',
     },
+
+    
     {
       name: 'FatafatLoans',
       // Temporary placeholder — replace with IMAGES.BRANDS.FATAFATLOANS when final logo is ready
