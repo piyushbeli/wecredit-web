@@ -121,7 +121,7 @@ const AboutUsContent = (): React.ReactNode => {
       name: 'LoansBazaar',
       // Temporary placeholder — replace with IMAGES.BRANDS.LOANSBAZAAR when final logo is ready
       logo: `${IMAGES.PARTNERS.BASE_PATH}/loanbazaar_new.png`,
-      url: 'https://loansbazaar.com',
+      url: 'https://loansbazaar.co',
       displayUrl: 'LoansBazaar',
     },
     {
