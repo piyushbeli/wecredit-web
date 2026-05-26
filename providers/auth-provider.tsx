@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
+import { usePlatformStore } from '@/stores/platform-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { authService, setAuthToken, setMobile } from '@/lib/api';
 import { getCookie, deleteCookie } from 'cookies-next';
@@ -61,7 +62,26 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   // Keep auth state (localStorage) in sync with cookies
   useAuthCookieSync();
   const { setUrlParams, setAttributionParams, clearParams } = useUrlParamsStore();
+  const { setMobilePlatform } = usePlatformStore();
   const { triggerApplyFlow } = useLoanApplicationStore();
+
+  /**
+   * Detects `platform=mobile` in the URL and flips the platform store.
+   *
+   * Persistence is intentional: once a session is marked mobile (e.g. opened
+   * from a mobile app webview) we keep the flag set even if subsequent
+   * navigations drop the query param, so the header/footer stay hidden.
+   * The flag is scoped to sessionStorage, so a brand new tab without the
+   * param renders the regular chrome.
+   */
+  const capturePlatformFromUrl = useCallback((): void => {
+    const platformParam = searchParams?.get('platform');
+    if (!platformParam) return;
+
+    if (platformParam.trim().toLowerCase() === 'mobile') {
+      setMobilePlatform(true);
+    }
+  }, [searchParams, setMobilePlatform]);
 
   /**
    * Normalizes query params into either a trimmed non-empty string or `null`.
@@ -217,6 +237,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
    * Called once on initial render if user appears to be authenticated
    */
   const initializeAuth = useCallback(async (): Promise<void> => {
+    // Detect mobile platform context as early as possible so the first paint
+    // (after hydration) can already hide global chrome.
+    capturePlatformFromUrl();
+
     // First check for pre-auth in URL
     const preAuthApplied = handlePreAuth();
     if (preAuthApplied) {
@@ -332,6 +356,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     }
   }, [
     captureAttributionFromUrl,
+    capturePlatformFromUrl,
     handlePreAuth,
     isAuthenticated,
     logout,
@@ -363,7 +388,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     captureAttributionFromUrl({ cleanUrl: false });
-  }, [pathname, searchParamsString, captureAttributionFromUrl]);
+    // Re-check platform on SPA navigations so deep links that include
+    // `?platform=mobile` mid-session still flip the flag.
+    capturePlatformFromUrl();
+  }, [pathname, searchParamsString, captureAttributionFromUrl, capturePlatformFromUrl]);
 
   return <>{children}</>;
 }
