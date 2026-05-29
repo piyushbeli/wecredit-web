@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
-import PageBanner from '@/components/shared/page-banner';
-import GrievanceContactContent from '@/components/shared/grievance-contact-content';
-import { IMAGES } from '@/lib/constants/images';
-import { BackToHomeButton } from '@/components/shared/back-to-home-button';
+import ContactUsWrapper from '@/components/shared/contact-us-wrapper';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
@@ -14,7 +11,8 @@ export const revalidate = 3600; // 1 hour
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Contact Us | WeCredit',
-    description: 'Get in touch with WeCredit customer services. Contact our grievance officer for assistance with your queries and complaints.',
+    description:
+      'Get in touch with WeCredit customer services. Contact our grievance officer for assistance with your queries and complaints.',
     keywords: 'contact us, customer service, support, help',
   };
 }
@@ -25,24 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 const ContactUsPage = (): React.ReactNode => {
   return (
-    <div className="max-w-4xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-12">
-      {/* Back to Home Button */}
-      <BackToHomeButton />
-      
-      {/* Page Banner with envelope icon */}
-      <div className="mb-8 flex justify-center">
-        <PageBanner 
-          title="CONTACT US" 
-          iconImage={IMAGES.ICONS.CONTACT_US}
-          iconAlt="Contact Us Icon"
-        />
-      </div>
-
-      {/* Contact Content */}
-      <GrievanceContactContent />
+    <div className="max-w-4xl mx-auto">
+      <ContactUsWrapper />
     </div>
   );
 };
 
 export default ContactUsPage;
-

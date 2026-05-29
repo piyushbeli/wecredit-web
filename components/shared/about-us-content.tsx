@@ -1,6 +1,8 @@
+'use client';
 import React from 'react';
 import { BackToHomeButton } from './back-to-home-button';
-import { IMAGES } from '@/lib/constants/images';
+import { ACHIEVEMENTS, BRANDS } from '@/lib/constants/common';
+import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
 
 interface InfoCardProps {
   image: string;
@@ -72,76 +74,16 @@ const BrandCard = ({ name, logo, url, displayUrl }: BrandCardProps) => (
 );
 
 const AboutUsContent = (): React.ReactNode => {
-  const teamMembers = [
-    {
-      image:
-        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
-      title: 'Mukul Devpura',
-    },
-    {
-      image:
-        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
-      title: 'Brijesh Chokhra',
-    },
-    {
-      image:
-        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
-      title: 'Laksh Dua',
-    },
-    {
-      image:
-        'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
-      title: 'Sumit Chokhra',
-    },
-  ];
-
-  const achievements = [
-    {
-      title: 'ONDC Partnership',
-      description:
-        'We started working with ONDC partners in 2024, expanding our reach and collaboration in the digital commerce ecosystem.',
-        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ondccard.png',
-    },
-    {
-      title: 'Jobs Created',
-      description:
-        'WeCredit has provided over 400 jobs, contributing to employment and growth in the financial sector.',
-        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/jobs_created.png',
-    },
-    {
-      title: 'Strong Lending Network',
-      description:
-        'We work with 25–30 lenders, NBFCs, fintechs, and banks, ensuring a wide range of credit options for our customers.',
-        image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/strong_lending_networks.png',
-    },
-  ];
-
-  const brands = [
-    {
-      name: 'LoansBazaar',
-      // Temporary placeholder — replace with IMAGES.BRANDS.LOANSBAZAAR when final logo is ready
-      logo: `${IMAGES.PARTNERS.BASE_PATH}/loanbazaar_new.png`,
-      url: 'https://loansbazaar.co',
-      displayUrl: 'LoansBazaar',
-    },
-
-    
-    {
-      name: 'FatafatLoans',
-      // Temporary placeholder — replace with IMAGES.BRANDS.FATAFATLOANS when final logo is ready
-      logo: `${IMAGES.PARTNERS.BASE_PATH}/fatfatloans_dark.png`,
-      url: 'https://fatafatloans.com',
-      displayUrl: 'FatafatLoans',
-    },
-  ];
-
+  const isMobilePlatform = useIsMobilePlatform();
   return (
-    <div className="w-full lg:-mt-10">
+    <div className={`w-full lg:-mt-10  ${!isMobilePlatform? 'pt-18':''} pb-8 md:pt-28 md:pb-12`}>
 
       <div className="bg-[linear-gradient(96.83deg,#CCDFFC_35.72%,#FAFCFF_100%)] px-4 py-6 mb-4">
-        <div className="">
-          <BackToHomeButton />
-        </div>
+        {!isMobilePlatform && (
+          <div>
+            <BackToHomeButton />
+          </div>
+        )}
 
         <h2 className="font-['Poppins'] font-medium text-2xl leading-none tracking-normal text-zinc-800">
           About WeCredit
@@ -174,7 +116,7 @@ const AboutUsContent = (): React.ReactNode => {
         </p>
 
         {/* Team */}
-        <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
+        {/* <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
           Meet the Team Behind WeCredit
         </h3>
 
@@ -191,7 +133,7 @@ const AboutUsContent = (): React.ReactNode => {
               title={member.title}
             />
           ))}
-        </div>
+        </div> */}
 
         {/* Timeline */}
         <div className="mb-6 mt-8">
@@ -268,7 +210,7 @@ const AboutUsContent = (): React.ReactNode => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {achievements.map((item, index) => (
+          {ACHIEVEMENTS.map((item, index) => (
             <InfoCard
               key={index}
               image={item.image}
@@ -287,7 +229,7 @@ const AboutUsContent = (): React.ReactNode => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {brands.map((brand) => (
+          {BRANDS.map((brand, index) => (
             <BrandCard
               key={brand.name}
               name={brand.name}

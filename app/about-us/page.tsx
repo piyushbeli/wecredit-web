@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 const AboutUsPage = () => {
   return (
-    <div className="max-w-4xl mx-auto  pt-18 pb-8 md:pt-28 md:pb-12">
+    <div className="max-w-4xl mx-auto">
       {/* About Us Content */}
       <AboutUsContent />
     </div>
