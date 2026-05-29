@@ -174,7 +174,7 @@ const AboutUsContent = (): React.ReactNode => {
         </p>
 
         {/* Team */}
-        <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
+        {/* <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
           Meet the Team Behind WeCredit
         </h3>
 
@@ -191,7 +191,7 @@ const AboutUsContent = (): React.ReactNode => {
               title={member.title}
             />
           ))}
-        </div>
+        </div> */}
 
         {/* Timeline */}
         <div className="mb-6 mt-8">
