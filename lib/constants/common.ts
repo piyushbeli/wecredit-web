@@ -140,3 +140,67 @@ export const UNITY_CONSENT = `I hereby give my consent to Unity Small Finance Ba
 
 // Dedicated partner terms route for multi-lender consent UI.
 export const MULTILENDER_PARTNER_TERMS_HREF = '/partner-terms-and-conditions';
+
+
+export const TEAM_MEMBERS = [
+  {
+    image:
+      'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
+    title: 'Mukul Devpura',
+  },
+  {
+    image:
+      'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
+    title: 'Brijesh Chokhra',
+  },
+  {
+    image:
+      'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
+    title: 'Laksh Dua',
+  },
+  {
+    image:
+      'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/person_placeholder.png',
+    title: 'Sumit Chokhra',
+  },
+];
+
+export const ACHIEVEMENTS = [
+  {
+    title: 'ONDC Partnership',
+    description:
+      'We started working with ONDC partners in 2024, expanding our reach and collaboration in the digital commerce ecosystem.',
+      image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ondccard.png',
+  },
+  {
+    title: 'Jobs Created',
+    description:
+      'WeCredit has provided over 400 jobs, contributing to employment and growth in the financial sector.',
+      image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/jobs_created.png',
+  },
+  {
+    title: 'Strong Lending Network',
+    description:
+      'We work with 25–30 lenders, NBFCs, fintechs, and banks, ensuring a wide range of credit options for our customers.',
+      image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/strong_lending_networks.png',
+  },
+];
+
+export const BRANDS = [
+  {
+    name: 'LoansBazaar',
+    // Temporary placeholder — replace with IMAGES.BRANDS.LOANSBAZAAR when final logo is ready
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/loanbazaar_new.png`,
+    url: 'https://loansbazaar.co',
+    displayUrl: 'LoansBazaar',
+  },
+
+  
+  {
+    name: 'FatafatLoans',
+    // Temporary placeholder — replace with IMAGES.BRANDS.FATAFATLOANS when final logo is ready
+    logo: `${IMAGES.PARTNERS.BASE_PATH}/fatfatloans_dark.png`,
+    url: 'https://fatafatloans.com',
+    displayUrl: 'FatafatLoans',
+  },
+];

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import PageBanner from '@/components/shared/page-banner';
-import { BackToHomeButton } from '@/components/shared/back-to-home-button';
-import { IMAGES } from '@/lib/constants/images';
+import PartnerTermsAndConditionsWrapper from '@/components/shared/partner-terms-and-conditions-wrapper';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
@@ -11,7 +9,8 @@ export const revalidate = 1800; // 30 minutes
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Partner Terms & Conditions | WeCredit',
-    description: 'Read and understand partner terms and conditions for WeCredit lending partners.',
+    description:
+      'Read and understand partner terms and conditions for WeCredit lending partners.',
     keywords: 'partner terms, terms and conditions, WeCredit',
   };
 }
@@ -51,7 +50,7 @@ const partners: PartnerCardProps[] = [
       {
         type: 'text',
         value:
-          'By continuing, I agree to CIBIL Terms and Conditions and authorise Krazybee Services Private Limited to run a CIBIL check for my profile. I also agree to KreditBee’s Privacy Policy and Terms & Conditions and consent to receive communications from KreditBee via SMS, email, and WhatsApp.',
+          "By continuing, I agree to CIBIL Terms and Conditions and authorise Krazybee Services Private Limited to run a CIBIL check for my profile. I also agree to KreditBee's Privacy Policy and Terms & Conditions and consent to receive communications from KreditBee via SMS, email, and WhatsApp.",
       },
     ],
     officialLinkText: 'Official T&C Page',
@@ -167,23 +166,14 @@ const PartnerCard = ({
 
 const PartnerTermsAndConditionsPage = async (): Promise<JSX.Element> => {
   return (
-    <div className="max-w-5xl mx-auto pt-24 pb-10 md:pt-28 md:pb-14 px-4">
-      <div className="mx-4">
-        <BackToHomeButton />
-      </div>
-
-      <div className="flex justify-center mx-4">
-        <PageBanner title="PARTNER TERMS & CONDITIONS" iconImage={'/assets/images/ptac.png'} />
-      </div>
-
-      <div className="mt-10 flex flex-col gap-6 items-center">
+    <div className="max-w-5xl mx-auto">
+      <PartnerTermsAndConditionsWrapper>
         {partners.map((partner) => (
           <PartnerCard key={partner.id} {...partner} />
         ))}
-      </div>
+      </PartnerTermsAndConditionsWrapper>
     </div>
   );
 };
 
 export default PartnerTermsAndConditionsPage;
-

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import PageBanner from '@/components/shared/page-banner';
-import { IMAGES } from '@/lib/constants/images';
-import { BackToHomeButton } from '@/components/shared/back-to-home-button';
+import PrivacyPolicyWrapper from '@/components/shared/privacy-policy-wrapper';
 
 /** Force static generation with 30-minute revalidation */
 export const dynamic = 'force-static';
@@ -53,27 +51,9 @@ const PrivacyPolicyPage = async (): Promise<React.ReactNode> => {
   const htmlContent = await getPrivacyContent();
 
   return (
-    <div className="max-w-4xl mx-auto  pt-24 pb-8 md:pt-28 md:pb-12">
+    <div className="max-w-4xl mx-auto">
       
-      {/* Back to Home Button */}
-      <div className="mx-4">
-        <BackToHomeButton />
-      </div>
-
-      {/* Page Banner */}
-      <div className="mb-1 mx-4 flex justify-center">
-        <PageBanner
-          title="PRIVACY POLICY"
-          iconImage={IMAGES.ICONS.WECREDIT_HEART}
-          iconAlt="WeCredit Heart Icon"
-        />
-      </div>
-
-      {/* Privacy Policy Content (From S3) */}
-      <div
-        className="prose max-w-none"
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
-      />
+      <PrivacyPolicyWrapper htmlContent={htmlContent} />
     </div>
   );
 };

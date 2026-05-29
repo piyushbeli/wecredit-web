@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import PageHeader from '@/components/shared/page-header';
 import PartnerCard from '@/components/shared/partner-card';
+import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper';
 import type { PartnerDetail } from '@/lib/constants/partners-data';
-import { BackToHomeButton } from '@/components/shared/back-to-home-button';
 
 /** Force static generation with 30-minute revalidation */
 export const dynamic = 'force-static';
 export const revalidate = 1800; // 30 minutes
 
-const PARTNERS_URL ='https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/our_partner_details_one.json';
+const PARTNERS_URL =
+  'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/our_partner_details_one.json';
 
 /**
  * Generates metadata for the Our Partners page
@@ -41,51 +41,49 @@ async function getPartners(): Promise<PartnerDetail[]> {
   const rawPartners = Array.isArray(json?.data) ? json.data : [];
 
   // Transform API shape → UI shape
-  return rawPartners.map((item: any) => ({
-    id: item.partner_name?.toLowerCase().replace(/\s+/g, '-'),
-    logo: item.img_url,
-    companyName: item.info?.companyName || item.partner_name,
-    phone: item.info?.telephone || '',
-    officer: item.info?.grievanceRedressalOfficer || '',
-    email: item.info?.email || '',
-    websiteLink: item.info?.redirectionLink || item.link || '',
+  return rawPartners.map((item: Record<string, unknown>) => ({
+    id: (item.partner_name as string)?.toLowerCase().replace(/\s+/g, '-'),
+    logo: item.img_url as string,
+    companyName:
+      (item.info as Record<string, string>)?.companyName ||
+      (item.partner_name as string),
+    phone: (item.info as Record<string, string>)?.telephone || '',
+    officer: (item.info as Record<string, string>)?.grievanceRedressalOfficer || '',
+    email: (item.info as Record<string, string>)?.email || '',
+    websiteLink:
+      (item.info as Record<string, string>)?.redirectionLink ||
+      (item.link as string) ||
+      '',
   }));
 }
-
 
 /**
  * Our Partners page component
  */
 const OurPartnersPage = async (): Promise<React.ReactNode> => {
   const partners = await getPartners();
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Page Header */}
-      <PageHeader title="Our Partners" />
+    <FooterLinkPageWrapper
+      pageHeaderTitle="Our Partners"
+      className="min-h-screen bg-white"
+      contentClassName="max-w-2xl mx-auto px-4 pt-4"
+    >
+      <h2 className="font-['Poppins'] font-normal text-base leading-7 tracking-normal text-zinc-800">
+        Personal Loans Partners
+      </h2>
 
-      {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-12">
-        {/* Back to Home Button */}
-        <BackToHomeButton />
-        
-        {/* Section Title */}
-<h2 className="font-['Poppins'] font-normal text-base leading-7 tracking-normal text-zinc-800">
-          Personal Loans Partners
-        </h2>
+      <p className="font-['Poppins'] font-normal text-xs leading-5 tracking-normal text-zinc-500 mb-4 mt-1">
+        Tap &apos;More Info&apos; on a partner card to see additional details like grievance
+        officer, email, and website links.
+      </p>
 
-        {/* Description */}
-<p className="font-['Poppins'] font-normal text-xs leading-5 tracking-normal text-zinc-500 mb-4 mt-1">
-          Tap &apos;More Info&apos; on a partner card to see additional details like grievance officer, email, and website links.
-        </p>
-
-        {/* Partner Cards List */}
-        <div className="flex flex-col gap-4">
-          {partners.map((partner) => (
-            <PartnerCard key={partner.id} partner={partner} />
-          ))}
-        </div>
+      <div className="flex flex-col gap-4">
+        {partners.map((partner) => (
+          <PartnerCard key={partner.id} partner={partner} />
+        ))}
       </div>
-    </div>
+    </FooterLinkPageWrapper>
   );
 };
 

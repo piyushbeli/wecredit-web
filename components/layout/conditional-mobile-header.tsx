@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import MobileHeader from '@/components/home/mobile-header';
-import { useIsMobilePlatform } from '@/stores/platform-store';
+import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
 import type { GlobalLink, StrapiMedia } from '@/types/strapi';
 
 /** Routes where MobileHeader should NOT be displayed */
@@ -19,8 +19,7 @@ interface ConditionalMobileHeaderProps {
 /**
  * Wrapper component that conditionally renders MobileHeader based on current route.
  * Returns null for routes listed in HEADER_EXCLUDED_ROUTES, or when the session
- * is flagged as a mobile platform context (e.g. opened from a mobile app webview
- * via `?platform=mobile`).
+ * URL includes `?platform=mobile` (e.g. opened from a mobile app webview).
  */
 const ConditionalMobileHeader = (props: ConditionalMobileHeaderProps) => {
   const pathname = usePathname();

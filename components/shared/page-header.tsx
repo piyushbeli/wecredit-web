@@ -4,6 +4,7 @@ import { JSX } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
+import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
 
 interface PageHeaderProps {
   /** Title displayed in the header */
@@ -17,9 +18,15 @@ interface PageHeaderProps {
  * Reusable sticky page header with back navigation.
  * Used for internal pages that need a simple back + title header.
  */
-const PageHeader = ({ title, onBack, isOfferStatus = false }: PageHeaderProps): JSX.Element => {
+const PageHeader = ({ title, onBack, isOfferStatus = false }: PageHeaderProps): JSX.Element | null => {
   const router = useRouter();
   const { isAffiliate } = useInfoSearchParams();
+  const isMobilePlatform = useIsMobilePlatform();
+
+  // App webview provides its own navigation chrome
+  if (isMobilePlatform) {
+    return null;
+  }
 
   const handleBack = (): void => {
     if (onBack) {

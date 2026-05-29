@@ -2,14 +2,13 @@
 
 import React, { useState, FormEvent, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import PageBanner from '@/components/shared/page-banner';
 import { IMAGES } from '@/lib/constants/images';
 import InputField from '@/components/forms/input-field';
 import Image from 'next/image';
 import { ActionButton } from '@/components/shared';
 import { partnerWithUs } from '@/lib/api/partner-service';
 import { useAuth } from '@/hooks/use-auth';
-import { BackToHomeButton } from '@/components/shared/back-to-home-button'; 
+import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper'; 
 /**
  * Partner with Us page component
  * Displays a form for partnership inquiries
@@ -252,19 +251,16 @@ const PartnerWithUsPage = (): React.ReactNode => {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 pt-24 pb-8 md:pt-28">
-       <BackToHomeButton />  
-          {/* Page Banner */}
-          <div className="mb-8 flex justify-center">
-            <PageBanner 
-              title="PARTNER WITH US" 
-              iconImage={IMAGES.ICONS.PARTNER_WITH_US}
-              iconAlt="Partner with Us Icon"
-            />
-          </div>
-
+        <div className="max-w-4xl mx-auto px-4">
+          <FooterLinkPageWrapper
+            banner={{
+              title: 'PARTNER WITH US',
+              iconImage: IMAGES.ICONS.PARTNER_WITH_US,
+              iconAlt: 'Partner with Us Icon',
+            }}
+          >
           {/* Partner Form */}
-          <div className="w-full pb-24">
+          <div className="w-full pb-24 px-4">
             <form onSubmit={handleSubmit} className="space-y-4" id="partner-form">
               {/* Full Name */}
               <InputField
@@ -316,6 +312,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
               </div>
             </form>
           </div>
+          </FooterLinkPageWrapper>
         </div>
       </div>
 
