@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Footer from '@/components/layout/Footer';
+import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
 
 /** Routes where Footer should NOT be displayed */
 const FOOTER_EXCLUDED_ROUTES: string[] = [
@@ -14,6 +15,7 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/contact-us/',
   '/faq/',
   '/grievance-redressal/',
+  '/partner-terms-and-conditions/',
   '/calculator/personal-loan',
   '/our-partners/',
   // '/blog/',
@@ -22,17 +24,19 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
 
 /**
  * Wrapper component that conditionally renders Footer based on current route.
- * Returns null for routes listed in FOOTER_EXCLUDED_ROUTES.
+ * Returns null for routes listed in FOOTER_EXCLUDED_ROUTES, or when the session
+ * URL includes `?platform=mobile` (e.g. opened from a mobile app webview).
  */
 const ConditionalFooter = (): React.ReactNode => {
   const pathname = usePathname();
+  const isMobilePlatform = useIsMobilePlatform();
 
   // Check if current route should hide the footer
   const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some((route) =>
     pathname?.startsWith(route)
   );
 
-  if (shouldHideFooter) {
+  if (isMobilePlatform || shouldHideFooter) {
     return null;
   }
 
