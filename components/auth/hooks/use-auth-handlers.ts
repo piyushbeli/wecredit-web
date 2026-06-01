@@ -134,10 +134,16 @@ export const useAuthHandlers = (): UseAuthHandlersReturn => {
   /** Handle OTP verification */
   const handleVerifyOtp = async (otpOverride?: string): Promise<void> => {
     const otpToVerify = otpOverride ?? otpValue;
-    if (otpToVerify.length !== 6 || isLoading || isVerifyingOtpRef.current) return;
+    if (otpToVerify.length !== 6 || isLoading || isVerifyingOtpRef.current) {
+      return;
+    }
+
+    // Set before any await — duplicate calls in the same tick can otherwise
+    // both verify the same one-time OTP and surface a false "wrong OTP" error.
     isVerifyingOtpRef.current = true;
     setLoading(true);
     setError(null);
+
     try {
       showLoading('Please wait...', "We're preparing your WeCredit experience.");
       const result = await authService.verifyOtp(phoneNumber, otpToVerify);

@@ -36,6 +36,12 @@ export const PhoneStepScreen = ({
   const resolvedHeaderHeight: HeaderHeightPreset | undefined =
     headerHeightPercent ? undefined : headerHeight;
 
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    if (!isPhoneValid || isLoading) return;
+    onContinue();
+  };
+
   return (
     <motion.div
 className="relative flex flex-col"
@@ -67,11 +73,13 @@ className="relative flex flex-col"
 
       {/* Bottom Sheet - fills remaining 50% */}
       <BottomSheet className={bottomSheetClasses}>
-        <motion.div
+        <motion.form
           className="flex-1 flex flex-col"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          onSubmit={handleFormSubmit}
+          noValidate
         >
           {/* Title Section */}
           <div className="mb-6">
@@ -121,8 +129,7 @@ className="relative flex flex-col"
 
           {/* Continue Button */}
           <motion.button
-            type="button"
-            onClick={onContinue}
+            type="submit"
             disabled={!isPhoneValid || isLoading}
             className={cn(
               'w-full py-4 rounded-full font-semibold text-base transition-all duration-300',
@@ -141,7 +148,7 @@ className="relative flex flex-col"
               'Continue'
             )}
           </motion.button>
-        </motion.div>
+        </motion.form>
       </BottomSheet>
     </motion.div>
   );
