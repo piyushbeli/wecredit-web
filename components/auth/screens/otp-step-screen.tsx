@@ -35,6 +35,14 @@ export const OTPStepScreen = ({
   const resolvedHeaderHeight: HeaderHeightPreset | undefined =
     headerHeightPercent ? undefined : headerHeight;
 
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    if (!isOtpComplete || isLoading) return;
+    // Pass otpValue explicitly — avoids stale state; no auto-verify on 6th digit
+    // (that + Enter would double-submit and invalidate a one-time OTP).
+    void onVerify(otpValue);
+  };
+
   return (
     <motion.div
       className="relative flex flex-col bg-white"
@@ -74,7 +82,11 @@ export const OTPStepScreen = ({
       />
 
       {/* White Content Section - fills remaining space */}
-      <div className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pb-8 pt-6 flex flex-col relative z-10">
+      <form
+        className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pb-8 pt-6 flex flex-col relative z-10"
+        onSubmit={handleFormSubmit}
+        noValidate
+      >
         {/* Title */}
         <motion.h1
           className="text-2xl font-bold text-gray-900 mb-6 text-center"
@@ -93,10 +105,8 @@ export const OTPStepScreen = ({
           transition={{ delay: 0.3 }}
         >
           <OTPInput
+            value={otpValue}
             onChange={onOtpChange}
-            onComplete={(otp) => {
-              void onVerify(otp);
-            }}
             onResend={onResend}
             onChangeNumber={onBack} 
             error={error || undefined}
@@ -112,10 +122,7 @@ export const OTPStepScreen = ({
 
         {/* Continue Button */}
         <motion.button
-          type="button"
-          onClick={() => {
-            void onVerify();
-          }}
+          type="submit"
           disabled={!isOtpComplete || isLoading}
           className={cn(
             'w-full max-w-sm mx-auto py-4 rounded-md font-semibold text-base transition-all duration-300 block',
@@ -137,7 +144,7 @@ export const OTPStepScreen = ({
             'Continue'
           )}
         </motion.button>
-      </div>
+      </form>
     </motion.div>
   );
 };
