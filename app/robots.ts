@@ -30,7 +30,8 @@ export default function robots(): MetadataRoute.Robots {
   }
   
   // Production environment - allow indexing with restrictions
-  // Original behavior preserved - no changes to production indexing
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL?.replace(/\/$/, '') ?? '';
+
   return {
     rules: [
       {
@@ -38,5 +39,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
+    ...(baseUrl && { sitemap: `${baseUrl}/sitemap.xml` }),
   };
 }
