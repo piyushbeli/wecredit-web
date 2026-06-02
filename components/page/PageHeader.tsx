@@ -5,7 +5,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Page, getStrapiMediaUrl, getOptimizedImageUrl } from '@/lib/api/strapi';
+import type { Page } from '@/types/strapi';
+import { getOptimizedImageUrl, getStrapiMediaUrl } from '@/lib/api/cms-client';
 import { formatDate } from '@/lib/utils/date';
 
 interface PageHeaderProps {

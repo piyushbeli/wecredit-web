@@ -4,7 +4,8 @@
  */
 
 import { Metadata } from 'next';
-import { Page, getStrapiMediaUrl } from '@/lib/api/strapi';
+import type { Page } from '@/types/strapi';
+import { getStrapiMediaUrl } from '@/lib/api/cms-client';
 
 const getSiteUrl = (): string => {
   if (typeof window !== 'undefined' && window.location?.origin) {
@@ -31,7 +32,7 @@ export function generatePageMetadata(page: Page): Metadata {
   const metadata: Metadata = {
     title,
     description,
-    keywords: seo?.keywords?.split(',').map((k) => k.trim()),
+    keywords: seo?.keywords?.split(',').map((keyword: string) => keyword.trim()),
     alternates: {
       canonical: canonicalUrl,
     },

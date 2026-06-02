@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { shouldPreventIndexing } from "@/lib/utils/seo-utils";
+import { shouldAllowSitemap, shouldPreventIndexing } from "@/lib/utils/seo-utils";
 
 /**
  * Generates robots.txt file for search engines
@@ -18,6 +18,10 @@ export default function robots(): MetadataRoute.Robots {
   
   // Prevent indexing on non-production domains
   // This blocks ALL pages from being crawled when on staging or other non-production subdomains
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL?.replace(/\/$/, '') ?? '';
+  const sitemapUrls =
+    baseUrl && shouldAllowSitemap() ? `${baseUrl}/sitemap.xml` : undefined;
+
   if (preventIndexing) {
     return {
       rules: [
@@ -26,12 +30,11 @@ export default function robots(): MetadataRoute.Robots {
           disallow: ["/"], // Blocks all routes
         },
       ],
+      ...(sitemapUrls && { sitemap: sitemapUrls }),
     };
   }
   
   // Production environment - allow indexing with restrictions
-  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL?.replace(/\/$/, '') ?? '';
-
   return {
     rules: [
       {
@@ -39,6 +42,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    ...(baseUrl && { sitemap: `${baseUrl}/sitemap.xml` }),
+    ...(sitemapUrls && { sitemap: sitemapUrls }),
   };
 }

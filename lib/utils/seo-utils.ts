@@ -12,7 +12,20 @@ export function shouldPreventIndexing(): boolean {
   if (environment === "staging") {
     return true;
   }
-  
+
   // Default: Allow indexing (production)
   return false;
+}
+
+/**
+ * Whether sitemap.xml routes should return URLs.
+ * Staging/deployed non-prod still returns empty sitemaps for SEO safety,
+ * but local `next dev` always generates sitemaps for testing.
+ */
+export function shouldAllowSitemap(): boolean {
+  if (!shouldPreventIndexing()) {
+    return true;
+  }
+
+  return process.env.NODE_ENV === "development";
 }

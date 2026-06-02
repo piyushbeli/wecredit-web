@@ -323,6 +323,7 @@ export interface StrapiBlogPost {
   documentId: string;
   title: string;
   slug: string;
+  fullPath: string;
   contentMarkdown: string;
   description: string | null;
   featuredImage: StrapiMedia | null;
@@ -333,12 +334,21 @@ export interface StrapiBlogPost {
   publishedAt: string;
 }
 
+/** Lightweight blog fields for sitemap and listing fetches */
+export interface BlogSummary {
+  fullPath: string;
+  updatedAt: string;
+  slug: string;
+  title: string;
+}
+
 export interface BlogPost {
   id: number;
   documentId: string;
   type: 'blog-post';
   title: string;
   slug: string;
+  fullPath: string;
   content: string;
   description?: string;
   featuredImage?: {

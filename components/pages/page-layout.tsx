@@ -1,7 +1,7 @@
 import PageContent from './page-content';
 import PageSidebar from './page-sidebar';
 import GroupedRelatedLinksWidget from '@/components/widgets/grouped-related-links-widget';
-import type { Breadcrumb, Page } from '@/lib/api/strapi';
+import type { Breadcrumb, Page } from '@/types/strapi';
 
 /** Props for PageLayout component */
 interface PageLayoutProps {

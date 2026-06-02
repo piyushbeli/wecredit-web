@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { fetchBlogRoutesFromSheet } from './lib/sitemap/fetch-blog-routes-from-sheet';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -17,6 +18,18 @@ const nextConfig: NextConfig = {
         source: '/terms',
         destination: 'https://www.wecredit.co.in/terms-of-service',
         permanent: true,
+      },
+    ];
+  },
+
+  async rewrites() {
+    const sheetRules = await fetchBlogRoutesFromSheet();
+    return [
+      ...sheetRules,
+      {
+        source: '/blog/testing-rewrite/',
+        // destination: 'https://www.eauctiondekho.com',
+        destination: 'https://blog.wecredit.co.in/blog/highest-fixed-deposit-interest-rates-in-india/',
       },
     ];
   },

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { PageSummary, getStrapiMediaUrl } from '@/lib/api/strapi';
+import type { PageSummary, StrapiMedia } from '@/types/strapi';
+import { getStrapiMediaUrl } from '@/lib/api/cms-client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import MarkdownHtmlContent from '../shared/MarkdownHtmlContent';
@@ -10,6 +11,7 @@ export interface ChildPage extends PageSummary {
 	fullPath: string;
 	documentId: string;
 	content?: string;
+	featuredImage?: StrapiMedia;
 }
 
 /** Props for ChildPageCard component */

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Page, Header, Footer, RelatedLinksWidget } from '@/types/strapi';
-import { getStrapiMediaUrl } from '@/lib/api/strapi';
+import { getStrapiMediaUrl } from '@/lib/api/cms-client';
 
 /** Props for AllPagesAndLinksDisplay component */
 interface AllPagesAndLinksDisplayProps {
@@ -11,8 +11,7 @@ interface AllPagesAndLinksDisplayProps {
 }
 
 /**
- * Displays ALL pages from Strapi and ALL their associated links
- * Shows complete navigation and content structure
+ * Displays configured site routes and navigation links (marketing + blog sheet).
  */
 const AllPagesAndLinksDisplay = ({ pages, header, footer }: AllPagesAndLinksDisplayProps) => {
   const totalPages = pages.length;
@@ -21,10 +20,10 @@ const AllPagesAndLinksDisplay = ({ pages, header, footer }: AllPagesAndLinksDisp
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 text-white">
+      <div className="bg-linear-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 text-white">
         <h1 className="text-4xl font-bold mb-2">Complete Pages & Links Overview</h1>
         <p className="text-blue-100 text-lg">
-          Showing all {totalPages} pages from Strapi API with their navigation links
+          Showing all {totalPages} configured routes with their navigation links
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getRecentPages } from '@/lib/api/pages';
-import { getOptimizedImageUrl } from '@/lib/api/strapi';
+import { getOptimizedImageUrl } from '@/lib/api/cms-client';
 import { RecentPagesWidget } from '@/types/strapi';
 
 /** Props for RecentPagesWidget component */

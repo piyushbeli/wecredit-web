@@ -3,7 +3,7 @@ import Breadcrumbs from '@/components/shared/Breadcrumbs';
 import PageHeader from '@/components/page/PageHeader';
 import ChildPagesSection from './child-pages-section';
 import { isChildPage } from './child-page-card';
-import { Page, Breadcrumb } from '@/lib/api/strapi';
+import type { Page, Breadcrumb } from '@/types/strapi';
 import { getBreadcrumbs } from '@/lib/api/pages';
 
 /** Props for PageContent component */

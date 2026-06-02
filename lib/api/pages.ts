@@ -3,14 +3,9 @@
  * Query functions for fetching and managing page data from Strapi
  */
 
-import {
-  fetchFromStrapi,
-  Page,
-  PageSummary,
-  Breadcrumb,
-  StrapiResponse,
-  PageBase,
-} from '@/lib/api/strapi';
+import { fetchFromCms } from '@/lib/api/cms-client';
+import type { CmsQueryValue } from '@/lib/api/cms-client';
+import type { Page, PageSummary, Breadcrumb, StrapiResponse, PageBase } from '@/types/strapi';
 
 // Export types for convenience
 export type { Page, PageSummary, Breadcrumb };
@@ -97,7 +92,7 @@ const PAGE_POPULATE_CONFIG = {
 export async function getPageByFullPath(fullPath: string): Promise<Page | null> {
   const normalizedPath = fullPath.startsWith('/') ? fullPath : `/${fullPath}`;
 
-  const response = await fetchFromStrapi<StrapiResponse<Page[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<Page[]>>('pages', {
     filters: {
       fullPath: { $eq: normalizedPath },
     },
@@ -112,7 +107,7 @@ export async function getPageByFullPath(fullPath: string): Promise<Page | null> 
  * Fetch a single page by slug
  */
 export async function getPageBySlug(slug: string): Promise<Page | null> {
-  const response = await fetchFromStrapi<StrapiResponse<Page[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<Page[]>>('pages', {
     filters: {
       slug: { $eq: slug },
     },
@@ -126,7 +121,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
  * Fetch a single page by documentId
  */
 export async function getPageById(documentId: string): Promise<Page | null> {
-  const response = await fetchFromStrapi<StrapiResponse<Page[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<Page[]>>('pages', {
     filters: {
       documentId: { $eq: documentId },
     },
@@ -145,7 +140,7 @@ export async function getPageById(documentId: string): Promise<Page | null> {
  * Fetch all pages with full data
  */
 export async function getAllPages(): Promise<Page[]> {
-  const response = await fetchFromStrapi<StrapiResponse<Page[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<Page[]>>('pages', {
     populate: PAGE_POPULATE_CONFIG,
     sort: ['order:asc', 'title:asc'],
     pagination: { pageSize: 1000 },
@@ -162,15 +157,15 @@ export async function getAllPages(): Promise<Page[]> {
  */
 export async function getAllPagePaths(): Promise<string[]> {
   try {
-    const response = await fetchFromStrapi<StrapiResponse<{ fullPath: string }[]>>('pages', {
+    const response = await fetchFromCms<StrapiResponse<{ fullPath: string }[]>>('pages', {
       fields: ['fullPath'],
       pagination: { pageSize: 1000 },
       // No caching: always fetch latest CMS content.
       revalidate: 0,
     });
     return response.data
-      .map((page) => page.fullPath)
-      .filter((path): path is string => Boolean(path));
+      .map((page: { fullPath: string }) => page.fullPath)
+      .filter((path: string | undefined): path is string => Boolean(path));
   } catch (error) {
     console.warn('[getAllPagePaths] Strapi unavailable during build, pages will be generated on-demand:', error);
     return [];
@@ -184,7 +179,7 @@ export async function getChildPages(
   parentDocumentId: string,
   options?: { limit?: number }
 ): Promise<PageSummary[]> {
-  const response = await fetchFromStrapi<StrapiResponse<PageSummary[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<PageSummary[]>>('pages', {
     filters: {
       parent: { documentId: { $eq: parentDocumentId } },
     },
@@ -203,7 +198,7 @@ export async function getSiblingPages(
   page: Page,
   options?: { limit?: number; excludeSelf?: boolean }
 ): Promise<PageSummary[]> {
-  const filters: Record<string, unknown> = page.parent
+  const filters: Record<string, CmsQueryValue> = page.parent
     ? { parent: { documentId: { $eq: (page.parent as PageBase).documentId } } }
     : { parent: { $null: true } };
 
@@ -211,7 +206,7 @@ export async function getSiblingPages(
     filters.documentId = { $ne: page.documentId };
   }
 
-  const response = await fetchFromStrapi<StrapiResponse<PageSummary[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<PageSummary[]>>('pages', {
     filters,
     populate: PAGE_POPULATE_CONFIG,
     sort: ['order:asc', 'title:asc'],
@@ -225,7 +220,7 @@ export async function getSiblingPages(
  * Fetch recent pages for widgets
  */
 export async function getRecentPages(count: number = 5): Promise<PageSummary[]> {
-  const response = await fetchFromStrapi<StrapiResponse<PageSummary[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<PageSummary[]>>('pages', {
     populate: PAGE_POPULATE_CONFIG,
     sort: ['publishedAt:desc'],
     pagination: { pageSize: count },
@@ -238,7 +233,7 @@ export async function getRecentPages(count: number = 5): Promise<PageSummary[]> 
  * Fetch featured pages
  */
 export async function getFeaturedPages(limit: number = 6): Promise<PageSummary[]> {
-  const response = await fetchFromStrapi<StrapiResponse<PageSummary[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<PageSummary[]>>('pages', {
     filters: {
       isFeatured: { $eq: true },
     },
@@ -257,7 +252,7 @@ export async function searchPages(
   query: string,
   options?: { limit?: number; page?: number }
 ): Promise<StrapiResponse<PageSummary[]>> {
-  return fetchFromStrapi<StrapiResponse<PageSummary[]>>('pages', {
+  return fetchFromCms<StrapiResponse<PageSummary[]>>('pages', {
     filters: {
       $or: [
         { title: { $containsi: query } },
@@ -320,7 +315,7 @@ export async function getBreadcrumbs(page: Page): Promise<Breadcrumb[]> {
  * Get navigation tree (for menus)
  */
 export async function getNavigationTree(): Promise<PageSummary[]> {
-  const response = await fetchFromStrapi<StrapiResponse<PageSummary[]>>('pages', {
+  const response = await fetchFromCms<StrapiResponse<PageSummary[]>>('pages', {
     filters: {
       parent: { $null: true },
     },
