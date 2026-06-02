@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import MobileHeader from '@/components/home/mobile-header';
 import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
-import type { GlobalLink, StrapiMedia } from '@/types/strapi';
+import type { NavigationLink } from '@/types/navigation';
 
 /** Routes where MobileHeader should NOT be displayed */
 const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/', '/business-loan/', '/gold-loan/', '/car-loan/',
@@ -11,8 +11,7 @@ const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/',
 ];
 
 interface ConditionalMobileHeaderProps {
-  headerLinks: GlobalLink[];
-  logo: StrapiMedia | null;
+  headerLinks: NavigationLink[];
   siteName: string;
 }
 

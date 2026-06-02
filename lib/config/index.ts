@@ -160,11 +160,5 @@ export const wecreditConfig = {
   headers: environment.wecreditHeaders,
 } as const;
 
-/** Strapi API Configuration */
-export const strapiConfig = {
-  url: process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337',
-  token: process.env.STRAPI_API_TOKEN,
-} as const;
-
 /** Export types */
 export type { EnvironmentConfig, EnvironmentType };

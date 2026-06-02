@@ -2,23 +2,20 @@
 
 import { useState, useEffect, useCallback, JSX } from 'react';
 import { usePathname } from 'next/navigation';
-import type { GlobalLink, StrapiMedia } from '@/types/strapi';
+import type { NavigationLink } from '@/types/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
-import { useAuthCookies } from '@/hooks/use-auth-cookies';
 import { HeaderLogo } from './mobile-header-components/header-logo';
 import { UserButton } from './mobile-header-components/user-button';
 import { MenuButton } from './mobile-header-components/menu-button';
 import { MobileMenuDrawer } from './mobile-header-components/mobile-menu-drawer';
-import { px } from 'framer-motion';
 
 /** Scroll threshold in pixels to trigger header style change */
 const SCROLL_THRESHOLD = 50;
 
 /** Props for MobileHeader component */
 interface MobileHeaderProps {
-  headerLinks: GlobalLink[];
-  logo: StrapiMedia | null;
+  headerLinks: NavigationLink[];
   siteName: string;
 }
 
@@ -26,7 +23,7 @@ interface MobileHeaderProps {
  * Mobile-first sticky header with scroll-aware styling and slide-out menu drawer.
  * Transitions from transparent to white background when user scrolls down.
  */
-const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.Element => {
+const MobileHeader = ({ headerLinks, siteName }: MobileHeaderProps): JSX.Element => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
@@ -81,7 +78,7 @@ const MobileHeader = ({ headerLinks, logo, siteName }: MobileHeaderProps): JSX.E
 <header className="fixed top-0 left-0 right-0 z-50 p-4 lg:p-0">
           <div
           className={cn(
-            'flex items-center justify-between px-4 py-2 rounded-md wc-header-pill-transition lg:rounded-[0]',
+            'flex items-center justify-between px-4 py-2 rounded-md wc-header-pill-transition lg:rounded-none',
             showSolidHeader ? 'wc-header-pill-scrolled' : 'wc-header-pill'
           )}
         >
