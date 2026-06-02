@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { GlobalLink } from '@/types/strapi';
+import type { NavigationLink } from '@/types/navigation';
 
 /** Props for MenuLink component */
 interface MenuLinkProps {
-    link: GlobalLink;
+    link: NavigationLink;
     onNavigate: () => void;
 }
 

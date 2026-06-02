@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { fetchBlogRoutesFromSheet } from './lib/sitemap/fetch-blog-routes-from-sheet';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -19,6 +20,20 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
     ];
+  },
+
+  async rewrites() {
+    const sheetRules = await fetchBlogRoutesFromSheet();
+    // console.log('sheetRules', sheetRules);
+    return {
+      beforeFiles: [
+        {
+          source: '/sitemap-posts.xml',
+          destination: '/sitemap-posts/sitemap.xml',
+        },
+        ...sheetRules,
+      ],
+    };
   },
 
   images: {
@@ -47,6 +62,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'wecredit-main-website-assets.s3.ap-south-1.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blog.wecredit.co.in',
         pathname: '/**',
       },
       // Add your production Strapi domain here
