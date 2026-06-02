@@ -5,7 +5,6 @@
 
 const DEFAULT_SHEET_ID = '1-EPYlYvCImOcqBSamBG1f5ak_-xaSM-Ddk8wv6QHkiU';
 const DEFAULT_BLOG_GID = '1704517346';
-const SHEET_REVALIDATE_SECONDS = 60; // every 1 minute
 
 export interface BlogRouteMapping {
   destination: string;
@@ -96,8 +95,6 @@ function parseBlogRoutesFromCsv(csvText: string): BlogRouteMapping[] {
 export async function fetchBlogRoutesFromSheet(): Promise<BlogRouteMapping[]> {
   try {
     const response = await fetch(getSheetExportUrl(), {
-      next: { revalidate: SHEET_REVALIDATE_SECONDS },
-      // no cache
       cache: 'no-store',
     });
 
