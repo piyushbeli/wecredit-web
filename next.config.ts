@@ -28,6 +28,10 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         {
+          source: '/sitemap-page.xml',
+          destination: '/sitemap-page/sitemap.xml',
+        },
+        {
           source: '/sitemap-posts.xml',
           destination: '/sitemap-posts/sitemap.xml',
         },

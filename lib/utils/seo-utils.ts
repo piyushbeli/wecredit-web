@@ -24,7 +24,7 @@ export function shouldPreventIndexing(): boolean {
  */
 export function shouldAllowSitemap(): boolean {
   // Temporary: allow sitemap generation on staging so QA/SEO can validate
-  // `/sitemap.xml` and `/sitemap-posts.xml` on deployed staging.
+  // `/sitemap.xml`, `/sitemap-page.xml`, and `/sitemap-posts.xml` on staging.
   // NOTE: robots behavior is unchanged and still controls crawl/index policy.
   if (process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase() === "staging") {
     return true;

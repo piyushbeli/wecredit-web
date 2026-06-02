@@ -1,5 +1,5 @@
 /**
- * Public marketing routes included in sitemap.xml.
+ * Public marketing routes included in sitemap-page.xml.
  * Paths use trailing slashes to match next.config trailingSlash: true.
  */
 export const SITEMAP_PATHS = [
