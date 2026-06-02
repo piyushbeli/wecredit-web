@@ -5,7 +5,7 @@
 
 const DEFAULT_SHEET_ID = '1-EPYlYvCImOcqBSamBG1f5ak_-xaSM-Ddk8wv6QHkiU';
 const DEFAULT_BLOG_GID = '1704517346';
-const SHEET_REVALIDATE_SECONDS = 3600;
+export const SHEET_REVALIDATE_SECONDS = 3600;
 
 export interface BlogRouteMapping {
   destination: string;

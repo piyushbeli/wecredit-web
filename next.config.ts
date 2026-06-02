@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next';
-import { fetchBlogRoutesFromSheet } from './lib/sitemap/fetch-blog-routes-from-sheet';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -23,15 +22,16 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
-    const sheetRules = await fetchBlogRoutesFromSheet();
-    // console.log('sheetRules', sheetRules);
     return {
       beforeFiles: [
+        {
+          source: '/sitemap-page.xml',
+          destination: '/sitemap-page/sitemap.xml',
+        },
         {
           source: '/sitemap-posts.xml',
           destination: '/sitemap-posts/sitemap.xml',
         },
-        ...sheetRules,
       ],
     };
   },

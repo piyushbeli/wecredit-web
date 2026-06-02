@@ -7,7 +7,7 @@ import {
 } from '@/lib/sitemap/sitemap-utils';
 import { shouldAllowSitemap } from '@/lib/utils/seo-utils';
 
-/** Revalidate main sitemap daily */
+/** Revalidate pages sitemap daily */
 export const revalidate = 86400;
 
 const buildStaticEntries = (baseUrl: string): MetadataRoute.Sitemap => {
@@ -20,10 +20,10 @@ const buildStaticEntries = (baseUrl: string): MetadataRoute.Sitemap => {
 };
 
 /**
- * Main sitemap at /sitemap.xml.
- * Static marketing routes only.
+ * Static marketing pages sitemap at /sitemap-page.xml.
+ * Linked from the parent sitemap index at /sitemap.xml.
  */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default async function sitemapPage(): Promise<MetadataRoute.Sitemap> {
   if (!shouldAllowSitemap()) return [];
 
   const baseUrl = getSiteBaseUrl();
