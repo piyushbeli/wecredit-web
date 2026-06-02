@@ -23,6 +23,13 @@ export function shouldPreventIndexing(): boolean {
  * but local `next dev` always generates sitemaps for testing.
  */
 export function shouldAllowSitemap(): boolean {
+  // Temporary: allow sitemap generation on staging so QA/SEO can validate
+  // `/sitemap.xml` and `/sitemap-posts.xml` on deployed staging.
+  // NOTE: robots behavior is unchanged and still controls crawl/index policy.
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase() === "staging") {
+    return true;
+  }
+
   if (!shouldPreventIndexing()) {
     return true;
   }
