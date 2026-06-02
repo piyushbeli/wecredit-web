@@ -24,14 +24,12 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     const sheetRules = await fetchBlogRoutesFromSheet();
-    return [
-      ...sheetRules,
-      {
-        source: '/blog/testing-rewrite/',
-        // destination: 'https://www.eauctiondekho.com',
-        destination: 'https://blog.wecredit.co.in/blog/highest-fixed-deposit-interest-rates-in-india/',
-      },
-    ];
+    // console.log('sheetRules', sheetRules);
+    return {
+      beforeFiles: [
+        ...sheetRules,
+      ],
+    };
   },
 
   images: {
@@ -60,6 +58,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'wecredit-main-website-assets.s3.ap-south-1.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blog.wecredit.co.in',
         pathname: '/**',
       },
       // Add your production Strapi domain here
