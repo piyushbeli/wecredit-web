@@ -1,7 +1,6 @@
 import {
   fetchBlogRoutesFromSheet,
   normalizeBlogSourcePath,
-  SHEET_REVALIDATE_SECONDS,
 } from '@/lib/sitemap/fetch-blog-routes-from-sheet';
 
 /** Fallback when pathname is not in the sheet (matches /blogs redirect target). */
@@ -38,7 +37,7 @@ const getCachedRouteMap = async (): Promise<Map<string, string>> => {
   const map = await buildRouteMap();
   routeCache = {
     map,
-    expiresAt: now + SHEET_REVALIDATE_SECONDS * 1000,
+    expiresAt: now + 60 * 1000, // every 1 minute
   };
 
   return map;
