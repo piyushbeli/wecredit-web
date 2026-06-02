@@ -20,7 +20,9 @@ export default function robots(): MetadataRoute.Robots {
   // This blocks ALL pages from being crawled when on staging or other non-production subdomains
   const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL?.replace(/\/$/, '') ?? '';
   const sitemapUrls =
-    baseUrl && shouldAllowSitemap() ? `${baseUrl}/sitemap.xml` : undefined;
+    baseUrl && shouldAllowSitemap()
+      ? [`${baseUrl}/sitemap.xml`, `${baseUrl}/sitemap-posts.xml`]
+      : undefined;
 
   if (preventIndexing) {
     return {

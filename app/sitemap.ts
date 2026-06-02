@@ -1,10 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { SITEMAP_PATHS } from '@/lib/constants/sitemap-routes';
-import { fetchBlogRoutesFromSheet } from '@/lib/sitemap/fetch-blog-routes-from-sheet';
 import {
-  buildPathSitemapEntries,
-  dedupeSitemapEntries,
   getSiteBaseUrl,
   toSitemapUrl,
 } from '@/lib/sitemap/sitemap-utils';
@@ -24,7 +21,7 @@ const buildStaticEntries = (baseUrl: string): MetadataRoute.Sitemap => {
 
 /**
  * Main sitemap at /sitemap.xml.
- * Static marketing routes plus blog source paths from Google Sheet.
+ * Static marketing routes only.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!shouldAllowSitemap()) return [];
@@ -32,13 +29,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteBaseUrl();
   if (!baseUrl) return [];
 
-  const staticEntries = buildStaticEntries(baseUrl);
-  const blogRoutes = await fetchBlogRoutesFromSheet();
-  const blogPaths = blogRoutes.map((route) => route.source);
-  const blogEntries = buildPathSitemapEntries(baseUrl, blogPaths, {
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  });
-
-  return dedupeSitemapEntries([...staticEntries, ...blogEntries]);
+  return buildStaticEntries(baseUrl);
 }

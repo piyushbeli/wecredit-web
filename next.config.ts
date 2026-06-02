@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
     // console.log('sheetRules', sheetRules);
     return {
       beforeFiles: [
+        {
+          source: '/sitemap-posts.xml',
+          destination: '/sitemap-posts/sitemap.xml',
+        },
         ...sheetRules,
       ],
     };
