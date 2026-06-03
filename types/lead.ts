@@ -93,6 +93,8 @@ export interface CheckDedupeResponse {
   statusMessage: string;
   /** True when user should see Prime PL thank-you overlay */
   isPrimePlLead?: boolean;
+  /** True when existing dedupe record is from WeCredit website data (1004 path) */
+  isWecreditWebsiteData?: boolean;
 }
 
 // ============================================
