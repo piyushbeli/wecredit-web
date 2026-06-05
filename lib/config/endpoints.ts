@@ -3,7 +3,7 @@
  * Application-specific paths and endpoint identifiers
  */
 
-import { strapiConfig, wecreditConfig } from './index';
+import { wecreditConfig } from './index';
 import { ENDPOINTS } from '@/lib/constants/api-keys';
 
 /**
@@ -25,25 +25,6 @@ export const wecreditApi = {
     // lenderDetails: 'lender-details',
     // applyLoan: 'apply-loan',
     // checkEligibility: 'check-eligibility',
-  },
-} as const;
-
-/**
- * Strapi API Configuration
- * Traditional REST API: endpoint is part of URL path
- */
-export const strapiApi = {
-  /** Base API URL */
-  baseUrl: `${strapiConfig.url}/api`,
-
-  /** URL builders for REST endpoints */
-  urls: {
-    pages: (slug?: string) => slug
-      ? `${strapiConfig.url}/api/pages/${slug}`
-      : `${strapiConfig.url}/api/pages`,
-    authors: (id?: string) => id
-      ? `${strapiConfig.url}/api/authors/${id}`
-      : `${strapiConfig.url}/api/authors`,
   },
 } as const;
 

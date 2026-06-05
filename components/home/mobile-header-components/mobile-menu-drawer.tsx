@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { X, User, LogOut } from 'lucide-react';
-import type { GlobalLink } from '@/types/strapi';
+import type { NavigationLink } from '@/types/navigation';
 import type { User as UserType } from '@/stores/auth-store';
 import { IMAGES } from '@/lib/constants/images';
 import { MenuLink } from './menu-link';
@@ -51,7 +51,7 @@ interface MobileMenuDrawerProps {
     user: UserType | null;
     logout: () => void;
     openAuthModal: () => void;
-    headerLinks: GlobalLink[];
+    headerLinks: NavigationLink[];
 }
 
 export const MobileMenuDrawer = ({

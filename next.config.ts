@@ -21,6 +21,21 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/sitemap-page.xml',
+          destination: '/sitemap-page/sitemap.xml',
+        },
+        {
+          source: '/sitemap-posts.xml',
+          destination: '/sitemap-posts/sitemap.xml',
+        },
+      ],
+    };
+  },
+
   images: {
     remotePatterns: [
       {
@@ -47,6 +62,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'wecredit-main-website-assets.s3.ap-south-1.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blog.wecredit.co.in',
         pathname: '/**',
       },
       // Add your production Strapi domain here
