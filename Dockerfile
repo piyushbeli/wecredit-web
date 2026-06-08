@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:20-alpine AS base
+FROM public.ecr.aws/docker/library/node:20.18-slim AS base
 
 # ---- Dependencies ----
 FROM base AS deps
@@ -41,8 +41,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
