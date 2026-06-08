@@ -1,20 +1,17 @@
 import {
-  fetchBlogRoutesFromSheet,
-} from '@/lib/sitemap/fetch-blog-routes-from-sheet';
+  fetchLoanRoutesFromSheet,
+} from '@/lib/sitemap/fetch-loan-routes-from-sheet';
 import { normalizeSheetSourcePath } from '@/lib/sitemap/fetch-sheet-routes';
 
-/** Fallback when pathname is not in the sheet (matches /blogs redirect target). */
-const BLOG_HOME_DESTINATION = 'https://blog.wecredit.co.in/';
-
-type BlogRouteCache = {
+type LoanRouteCache = {
   map: Map<string, string>;
   expiresAt: number;
 };
 
-let routeCache: BlogRouteCache | null = null;
+let routeCache: LoanRouteCache | null = null;
 
 const buildRouteMap = async (): Promise<Map<string, string>> => {
-  const routes = await fetchBlogRoutesFromSheet();
+  const routes = await fetchLoanRoutesFromSheet();
   const map = new Map<string, string>();
 
   for (const route of routes) {
@@ -44,11 +41,11 @@ const getCachedRouteMap = async (): Promise<Map<string, string>> => {
 };
 
 /**
- * Resolves the external blog URL for an on-site /blog path.
- * Uses a TTL cache so middleware does not fetch the sheet on every request.
+ * Resolves the external blog URL for an on-site /loans path.
+ * Returns null when the path is not listed in the Google Sheet.
  */
-export const getBlogDestination = async (pathname: string): Promise<string> => {
+export const getLoanDestination = async (pathname: string): Promise<string | null> => {
   const normalizedPath = normalizeSheetSourcePath(pathname);
   const map = await getCachedRouteMap();
-  return map.get(normalizedPath) ?? BLOG_HOME_DESTINATION;
+  return map.get(normalizedPath) ?? null;
 };
