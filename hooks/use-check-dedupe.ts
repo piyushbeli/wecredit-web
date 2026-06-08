@@ -14,6 +14,7 @@ import { checkStatusAll } from '@/lib/api';
 import { getCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { toast } from 'sonner';
+import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
 
 /**
  * Return type for useCheckDedupe hook
@@ -122,8 +123,9 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
 
       if (isExistingMobileStatus) {
 
-        // Only explicit false skips status check; missing/true keeps backward-compatible normal flow.
-        if (isWecreditWebsiteData === false) {
+        // Non-WeCredit website data → must fill multi-lender lead form.
+        // Only explicit false triggers this; missing/true keeps the normal flow.
+        if (requiresMultiLenderLeadForm(isWecreditWebsiteData)) {
           setNeedsForm(true);
           return true;
         }

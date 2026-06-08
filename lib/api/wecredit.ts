@@ -509,8 +509,11 @@ export async function hitAllLenders(
 
     clearTimeout(timeoutId);
 
+    // Return the full response so callers can inspect fields like
+    // `isWecreditWebsiteData` to decide whether to open the lead form.
     return {
       success: true,
+      data,
     };
   } catch (error) {
   // Handle timeout explicitly

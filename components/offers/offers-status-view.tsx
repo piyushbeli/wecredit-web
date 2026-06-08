@@ -82,9 +82,18 @@ useEffect(() => {
   const hasStatusOffers = statusOffers.length > 0;
   const handleExploreMore = async () => {
     if (newPLEnabled) {
-      await reHitLenders();
+      const { shouldOpenLeadForm } = await reHitLenders();
+
+      // Non-WeCredit data: must fill lead form before seeing offers.
+      // Redirect to home and open the multi-lender apply flow instead of
+      // proceeding to the offers list (window.location.replace would wipe state).
+      if (shouldOpenLeadForm) {
+        router.replace('/');
+        Promise.resolve().then(() => triggerApplyFlow());
+        return;
+      }
     }
-    window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
+    router.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
 
   const handleGoBack = () => {
