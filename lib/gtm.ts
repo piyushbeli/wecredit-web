@@ -21,6 +21,7 @@ interface OfferpagePayload {
   offerList: string[];
   maxLoanAmount: number;
   declaredSalary?: number | string | null;
+  requiredLoanAmount?: number | string | null;
   empType?: string | null;
 }
 
@@ -56,6 +57,27 @@ const normalizeOfferpageDeclaredSalary = (
   return 'undetermined';
 };
 
+/**
+ * Normalizes requiredLoanAmount for GTM. Unlike salary, falls back to 0
+ * (not 'undetermined') when the value is missing, empty, or non-numeric.
+ */
+const normalizeOfferpageRequiredLoanAmount = (
+  value?: number | string | null
+): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const parsed = parseSalaryNumericString(value);
+    if (parsed !== undefined) {
+      return parsed;
+    }
+  }
+
+  return 0;
+};
+
 const normalizeOfferpageEmpType = (empType?: string | null): string => {
   const normalizedEmpType = empType?.trim();
   return normalizedEmpType ? normalizedEmpType : 'undetermined';
@@ -88,6 +110,7 @@ export const pushOfferpageEvent = ({
   offerList,
   maxLoanAmount,
   declaredSalary,
+  requiredLoanAmount,
   empType,
 }: OfferpagePayload): void => {
 
@@ -97,6 +120,7 @@ export const pushOfferpageEvent = ({
     offer_list: offerList,
     max_loan_amount: maxLoanAmount,
     declaredSalary: normalizeOfferpageDeclaredSalary(declaredSalary),
+    requiredLoanAmount: normalizeOfferpageRequiredLoanAmount(requiredLoanAmount),
     empType: normalizeOfferpageEmpType(empType),
   };
 
