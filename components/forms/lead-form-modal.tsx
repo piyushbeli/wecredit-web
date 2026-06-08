@@ -492,6 +492,22 @@ const LeadFormModal = ({
     searchParams,
   ]);
 
+  /**
+   * Browser default: Enter in an input submits the enclosing <form>.
+   * On intermediate wizard steps that must advance with "Next", not create-lead.
+   */
+  const handleFormSubmit = useCallback(
+    (event: React.FormEvent): void => {
+      event.preventDefault();
+      if (!isLastStep) {
+        handleNext();
+        return;
+      }
+      void handleSubmit(event);
+    },
+    [handleNext, handleSubmit, isLastStep],
+  );
+
 
   const renderSubmitError = (): React.ReactElement | null => {
     if (!submitError) return null;
@@ -900,7 +916,7 @@ const LeadFormModal = ({
           ) : (
             <>
               <div className="flex-1 overflow-y-auto">
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
                   {!isSinglePage && (
                     <h2 className="lead-form-heading">
                       {currentStepConfig.title}

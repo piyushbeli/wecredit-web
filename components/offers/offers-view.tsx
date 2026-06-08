@@ -31,6 +31,7 @@ import { isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNu
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { pushOfferpageEvent } from '@/lib/gtm';
+import { cn } from '@/lib/utils';
 
 export const OffersView = () => {
   const router = useRouter();
@@ -303,7 +304,7 @@ export const OffersView = () => {
                     className="w-[200px] px-10"
                     rightIcon="🔍"
                   >
-                    Explore More Offers
+                    Explore More Offers 
                   </ActionButton>
                 </div>
               </>
@@ -330,7 +331,7 @@ export const OffersView = () => {
       return null;
     }
     return (
-      <div className="space-y-6 max-w-xl mx-auto">
+      <div className={cn("space-y-6 max-w-xl mx-auto", exploreOffers.length <= 0 && "mt-10")}>
         {exploreOffers.length > 0 ? renderOfferSection('', exploreOffers) : null}
         {canReHit && newPLEnabled && <ActionButton
           type="button"
