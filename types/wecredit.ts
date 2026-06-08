@@ -127,6 +127,8 @@ export interface CheckStatusAllResponse {
   declaredSalary?: number | string | null;
   /** Employment type from lead details when available. */
   empType?: string | null;
+  /** Required loan amount from lead details when available. */
+  requiredLoanAmount?: number | string | null;
 }
 
 /**

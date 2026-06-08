@@ -30,6 +30,8 @@ interface OfferState {
   declaredSalary: number | string | null;
   /** Optional employment type returned by check-status-all for GTM tracking. */
   empType: string | null;
+  /** Optional required loan amount returned by check-status-all for GTM tracking. */
+  requiredLoanAmount: number | string | null;
   /** Currently selected status filter */
   selectedStatus: StatusFilter;
 }
@@ -53,7 +55,7 @@ interface OfferActions {
   /** Set status code */
   setStatusCode: (statusCode: string | null) => void;
   /** Save optional lead fields returned by check-status-all. */
-  setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null) => void;
+  setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null, requiredLoanAmount: number | string | null) => void;
   /** Set selected status filter */
   setSelectedStatus: (status: StatusFilter) => void;
   /** Reset store to initial state */
@@ -71,6 +73,7 @@ const initialState: OfferState = {
   statusCode: null,
   declaredSalary: null,
   empType: null,
+  requiredLoanAmount: null,
   selectedStatus: 'ALL',
 };
 
@@ -97,8 +100,8 @@ export const useOfferStore = create<OfferState & OfferActions>()(
 
       setStatusCode: (statusCode: string | null) => set({ statusCode }, false, 'setStatusCode'),
 
-      setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null) =>
-        set({ declaredSalary, empType }, false, 'setOfferTrackingMeta'),
+      setOfferTrackingMeta: (declaredSalary: number | string | null, empType: string | null, requiredLoanAmount: number | string | null) =>
+        set({ declaredSalary, empType, requiredLoanAmount }, false, 'setOfferTrackingMeta'),
 
       setSelectedStatus: (selectedStatus: StatusFilter) =>
         set({ selectedStatus }, false, 'setSelectedStatus'),

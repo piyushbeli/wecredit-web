@@ -99,11 +99,12 @@ export function useOffers(): UseOffersReturn {
   }, [shouldSkipRehit, enableMockData]);
 
   const getOfferTrackingMeta = useCallback(
-    (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null } => {
+    (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null; requiredLoanAmount: number | string | null } => {
       // API payload shape is not always stable, so support both camelCase and snake_case keys.
       const declaredSalary = response.declaredSalary ?? null;
       const empType = response.empType ?? null;
-      return { declaredSalary, empType };
+      const requiredLoanAmount = response.requiredLoanAmount ?? null;
+      return { declaredSalary, empType, requiredLoanAmount };
     },
     []
   );
@@ -120,7 +121,7 @@ export function useOffers(): UseOffersReturn {
         setCanReHit(mock.isRehitLenders === 0);
         setStatusCode(mock.statusCode);
         const mockTrackingMeta = getOfferTrackingMeta(mock);
-        setOfferTrackingMeta(mockTrackingMeta.declaredSalary, mockTrackingMeta.empType);
+        setOfferTrackingMeta(mockTrackingMeta.declaredSalary, mockTrackingMeta.empType, mockTrackingMeta.requiredLoanAmount);
         return;
       }
 
@@ -128,7 +129,7 @@ export function useOffers(): UseOffersReturn {
       const token = getCookie(STORAGE_AUTH_TOKEN) as string;
       if (!mobile) {
         setError('Mobile number not found.');
-        setOfferTrackingMeta(null, null);
+        setOfferTrackingMeta(null, null, null);
         return;
       }
 
@@ -141,13 +142,13 @@ export function useOffers(): UseOffersReturn {
           setCanReHit(res.isRehitLenders === 0);
           setStatusCode(res.statusCode);
           const responseTrackingMeta = getOfferTrackingMeta(res);
-          setOfferTrackingMeta(responseTrackingMeta.declaredSalary, responseTrackingMeta.empType);
+          setOfferTrackingMeta(responseTrackingMeta.declaredSalary, responseTrackingMeta.empType, responseTrackingMeta.requiredLoanAmount);
         } else {
           setError(result.error || 'Failed to load offers');
-          setOfferTrackingMeta(null, null);
+          setOfferTrackingMeta(null, null, null);
         }
       } catch (err) {
-        setOfferTrackingMeta(null, null);
+        setOfferTrackingMeta(null, null, null);
         if (!(err instanceof Error && err.name === 'AbortError')) {
           setError(
             err instanceof Error

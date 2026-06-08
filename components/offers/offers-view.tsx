@@ -38,6 +38,7 @@ export const OffersView = () => {
   const reset = useOfferStore((state) => state.reset);
   const declaredSalary = useOfferStore((state) => state.declaredSalary);
   const empType = useOfferStore((state) => state.empType);
+  const requiredLoanAmount = useOfferStore((state) => state.requiredLoanAmount);
   const searchParams = useSearchParams();
   const {partner} = useUrlParamsStore()
   const rawLender =
@@ -226,6 +227,7 @@ export const OffersView = () => {
       offerList: lenderNames,
       maxLoanAmount: maxInitiatedAmount,
       declaredSalary,
+      requiredLoanAmount,
       empType,
     });
     hasFiredOfferpageEventRef.current = true;
@@ -238,6 +240,7 @@ export const OffersView = () => {
     isReHitting,
     maxInitiatedAmount,
     declaredSalary,
+    requiredLoanAmount,
     empType,
   ]);
   // Only show the status CTA once we have non-initiated offers to check.

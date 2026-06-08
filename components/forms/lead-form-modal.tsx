@@ -464,6 +464,7 @@ const LeadFormModal = ({
           offerList: ['primepl'],
           maxLoanAmount: 0,
           declaredSalary: formValues.salary,
+          requiredLoanAmount: formValues.requiredLoanAmount,
           empType: formValues.employmentType,
         });
       } else {
