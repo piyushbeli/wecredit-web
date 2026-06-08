@@ -129,6 +129,9 @@ export interface CheckStatusAllResponse {
   empType?: string | null;
   /** Required loan amount from lead details when available. */
   requiredLoanAmount?: number | string | null;
+  /** True when the existing record originates from the WeCredit website.
+   *  Explicit `false` means the user must go through the multi-lender lead form. */
+  isWecreditWebsiteData?: boolean;
 }
 
 /**

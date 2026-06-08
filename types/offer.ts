@@ -27,8 +27,10 @@ export interface UseOffersReturn {
     statusCode: string | null;
     /** Fetch offers (initial load or retry) */
     fetchOffers: (signal?: AbortSignal) => Promise<void>;
-    /** Re-hit all lenders to find more offers */
-    reHitLenders: () => Promise<void>;
+    /** Re-hit all lenders to find more offers.
+     *  Returns `shouldOpenLeadForm: true` when the response signals
+     *  non-WeCredit website data — callers must redirect to the lead form. */
+    reHitLenders: () => Promise<{ shouldOpenLeadForm: boolean }>;
     /** Filter offers by status */
     filterByStatus: (status: WcStatus | 'ALL') => LenderOfferStatus[];
     /** Count of offers by status */

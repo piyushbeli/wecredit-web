@@ -14,6 +14,7 @@ import { useOfferStore, selectFilteredOffers, selectStatusCounts, type StatusFil
 import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
+import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
 
 export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
@@ -81,20 +82,43 @@ export function useOffers(): UseOffersReturn {
   /* ---------------- API CALLS ----------------------- */
   /* -------------------------------------------------- */
 
-  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<boolean> => {
-    if (newPLEnabled && !force) return false;
-    if (shouldSkipRehit) return false;
-    if (enableMockData) return true;
+  /**
+   * Calls the hit-all-lenders API and signals whether the caller should
+   * redirect the user to the multi-lender lead form.
+   *
+   * `shouldOpenLeadForm` is true when the API responds with
+   * `isWecreditWebsiteData === false`, meaning the existing record did not
+   * originate from the WeCredit website. In that case the user must fill
+   * the form again (multi-lender flow) before they can see offers.
+   *
+   * When `isWecreditWebsiteData` is `true` or absent, the normal flow
+   * continues (polling / re-hit) unchanged for backward compatibility.
+   */
+  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<{ invoked: boolean; shouldOpenLeadForm: boolean }> => {
+    const noop = { invoked: false, shouldOpenLeadForm: false };
+
+    if (newPLEnabled && !force) return noop;
+    if (shouldSkipRehit) return noop;
+
+    // Mock flow: never redirects to form; just signals the call happened.
+    if (enableMockData) return { invoked: true, shouldOpenLeadForm: false };
 
     const mobile = getCookie(STORAGE_MOBILE) as string;
     const token = getCookie(STORAGE_AUTH_TOKEN) as string;
-    if (!mobile) return false;
+    if (!mobile) return noop;
 
     try {
       const result = await hitAllLenders(mobile, token);
-      return result.success;
+
+      if (!result.success) return noop;
+
+      // If the backend flags this lead as non-WeCredit website data,
+      // the user must complete the lead form before we can show offers.
+      const shouldOpenLeadForm = requiresMultiLenderLeadForm(result.data?.isWecreditWebsiteData);
+
+      return { invoked: true, shouldOpenLeadForm };
     } catch {
-      return false;
+      return noop;
     }
   }, [shouldSkipRehit, enableMockData]);
 
@@ -260,7 +284,16 @@ export function useOffers(): UseOffersReturn {
           executePoll();
         }
         else if (!shouldSkipRehit && pathname !== '/offers/status/') {
-          await executeHitAllLenders();
+          const hitResult = await executeHitAllLenders();
+
+          // Non-WeCredit data: user must fill the lead form first; skip polling.
+          if (hitResult.shouldOpenLeadForm) {
+            setShouldTriggerApply(true);
+            setIsInitializing(false);
+            setIsLoading(false);
+            return;
+          }
+
           // In new PL, skip polling when initial fetch already has lenders (common on refresh).
           if (!(newPLEnabled && currentState.offers.length > 0)) {
             setIsPolling(true);
@@ -272,7 +305,16 @@ export function useOffers(): UseOffersReturn {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
         if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
-          await executeHitAllLenders();
+          const hitResult = await executeHitAllLenders();
+
+          // Non-WeCredit data: user must fill the lead form first; skip polling.
+          if (hitResult.shouldOpenLeadForm) {
+            setShouldTriggerApply(true);
+            setIsInitializing(false);
+            setIsLoading(false);
+            return;
+          }
+
           // In new PL, polling is only for the "no lenders yet" waiting state.
           if (!(newPLEnabled && currentState.offers.length > 0)) {
             setIsPolling(true);
@@ -345,7 +387,8 @@ export function useOffers(): UseOffersReturn {
     statusCode,
     fetchOffers,
     reHitLenders: async () => {
-      await executeHitAllLenders({ force: true });
+      const result = await executeHitAllLenders({ force: true });
+      return { shouldOpenLeadForm: result.shouldOpenLeadForm };
     },
     filterByStatus: (status) => selectFilteredOffers(offers, status),
     statusCounts: selectStatusCounts(offers),
