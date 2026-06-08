@@ -356,6 +356,12 @@ const LeadFormModal = ({
     }
   }, [isAllLenders, isFirstStep, onClose, handleBack]);
 
+  // Prime PL is a terminal success path — user should land on home, not stay on /offers.
+  const handlePrimePlContinueClick = useCallback((): void => {
+    onClose();
+    router.replace('/');
+  }, [onClose, router]);
+
   const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setShowPartnerConsentError(false);
@@ -855,7 +861,7 @@ const LeadFormModal = ({
                     <ActionButton
                       type="button"
                       className="mt-8 min-w-[200px]"
-                      onClick={onClose}
+                      onClick={handlePrimePlContinueClick}
                     >
                       Continue
                     </ActionButton>
