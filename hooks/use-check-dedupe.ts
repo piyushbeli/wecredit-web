@@ -14,6 +14,7 @@ import { checkStatusAll } from '@/lib/api';
 import { getCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { toast } from 'sonner';
+import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
 
 /**
  * Return type for useCheckDedupe hook
@@ -21,7 +22,7 @@ import { toast } from 'sonner';
 interface UseCheckDedupeReturn {
   /** Whether API call is in progress */
   isLoading: boolean;
-  /** Whether user needs to fill form (1003 or 1004 without existing lenders) */
+  /** Whether user needs to fill form (1003, 1004 without lenders, or 1004 non-WeCredit data) */
   needsForm: boolean;
   /** Raw response data from API */
   response: CheckDedupeResponse | null;
@@ -67,6 +68,15 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     mobile: string,
     partnerCode: string
   ): Promise<boolean> => {
+
+    // Get token from cookies
+    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
+
+    if (!token) {
+      setError('Session expired. Please login again.');
+      return false; // STOP
+    }
+
     // Feature flag: Bypass dedupe check for testing
     if (bypassDedupeCheck) {
       console.info('[FeatureFlag] Bypassing dedupe check');
@@ -93,12 +103,14 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
         setError(result.error || 'Failed to check dedupe');
         return false;
       }
-
+      
       setResponse(result.data);
 
-      const statusCodeNumber = typeof result.data.statusCode === 'number'
-        ? result.data.statusCode
-        : parseInt(String(result.data.statusCode), 10);
+      // Get status code and isWecreditWebsiteData from response
+      const statusCode = result.data.statusCode;
+      const isWecreditWebsiteData = result.data.isWecreditWebsiteData;
+
+      const statusCodeNumber = typeof statusCode === 'number' ? statusCode : Number(statusCode);
 
       const isNewUserStatus = statusCodeNumber === 1003;
       const isExistingMobileStatus = statusCodeNumber === 1004;
@@ -110,14 +122,15 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
       }
 
       if (isExistingMobileStatus) {
-        const token = getCookie(STORAGE_AUTH_TOKEN);
 
-        if (!token) {
-          setError('Session expired. Please login again.');
-          return false; // STOP
+        // Non-WeCredit website data → must fill multi-lender lead form.
+        // Only explicit false triggers this; missing/true keeps the normal flow.
+        if (requiresMultiLenderLeadForm(isWecreditWebsiteData)) {
+          setNeedsForm(true);
+          return true;
         }
 
-        const statusResult = await checkStatusAll(mobile, token as string);
+        const statusResult = await checkStatusAll(mobile, token);
 
         // ✅ GUARD: stop user if status API fails
         if (!statusResult.success) {

@@ -31,6 +31,7 @@ import { isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNu
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { pushOfferpageEvent } from '@/lib/gtm';
+import { cn } from '@/lib/utils';
 
 export const OffersView = () => {
   const router = useRouter();
@@ -38,6 +39,7 @@ export const OffersView = () => {
   const reset = useOfferStore((state) => state.reset);
   const declaredSalary = useOfferStore((state) => state.declaredSalary);
   const empType = useOfferStore((state) => state.empType);
+  const requiredLoanAmount = useOfferStore((state) => state.requiredLoanAmount);
   const searchParams = useSearchParams();
   const {partner} = useUrlParamsStore()
   const rawLender =
@@ -98,20 +100,15 @@ export const OffersView = () => {
   );
 
   useEffect(() => {
-
     // If partner is present, don't trigger apply flow
     if (partner) return;
 
     if (!shouldTriggerApply) return;
-    // Step 1: Go to home
-    router.replace('/');
 
-    // Step 2: Trigger apply AFTER navigation
-    Promise.resolve().then(() => {
-      triggerApplyFlow();
-    });
-
-  }, [shouldTriggerApply, triggerApplyFlow, router]);
+    // PersonalLoanContent is now mounted via the offers layout, so we can
+    // trigger the apply flow directly without navigating to the home page.
+    triggerApplyFlow();
+  }, [shouldTriggerApply, triggerApplyFlow]);
 
   // If lenderName is present and the matching offer is non-INITIATED, redirect to status page
   useEffect(() => {
@@ -133,9 +130,17 @@ export const OffersView = () => {
 
   const handleExploreMore = async () => {
     if (newPLEnabled) {
-      await reHitLenders();
+      const { shouldOpenLeadForm } = await reHitLenders();
+
+      // Non-WeCredit data: open multi-lender lead form in place.
+      // PersonalLoanContent is mounted via the offers layout so triggerApplyFlow
+      // works here without navigating away.
+      if (shouldOpenLeadForm) {
+        triggerApplyFlow();
+        return;
+      }
     }
-    window.location.replace(buildOffersPathClearingLenderFilter(searchParams));
+    router.replace(buildOffersPathClearingLenderFilter(searchParams));
   };
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
@@ -226,6 +231,7 @@ export const OffersView = () => {
       offerList: lenderNames,
       maxLoanAmount: maxInitiatedAmount,
       declaredSalary,
+      requiredLoanAmount,
       empType,
     });
     hasFiredOfferpageEventRef.current = true;
@@ -238,6 +244,7 @@ export const OffersView = () => {
     isReHitting,
     maxInitiatedAmount,
     declaredSalary,
+    requiredLoanAmount,
     empType,
   ]);
   // Only show the status CTA once we have non-initiated offers to check.
@@ -290,8 +297,10 @@ export const OffersView = () => {
                     onClick={handleExploreMore}
                     className="w-[200px] px-10"
                     rightIcon="🔍"
+                    isLoading={isReHitting}
+                    disabled={isReHitting}
                   >
-                    Explore More Offers
+                    Explore More Offers 
                   </ActionButton>
                 </div>
               </>
@@ -307,6 +316,8 @@ export const OffersView = () => {
               type="button"
               onClick={handleExploreMore}
               className="w-full max-w-xs"
+              isLoading={isReHitting}
+              disabled={isReHitting}
             >
               Explore Other Offers
             </ActionButton>)}
@@ -318,13 +329,15 @@ export const OffersView = () => {
       return null;
     }
     return (
-      <div className="space-y-6 max-w-xl mx-auto">
+      <div className={cn("space-y-6 max-w-xl mx-auto", exploreOffers.length <= 0 && "mt-10")}>
         {exploreOffers.length > 0 ? renderOfferSection('', exploreOffers) : null}
         {canReHit && newPLEnabled && <ActionButton
           type="button"
           onClick={handleExploreMore}
           rightIcon="🔍"
           fullWidth
+          isLoading={isReHitting}
+          disabled={isReHitting}
         >
           Explore More Offers
         </ActionButton>}
@@ -333,8 +346,8 @@ export const OffersView = () => {
     );
   };
 
-  // Show loading skeleton while: initial loading, polling, or re-hitting lenders
-  if (isLoading || isReHitting) {
+  // Show loading skeleton only during initial load; re-hitting is button-level loading only
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <PollingState message={pollingMessage} />

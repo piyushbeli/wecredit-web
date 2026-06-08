@@ -2,4 +2,5 @@
 export const SITEMAP_CHILD_PATHS = {
   pages: '/sitemap-page.xml',
   posts: '/sitemap-posts.xml',
+  loans: '/sitemap-loans.xml',
 } as const;

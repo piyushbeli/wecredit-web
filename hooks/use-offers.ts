@@ -14,6 +14,7 @@ import { useOfferStore, selectFilteredOffers, selectStatusCounts, type StatusFil
 import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
+import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
 
 export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
@@ -81,29 +82,13 @@ export function useOffers(): UseOffersReturn {
   /* ---------------- API CALLS ----------------------- */
   /* -------------------------------------------------- */
 
-  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<boolean> => {
-    if (newPLEnabled && !force) return false;
-    if (shouldSkipRehit) return false;
-    if (enableMockData) return true;
-
-    const mobile = getCookie(STORAGE_MOBILE) as string;
-    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
-    if (!mobile) return false;
-
-    try {
-      const result = await hitAllLenders(mobile, token);
-      return result.success;
-    } catch {
-      return false;
-    }
-  }, [shouldSkipRehit, enableMockData]);
-
   const getOfferTrackingMeta = useCallback(
-    (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null } => {
+    (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null; requiredLoanAmount: number | string | null } => {
       // API payload shape is not always stable, so support both camelCase and snake_case keys.
       const declaredSalary = response.declaredSalary ?? null;
       const empType = response.empType ?? null;
-      return { declaredSalary, empType };
+      const requiredLoanAmount = response.requiredLoanAmount ?? null;
+      return { declaredSalary, empType, requiredLoanAmount };
     },
     []
   );
@@ -120,7 +105,7 @@ export function useOffers(): UseOffersReturn {
         setCanReHit(mock.isRehitLenders === 0);
         setStatusCode(mock.statusCode);
         const mockTrackingMeta = getOfferTrackingMeta(mock);
-        setOfferTrackingMeta(mockTrackingMeta.declaredSalary, mockTrackingMeta.empType);
+        setOfferTrackingMeta(mockTrackingMeta.declaredSalary, mockTrackingMeta.empType, mockTrackingMeta.requiredLoanAmount);
         return;
       }
 
@@ -128,7 +113,7 @@ export function useOffers(): UseOffersReturn {
       const token = getCookie(STORAGE_AUTH_TOKEN) as string;
       if (!mobile) {
         setError('Mobile number not found.');
-        setOfferTrackingMeta(null, null);
+        setOfferTrackingMeta(null, null, null);
         return;
       }
 
@@ -141,13 +126,13 @@ export function useOffers(): UseOffersReturn {
           setCanReHit(res.isRehitLenders === 0);
           setStatusCode(res.statusCode);
           const responseTrackingMeta = getOfferTrackingMeta(res);
-          setOfferTrackingMeta(responseTrackingMeta.declaredSalary, responseTrackingMeta.empType);
+          setOfferTrackingMeta(responseTrackingMeta.declaredSalary, responseTrackingMeta.empType, responseTrackingMeta.requiredLoanAmount);
         } else {
           setError(result.error || 'Failed to load offers');
-          setOfferTrackingMeta(null, null);
+          setOfferTrackingMeta(null, null, null);
         }
       } catch (err) {
-        setOfferTrackingMeta(null, null);
+        setOfferTrackingMeta(null, null, null);
         if (!(err instanceof Error && err.name === 'AbortError')) {
           setError(
             err instanceof Error
@@ -159,6 +144,58 @@ export function useOffers(): UseOffersReturn {
     },
     [enableMockData, getOfferTrackingMeta, setOfferTrackingMeta]
   );
+
+  /**
+   * Calls the hit-all-lenders API and signals whether the caller should
+   * redirect the user to the multi-lender lead form.
+   *
+   * `shouldOpenLeadForm` is true when the API responds with
+   * `isWecreditWebsiteData === false`, meaning the existing record did not
+   * originate from the WeCredit website. In that case the user must fill
+   * the form again (multi-lender flow) before they can see offers.
+   *
+   * When `isWecreditWebsiteData` is `true` or absent, the normal flow
+   * continues (polling / re-hit) unchanged for backward compatibility.
+   */
+  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<{ invoked: boolean; shouldOpenLeadForm: boolean }> => {
+    const noop = { invoked: false, shouldOpenLeadForm: false };
+
+    if (newPLEnabled && !force) return noop;
+    if (shouldSkipRehit) return noop;
+
+    // Mock flow: never redirects to form; just signals the call happened.
+    if (enableMockData) return { invoked: true, shouldOpenLeadForm: false };
+
+    const mobile = getCookie(STORAGE_MOBILE) as string;
+    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
+    if (!mobile) return noop;
+
+    // Manual re-hit (force=true) shows button-level loading; init-time hits do not.
+    if (force) setIsReHitting(true);
+
+    try {
+      const result = await hitAllLenders(mobile, token);
+
+      if (!result.success) return noop;
+
+      // If the backend flags this lead as non-WeCredit website data,
+      // the user must complete the lead form before we can show offers.
+      const shouldOpenLeadForm = requiresMultiLenderLeadForm(result.data?.isWecreditWebsiteData);
+
+      if (shouldOpenLeadForm) {
+        return { invoked: true, shouldOpenLeadForm: true };
+      }
+
+      // Hit succeeded — refresh the offers store so UI reflects the latest lender statuses.
+      await fetchOffers();
+
+      return { invoked: true, shouldOpenLeadForm: false };
+    } catch {
+      return noop;
+    } finally {
+      if (force) setIsReHitting(false);
+    }
+  }, [shouldSkipRehit, enableMockData, setIsReHitting, fetchOffers]);
 
   /* -------------------------------------------------- */
   /* ---------------- POLLING ------------------------- */
@@ -259,7 +296,16 @@ export function useOffers(): UseOffersReturn {
           executePoll();
         }
         else if (!shouldSkipRehit && pathname !== '/offers/status/') {
-          await executeHitAllLenders();
+          const hitResult = await executeHitAllLenders();
+
+          // Non-WeCredit data: user must fill the lead form first; skip polling.
+          if (hitResult.shouldOpenLeadForm) {
+            setShouldTriggerApply(true);
+            setIsInitializing(false);
+            setIsLoading(false);
+            return;
+          }
+
           // In new PL, skip polling when initial fetch already has lenders (common on refresh).
           if (!(newPLEnabled && currentState.offers.length > 0)) {
             setIsPolling(true);
@@ -271,7 +317,16 @@ export function useOffers(): UseOffersReturn {
         /* ---------------- DIRECT NAVIGATION ---------------- */
 
         if (!shouldSkipRehit && currentState.canReHit && pathname !== '/offers/status/')  {
-          await executeHitAllLenders();
+          const hitResult = await executeHitAllLenders();
+
+          // Non-WeCredit data: user must fill the lead form first; skip polling.
+          if (hitResult.shouldOpenLeadForm) {
+            setShouldTriggerApply(true);
+            setIsInitializing(false);
+            setIsLoading(false);
+            return;
+          }
+
           // In new PL, polling is only for the "no lenders yet" waiting state.
           if (!(newPLEnabled && currentState.offers.length > 0)) {
             setIsPolling(true);
@@ -344,7 +399,8 @@ export function useOffers(): UseOffersReturn {
     statusCode,
     fetchOffers,
     reHitLenders: async () => {
-      await executeHitAllLenders({ force: true });
+      const result = await executeHitAllLenders({ force: true });
+      return { shouldOpenLeadForm: result.shouldOpenLeadForm };
     },
     filterByStatus: (status) => selectFilteredOffers(offers, status),
     statusCounts: selectStatusCounts(offers),

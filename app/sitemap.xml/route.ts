@@ -33,6 +33,7 @@ export async function GET(): Promise<NextResponse> {
   const childSitemapUrls = [
     `${baseUrl}${SITEMAP_CHILD_PATHS.pages}`,
     `${baseUrl}${SITEMAP_CHILD_PATHS.posts}`,
+    `${baseUrl}${SITEMAP_CHILD_PATHS.loans}`,
   ];
 
   return xmlResponse(buildSitemapIndexXml(childSitemapUrls));

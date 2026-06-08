@@ -80,6 +80,12 @@ export const PersonalLoanContent = (): JSX.Element => {
     return '';
   }, [isUnitySingleLenderFromAffiliate, affiliateLenderSlug]);
 
+  // Prime PL dedupe is also terminal — dismiss overlay and return to home.
+  const handlePrimePlDedupeContinue = useCallback((): void => {
+    setShowPrimePlDedupeThankYou(false);
+    router.replace('/');
+  }, [router]);
+
   const handleDedupeResponse = useCallback((): void => {
     if (!response || isCheckingDedupe || !hasCheckedDedupe.current) {
       return;
@@ -230,7 +236,7 @@ export const PersonalLoanContent = (): JSX.Element => {
               <ActionButton
                 type="button"
                 className="mt-8 min-w-[200px]"
-                onClick={() => setShowPrimePlDedupeThankYou(false)}
+                onClick={handlePrimePlDedupeContinue}
               >
                 Continue
               </ActionButton>

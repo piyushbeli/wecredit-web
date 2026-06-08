@@ -171,6 +171,7 @@ export const MOCK_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
   isRehitLenders: 0, // More lenders available for re-hit
   declaredSalary: 50000,
   empType: 'salaried',
+  requiredLoanAmount: 100000,
 };
 
 /**
@@ -183,6 +184,7 @@ export const MOCK_ALL_STATUSES_RESPONSE: CheckStatusAllResponse = {
   isRehitLenders: 1, // All lenders checked
   declaredSalary: 50000,
   empType: 'salaried',
+  requiredLoanAmount: 100000,
 };
 
 /**
@@ -194,6 +196,7 @@ export const MOCK_NO_OFFERS_RESPONSE: CheckStatusAllResponse = {
   isRehitLenders: 0, // Can re-hit to check more lenders
   declaredSalary: null,
   empType: null,
+  requiredLoanAmount: null,
 };
 
 /**
@@ -231,6 +234,7 @@ export const MOCK_REHIT_RESPONSE: CheckStatusAllResponse = {
   isRehitLenders: 1, // All lenders checked
   declaredSalary: 50000,
   empType: 'salaried',
+  requiredLoanAmount: 100000,
 };
 
 /**

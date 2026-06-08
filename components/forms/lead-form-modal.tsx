@@ -356,6 +356,12 @@ const LeadFormModal = ({
     }
   }, [isAllLenders, isFirstStep, onClose, handleBack]);
 
+  // Prime PL is a terminal success path — user should land on home, not stay on /offers.
+  const handlePrimePlContinueClick = useCallback((): void => {
+    onClose();
+    router.replace('/');
+  }, [onClose, router]);
+
   const handleSubmit = useCallback(async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setShowPartnerConsentError(false);
@@ -464,6 +470,7 @@ const LeadFormModal = ({
           offerList: ['primepl'],
           maxLoanAmount: 0,
           declaredSalary: formValues.salary,
+          requiredLoanAmount: formValues.requiredLoanAmount,
           empType: formValues.employmentType,
         });
       } else {
@@ -490,6 +497,22 @@ const LeadFormModal = ({
     router,
     searchParams,
   ]);
+
+  /**
+   * Browser default: Enter in an input submits the enclosing <form>.
+   * On intermediate wizard steps that must advance with "Next", not create-lead.
+   */
+  const handleFormSubmit = useCallback(
+    (event: React.FormEvent): void => {
+      event.preventDefault();
+      if (!isLastStep) {
+        handleNext();
+        return;
+      }
+      void handleSubmit(event);
+    },
+    [handleNext, handleSubmit, isLastStep],
+  );
 
 
   const renderSubmitError = (): React.ReactElement | null => {
@@ -838,7 +861,7 @@ const LeadFormModal = ({
                     <ActionButton
                       type="button"
                       className="mt-8 min-w-[200px]"
-                      onClick={onClose}
+                      onClick={handlePrimePlContinueClick}
                     >
                       Continue
                     </ActionButton>
@@ -899,7 +922,7 @@ const LeadFormModal = ({
           ) : (
             <>
               <div className="flex-1 overflow-y-auto">
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
                   {!isSinglePage && (
                     <h2 className="lead-form-heading">
                       {currentStepConfig.title}
