@@ -107,6 +107,9 @@ export function useOffers(): UseOffersReturn {
     const token = getCookie(STORAGE_AUTH_TOKEN) as string;
     if (!mobile) return noop;
 
+    // Manual re-hit (force=true) shows button-level loading; init-time hits do not.
+    if (force) setIsReHitting(true);
+
     try {
       const result = await hitAllLenders(mobile, token);
 
@@ -119,8 +122,10 @@ export function useOffers(): UseOffersReturn {
       return { invoked: true, shouldOpenLeadForm };
     } catch {
       return noop;
+    } finally {
+      if (force) setIsReHitting(false);
     }
-  }, [shouldSkipRehit, enableMockData]);
+  }, [shouldSkipRehit, enableMockData, setIsReHitting]);
 
   const getOfferTrackingMeta = useCallback(
     (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null; requiredLoanAmount: number | string | null } => {

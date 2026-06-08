@@ -100,20 +100,15 @@ export const OffersView = () => {
   );
 
   useEffect(() => {
-
     // If partner is present, don't trigger apply flow
     if (partner) return;
 
     if (!shouldTriggerApply) return;
-    // Step 1: Go to home
-    router.replace('/');
 
-    // Step 2: Trigger apply AFTER navigation
-    Promise.resolve().then(() => {
-      triggerApplyFlow();
-    });
-
-  }, [shouldTriggerApply, triggerApplyFlow, router]);
+    // PersonalLoanContent is now mounted via the offers layout, so we can
+    // trigger the apply flow directly without navigating to the home page.
+    triggerApplyFlow();
+  }, [shouldTriggerApply, triggerApplyFlow]);
 
   // If lenderName is present and the matching offer is non-INITIATED, redirect to status page
   useEffect(() => {
@@ -137,12 +132,11 @@ export const OffersView = () => {
     if (newPLEnabled) {
       const { shouldOpenLeadForm } = await reHitLenders();
 
-      // Non-WeCredit data: must fill lead form before seeing offers.
-      // Redirect to home and open the multi-lender apply flow instead of
-      // proceeding to the offers list (window.location.replace would wipe state).
+      // Non-WeCredit data: open multi-lender lead form in place.
+      // PersonalLoanContent is mounted via the offers layout so triggerApplyFlow
+      // works here without navigating away.
       if (shouldOpenLeadForm) {
-        router.replace('/');
-        Promise.resolve().then(() => triggerApplyFlow());
+        triggerApplyFlow();
         return;
       }
     }
@@ -303,6 +297,8 @@ export const OffersView = () => {
                     onClick={handleExploreMore}
                     className="w-[200px] px-10"
                     rightIcon="🔍"
+                    isLoading={isReHitting}
+                    disabled={isReHitting}
                   >
                     Explore More Offers 
                   </ActionButton>
@@ -320,6 +316,8 @@ export const OffersView = () => {
               type="button"
               onClick={handleExploreMore}
               className="w-full max-w-xs"
+              isLoading={isReHitting}
+              disabled={isReHitting}
             >
               Explore Other Offers
             </ActionButton>)}
@@ -338,6 +336,8 @@ export const OffersView = () => {
           onClick={handleExploreMore}
           rightIcon="🔍"
           fullWidth
+          isLoading={isReHitting}
+          disabled={isReHitting}
         >
           Explore More Offers
         </ActionButton>}
@@ -346,8 +346,8 @@ export const OffersView = () => {
     );
   };
 
-  // Show loading skeleton while: initial loading, polling, or re-hitting lenders
-  if (isLoading || isReHitting) {
+  // Show loading skeleton only during initial load; re-hitting is button-level loading only
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <PollingState message={pollingMessage} />

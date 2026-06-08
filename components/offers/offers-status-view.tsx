@@ -30,7 +30,7 @@ export const OffersStatusView = () => {
   const router = useRouter();
 const {partner} = useUrlParamsStore()
   const searchParams = useSearchParams();
-  const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply, reHitLenders } = useOffers();
+  const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply, reHitLenders, isReHitting } = useOffers();
  const { triggerApplyFlow } = useLoanApplicationStore();
 const hasTriggeredRef = useRef(false);
 
@@ -41,16 +41,10 @@ useEffect(() => {
 
   hasTriggeredRef.current = true;
 
-  // Step 1: Go home
-  router.replace('/');
-
-  // Step 2: Trigger apply after navigation
-  Promise.resolve().then(() => {
+  // PersonalLoanContent is now mounted via the offers layout, so we can
+  // trigger the apply flow directly without navigating to the home page.
   triggerApplyFlow();
-});
-
-
-}, [shouldTriggerApply, router, triggerApplyFlow]);
+}, [shouldTriggerApply, triggerApplyFlow]);
 
 
   const handleOfferClick = (offer: LenderOfferStatus): void => {
@@ -84,12 +78,11 @@ useEffect(() => {
     if (newPLEnabled) {
       const { shouldOpenLeadForm } = await reHitLenders();
 
-      // Non-WeCredit data: must fill lead form before seeing offers.
-      // Redirect to home and open the multi-lender apply flow instead of
-      // proceeding to the offers list (window.location.replace would wipe state).
+      // Non-WeCredit data: open multi-lender lead form in place.
+      // PersonalLoanContent is mounted via the offers layout so triggerApplyFlow
+      // works here without navigating away.
       if (shouldOpenLeadForm) {
-        router.replace('/');
-        Promise.resolve().then(() => triggerApplyFlow());
+        triggerApplyFlow();
         return;
       }
     }
@@ -152,6 +145,8 @@ useEffect(() => {
                   type="button"
                   onClick={handleExploreMore}
                   className="w-full max-w-xs"
+                  isLoading={isReHitting}
+                  disabled={isReHitting}
                 >
                   Explore Other Offers
                 </ActionButton>
