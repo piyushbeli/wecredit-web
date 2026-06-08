@@ -82,51 +82,6 @@ export function useOffers(): UseOffersReturn {
   /* ---------------- API CALLS ----------------------- */
   /* -------------------------------------------------- */
 
-  /**
-   * Calls the hit-all-lenders API and signals whether the caller should
-   * redirect the user to the multi-lender lead form.
-   *
-   * `shouldOpenLeadForm` is true when the API responds with
-   * `isWecreditWebsiteData === false`, meaning the existing record did not
-   * originate from the WeCredit website. In that case the user must fill
-   * the form again (multi-lender flow) before they can see offers.
-   *
-   * When `isWecreditWebsiteData` is `true` or absent, the normal flow
-   * continues (polling / re-hit) unchanged for backward compatibility.
-   */
-  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<{ invoked: boolean; shouldOpenLeadForm: boolean }> => {
-    const noop = { invoked: false, shouldOpenLeadForm: false };
-
-    if (newPLEnabled && !force) return noop;
-    if (shouldSkipRehit) return noop;
-
-    // Mock flow: never redirects to form; just signals the call happened.
-    if (enableMockData) return { invoked: true, shouldOpenLeadForm: false };
-
-    const mobile = getCookie(STORAGE_MOBILE) as string;
-    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
-    if (!mobile) return noop;
-
-    // Manual re-hit (force=true) shows button-level loading; init-time hits do not.
-    if (force) setIsReHitting(true);
-
-    try {
-      const result = await hitAllLenders(mobile, token);
-
-      if (!result.success) return noop;
-
-      // If the backend flags this lead as non-WeCredit website data,
-      // the user must complete the lead form before we can show offers.
-      const shouldOpenLeadForm = requiresMultiLenderLeadForm(result.data?.isWecreditWebsiteData);
-
-      return { invoked: true, shouldOpenLeadForm };
-    } catch {
-      return noop;
-    } finally {
-      if (force) setIsReHitting(false);
-    }
-  }, [shouldSkipRehit, enableMockData, setIsReHitting]);
-
   const getOfferTrackingMeta = useCallback(
     (response: CheckStatusAllResponse): { declaredSalary: number | string | null; empType: string | null; requiredLoanAmount: number | string | null } => {
       // API payload shape is not always stable, so support both camelCase and snake_case keys.
@@ -189,6 +144,58 @@ export function useOffers(): UseOffersReturn {
     },
     [enableMockData, getOfferTrackingMeta, setOfferTrackingMeta]
   );
+
+  /**
+   * Calls the hit-all-lenders API and signals whether the caller should
+   * redirect the user to the multi-lender lead form.
+   *
+   * `shouldOpenLeadForm` is true when the API responds with
+   * `isWecreditWebsiteData === false`, meaning the existing record did not
+   * originate from the WeCredit website. In that case the user must fill
+   * the form again (multi-lender flow) before they can see offers.
+   *
+   * When `isWecreditWebsiteData` is `true` or absent, the normal flow
+   * continues (polling / re-hit) unchanged for backward compatibility.
+   */
+  const executeHitAllLenders = useCallback(async ({ force = false }: { force?: boolean } = {}): Promise<{ invoked: boolean; shouldOpenLeadForm: boolean }> => {
+    const noop = { invoked: false, shouldOpenLeadForm: false };
+
+    if (newPLEnabled && !force) return noop;
+    if (shouldSkipRehit) return noop;
+
+    // Mock flow: never redirects to form; just signals the call happened.
+    if (enableMockData) return { invoked: true, shouldOpenLeadForm: false };
+
+    const mobile = getCookie(STORAGE_MOBILE) as string;
+    const token = getCookie(STORAGE_AUTH_TOKEN) as string;
+    if (!mobile) return noop;
+
+    // Manual re-hit (force=true) shows button-level loading; init-time hits do not.
+    if (force) setIsReHitting(true);
+
+    try {
+      const result = await hitAllLenders(mobile, token);
+
+      if (!result.success) return noop;
+
+      // If the backend flags this lead as non-WeCredit website data,
+      // the user must complete the lead form before we can show offers.
+      const shouldOpenLeadForm = requiresMultiLenderLeadForm(result.data?.isWecreditWebsiteData);
+
+      if (shouldOpenLeadForm) {
+        return { invoked: true, shouldOpenLeadForm: true };
+      }
+
+      // Hit succeeded — refresh the offers store so UI reflects the latest lender statuses.
+      await fetchOffers();
+
+      return { invoked: true, shouldOpenLeadForm: false };
+    } catch {
+      return noop;
+    } finally {
+      if (force) setIsReHitting(false);
+    }
+  }, [shouldSkipRehit, enableMockData, setIsReHitting, fetchOffers]);
 
   /* -------------------------------------------------- */
   /* ---------------- POLLING ------------------------- */
