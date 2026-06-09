@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
+import { sanitizeExternalHtml } from '@/lib/seo/sanitize-external-html';
 import TermsOfUseWrapper from '@/components/shared/terms-of-use-wrapper';
 /** Force static generation with 30-minute revalidation */
 export const dynamic = 'force-static';
@@ -7,16 +9,7 @@ export const revalidate = 1800; // 30 minutes
 const TERMS_URL =
   'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/wc_terms_of_use1.html';
 
-/**
- * Generates metadata for the Terms of Service page
- */
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Terms of Service | WeCredit',
-    description: 'Read our terms of service to understand the terms and conditions governing your use of the WeCredit platform.',
-    keywords: 'terms of service, terms and conditions, user agreement',
-  };
-}
+export const metadata: Metadata = buildPageMetadata('/terms-of-service/');
 
 /**
  * Fetch Terms HTML from S3
@@ -32,10 +25,8 @@ async function getTermsContent(): Promise<string> {
 
   const html = await res.text();
 
-  // Remove first <h1>...</h1>
-  const cleanedHtml = html.replace(/<h1[^>]*>.*?<\/h1>/i, '');
-
-  return cleanedHtml;
+  // Strip document-level tags and first <h1> (page renders its own semantic H1)
+  return sanitizeExternalHtml(html);
 }
 
 

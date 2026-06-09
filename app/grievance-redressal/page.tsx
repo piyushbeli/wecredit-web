@@ -1,21 +1,12 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
 import GrievanceRedressalWrapper from '@/components/shared/grievance-redressal-wrapper';
 
 /** Force static generation for better performance */
 export const dynamic = 'force-static';
 export const revalidate = 3600; // 1 hour
 
-/**
- * Generates metadata for the Grievance Redressal page
- */
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Grievance Redressal | WeCredit',
-    description:
-      'Contact our grievance officer to resolve your complaints and grievances. We are committed to resolving issues within a reasonable time frame.',
-    keywords: 'grievance redressal, customer service, complaints, contact',
-  };
-}
+export const metadata: Metadata = buildPageMetadata('/grievance-redressal/');
 
 /**
  * Grievance Redressal page component

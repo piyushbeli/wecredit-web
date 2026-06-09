@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
 import PartnerTermsAndConditionsWrapper from '@/components/shared/partner-terms-and-conditions-wrapper';
 import Link from 'next/link';
 import type { JSX } from 'react';
@@ -6,14 +7,7 @@ import type { JSX } from 'react';
 export const dynamic = 'force-static';
 export const revalidate = 1800; // 30 minutes
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Partner Terms & Conditions | WeCredit',
-    description:
-      'Read and understand partner terms and conditions for WeCredit lending partners.',
-    keywords: 'partner terms, terms and conditions, WeCredit',
-  };
-}
+export const metadata: Metadata = buildPageMetadata('/partner-terms-and-conditions/');
 
 type PartnerCardProps = {
   id: string;

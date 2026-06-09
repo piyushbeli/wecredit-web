@@ -1,5 +1,9 @@
 
+import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
 import { HomePage } from '@/components/home';
+
+export const metadata: Metadata = buildPageMetadata('/');
 
 /**
  * WeCredit Home page with hero carousel, stats, and product sections

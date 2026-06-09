@@ -15,6 +15,7 @@ const ContactUsWrapper = (): ReactNode => {
       }}
       contentClassName="mx-4 px-4"
     >
+      <h1 className="sr-only">Contact WeCredit Support</h1>
       <GrievanceContactContent />
     </FooterLinkPageWrapper>
   );

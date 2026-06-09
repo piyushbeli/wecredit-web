@@ -27,9 +27,7 @@ const HeroSection = (): JSX.Element => {
 
 				{/* Main Heading */}
 				<h1 className="text-2xl font-semibold text-center mb-6">
-					Apply <span className="">Personal Loan</span>
-					<br />
-					<span className="text-brand-primary font-medium">at WeCredit</span>
+					Personal Loan Online
 				</h1>
 
 				<ActionButton

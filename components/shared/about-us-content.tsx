@@ -85,9 +85,9 @@ const AboutUsContent = (): React.ReactNode => {
           </div>
         )}
 
-        <h2 className="font-['Poppins'] font-medium text-2xl leading-none tracking-normal text-zinc-800">
+        <h1 className="font-['Poppins'] font-medium text-2xl leading-none tracking-normal text-zinc-800">
           About WeCredit
-        </h2>
+        </h1>
 
         <div className="h-4" />
 

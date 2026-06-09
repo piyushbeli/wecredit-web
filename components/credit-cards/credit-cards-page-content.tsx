@@ -12,6 +12,7 @@ const CreditCardsPageContent = (): React.ReactNode => {
   return (
     <div className="min-h-screen bg-white">
       <div className="py-8 sm:py-10 pt-20">
+        <h1 className="sr-only">Best Credit Card Offers in India</h1>
 
         {/* Credit cards grid */}
         <section className="mb-12 sm:mb-16 px-4" aria-label="Credit card offers">

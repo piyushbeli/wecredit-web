@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import TrendingOfferCard from './trending-offer-card';
 import {
@@ -45,6 +46,7 @@ const TrendingOffersSection = ({
   activeLenders,
   heading,
 }: TrendingOffersSectionProps): React.ReactNode => {
+  const pathname = usePathname();
   const [skipAnimation, setSkipAnimation] = useState(false);
   const lenderColumns = groupIntoColumns(activeLenders, 3);
 
@@ -74,6 +76,7 @@ const TrendingOffersSection = ({
       </div>
 
       <Carousel
+        key={`${pathname}-trending-offers`}
         options={{
           loop: false,
           align: lenderColumns.length === 1 ? 'center' : 'start',

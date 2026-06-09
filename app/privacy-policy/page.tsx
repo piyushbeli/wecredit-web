@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
+import { sanitizeExternalHtml } from '@/lib/seo/sanitize-external-html';
 import PrivacyPolicyWrapper from '@/components/shared/privacy-policy-wrapper';
 
 /** Force static generation with 30-minute revalidation */
@@ -8,17 +10,7 @@ export const revalidate = 1800; // 30 minutes
 const PRIVACY_URL =
   'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/wc_privacy_policy.html';
 
-/**
- * Generates metadata for the Privacy Policy page
- */
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Privacy Policy | WeCredit',
-    description:
-      'Read our privacy policy to understand how we collect, use, and protect your personal information.',
-    keywords: 'privacy policy, data protection, security',
-  };
-}
+export const metadata: Metadata = buildPageMetadata('/privacy-policy/');
 
 /**
  * Fetch Privacy Policy HTML from S3
@@ -34,13 +26,8 @@ async function getPrivacyContent(): Promise<string> {
 
   const html = await res.text();
 
-  // Remove first <h1>Privacy Policy</h1> (case-insensitive)
-  const cleanedHtml = html.replace(
-    /<h1[^>]*>\s*Privacy\s*Policy\s*<\/h1>/i,
-    ''
-  );
-
-  return cleanedHtml;
+  // Strip document-level tags and first <h1> (page renders its own semantic H1)
+  return sanitizeExternalHtml(html);
 }
 
 

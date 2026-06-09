@@ -450,7 +450,7 @@ const TermsOfServiceContent = (): React.ReactNode => {
           </p>
 
           <p>
-            If the grievance is not resolved by the WeCredit Grievance Officer within 30 (Thirty) days of lodging the grievance, or if the User who has availed any Credit Facility from the Lending Partner is not satisfied with the response received from WeCredit, such User may approach the Lending Partner to have such grievance resolved. The grievance redressal mechanism of the Lending Partner is accessible at: https://wecredit.co.in/ourpartnerpage and in case you are not satisfied with resolution provided by us or the Lending Partners, you may submit your grievance at Sachet Portal.
+            If the grievance is not resolved by the WeCredit Grievance Officer within 30 (Thirty) days of lodging the grievance, or if the User who has availed any Credit Facility from the Lending Partner is not satisfied with the response received from WeCredit, such User may approach the Lending Partner to have such grievance resolved. The grievance redressal mechanism of the Lending Partner is accessible at: https://wecredit.co.in/our-partners/ and in case you are not satisfied with resolution provided by us or the Lending Partners, you may submit your grievance at Sachet Portal.
           </p>
         </div>
       </div>
