@@ -62,6 +62,11 @@ export const IMAGES = {
     OTP: `${BUCKET_IMAGE_URL}/otp-icon.png`,
     WALLET: `${BUCKET_IMAGE_URL}/wallet-icon.png`,
     HOURGLASS: `${BUCKET_IMAGE_URL}/hourglass-icon.png`,
+    IPL: `${BUCKET_IMAGE_URL}/ipl.png`,
+  },
+  /** Instant Personal Loan landing page — local public assets */
+  IPL_LANDING: {
+    STICKY_CTA_BG: '/assets/instant-personal-loan/sticky-cta-bg.png',
   },
   PARTNERS: {
     BASE_PATH: `${BUCKET_IMAGE_URL}/partners`,
