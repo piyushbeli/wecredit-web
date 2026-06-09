@@ -18,6 +18,7 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/partner-terms-and-conditions/',
   '/calculator/personal-loan',
   '/our-partners/',
+  '/instant-personal-loan/',
   // '/blog/',
   '/offers' // Exclude /offers route
 ];

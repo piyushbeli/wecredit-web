@@ -65,17 +65,17 @@ const StatsSection = (): React.ReactNode => {
   return (
     <section className="py-2">
       <motion.div
-  className="flex justify-around items-start mx-auto max-w-xl lg:max-w-5xl px-4"
-  variants={containerVariants}
-  initial="hidden"
-  whileInView="visible"
-  viewport={{ once: true, margin: '-50px' }}
->
+        className="flex justify-between items-start"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-50px' }}
+      >
 
         {stats.map((stat) => (
           <motion.div
             key={stat.id}
-            className="flex flex-col items-center text-center"
+            className="flex flex-col items-center text-center px-4"
             variants={itemVariants}
           >
             <div className="flex items-baseline">
