@@ -71,6 +71,8 @@ const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(
       return () => {
         emblaApi.off('select', onSelect);
         emblaApi.off('reInit', onSelect);
+        // Tear down Embla DOM transforms so React can reconcile cleanly on route change.
+        emblaApi.destroy();
       };
     }, [emblaApi, onSelect]);
 

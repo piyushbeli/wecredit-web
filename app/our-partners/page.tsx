@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
 import PartnerCard from '@/components/shared/partner-card';
 import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper';
 import type { PartnerDetail } from '@/lib/constants/partners-data';
@@ -10,18 +11,7 @@ export const revalidate = 1800; // 30 minutes
 const PARTNERS_URL =
   'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/our_partner_details_one.json';
 
-/**
- * Generates metadata for the Our Partners page
- */
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Our Partners | WeCredit',
-    description:
-      'View our trusted personal loan partners. Get detailed information about our partner companies including contact details and grievance officer information.',
-    keywords:
-      'partners, personal loans, lenders, loan partners, WeCredit partners',
-  };
-}
+export const metadata: Metadata = buildPageMetadata('/our-partners/');
 
 /**
  * Fetch partner data from S3
@@ -65,7 +55,7 @@ const OurPartnersPage = async (): Promise<React.ReactNode> => {
 
   return (
     <FooterLinkPageWrapper
-      pageHeaderTitle="Our Partners"
+      pageHeaderTitle="WeCredit Lending Partners"
       className="min-h-screen bg-white"
       contentClassName="max-w-2xl mx-auto px-4 pt-4"
     >

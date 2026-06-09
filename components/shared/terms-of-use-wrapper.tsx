@@ -16,6 +16,7 @@ const TermsOfUseWrapper = ({ htmlContent }: TermsOfUseWrapperProps): ReactNode =
         iconImage: IMAGES.ICONS.TERMS_OF_SERVICE,
       }}
     >
+      <h1 className="sr-only">Terms of Service</h1>
       <div
         className="prose max-w-none"
         dangerouslySetInnerHTML={{ __html: htmlContent }}

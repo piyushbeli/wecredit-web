@@ -14,6 +14,7 @@ const GrievanceRedressalWrapper = (): ReactNode => {
       }}
       contentClassName="mx-4 px-4"
     >
+      <h1 className="sr-only">WeCredit Grievance Redressal</h1>
       <GrievanceContactContent />
     </FooterLinkPageWrapper>
   );

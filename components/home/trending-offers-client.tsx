@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { fetchActiveLendersForUser } from '@/lib/api/wecredit';
 import { filterActiveLenders } from '@/lib/utils/lenders';
@@ -20,6 +21,7 @@ import { useAuthCookies } from '@/hooks/use-auth-cookies';
  * Completely independent component - handles all lender fetching internally
  */
 const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: string }): React.ReactNode => {
+  const pathname = usePathname();
   const { isAuthenticated, user } = useAuthStore();
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -95,28 +97,29 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
   // Show loading state if either generic or user-specific lenders are loading
   const isAnyLoading = isLoadingGeneric || (isLoadingUserLenders && (hasAuthCookies || isAuthenticated));
 
-  // Show skeleton when loading and no lenders available
-  if (displayLenders.length === 0 && isAnyLoading) {
-    return <TrendingOffersSkeleton />;
-  }
+  const showSkeleton =
+    !isHydrated || (displayLenders.length === 0 && isAnyLoading);
 
-  // Keep markup stable across SSR and first client render to avoid hydration errors.
-  if (!isHydrated) {
-    return <TrendingOffersSkeleton />;
-  }
-
+  // Single stable root keyed by route so back/forward never reuses an Embla instance
+  // from a different page (home vs personal-loan both mount this component).
   return (
-    <div className="relative">
-      {/* Subtle loading indicator when fetching lenders */}
-      {isAnyLoading && (
-        <div className="absolute top-2 right-4 z-10">
-          <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded-full shadow-sm">
-            <span className="w-3 h-3 border-2 border-wc-blue-500/30 border-t-wc-blue-500 rounded-full animate-spin" />
-            <span>{(isLoadingUserLenders && (hasAuthCookies || isAuthenticated)) ? 'Personalizing...' : 'Loading...'}</span>
-          </div>
-        </div>
+    <div key={pathname} className="relative">
+      {showSkeleton ? (
+        <TrendingOffersSkeleton />
+      ) : (
+        <>
+          {/* Subtle loading indicator when fetching lenders */}
+          {isAnyLoading && (
+            <div className="absolute top-2 right-4 z-10">
+              <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded-full shadow-sm">
+                <span className="w-3 h-3 border-2 border-wc-blue-500/30 border-t-wc-blue-500 rounded-full animate-spin" />
+                <span>{(isLoadingUserLenders && (hasAuthCookies || isAuthenticated)) ? 'Personalizing...' : 'Loading...'}</span>
+              </div>
+            </div>
+          )}
+          <TrendingOffersSection activeLenders={displayLenders} heading={heading} />
+        </>
       )}
-      <TrendingOffersSection activeLenders={displayLenders} heading={heading} />
     </div>
   );
 };

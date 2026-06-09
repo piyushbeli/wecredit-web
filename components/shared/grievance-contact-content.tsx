@@ -7,10 +7,10 @@ import React from 'react';
 const GrievanceContactContent = (): React.ReactNode => {
   return (
     <div className="w-full space-y-6">
-      {/* Welcome Title */}
-      <h1 className="text-zinc-800 text-base font-medium font-['Poppins']">
+      {/* Section welcome heading — page H1 is rendered by each page's wrapper */}
+      <h2 className="text-zinc-800 text-base font-medium font-['Poppins']">
         Welcome to WeCredit Customer Services
-      </h1>
+      </h2>
 
       {/* Introduction Paragraph 1 */}
       <p className="text-zinc-500 text-sm font-normal font-['Poppins'] leading-4">

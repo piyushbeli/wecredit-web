@@ -3,6 +3,7 @@
 import { JSX } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
 import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/components/ui/carousel';
@@ -25,6 +26,7 @@ export interface SlideContent {
  * Hero carousel section with gradient background, 3D avatar, and swipeable slides
  */
 const HeroCarousel = (): JSX.Element => {
+  const pathname = usePathname();
   const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 
   const renderCtaElement = (slide: SlideContent) => {
@@ -50,7 +52,10 @@ const HeroCarousel = (): JSX.Element => {
 
   return (
     <section className="wc-hero-bg min-h-[40vh] relative pt-16">
+      {/* Single page-level H1 — visually hidden; carousel slide headings are decorative h2s */}
+      <h1 className="sr-only">Compare Loans & Credit Offers Online</h1>
       <Carousel
+        key={pathname}
         options={{ loop: true, align: 'center' }}
         plugins={[Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })]}
         className="relative z-10 h-full flex flex-col"
@@ -88,7 +93,8 @@ const HeroCarousel = (): JSX.Element => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  <h1 className="text-3xl font-medium mb-1">{slide.titleWhite}</h1>
+                  {/* Carousel headings are decorative — the page H1 lives in HomePage */}
+                  <h2 className="text-3xl font-medium mb-1">{slide.titleWhite}</h2>
                   <p className="text-3xl font-medium text-blue-primary">{slide.titleGradient}</p>
                 </motion.div>
 

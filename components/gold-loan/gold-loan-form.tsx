@@ -73,7 +73,7 @@ const GoldLoanForm = ({
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-base font-medium text-gray-900">Gold Loan</h1>
+        <h2 className="text-base font-medium text-gray-900">Gold Loan</h2>
       </div>
 
       <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">

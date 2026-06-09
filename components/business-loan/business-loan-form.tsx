@@ -100,9 +100,9 @@ const BusinessLoanForm = ({ onClose, isModal = false, onSuccess }: BusinessLoanF
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-base font-medium text-gray-900">
+        <h2 className="text-base font-medium text-gray-900">
           Business Loan ({currentStep}/{totalSteps})
-        </h1>
+        </h2>
       </div>
 
       <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">
