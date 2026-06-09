@@ -4,7 +4,11 @@
  * Interactive logic is in PersonalLoanContent client component
  */
 
+import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
 import React from 'react';
+
+export const metadata: Metadata = buildPageMetadata('/personal-loan/');
 import HeroSection from '@/components/personal-loan/hero-section';
 import EmiCalculator from '@/components/personal-loan/emi-calculator';
 import VideoSection from '@/components/personal-loan/video-section';

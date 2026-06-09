@@ -19,6 +19,7 @@ const PrivacyPolicyWrapper = ({
         iconAlt: 'WeCredit Heart Icon',
       }}
     >
+      <h1 className="sr-only">Privacy Policy</h1>
       <div
         className="prose max-w-none"
         dangerouslySetInnerHTML={{ __html: htmlContent }}

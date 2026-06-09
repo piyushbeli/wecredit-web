@@ -20,6 +20,7 @@ const PartnerTermsAndConditionsWrapper = ({
       }}
       contentClassName="mt-10 flex flex-col gap-6 items-center px-4"
     >
+      <h1 className="sr-only">Partner Terms &amp; Conditions</h1>
       {children}
     </FooterLinkPageWrapper>
   );

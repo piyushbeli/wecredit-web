@@ -59,7 +59,10 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" className="overscroll-y-none">
-      <head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${poppins.className} antialiased min-h-screen flex flex-col`}
+      >
+        {/* GTM lives in <body> — do not wrap in a manual <head>; Next.js manages head via Metadata API (title, canonical, etc.) */}
         <Script id="gtm-script" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -69,10 +72,6 @@ export default async function RootLayout({
             })(window,document,'script','dataLayer','GTM-TMJBLB7R');
           `}
         </Script>
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${poppins.className} antialiased min-h-screen flex flex-col`}
-      >
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-TMJBLB7R"

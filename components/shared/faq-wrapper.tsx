@@ -9,11 +9,12 @@ const FaqWrapper = (): ReactNode => {
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'Frequently Asked Questions ',
+        title: 'Frequently Asked Questions',
         iconImage: IMAGES.ICONS.TERMS_OF_SERVICE,
       }}
       contentClassName="px-4"
     >
+      <h1 className="sr-only">WeCredit FAQs</h1>
       <FaqSection />
     </FooterLinkPageWrapper>
   );
