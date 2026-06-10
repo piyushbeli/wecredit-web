@@ -137,9 +137,9 @@ export const STATIC_PAGE_SEO: Record<WEB_SEO_ROUTES, StaticPageSeoEntry> = {
     priority: 'High',
   },
   [WEB_SEO_ROUTES.INSTANT_PERSONAL_LOAN]: {
-    title: 'Get Instant Personal Loans Online | WeCredit',
+    title: 'Instant Personal Loan Online in India – Apply in 2 Min | WeCredit',
     description:
-      'Apply for instant personal loans online with WeCredit. Check eligibility in minutes, compare offers, and get fast disbursal with minimal paperwork.',
+      'Get instant personal loans up to ₹50 Lakhs in India. Low interest from 1.5% p.m., 30-min disbursal, minimal paperwork. Check eligibility free – no credit score impact.',
     h1: 'Get Instant Personal Loans',
     priority: 'High',
   },
