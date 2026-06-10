@@ -62,6 +62,7 @@ export const IMAGES = {
     OTP: `${BUCKET_IMAGE_URL}/otp-icon.png`,
     WALLET: `${BUCKET_IMAGE_URL}/wallet-icon.png`,
     HOURGLASS: `${BUCKET_IMAGE_URL}/hourglass-icon.png`,
+    IPL: `${BUCKET_IMAGE_URL}/ipl.png`,
   },
   PARTNERS: {
     BASE_PATH: `${BUCKET_IMAGE_URL}/partners`,

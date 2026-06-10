@@ -17,6 +17,7 @@ export const SITEMAP_PATHS = [
   '/gold-loan/',
   '/grievance-redressal/',
   '/home-loan/',
+  '/instant-personal-loan/',
   '/our-partners/',
   '/partner-terms-and-conditions/',
   '/partner-with-us/',

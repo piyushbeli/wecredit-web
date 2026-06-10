@@ -7,7 +7,7 @@ import type { NavigationLink } from '@/types/navigation';
 
 /** Routes where MobileHeader should NOT be displayed */
 const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/', '/business-loan/', '/gold-loan/', '/car-loan/',
-  '/home-loan/', '/primepl-lead/', '/business-loan/'
+  '/home-loan/', '/primepl-lead/', '/business-loan/', '/instant-personal-loan/'
 ];
 
 interface ConditionalMobileHeaderProps {

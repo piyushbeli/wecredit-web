@@ -258,6 +258,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
               iconImage: IMAGES.ICONS.PARTNER_WITH_US,
               iconAlt: 'Partner with Us Icon',
             }}
+            contentClassName='px-4'
           >
             <h1 className="sr-only">Partner With WeCredit</h1>
           {/* Partner Form */}

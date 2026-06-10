@@ -21,6 +21,7 @@ export enum WEB_SEO_ROUTES {
   GOLD_LOAN = '/gold-loan/',
   GRIEVANCE_RESTRAIN = '/grievance-redressal/',
   HOME_LOAN = '/home-loan/',
+  INSTANT_PERSONAL_LOAN = '/instant-personal-loan/',
   OUR_PARTNERS = '/our-partners/',
   PARTNER_TERMS_AND_CONDITIONS = '/partner-terms-and-conditions/',
   PARTNER_WITH_US = '/partner-with-us/',
@@ -133,6 +134,13 @@ export const STATIC_PAGE_SEO: Record<WEB_SEO_ROUTES, StaticPageSeoEntry> = {
     description:
       'Compare home loan options, estimate EMI and review eligibility factors before choosing financing for your property purchase.',
     h1: 'Home Loan Offers & EMI Planning',
+    priority: 'High',
+  },
+  [WEB_SEO_ROUTES.INSTANT_PERSONAL_LOAN]: {
+    title: 'Get Instant Personal Loans Online | WeCredit',
+    description:
+      'Apply for instant personal loans online with WeCredit. Check eligibility in minutes, compare offers, and get fast disbursal with minimal paperwork.',
+    h1: 'Get Instant Personal Loans',
     priority: 'High',
   },
   [WEB_SEO_ROUTES.OUR_PARTNERS]: {
