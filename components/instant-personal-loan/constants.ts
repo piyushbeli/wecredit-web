@@ -13,7 +13,7 @@ export interface HeroBenefit {
 }
 
 export const HERO_TAGLINE = 'Loans for every small profit.';
-export const HERO_HEADLINE = 'Get Instant Personal Loans.';
+export const HERO_HEADLINE = 'Instant Personal Loans Upto 50 Lakhs';
 
 export const HERO_BENEFITS: HeroBenefit[] = [
   { id: 'loan-amount', label: 'Higher loan amount', icon: 'rupee' },
