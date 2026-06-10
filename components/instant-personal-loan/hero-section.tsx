@@ -40,7 +40,7 @@ const HeroSection = (): JSX.Element => {
   return (
     <section className="ipl-hero-gradient pt-16 pb-6">
       <PageHeader />
-      <div className="px-4 max-w-xl mx-auto">
+      <div className="px-4 max-w-xl mx-auto pt-4">
         {/* Tagline + headline with centered illustration */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex-1 min-w-0">

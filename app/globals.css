@@ -436,16 +436,85 @@
     0 4px 16px rgba(7, 113, 219, 0.1);
 }
 
-/* Sticky bottom CTA — Figma exported button background image */
+/* Sticky bottom CTA — centered concentric pill ripple animation */
 .ipl-sticky-cta-button {
-  background-image: url('/assets/instant-personal-loan/sticky-cta-bg.png');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: center;
+  position: relative;
+  overflow: hidden;
+  background: #1e6fe8;
   color: #ffffff;
   border: none;
   border-radius: 0.75rem;
   transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ipl-sticky-cta-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 9999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* Concentric pill layers — inner brightest, outer most subtle (matches Figma reference) */
+.ipl-sticky-cta-wave-1 {
+  width: 50%;
+  height: 130%;
+  background: rgba(147, 195, 255, 0.50);
+  animation: ipl-sticky-cta-ripple 2.4s ease-in-out infinite;
+}
+
+.ipl-sticky-cta-wave-2 {
+  width: 70%;
+  height: 150%;
+  background: rgba(118, 172, 255, 0.25);
+  /* background: "#0065EB"; */
+  animation: ipl-sticky-cta-ripple 2.4s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+
+.ipl-sticky-cta-wave-3 {
+  width: 90%;
+  height: 170%;
+  /* background: rgba(90, 150, 255, 0.22); */
+  background: "#045BCF";
+  animation: ipl-sticky-cta-ripple 2.4s ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+
+/* Outward pulse from center — scale + opacity breathe, staggered for wave motion */
+@keyframes ipl-sticky-cta-ripple {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ipl-sticky-cta-wave-1,
+  .ipl-sticky-cta-wave-2,
+  .ipl-sticky-cta-wave-3 {
+    animation: none;
+    opacity: 1;
+  }
+
+  .ipl-sticky-cta-wave-1 {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .ipl-sticky-cta-wave-2 {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .ipl-sticky-cta-wave-3 {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .ipl-sticky-cta-button:active:not(:disabled) {
