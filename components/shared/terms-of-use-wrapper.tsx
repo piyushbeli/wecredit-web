@@ -15,6 +15,7 @@ const TermsOfUseWrapper = ({ htmlContent }: TermsOfUseWrapperProps): ReactNode =
         title: 'TERMS OF USE',
         iconImage: IMAGES.ICONS.TERMS_OF_SERVICE,
       }}
+      contentClassName='px-4'
     >
       <h1 className="sr-only">Terms of Service</h1>
       <div

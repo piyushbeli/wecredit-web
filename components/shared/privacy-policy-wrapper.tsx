@@ -18,6 +18,7 @@ const PrivacyPolicyWrapper = ({
         iconImage: IMAGES.ICONS.WECREDIT_HEART,
         iconAlt: 'WeCredit Heart Icon',
       }}
+      contentClassName='px-4'
     >
       <h1 className="sr-only">Privacy Policy</h1>
       <div

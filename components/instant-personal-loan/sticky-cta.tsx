@@ -2,7 +2,7 @@
 
 /**
  * Sticky bottom CTA for the Instant Personal Loan page.
- * Uses the Figma-exported button background image for pixel-accurate styling.
+ * Concentric pill ripple animation centered behind the label.
  */
 
 import { JSX, useCallback } from 'react';
@@ -27,11 +27,16 @@ const StickyCta = (): JSX.Element => {
         disabled={isApplyLoading}
         className="ipl-sticky-cta-button w-full max-w-xl mx-auto h-14 flex items-center justify-center text-base font-medium"
       >
-        {isApplyLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" aria-label="Loading" />
-        ) : (
-          'Get Instant Loan'
-        )}
+        <span className="ipl-sticky-cta-wave ipl-sticky-cta-wave-1" aria-hidden="true" />
+        <span className="ipl-sticky-cta-wave ipl-sticky-cta-wave-2" aria-hidden="true" />
+        <span className="ipl-sticky-cta-wave ipl-sticky-cta-wave-3" aria-hidden="true" />
+        <span className="relative z-10 flex items-center justify-center">
+          {isApplyLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-label="Loading" />
+          ) : (
+            'Get Instant Loan'
+          )}
+        </span>
       </button>
     </div>
   );
