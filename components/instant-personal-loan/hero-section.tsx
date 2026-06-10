@@ -11,6 +11,7 @@ import { IndianRupee, Percent, Zap } from 'lucide-react';
 import { IMAGES } from '@/lib/constants/images';
 import { HERO_BENEFITS, HERO_HEADLINE, HERO_TAGLINE, type HeroBenefit } from './constants';
 import LeadCaptureForm from './lead-capture-form';
+import PageHeader from './page-header';
 
 const BENEFIT_ICON_MAP = {
   rupee: IndianRupee,
@@ -37,7 +38,8 @@ const BenefitPill = ({ benefit }: BenefitPillProps): JSX.Element => {
 
 const HeroSection = (): JSX.Element => {
   return (
-    <section className="ipl-hero-gradient pt-8 pb-6">
+    <section className="ipl-hero-gradient pt-16 pb-6">
+      <PageHeader />
       <div className="px-4 max-w-xl mx-auto">
         {/* Tagline + headline with centered illustration */}
         <div className="flex items-center justify-between gap-3 mb-4">
