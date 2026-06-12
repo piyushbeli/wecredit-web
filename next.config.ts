@@ -9,8 +9,13 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/blog',
+        destination: 'https://blog.wecredit.co.in/blog',
+        permanent: true,
+      },
+      {
         source: '/blogs',
-        destination: 'https://blog.wecredit.co.in/',
+        destination: 'https://blog.wecredit.co.in/blog',
         permanent: true,
       },
       {
