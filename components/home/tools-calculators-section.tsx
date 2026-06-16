@@ -6,7 +6,6 @@ import ToolCard from './tool-card';
 import { IMAGES } from '@/lib/constants/images';
 import type { LucideIcon } from 'lucide-react';
 
-/** Tool configuration interface */
 interface Tool {
   id: string;
   title: string;
@@ -16,11 +15,10 @@ interface Tool {
   fallbackIcon: LucideIcon;
 }
 
-/** Tools data matching the design */
 const tools: Tool[] = [
   {
     id: 'personal-loan-calculator',
-    title: 'Personal Loan\ncalculator',
+    title: 'Personal Loan calculator',
     description: 'Calculate personal loan EMI',
     href: '/calculator/personal-loan',
     imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
@@ -28,7 +26,7 @@ const tools: Tool[] = [
   },
   {
     id: 'emi-calculator',
-    title: 'EMI\ncalculator',
+    title: 'EMI calculator',
     description: 'Calculate personal loan EMI',
     href: '/calculator/emi',
     imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
@@ -36,7 +34,7 @@ const tools: Tool[] = [
   },
   {
     id: 'business-loan-calculator',
-    title: 'Business Loan\ncalculator',
+    title: 'Business Loan calculator',
     description: 'Calculate business loan EMI',
     href: '/calculator/business-loan',
     imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
@@ -44,25 +42,20 @@ const tools: Tool[] = [
   },
   {
     id: 'credit-score-check',
-    title: 'Check Credit\nScore',
-    description: 'Check personal loan EMI',
+    title: 'Check Credit Score',
+    description: 'Check your credit score for free',
     href: '/bureau-report/',
     imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
     fallbackIcon: Gauge,
   },
 ];
 
-/**
- * Tools & Calculators section component
- * Displays a 2x2 grid of tool cards with an explore link
- */
 const ToolsCalculatorsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white py-4 px-4 md:py-0">
-      <div className="mx-auto max-w-3xl md:my-8 lg:my-12">
-        {/* Section Title */}
+    <section className="bg-white py-8 lg:py-10">
+      <div className="mx-auto max-w-7xl xl:px-0 px-8">
         <motion.h2
-          className="text-lg font-medium md:text-[18px] text-center mb-6"
+          className="text-xl font-semibold text-gray-900 text-center mb-8"
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -71,27 +64,23 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
           Tools & Calculators
         </motion.h2>
 
-        {/* Tools Grid - 2x2 layout */}
-        {/* Tools Grid */}
-<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-  {tools.map((tool, index) => (
-    <ToolCard
-      key={tool.id}
-      id={tool.id}
-      title={tool.title}
-      description={tool.description}
-      href={tool.href}
-      imagePath={tool.imagePath}
-      fallbackIcon={tool.fallbackIcon}
-      index={index}
-    />
-  ))}
-</div>
-
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {tools.map((tool, index) => (
+            <ToolCard
+              key={tool.id}
+              id={tool.id}
+              title={tool.title}
+              description={tool.description}
+              href={tool.href}
+              imagePath={tool.imagePath}
+              fallbackIcon={tool.fallbackIcon}
+              index={index}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
 export default ToolsCalculatorsSection;
-

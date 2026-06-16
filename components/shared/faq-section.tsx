@@ -46,9 +46,8 @@ const FaqAccordionItem = ({
 					{item.question}
 				</span>
 				<ChevronDown
-					className={`w-5 h-5 text-gray-500 shrink-0 transition-transform duration-300 ${
-						isExpanded ? 'rotate-180' : ''
-					}`}
+					className={`w-5 h-5 text-gray-500 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''
+						}`}
 				/>
 			</button>
 			<AnimatePresence initial={false}>
@@ -87,7 +86,7 @@ const FaqSection = (): React.ReactNode => {
 		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
 			{/* Section Title */}
 			<motion.h2
-				className="text-lg md:text-[18px] md:text-2xl font-medium text-center mb-6 sm:mb-8"
+				className="text-xl font-semibold text-gray-900 text-center mb-8"
 				initial={{ opacity: 0, y: 10 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: true }}

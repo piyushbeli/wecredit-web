@@ -24,6 +24,8 @@ const ToolCard = ({
   fallbackIcon: FallbackIcon,
   index,
 }: ToolCardProps): React.ReactNode => {
+  const displayTitle = title.replace('\n', ' ');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -33,56 +35,36 @@ const ToolCard = ({
         type: 'spring',
         stiffness: 100,
         damping: 15,
-        delay: index * 0.1,
+        delay: index * 0.08,
       }}
       className="h-full"
     >
       <Link
         href={href}
-        className="group block h-full rounded-xl border border-gray-100 bg-white  shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200"
+        className="group block h-full min-h-[148px] rounded-xl border border-gray-100 bg-white p-4 relative overflow-hidden hover:border-gray-200 transition-colors"
       >
-        <div className="flex flex-col h-full">
-  
-  {/* Row: Image + Title */}
-  <div className="flex items-center gap-1 px-1 mt-2">
-    <motion.div
-      className="w-14 h-14 md:w-18 md:h-18 relative flex-shrink-0"
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-    >
-      {imagePath ? (
-        <Image
-          src={imagePath}
-          alt={title.replace('\n', ' ')}
-          fill
-          className="object-contain"
-          sizes="48px"
-        />
-      ) : FallbackIcon ? (
-        <div className="w-full h-full rounded-xl bg-linear-to-br from-wc-blue-50 to-wc-blue-100 flex items-center justify-center">
-          <FallbackIcon className="w-6 h-6 text-wc-blue-500" strokeWidth={1.5} />
+        <h3 className="text-sm font-semibold text-gray-900 leading-tight pr-16">
+          {displayTitle}
+        </h3>
+        <p className="text-xs text-gray-500 mt-1 leading-snug pr-14">
+          {description}
+        </p>
+
+        <div className="absolute bottom-0 right-0 w-[88px] h-[88px] sm:w-[96px] sm:h-[96px]">
+          {imagePath ? (
+            <Image
+              src={imagePath}
+              alt={displayTitle}
+              fill
+              className="object-contain object-bottom-right"
+              sizes="96px"
+            />
+          ) : FallbackIcon ? (
+            <div className="w-full h-full flex items-end justify-end pb-1 pr-1">
+              <FallbackIcon className="w-10 h-10 text-wc-blue-500" strokeWidth={1.5} />
+            </div>
+          ) : null}
         </div>
-      ) : (
-        <div className="w-full h-full rounded-xl bg-linear-to-br from-wc-blue-50 to-wc-blue-100" />
-      )}
-    </motion.div>
-
-    <h3 className="text-sm font-medium leading-tight">
-      {title.split('\n').map((line, idx) => (
-        <span key={idx}>
-          {line}
-          {idx < title.split('\n').length - 1 && <br />}
-        </span>
-      ))}
-    </h3>
-  </div>
-
-  {/* Description */}
-  <p className="text-xs text-gray-500 leading-snug mt-0 mb-4 mx-2">
-    {description}
-  </p>
-
-</div>
       </Link>
     </motion.div>
   );

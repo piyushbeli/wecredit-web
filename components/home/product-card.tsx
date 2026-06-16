@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 
-/** Props for ProductCard component */
 interface ProductCardProps {
   id: string;
   label: string;
@@ -15,9 +14,6 @@ interface ProductCardProps {
   index: number;
 }
 
-/**
- * Individual product card with icon/image and label
- */
 const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardProps): React.ReactNode => {
   return (
     <motion.div
@@ -28,16 +24,18 @@ const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardP
         type: 'spring',
         stiffness: 100,
         damping: 15,
-        delay: index * 0.1,
+        delay: index * 0.08,
       }}
+      className="h-full"
     >
       <Link
         href={href}
-        className="wc-product-card flex flex-col items-center gap-3 p-2"
+        className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl  bg-white hover:border-gray-200 transition-colors"
+      // with border 
+      // className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl border border-gray-100 bg-white hover:border-gray-200 transition-colors"
       >
-        {/* Icon/Image Container - Large circular background */}
         <motion.div
-          className="w-16 h-16 rounded-full bg-wc-blue-100 flex items-center justify-center overflow-hidden"
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-wc-blue-50 flex items-center justify-center"
           whileTap={{ scale: 0.95 }}
         >
           {imagePath ? (
@@ -46,15 +44,14 @@ const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardP
               alt={label}
               width={32}
               height={32}
-              className="object-contain"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
             />
           ) : Icon ? (
-            <Icon className="w-7 h-7 text-wc-blue-500" strokeWidth={2} />
+            <Icon className="w-7 h-7 text-wc-blue-600" strokeWidth={2} />
           ) : null}
         </motion.div>
-        
-        {/* Label */}
-        <span className="text-xs text-center leading-tight">
+
+        <span className="text-xs sm:text-sm font-medium text-gray-700 text-center leading-tight">
           {label}
         </span>
       </Link>

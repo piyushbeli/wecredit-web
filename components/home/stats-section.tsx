@@ -2,7 +2,6 @@
 
 import { motion, Variants } from 'framer-motion';
 
-/** Individual stat configuration */
 interface StatItem {
   id: string;
   value: string;
@@ -10,17 +9,16 @@ interface StatItem {
   label: string;
 }
 
-/** Stats data matching the design */
 const stats: StatItem[] = [
   {
     id: 'users',
     value: '180K',
-    suffix: '+',
+    suffix: ' +',
     label: 'Satisfied Users',
   },
   {
     id: 'disbursal',
-    value: '1000Cr',
+    value: '1000 Cr',
     suffix: '+',
     label: 'Total Disbursal',
   },
@@ -28,11 +26,16 @@ const stats: StatItem[] = [
     id: 'ratings',
     value: '4.2',
     suffix: '',
-    label: 'Total Ratings',
+    label: 'Ratings',
+  },
+  {
+    id: 'support',
+    value: '24/7',
+    suffix: '',
+    label: 'Expert Support',
   },
 ];
 
-/** Animation variants for staggered reveal */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -58,37 +61,43 @@ const itemVariants: Variants = {
 };
 
 /**
- * Stats section displaying key metrics in a 3-column layout
- * Transparent background to show gradient from hero wrapper
+ * Stats section displaying key metrics in a 4-column layout with dividers
  */
 const StatsSection = (): React.ReactNode => {
   return (
-    <section className="py-2">
+    <section className="bg-white py-8 lg:py-10">
       <motion.div
-        className="flex justify-around items-start mx-auto max-w-xl lg:max-w-5xl px-4"
+        className="mx-auto max-w-7xl xl:px-0 px-8"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-50px' }}
       >
-
-        {stats.map((stat) => (
-          <motion.div
-            key={stat.id}
-            className="flex flex-col items-center text-center"
-            variants={itemVariants}
-          >
-            <div className="flex items-baseline">
-              <span className="text-[20px] font-medium text-wc-blue-600 wc-stat-number">
-                {stat.value}
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.id}
+              className={`flex flex-col items-center text-center py-4 lg:py-0 ${index % 2 === 1 ? 'border-l border-gray-200' : ''
+                } ${index >= 2 ? 'md:mt-0 mt-8 border-gray-200 md:border-t-0' : ''} ${index > 0 ? 'md:border-l md:border-gray-200' : ''
+                }`}
+              variants={itemVariants}
+            >
+              <div className="flex items-baseline">
+                <span className="text-xl sm:text-2xl font-semibold text-wc-blue-600 wc-stat-number">
+                  {stat.value}
+                </span>
+                {stat.suffix && (
+                  <span className="text-xl sm:text-2xl font-semibold text-wc-blue-600">
+                    {stat.suffix}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs sm:text-sm text-gray-500 mt-1 leading-tight">
+                {stat.label}
               </span>
-              {stat.suffix && (
-                <span className="text-[20px] font-medium text-wc-blue-600">{stat.suffix}</span>
-              )}
-            </div>
-            <span className="text-[13px] text-gray-600 mt-1 leading-tight">{stat.label}</span>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
     </section>
   );
