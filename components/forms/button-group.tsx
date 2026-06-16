@@ -18,9 +18,13 @@ interface ButtonGroupProps {
   error?: string;
   className?: string;
   buttonClassName?: string;
+  /** Override selected-state styling (e.g. MoneyView green theme). */
+  selectedClassName?: string;
   /** id of a heading/label element; exposes this group to assistive tech like a labeled fieldset. */
   ariaLabelledBy?: string;
 }
+
+const DEFAULT_SELECTED_CLASS = 'bg-blue-50 border-blue-600 text-blue-600';
 
 const ButtonGroup = ({ 
   options, 
@@ -30,6 +34,7 @@ const ButtonGroup = ({
   error,
   className,
   buttonClassName,
+  selectedClassName = DEFAULT_SELECTED_CLASS,
   ariaLabelledBy,
 }: ButtonGroupProps) => {
   return (
@@ -44,7 +49,7 @@ const ButtonGroup = ({
             className={cn(
               'flex-1 px-4 py-3 rounded-lg border text-sm font-medium transition-colors',
               value === option.value
-                ? 'bg-blue-50 border-blue-600 text-blue-600'
+                ? selectedClassName
                 : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400',
               disabled && 'opacity-50 cursor-not-allowed',
               buttonClassName

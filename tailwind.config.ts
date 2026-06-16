@@ -42,6 +42,11 @@ const config = {
           100: '#D9D9D9',
         },
 
+        // MoneyView Brand Colors
+        mv: {
+          green: '#144734',
+        },
+
         // Legacy WeCredit Brand Colors (for backward compatibility)
         wc: {
           blue: {
@@ -135,6 +140,7 @@ const config = {
         sans: ['var(--font-poppins)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
         poppins: ['var(--font-poppins)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
 
       /**
