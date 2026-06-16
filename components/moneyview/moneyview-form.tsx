@@ -20,6 +20,7 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
+import { isMultiLenderCreditCardSectionComplete } from '@/lib/utils/form-helpers';
 
 import DynamicField from '@/components/forms/dynamic-field';
 import { ActionButton } from '@/components/shared';
@@ -46,6 +47,14 @@ function resolveHasCreditCardForPayload(
   if (creditCardAnswer === 'true') return true;
   if (creditCardAnswer === 'false') return false;
   return undefined;
+}
+
+/** Hide credit limit until user selects Yes — same rule as LeadFormModal. */
+function shouldRenderFieldGivenCreditCardChoice(
+  field: FormField,
+  isCreditCardYes: boolean,
+): boolean {
+  return field.key !== 'creditCardLimit' || isCreditCardYes;
 }
 
 const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
@@ -89,7 +98,20 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
   } = useLeadForm(fields, { singlePage: true });
 
   const creditCardAnswer = formValues.hasCreditCard;
+  const isCreditCardYes = creditCardAnswer === 'true';
   const hasWeCreditConsent = formValues.consent === 'true';
+
+  const isCreditCardSectionComplete = isMultiLenderCreditCardSectionComplete(
+    hasCreditCardQuestionField,
+    creditCardAnswer,
+    formValues.creditCardLimit,
+  );
+
+  const visibleFormFields = currentStepFields.filter(
+    (field) =>
+      field.key !== 'consent' &&
+      shouldRenderFieldGivenCreditCardChoice(field, isCreditCardYes),
+  );
 
   // Fetch user IP on mount
   useEffect(() => {
@@ -131,6 +153,16 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
 
       const consentField = fields.find((f) => f.key === 'consent');
       if (consentField && !hasWeCreditConsent) return;
+
+      if (
+        !isMultiLenderCreditCardSectionComplete(
+          hasCreditCardQuestionField,
+          creditCardAnswer,
+          formValues.creditCardLimit,
+        )
+      ) {
+        return;
+      }
 
       const formatDateForApi = (dateStr: string): string => {
         if (!dateStr) return '';
@@ -334,9 +366,7 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col max-w-xl mx-auto w-full">
         <div className="flex-1 px-4 py-6 space-y-5">
-          {currentStepFields
-            .filter((field) => field.key !== 'consent')
-            .map((field) => renderField(field))}
+          {visibleFormFields.map((field) => renderField(field))}
 
           {/* Consent checkbox */}
           <div className="space-y-2">
@@ -371,7 +401,7 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
         <div className="border-t bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
           <ActionButton
             type="submit"
-            disabled={!hasWeCreditConsent}
+            disabled={!hasWeCreditConsent || !isCreditCardSectionComplete}
             isLoading={isSubmitting}
             fullWidth
             className="h-12 text-lg !bg-mv-green hover:!bg-mv-green/90"
