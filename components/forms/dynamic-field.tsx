@@ -30,7 +30,26 @@ interface DynamicFieldProps {
   error?: string;
   /** Whether the field is disabled */
   disabled?: boolean;
+  /** Visual theme for lender-specific branding */
+  theme?: 'default' | 'moneyview';
 }
+
+const FIELD_THEMES = {
+  default: {
+    buttonSelected: 'bg-blue-50 border-blue-600 text-blue-600',
+    buttonFocus: 'focus:ring-blue-500',
+    checkbox: 'accent-blue-600 focus:ring-blue-500',
+    inputFocus: 'focus:ring-blue-500',
+    link: 'text-blue-600',
+  },
+  moneyview: {
+    buttonSelected: 'bg-mv-green/10 border-mv-green text-mv-green',
+    buttonFocus: 'focus:ring-mv-green',
+    checkbox: 'accent-mv-green focus:ring-mv-green',
+    inputFocus: 'focus:ring-mv-green',
+    link: 'text-mv-green',
+  },
+} as const;
 
 /** Fields that should be hidden (auto-filled, never shown) */
 const HIDDEN_FIELDS: FormFieldKey[] = ['ConsentIp', 'ConsentDateTime'];
@@ -157,8 +176,10 @@ const DynamicField = ({
   onBlur,
   error,
   disabled = false,
+  theme = 'default',
 }: DynamicFieldProps) => {
   const { title, key, type, options, isMandatory } = field;
+  const themeStyles = FIELD_THEMES[theme];
 
   if (key === 'hasCreditCard') {
     return (
@@ -177,7 +198,11 @@ const DynamicField = ({
             disabled={disabled}
             error={error}
             className="gap-3"
-            buttonClassName="py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            selectedClassName={themeStyles.buttonSelected}
+            buttonClassName={cn(
+              'py-3 text-base focus:outline-none focus:ring-2 focus:ring-offset-2',
+              themeStyles.buttonFocus,
+            )}
           />
         </div>
       </div>
@@ -206,7 +231,10 @@ const DynamicField = ({
               id={key}
               checked={isChecked}
               onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
-className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"            />
+              className={cn(
+                'mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 cursor-pointer shrink-0',
+                themeStyles.checkbox,
+              )}            />
            <label htmlFor={key} className="text-sm text-gray-700 leading-relaxed">
   {title}
 </label>
@@ -226,13 +254,16 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
             id={key}
             checked={isChecked}
             onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
-            className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+                          className={cn(
+                'mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 cursor-pointer shrink-0',
+                themeStyles.checkbox,
+              )}
           />
           <label htmlFor={key} className="text-sm text-gray-700">
   {key === 'consent' ? (
     <>
     I agree to the{' '}
-    <Link target="_blank" href="/terms-of-service" className="text-blue-600 underline">
+    <Link target="_blank" href="/terms-of-service" className={cn('underline', themeStyles.link)}>
       Terms of Service
     </Link>{' '}
     of WeCredit.
@@ -280,6 +311,7 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
             onChange={onChange}
             disabled={disabled}
             error={error}
+            selectedClassName={themeStyles.buttonSelected}
           />
         </div>
       );
@@ -302,7 +334,8 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
             disabled={disabled}
           className={cn(
             'w-full px-4 py-3 rounded-lg border text-base transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:border-transparent',
+            themeStyles.inputFocus,
             'appearance-none bg-white pr-10 cursor-pointer',
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
               disabled && 'opacity-50 cursor-not-allowed'
@@ -365,7 +398,8 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
           disabled={disabled}
           className={cn(
             'w-full px-4 py-3 rounded-lg border text-base transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:border-transparent',
+            themeStyles.inputFocus,
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
@@ -403,7 +437,8 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
           maxLength={10}
           className={cn(
             'w-full px-4 py-3 rounded-lg border text-base transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:border-transparent',
+            themeStyles.inputFocus,
             '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
             disabled && 'opacity-50 cursor-not-allowed'
@@ -439,7 +474,8 @@ className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 text-b
         maxLength={getMaxLength(key)}
         className={cn(
           'w-full px-4 py-3 rounded-lg border text-base transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+          'focus:outline-none focus:ring-2 focus:border-transparent',
+          themeStyles.inputFocus,
           '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
           error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
           disabled && 'opacity-50 cursor-not-allowed'
