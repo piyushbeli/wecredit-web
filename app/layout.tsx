@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
-import { Geist, Geist_Mono, Poppins } from 'next/font/google';
+import { Geist, Geist_Mono, Poppins, Manrope } from 'next/font/google';
 import './globals.css';
 import ConditionalMobileHeader from '@/components/layout/conditional-mobile-header';
 import ConditionalFooter from '@/components/layout/conditional-footer';
@@ -26,6 +26,12 @@ const poppins = Poppins({
   variable: '--font-poppins',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
+});
+
+const manrope = Manrope({
+  variable: '--font-manrope',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 /**
@@ -60,7 +66,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="overscroll-y-none">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${poppins.className} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${manrope.variable} ${poppins.className} antialiased min-h-screen flex flex-col`}
       >
         {/* GTM lives in <body> — do not wrap in a manual <head>; Next.js manages head via Metadata API (title, canonical, etc.) */}
         <Script id="gtm-script" strategy="afterInteractive">

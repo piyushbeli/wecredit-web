@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
+import { MoneyViewForm } from '@/components/moneyview';
 import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 import { useAuth } from '@/hooks/use-auth';
@@ -124,6 +125,9 @@ export const CampaignLandingClient = ({
   const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
   const showForm = !error && !!canonicalLenderName;
 
+  // Check if this is a MoneyView lender for custom form rendering
+  const isMoneyViewLender = canonicalLenderName?.toLowerCase() === 'moneyview';
+
   return (
     <>
       {/* Auto-Fill Modal - shown first (renders above the original page background) */}
@@ -142,11 +146,18 @@ export const CampaignLandingClient = ({
 
       {/* Fixed overlay - only shown AFTER auto-fill modal closes */}
       {showLeadFormModal && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col">
+        <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto">
           {isLoading || !showForm ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50">
               <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
             </div>
+          ) : isMoneyViewLender ? (
+            <MoneyViewForm
+              onSuccess={() => {
+                setShowLeadFormModal(false);
+              }}
+              onClose={handleCloseModal}
+            />
           ) : (
             <LeadFormModal
               isOpen={showLeadFormModal}

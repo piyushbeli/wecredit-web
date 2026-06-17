@@ -3,6 +3,7 @@
  * Use these constants instead of hardcoded strings to ensure consistency
  * and make path changes easier.
  */
+import XIcon from '@/public/assets/images/XIcon.png';
 
 const BUCKET_IMAGE_URL = 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com';
 
@@ -11,6 +12,7 @@ export const IMAGES = {
   LOGOS: {
     DEFAULT: `${BUCKET_IMAGE_URL}/logo.png`,
     TRANSPARENT: `${BUCKET_IMAGE_URL}/logo-transparent.jpg`,
+    X_ICON: XIcon,
   },
   CAROUSEL: {
     SLIDE_1: `${BUCKET_IMAGE_URL}/carousel-one.png`,
