@@ -15,9 +15,11 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
+import { MoneyViewForm } from '@/components/moneyview';
 import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 import { useAuth } from '@/hooks/use-auth';
+import { useRequireLogin } from '@/hooks/use-require-login';
 
 interface CampaignLandingClientProps {
   lenderName: string;
@@ -52,6 +54,16 @@ export const CampaignLandingClient = ({
     window.location.href = window.location.origin;
   }, [router]);
 
+  const mobile = searchParams.get('mn');
+  const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
+
+  // No mobile param: require login first, same auth-first gate the multi-lender apply
+  // flow uses (PersonalLoanContent.handleOpenModal opens the auth modal before any apply modal).
+  useRequireLogin({
+    shouldTrigger: !isLoading && !error && !!canonicalLenderName && !mobile,
+    onCancel: handleCloseModal,
+  });
+
   // Reset modal state on mount (prevents reopening on browser back)
   useEffect(() => {
     setShowAutoFillModal(false);
@@ -68,13 +80,11 @@ export const CampaignLandingClient = ({
       return;
     }
     // Lender not in active list: redirect with specific error
-    const canonicalName = getMatchedLenderCanonicalName(lenderName, activeLenders);
-    if (!canonicalName) {
+    if (!canonicalLenderName) {
       toast.error(INCORRECT_LENDER_ERROR);
       router.replace('/');
       return;
     }
-    const mobile = searchParams.get('mn');
 
     if (mobile && isAuthenticated && !alreadyLoggedInToastRef.current) {
       const existingDigits = (user?.phoneNumber || '').replace(/\D/g, '');
@@ -95,9 +105,15 @@ export const CampaignLandingClient = ({
       return;
     }
 
+    // No mobile param and not authenticated: useRequireLogin above owns the auth
+    // gate (opens the login modal, redirects home on cancel) — wait for it.
+    if (!mobile && !isAuthenticated) {
+      return;
+    }
+
     // Valid lender: show auto-fill modal first
     setShowAutoFillModal(true);
-  }, [isLoading, error, activeLenders, lenderName, router, searchParams, isAuthenticated, user, openAuthModalWithPhone]);
+  }, [isLoading, error, canonicalLenderName, mobile, router, isAuthenticated, user, openAuthModalWithPhone]);
 
   /**
    * Handle auto-fill modal proceed
@@ -121,8 +137,10 @@ export const CampaignLandingClient = ({
   }, [isDebugMode]);
 
   // Guard: Do not render form if API failed or lender is invalid (will redirect from useEffect)
-  const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
   const showForm = !error && !!canonicalLenderName;
+
+  // Check if this is a MoneyView lender for custom form rendering
+  const isMoneyViewLender = canonicalLenderName?.toLowerCase() === 'moneyview';
 
   return (
     <>
@@ -142,11 +160,18 @@ export const CampaignLandingClient = ({
 
       {/* Fixed overlay - only shown AFTER auto-fill modal closes */}
       {showLeadFormModal && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col">
+        <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto">
           {isLoading || !showForm ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50">
               <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
             </div>
+          ) : isMoneyViewLender ? (
+            <MoneyViewForm
+              onSuccess={() => {
+                setShowLeadFormModal(false);
+              }}
+              onClose={handleCloseModal}
+            />
           ) : (
             <LeadFormModal
               isOpen={showLeadFormModal}
