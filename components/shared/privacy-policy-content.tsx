@@ -220,7 +220,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
           </p>
 
           <p>
-            4.2. Such activities are usually carried on by unauthorized individuals and are illegal in nature. They are called phishing or identity theft. In case of any suspicion of such activity or on receiving such an e-mail you are certain it was not sent by us. We advise you to not respond to such mail and to take whatever action you see fit. You may inform us of such instances by writing to us at care@wecredit.co.in.
+            4.2. Such activities are usually carried on by unauthorized individuals and are illegal in nature. They are called phishing or identity theft. In case of any suspicion of such activity or on receiving such an e-mail you are certain it was not sent by us. We advise you to not respond to such mail and to take whatever action you see fit. You may inform us of such instances by writing to us at{' '}
+            <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>.
           </p>
         </div>
       </div>
@@ -244,7 +245,9 @@ const PrivacyPolicyContent = (): React.ReactNode => {
           </p>
 
           <p>
-            6.2. We encourage you to review the information and inform about any discrepancies and information found to be inaccurate shall be corrected or amended. Please reach out to us at care@wecredit.co.in in case you would like to review the information collected by us.
+            6.2. We encourage you to review the information and inform about any discrepancies and information found to be inaccurate shall be corrected or amended. Please reach out to us at{' '}
+            <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>
+            {' '}in case you would like to review the information collected by us.
           </p>
         </div>
       </div>
@@ -302,7 +305,9 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
         <div className="space-y-4 ">
           <p>
-            10.1. You may choose to withdraw your consent provided hereunder at any point in time. Such withdrawal of consent must be sent in writing to care@wecredit.co.in. In case you later withdraw your consent, we request you not to access the Platform and/or use the Services and also reserve the right to not provide you any Services through the Platform.
+            10.1. You may choose to withdraw your consent provided hereunder at any point in time. Such withdrawal of consent must be sent in writing to{' '}
+            <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>.
+            {' '}In case you later withdraw your consent, we request you not to access the Platform and/or use the Services and also reserve the right to not provide you any Services through the Platform.
           </p>
 
           <p>
@@ -336,8 +341,14 @@ const PrivacyPolicyContent = (): React.ReactNode => {
           <div className="space-y-2">
             <p>Name: Abhay Padoor</p>
             <p>Address: Office No S7, 2nd floor Pinnacle Business Park, Mahakali caves Rd, Shanti Nagar, Andheri East Mumbai 400093</p>
-            <p>Cell: +91 9240249293</p>
-            <p>Email ID: care@wecredit.co.in</p>
+            <p>
+              Cell:{' '}
+              <a href="tel:+919240249293">+91 9240249293</a>
+            </p>
+            <p>
+              Email ID:{' '}
+              <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>
+            </p>
           </div>
 
           <p>
@@ -359,7 +370,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
         <h2 className="text-black/80 text-base font-medium ">12. How to Contact Us</h2>
 
         <p className="">
-          If You have questions or concerns about this Policy, please contact us at the following email address: care@wecredit.co.in.
+          If You have questions or concerns about this Policy, please contact us at the following email address:{' '}
+          <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>.
         </p>
       </div>
 

@@ -14,7 +14,7 @@ const PrivacyPolicyWrapper = ({
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'PRIVACY POLICY',
+        title: 'Privacy Policy',
         iconImage: IMAGES.ICONS.WECREDIT_HEART,
         iconAlt: 'WeCredit Heart Icon',
       }}
@@ -22,7 +22,7 @@ const PrivacyPolicyWrapper = ({
     >
       <h1 className="sr-only">Privacy Policy</h1>
       <div
-        className="prose max-w-none"
+        className="wc-static-content max-w-none"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
     </FooterLinkPageWrapper>

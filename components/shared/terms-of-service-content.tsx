@@ -433,8 +433,14 @@ const TermsOfServiceContent = (): React.ReactNode => {
           <div className="space-y-2">
             <p>Name: Abhay Padoor</p>
             <p>Address: Office No S7, 2nd floor Pinnacle Business Park, Mahakali caves Rd, Shanti Nagar, Andheri East Mumbai 400093</p>
-            <p>Cell: +91 9240249293</p>
-            <p>Email ID: care@wecredit.co.in</p>
+            <p>
+              Cell:{' '}
+              <a href="tel:+919240249293">+91 9240249293</a>
+            </p>
+            <p>
+              Email ID:{' '}
+              <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>
+            </p>
           </div>
 
           <p>
@@ -461,7 +467,8 @@ const TermsOfServiceContent = (): React.ReactNode => {
 
         <div className="space-y-4">
           <p>
-            If you have questions or concerns about the Terms, please contact WeCredit at the following email address: care@wecredit.co.in
+            If you have questions or concerns about the Terms, please contact WeCredit at the following email address:{' '}
+            <a href="mailto:care@wecredit.co.in">care@wecredit.co.in</a>
           </p>
         </div>
       </div>

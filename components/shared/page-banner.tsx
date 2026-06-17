@@ -38,9 +38,9 @@ interface PageBannerProps {
   showIcon?: boolean;
   /** Additional CSS classes */
   className?: string;
-  /** Width class (default: "w-full md:w-96") */
+  /** Width class (default fills the available viewport while keeping page gutters) */
   width?: string;
-  /** Height class (default: "h-32") */
+  /** Height/min-height class */
   height?: string;
 }
 
@@ -57,8 +57,8 @@ const PageBanner = ({
   iconAlt = 'Icon',
   showIcon = true,
   className,
-  width = 'w-full md:w-96',
-  height = 'h-32',
+  width = 'w-full',
+  height = 'min-h-[150px] sm:min-h-[180px] lg:min-h-[204px]',
 }: PageBannerProps): React.ReactNode => {
   // Handle edge case: empty or invalid title
   if (!title || title.trim().length === 0) {
@@ -77,16 +77,17 @@ const PageBanner = ({
     <div
       className={cn(
         width,
-        'relative py-6',
-        isDefaultGradient ? 'bg-[linear-gradient(180deg,_#1562D8_0%,_#FFFFFF_100%)]'
+        height,
+        'relative px-4 py-8 sm:px-6',
+        isDefaultGradient ? 'bg-[linear-gradient(180deg,_#1562D8_0%,_#8FB9F1_52%,_#FFFFFF_100%)]'
           : '',
-        'rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4',
+        'rounded-xl overflow-hidden flex flex-col items-center justify-start gap-5 sm:gap-6 ',
         className
       )}
       style={gradientStyle}
     >
       {/* Title */}
-      <div className="text-center text-white text-xl font-semibold  leading-6">
+      <div className="text-center text-white text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight">
         {title}
       </div>
 
@@ -95,15 +96,18 @@ const PageBanner = ({
         <Image
           src={iconImage}
           alt={iconAlt}
-          width={32}
-          height={40}
-          className="object-contain"
+          width={56}
+          height={68}
+          className="h-auto w-12 object-contain sm:w-14"
         />
       ) : (
         showIcon && (
-          <div className="flex flex-col items-center">
-            <div className="w-8 h-10 bg-white outline outline-[1.5px] outline-white" />
-            <div className="w-3.5 h-3.5 bg-blue-700 outline outline-[0.72px] outline-white -mt-6" />
+          <div className="flex flex-col items-center" aria-hidden="true">
+            <div
+              className="h-14 w-11 bg-white"
+              style={{ clipPath: 'polygon(50% 0, 100% 18%, 100% 48%, 82% 78%, 50% 100%, 18% 78%, 0 48%, 0 18%)' }}
+            />
+            <div className="-mt-8 h-4 w-4 rounded-full bg-[#1562D8]" />
           </div>
         )
       )}

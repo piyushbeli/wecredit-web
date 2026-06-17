@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
-import { sanitizeExternalHtml } from '@/lib/seo/sanitize-external-html';
+import { linkContactDetails, sanitizeExternalHtml } from '@/lib/seo/sanitize-external-html';
 import PrivacyPolicyWrapper from '@/components/shared/privacy-policy-wrapper';
 
 /** Force static generation with 30-minute revalidation */
@@ -27,7 +27,7 @@ async function getPrivacyContent(): Promise<string> {
   const html = await res.text();
 
   // Strip document-level tags and first <h1> (page renders its own semantic H1)
-  return sanitizeExternalHtml(html);
+  return linkContactDetails(sanitizeExternalHtml(html));
 }
 
 
@@ -38,8 +38,8 @@ const PrivacyPolicyPage = async (): Promise<React.ReactNode> => {
   const htmlContent = await getPrivacyContent();
 
   return (
-    <div className="max-w-4xl mx-auto">
-      
+    <div className="max-w-7xl mx-auto">
+
       <PrivacyPolicyWrapper htmlContent={htmlContent} />
     </div>
   );

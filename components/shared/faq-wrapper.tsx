@@ -15,7 +15,11 @@ const FaqWrapper = (): ReactNode => {
       contentClassName="px-4"
     >
       <h1 className="sr-only">WeCredit FAQs</h1>
-      <FaqSection />
+      <FaqSection
+        showTitle={false}
+        className="px-0 py-0 sm:py-0 md:py-0"
+        listClassName="max-w-none"
+      />
     </FooterLinkPageWrapper>
   );
 };

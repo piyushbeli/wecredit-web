@@ -164,6 +164,44 @@
   }
 }
 
+@layer components {
+  .wc-static-content {
+    @apply text-[13px] leading-6 text-zinc-600 sm:text-sm sm:leading-7 lg:text-base lg:leading-8;
+  }
+
+  .wc-static-content :where(p, ul, ol, table, blockquote) {
+    @apply mb-4;
+  }
+
+  .wc-static-content :where(h2, h3, h4) {
+    @apply mt-6 mb-3 text-zinc-900 font-semibold leading-snug;
+  }
+
+  .wc-static-content :where(h2) {
+    @apply text-base sm:text-lg lg:text-xl;
+  }
+
+  .wc-static-content :where(h3) {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .wc-static-content :where(a) {
+    @apply text-blue-700 underline underline-offset-2;
+  }
+
+  .wc-static-content :where(ul, ol) {
+    @apply pl-5;
+  }
+
+  .wc-static-content :where(ul) {
+    @apply list-disc;
+  }
+
+  .wc-static-content :where(ol) {
+    @apply list-decimal;
+  }
+}
+
 /* =============================================================================
  * WeCredit Home Screen Styles
  * ============================================================================= */

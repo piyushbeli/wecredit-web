@@ -8,7 +8,7 @@ export const BackToHomeButton = (): JSX.Element => {
   const router = useRouter();
 
   const handleBackToHome = (): void => {
-    router.replace('/');
+    router.push('/');
   };
 
   return (
@@ -17,13 +17,17 @@ export const BackToHomeButton = (): JSX.Element => {
         type="button"
         onClick={handleBackToHome}
         variant="ghost"
-        className="border-none shadow-none px-0"
         size="sm"
+        title="Back to Home"
+        aria-label="Back to Home"
+        className="border-none cursor-pointer shadow-none px-0 transition-transform duration-150 hover:opacity-95 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-600"
         leftIcon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
-            className="size-4"
+            className="h-4 w-4"
+            aria-hidden="true"
+            focusable="false"
           >
             <path
               fillRule="evenodd"

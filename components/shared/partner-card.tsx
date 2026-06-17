@@ -17,14 +17,16 @@ interface PartnerCardProps {
 const DetailRow = ({
   label,
   value,
-  isLink = false,
+  href,
   showBorder = true,
 }: {
   label: string;
   value: string;
-  isLink?: boolean;
+  href?: string;
   showBorder?: boolean;
 }): JSX.Element => {
+  const isExternalLink = href?.startsWith('http');
+
   return (
     <div className={`flex items-stretch ${showBorder ? 'border-t border-white' : ''}`}>
 
@@ -37,11 +39,11 @@ const DetailRow = ({
 
       {/* Right Column */}
       <div className="flex-1 bg-[#F3F6FF] flex items-center px-3 py-[5px]">
-        {isLink ? (
+        {href ? (
           <a
-            href={value}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={href}
+            target={isExternalLink ? '_blank' : undefined}
+            rel={isExternalLink ? 'noopener noreferrer' : undefined}
             className="text-zinc-800 text-xs font-normal  underline leading-4 hover:text-blue-600 transition-colors"
           >
             {value}
@@ -62,6 +64,8 @@ const DetailRow = ({
  */
 const PartnerCard = ({ partner }: PartnerCardProps): JSX.Element => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const phoneHref = partner.phone ? `tel:${partner.phone.replace(/[^\d+]/g, '')}` : undefined;
+  const emailHref = partner.email ? `mailto:${partner.email}` : undefined;
 
   const toggleExpanded = (): void => {
     setIsExpanded((prev) => !prev);
@@ -107,7 +111,7 @@ const PartnerCard = ({ partner }: PartnerCardProps): JSX.Element => {
       {/* Always Visible Details */}
       <div className="w-full">
         <DetailRow showBorder={false} label="Company Name" value={partner.companyName} />
-        <DetailRow label="Phone" value={partner.phone} />
+        <DetailRow label="Phone" value={partner.phone} href={phoneHref} />
       </div>
 
       {/* Expandable Details */}
@@ -117,8 +121,8 @@ const PartnerCard = ({ partner }: PartnerCardProps): JSX.Element => {
       >
         <div className="w-full">
           <DetailRow label="Officer" value={partner.officer} />
-          <DetailRow label="Email" value={partner.email} />
-          <DetailRow label="Link" value={partner.websiteLink} isLink />
+          <DetailRow label="Email" value={partner.email} href={emailHref} />
+          <DetailRow label="Link" value={partner.websiteLink} href={partner.websiteLink} />
         </div>
       </div>
     </div>

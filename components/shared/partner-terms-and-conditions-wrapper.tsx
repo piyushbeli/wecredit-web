@@ -15,10 +15,10 @@ const PartnerTermsAndConditionsWrapper = ({
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'PARTNER TERMS & CONDITIONS',
+        title: 'Partner Terms & Conditions',
         iconImage: PARTNER_TERMS_BANNER_ICON,
       }}
-      contentClassName="mt-10 flex flex-col gap-6 items-center px-4"
+      contentClassName="mt-10 grid gap-6 px-4 sm:grid-cols-2 xl:grid-cols-3"
     >
       <h1 className="sr-only">Partner Terms &amp; Conditions</h1>
       {children}
