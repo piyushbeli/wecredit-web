@@ -59,11 +59,11 @@ const OurPartnersPage = async (): Promise<React.ReactNode> => {
       className="min-h-screen bg-white"
       contentClassName="max-w-2xl mx-auto px-4 pt-4"
     >
-      <h2 className="font-['Poppins'] font-normal text-base leading-7 tracking-normal text-zinc-800">
+      <h2 className="font-normal text-base leading-7 tracking-normal text-zinc-800">
         Personal Loans Partners
       </h2>
 
-      <p className="font-['Poppins'] font-normal text-xs leading-5 tracking-normal text-zinc-500 mb-4 mt-1">
+      <p className="font-normal text-xs leading-5 tracking-normal text-zinc-500 mb-4 mt-1">
         Tap &apos;More Info&apos; on a partner card to see additional details like grievance
         officer, email, and website links.
       </p>

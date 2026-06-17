@@ -81,7 +81,7 @@ const CountdownTimer = ({ countdown, totalDuration }: CountdownTimerProps): JSX.
 
       {/* Countdown text in center */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-slate-950 text-2xl font-medium font-['Poppins'] leading-none tracking-wide">
+        <span className="text-slate-950 text-2xl font-medium  leading-none tracking-wide">
           {formatTime(countdown)}
         </span>
       </div>

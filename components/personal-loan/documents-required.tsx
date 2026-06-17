@@ -32,9 +32,8 @@ const TabButton = ({ label, isActive, onClick }: TabButtonProps): JSX.Element =>
 		<button
 			type="button"
 			onClick={onClick}
-			className={`w-28 h-8 rounded-md text-xs font-medium font-['Poppins'] leading-5 transition-colors ${
-				isActive ? activeStyles : inactiveStyles
-			}`}
+			className={`w-28 h-8 rounded-md text-xs font-medium  leading-5 transition-colors ${isActive ? activeStyles : inactiveStyles
+				}`}
 		>
 			{label}
 		</button>
@@ -65,11 +64,11 @@ const DocumentRow = ({ document }: DocumentRowProps): JSX.Element => {
 
 			{/* Document Details */}
 			<div className="flex-1">
-				<span className="text-zinc-800 text-sm font-medium font-['Poppins'] leading-5">
+				<span className="text-zinc-800 text-sm font-medium  leading-5">
 					{document.title}
 				</span>
 				<br />
-				<span className="text-zinc-500 text-xs font-normal font-['Poppins'] leading-5">
+				<span className="text-zinc-500 text-xs font-normal  leading-5">
 					{document.description}
 				</span>
 			</div>
@@ -96,12 +95,12 @@ const DocumentsRequired = (): JSX.Element => {
 				className="max-w-3xl mx-auto"
 			>
 				{/* Section Title */}
-				<h2 className="text-base font-medium text-center text-black/80 font-['Poppins'] mb-2">
+				<h2 className="text-base font-medium text-center text-black/80  mb-2">
 					Documents Required for Personal Loan
 				</h2>
 
 				{/* Subtitle */}
-				<p className="text-sm text-zinc-500 font-normal font-['Poppins'] leading-5 mb-6">
+				<p className="text-sm text-zinc-500 font-normal  leading-5 mb-6">
 					Basically it depends on the lender how they verify the customer, here are some common
 					documents required for personal loan application.
 				</p>

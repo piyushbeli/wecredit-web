@@ -30,7 +30,7 @@ const DetailRow = ({
 
       {/* Left Column */}
       <div className="w-40 bg-[#F3F6FF] border-r border-white flex items-center px-3 py-[13px]">
-        <div className="text-zinc-800 text-xs font-normal font-['Poppins'] leading-4">
+        <div className="text-zinc-800 text-xs font-normal  leading-4">
           {label}
         </div>
       </div>
@@ -42,12 +42,12 @@ const DetailRow = ({
             href={value}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-800 text-xs font-normal font-['Poppins'] underline leading-4 hover:text-blue-600 transition-colors"
+            className="text-zinc-800 text-xs font-normal  underline leading-4 hover:text-blue-600 transition-colors"
           >
             {value}
           </a>
         ) : (
-          <div className="text-zinc-800 text-xs font-normal font-['Poppins'] leading-4">
+          <div className="text-zinc-800 text-xs font-normal  leading-4">
             {value}
           </div>
         )}
@@ -93,7 +93,7 @@ const PartnerCard = ({ partner }: PartnerCardProps): JSX.Element => {
           aria-expanded={isExpanded}
           aria-label={`${isExpanded ? 'Hide' : 'Show'} more information about ${partner.companyName}`}
         >
-          <span className="text-center text-blue-500 text-xs font-normal font-['Poppins'] leading-3">
+          <span className="text-center text-blue-500 text-xs font-normal  leading-3">
             More Info
           </span>
           <ChevronRight

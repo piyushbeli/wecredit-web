@@ -27,14 +27,14 @@ const InfoCard = ({
     </div>
 
     <div className="p-3 text-center">
-      <h3 className="font-['Poppins'] font-medium text-base leading-none tracking-normal text-zinc-800">
+      <h3 className=" font-medium text-base leading-none tracking-normal text-zinc-800">
         {title}
       </h3>
 
       {description && (
         <>
           <div className="h-2" />
-          <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-zinc-500">
+          <p className=" font-normal text-sm leading-[1.2] tracking-normal text-zinc-500">
             {description}
           </p>
         </>
@@ -65,7 +65,7 @@ const BrandCard = ({ name, logo, url, displayUrl }: BrandCardProps) => (
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-[#045BCF] hover:underline"
+        className=" font-normal text-sm leading-[1.2] tracking-normal text-[#045BCF] hover:underline"
       >
         {displayUrl}
       </a>
@@ -76,7 +76,7 @@ const BrandCard = ({ name, logo, url, displayUrl }: BrandCardProps) => (
 const AboutUsContent = (): React.ReactNode => {
   const isMobilePlatform = useIsMobilePlatform();
   return (
-    <div className={`w-full lg:-mt-10  ${!isMobilePlatform? 'pt-18':''} pb-8 md:pt-28 md:pb-12`}>
+    <div className={`w-full lg:-mt-10  ${!isMobilePlatform ? 'pt-18' : ''} pb-8 md:pt-28 md:pb-12`}>
 
       <div className="bg-[linear-gradient(96.83deg,#CCDFFC_35.72%,#FAFCFF_100%)] px-4 py-6 mb-4">
         {!isMobilePlatform && (
@@ -85,20 +85,20 @@ const AboutUsContent = (): React.ReactNode => {
           </div>
         )}
 
-        <h1 className="font-['Poppins'] font-medium text-2xl leading-none tracking-normal text-zinc-800">
+        <h1 className=" font-medium text-2xl leading-none tracking-normal text-zinc-800">
           About WeCredit
         </h1>
 
         <div className="h-4" />
 
-        <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-zinc-600">
+        <p className=" font-normal text-sm leading-[1.2] tracking-normal text-zinc-600">
           At WeCredit, we believe that managing credit should be easy and transparent without confusion or hidden details.
         </p>
       </div>
 
       <div className="px-4">
 
-         {/* Hero Image */}
+        {/* Hero Image */}
         <div className="w-full overflow-hidden mb-8">
           <img
             src="https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/Heroimage.png"
@@ -107,20 +107,20 @@ const AboutUsContent = (): React.ReactNode => {
           />
         </div>
 
-        <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
+        <h3 className=" font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
           We make personal finance simple and transparent.
         </h3>
 
-        <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-[#7F7F7F] mb-8">
+        <p className=" font-normal text-sm leading-[1.2] tracking-normal text-[#7F7F7F] mb-8">
           With the help of data and technology, WeCredit lets you view and compare multiple loan and card offers in one place. We share clear and unbiased information to help you make better decisions and support you throughout your credit journey.
         </p>
 
         {/* Team */}
-        {/* <h3 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
+        {/* <h3 className=" font-medium text-base leading-[1] tracking-normal text-zinc-800 mb-4">
           Meet the Team Behind WeCredit
         </h3>
 
-        <p className="font-['Poppins'] font-normal text-sm leading-[1.2] tracking-normal text-[#7F7F7F] mb-10">
+        <p className=" font-normal text-sm leading-[1.2] tracking-normal text-[#7F7F7F] mb-10">
           Our leadership team brings experience from key areas of the business, including finance, operations, risk, and growth.
         </p>
 
@@ -137,7 +137,7 @@ const AboutUsContent = (): React.ReactNode => {
 
         {/* Timeline */}
         <div className="mb-6 mt-8">
-          <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-black">
+          <h2 className=" font-medium text-base leading-[1] tracking-normal text-black">
             Our Journey
           </h2>
         </div>
@@ -169,15 +169,15 @@ const AboutUsContent = (): React.ReactNode => {
                 />
 
                 <div className="ml-8 flex-1">
-                  <div className="font-['Poppins'] font-medium text-sm leading-[1.2] text-[#045BCF]">
+                  <div className=" font-medium text-sm leading-[1.2] text-[#045BCF]">
                     {item.year}
                   </div>
 
-                  <div className="mt-1 font-['Poppins'] font-medium text-base leading-[1.2] text-[#045BCF]">
+                  <div className="mt-1  font-medium text-base leading-[1.2] text-[#045BCF]">
                     {item.title}
                   </div>
 
-                  <p className="mt-2 font-['Poppins'] font-normal text-sm leading-[1.2] text-zinc-400">
+                  <p className="mt-2  font-normal text-sm leading-[1.2] text-zinc-400">
                     {item.desc}
                   </p>
                 </div>
@@ -188,12 +188,12 @@ const AboutUsContent = (): React.ReactNode => {
               <div className="w-6 h-6 rounded-full bg-[#D9D9D9] shrink-0" />
 
               <div className="ml-8 flex-1">
-                <div className="font-['Poppins'] font-medium text-sm leading-[1.2] text-[#045BCF]">
+                <div className=" font-medium text-sm leading-[1.2] text-[#045BCF]">
                   2026
                 </div>
 
                 <div className="mt-3 p-4 rounded-lg border border-dashed border-[#045BCF] bg-[linear-gradient(96.83deg,_#CCDFFC_35.72%,_#FAFCFF_100%)]">
-                  <p className="font-['Poppins'] font-normal text-sm leading-[1.2] text-[#045BCF]">
+                  <p className=" font-normal text-sm leading-[1.2] text-[#045BCF]">
                     Since then, WeCredit has been helping people get credit easily and quickly.
                   </p>
                 </div>
@@ -204,7 +204,7 @@ const AboutUsContent = (): React.ReactNode => {
 
         {/* Achievements */}
         <div className="mb-6 mt-8">
-          <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-black">
+          <h2 className=" font-medium text-base leading-[1] tracking-normal text-black">
             Our Achievements & Partnerships
           </h2>
         </div>
@@ -223,7 +223,7 @@ const AboutUsContent = (): React.ReactNode => {
 
         {/* Our Brands */}
         <div className="mb-6 mt-8">
-          <h2 className="font-['Poppins'] font-medium text-base leading-[1] tracking-normal text-black">
+          <h2 className=" font-medium text-base leading-[1] tracking-normal text-black">
             Our Brands
           </h2>
         </div>

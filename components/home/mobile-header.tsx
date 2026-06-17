@@ -42,23 +42,23 @@ const MobileHeader = ({ siteName }: MobileHeaderProps): JSX.Element => {
     const scrollPosition = window.scrollY;
     setIsScrolled(scrollPosition > SCROLL_THRESHOLD);
   }, []);
- 
+
   /** Show solid header variant when scrolled OR when not on home page */
   const showSolidHeader = isScrolled || !isHomePage || isLargeScreen;
   useEffect(() => {
-  const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
 
-  const handleChange = () => {
-    setIsLargeScreen(mediaQuery.matches);
-  };
+    const handleChange = () => {
+      setIsLargeScreen(mediaQuery.matches);
+    };
 
-  handleChange(); // initial check
-  mediaQuery.addEventListener('change', handleChange);
+    handleChange(); // initial check
+    mediaQuery.addEventListener('change', handleChange);
 
-  return () => {
-    mediaQuery.removeEventListener('change', handleChange);
-  };
-}, []);
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   useEffect(() => {
     // Check initial scroll position on mount
@@ -82,7 +82,7 @@ const MobileHeader = ({ siteName }: MobileHeaderProps): JSX.Element => {
       <header className="fixed top-0 left-0 right-0 z-50 p-4 lg:p-0 lg:bg-white">
         <div
           className={cn(
-            'grid lg:grid-cols-[1fr_auto_1fr] grid-cols-[1fr_1fr] items-center px-4 lg:px-8 py-2 rounded-md wc-header-pill-transition lg:rounded-none xl:px-0 lg:py-3 lg:max-w-7xl lg:mx-auto lg:bg-transparent lg:shadow-none',
+            'grid lg:grid-cols-[1fr_auto_1fr] grid-cols-[1fr_1fr] items-center px-4 lg:px-8 py-2 rounded-md wc-header-pill-transition lg:rounded-none xl:px-0 lg:py-3 lg:max-w-7xl lg:mx-auto lg:bg-transparent',
             showSolidHeader ? 'wc-header-pill-scrolled' : 'wc-header-pill'
           )}
         >

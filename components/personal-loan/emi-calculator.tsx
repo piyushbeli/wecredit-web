@@ -183,7 +183,7 @@ const EditableValue = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className="text-neutral-900 text-lg font-semibold font-['Poppins'] leading-9 
+        className="text-neutral-900 text-lg font-semibold  leading-9 
                    bg-transparent outline-none w-full max-w-[200px]"
         aria-label="Edit value"
       />
@@ -194,7 +194,7 @@ const EditableValue = ({
     <button
       type="button"
       onClick={handleClick}
-      className="text-neutral-900 text-lg font-semibold font-['Poppins'] leading-9 
+      className="text-neutral-900 text-lg font-semibold  leading-9 
                  cursor-pointer hover:text-wc-blue-600 transition-colors"
       aria-label={`Edit ${displayValue}`}
     >
@@ -301,7 +301,7 @@ const Slider = ({
     <div className="bg-white rounded-lg shadow-[1px_1px_4px_rgba(102,102,102,0.10),-1px_-1px_4px_rgba(102,102,102,0.10)] p-4 mb-3">
       {/* Header row with label and optional right element */}
       <div className="flex justify-between items-center">
-        <span className="text-zinc-800 text-sm font-medium font-['Poppins'] leading-5">
+        <span className="text-zinc-800 text-sm font-medium  leading-5">
           {label}
         </span>
         {rightElement}

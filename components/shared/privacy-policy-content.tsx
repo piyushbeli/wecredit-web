@@ -75,8 +75,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 1 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">1. Information we collect</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">1. Information we collect</h2>
+
         <div className="space-y-4 ">
           <p>
             1.1. When you use our Platform or avail the Services, we seek or collect, amongst other information, your name, mother&apos;s name, father&apos;s name, date of birth, gender, Permanent Account Number (PAN), signature, marital status, nominee details, email id, phone number, educational or professional qualification, business name, business address, nature of business, Goods and Services Tax Identification Number (&quot;GSTIN&quot;), Tax Deduction and Collection Account Number (TAN), bank account details, Unified Payments Interface (UPI) ID, and copies of KYC documents, and/or any other information as required by the banks and non-banking financial companies that offer loans through our Platform (collectively, &quot;Lending Partner(s)&quot;), that helps our Lending Partners verify your identity, and enables us to facilitate the provision of the Services through our Platform. No liability pertaining to the authenticity/genuineness of the information disclosed will lie on the Company. Further, the Company will not be in any way responsible for verifying any information obtained from you.
@@ -94,8 +94,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 2 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">2. How we use and share the information</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">2. How we use and share the information</h2>
+
         <div className="space-y-4 ">
           <p>
             2.1. In collecting your information under this Policy, we confirm the following:
@@ -193,8 +193,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 3 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">3. Cookie Policy, Log Data and Usage Information</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">3. Cookie Policy, Log Data and Usage Information</h2>
+
         <div className="space-y-4 ">
           <p>
             3.1. &quot;Cookies&quot; are small text files that are stored on your computer or other device when you visit certain online pages that record your preferences and actions. Like many other platforms and websites, we use cookies for a variety of purposes, including identifying you and your preferences, tracking your use of our Platform, and facilitating your use of the Platform. Most web browsers automatically accept cookies, but, if you prefer, you can usually modify your browser setting to decline cookies. However, please note that refusing a cookie may limit your access and/or use of Platform and Services.
@@ -212,8 +212,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 4 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">4. Identity Theft / Phishing</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">4. Identity Theft / Phishing</h2>
+
         <div className="space-y-4 ">
           <p>
             4.1. There may be instances when you receive a seemingly legitimate-looking e-mail asking your personal information from you such as your credit card details, bank account details, one-time passwords, contact information, etc. The Company will never ask for such information from you via e-mail.
@@ -227,8 +227,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 5 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">5. Links to Other Sites</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">5. Links to Other Sites</h2>
+
         <p className="">
           Our Platform provides links to other websites and third-party platforms (&quot;Third-Party Platforms&quot;). Such Third-Party Platforms may collect information about you in case you decide to visit the same. We are not responsible for the privacy practices or the content of those linked websites and Third-Party Platforms. We recommend you review the privacy policies of such Third-Party Platforms. In case you choose to log-in through your Google account, we will access information from your Google accounts once they give us permission to do so whilst using the Google-related functionality (as the case may be) of the Platform. Once permission is granted, the Platform accesses a user&apos;s account details, mobile number, email address, contact list, and location (as applicable). The respective privacy policies of Google will also be applicable.
         </p>
@@ -236,8 +236,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 6 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">6. Data Retention by Us</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">6. Data Retention by Us</h2>
+
         <div className="space-y-4 ">
           <p>
             6.1. We will retain your information only for as long as is necessary for the purposes set out in this Policy. We will retain and use your information to the extent necessary to comply with our legal obligations and enable our Lending Partners to comply with their legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.
@@ -251,8 +251,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 7 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">7. Information Security</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">7. Information Security</h2>
+
         <p className="">
           We work to protect your information from loss, misuse, or unauthorized alteration by using industry-recognized security safeguards, coupled with carefully developed security procedures and practices. We maintain electronic and procedural safeguards of all information. We use both internal and external resources to review our security procedures.
         </p>
@@ -260,8 +260,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 8 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">8. Disclaimer</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">8. Disclaimer</h2>
+
         <div className="space-y-4 ">
           <p>
             8.1. You shall be solely responsible to ensure that you maintain back-up copies of such information and in the event of any malfunctioning or failing of the Platform for any reason whatsoever (including on account of maintenance), you may be required to resubmit such information.
@@ -283,8 +283,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 9 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">9. Changes to the Platform and this Policy</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">9. Changes to the Platform and this Policy</h2>
+
         <div className="space-y-4 ">
           <p>
             9.1. All information provided on the Platform is subject to the discretion of the same and is likely to change without any notice. However, any changes in public utility will be communicated through updates on our Platform.
@@ -298,8 +298,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 10 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">10. Withdrawal of Consent by You</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">10. Withdrawal of Consent by You</h2>
+
         <div className="space-y-4 ">
           <p>
             10.1. You may choose to withdraw your consent provided hereunder at any point in time. Such withdrawal of consent must be sent in writing to care@wecredit.co.in. In case you later withdraw your consent, we request you not to access the Platform and/or use the Services and also reserve the right to not provide you any Services through the Platform.
@@ -326,8 +326,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 11 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">11. Grievance Redressal Officer</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">11. Grievance Redressal Officer</h2>
+
         <div className="space-y-4 ">
           <p>
             In accordance with the provisions of applicable laws, the name and contact details of the Grievance Officer are provided below:
@@ -356,8 +356,8 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 12 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">12. How to Contact Us</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">12. How to Contact Us</h2>
+
         <p className="">
           If You have questions or concerns about this Policy, please contact us at the following email address: care@wecredit.co.in.
         </p>
@@ -365,14 +365,14 @@ const PrivacyPolicyContent = (): React.ReactNode => {
 
       {/* Section 13 */}
       <div className="space-y-4">
-        <h2 className="text-black/80 text-base font-medium font-['Poppins']">13. Statement on Loan Listing and Matching Logic</h2>
-        
+        <h2 className="text-black/80 text-base font-medium ">13. Statement on Loan Listing and Matching Logic</h2>
+
         <div className="space-y-4 ">
           <p>
             In accordance with the Reserve Bank of India – Digital Lending Directions, 2025, this section outlines the listing and matching logic followed by WeCredit for presenting loan offers from multiple Regulated Entities (&quot;REs&quot;) on our Platform.
           </p>
 
-          <h3 className="text-black/80 text-base font-medium font-['Poppins'] text-left">Overview</h3>
+          <h3 className="text-black/80 text-base font-medium  text-left">Overview</h3>
 
           <p>
             In compliance with the RBI&apos;s Digital Lending Directions, 2025, our Platform follows a transparent, fair, and non-discriminatory process for evaluating and submitting loan applications to multiple Regulated Entities. We do not prioritise or rank lenders in any biased manner.
@@ -397,7 +397,7 @@ const PrivacyPolicyContent = (): React.ReactNode => {
             <p>Conversion ratio (Application to Disbursed)</p>
           </div>
 
-          <h3 className="text-black/80 text-base font-medium font-['Poppins'] text-left">Declaration</h3>
+          <h3 className="text-black/80 text-base font-medium  text-left">Declaration</h3>
 
           <p>
             We affirm that our listing and matching logic adheres to the RBI&apos;s intent of transparency, borrower awareness, and non-discriminatory access to credit.

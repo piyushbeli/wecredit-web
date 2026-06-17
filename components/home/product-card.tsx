@@ -30,9 +30,7 @@ const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardP
     >
       <Link
         href={href}
-        className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl  bg-white hover:border-gray-200 transition-colors"
-      // with border 
-      // className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl border border-gray-100 bg-white hover:border-gray-200 transition-colors"
+        className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl md:border md:border-gray-100 bg-white hover:border-gray-200 transition-colors"
       >
         <motion.div
           className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-wc-blue-50 flex items-center justify-center"

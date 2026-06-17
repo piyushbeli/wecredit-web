@@ -99,7 +99,7 @@ export const MobileMenuDrawer = ({
                             <motion.button
                                 type="button"
                                 onClick={closeMenu}
-                                className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                                className="p-2 text-white/70 cursor-pointer hover:text-white rounded-lg hover:bg-white/10 transition-colors"
                                 aria-label="Close menu"
                                 whileTap={{ scale: 0.95 }}
                             >
@@ -116,7 +116,7 @@ export const MobileMenuDrawer = ({
                                             <User className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            
+
                                             <p className="text-white/60 text-sm">
                                                 +91 {user?.phoneNumber}
                                             </p>
@@ -128,7 +128,7 @@ export const MobileMenuDrawer = ({
                                             logout();
                                             closeMenu();
                                         }}
-                                        className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                                        className="p-2 cursor-pointer text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
                                         aria-label="Logout"
                                         whileTap={{ scale: 0.95 }}
                                     >
