@@ -229,7 +229,7 @@ const AboutUsContent = (): React.ReactNode => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {BRANDS.map((brand, index) => (
+          {BRANDS.map((brand) => (
             <BrandCard
               key={brand.name}
               name={brand.name}

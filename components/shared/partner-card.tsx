@@ -31,25 +31,25 @@ const DetailRow = ({
     <div className={`flex items-stretch ${showBorder ? 'border-t border-white' : ''}`}>
 
       {/* Left Column */}
-      <div className="w-40 bg-[#F3F6FF] border-r border-white flex items-center px-3 py-[13px]">
-        <div className="text-zinc-800 text-xs font-normal  leading-4">
+      <div className="w-40 shrink-0 bg-[#F3F6FF] border-r border-white flex items-center px-3 py-[13px]">
+        <div className="text-zinc-800 text-xs font-normal leading-4 lg:text-sm lg:leading-5">
           {label}
         </div>
       </div>
 
       {/* Right Column */}
-      <div className="flex-1 bg-[#F3F6FF] flex items-center px-3 py-[5px]">
+      <div className="min-w-0 flex-1 bg-[#F3F6FF] flex items-center px-3 py-[5px]">
         {href ? (
           <a
             href={href}
             target={isExternalLink ? '_blank' : undefined}
             rel={isExternalLink ? 'noopener noreferrer' : undefined}
-            className="text-zinc-800 text-xs font-normal  underline leading-4 hover:text-blue-600 transition-colors"
+            className="min-w-0 break-words text-zinc-800 text-xs font-normal underline leading-4 hover:text-blue-600 transition-colors lg:text-sm lg:leading-5"
           >
             {value}
           </a>
         ) : (
-          <div className="text-zinc-800 text-xs font-normal  leading-4">
+          <div className="min-w-0 break-words text-zinc-800 text-xs font-normal leading-4 lg:text-sm lg:leading-5">
             {value}
           </div>
         )}
@@ -97,7 +97,7 @@ const PartnerCard = ({ partner }: PartnerCardProps): JSX.Element => {
           aria-expanded={isExpanded}
           aria-label={`${isExpanded ? 'Hide' : 'Show'} more information about ${partner.companyName}`}
         >
-          <span className="text-center text-blue-500 text-xs font-normal  leading-3">
+          <span className="text-center text-blue-500 text-xs font-normal leading-3 lg:text-sm lg:leading-4">
             More Info
           </span>
           <ChevronRight
