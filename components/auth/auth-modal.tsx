@@ -9,6 +9,7 @@ import { useAuthHandlers } from './hooks/use-auth-handlers';
 import { usePostLogin } from './hooks/use-post-login';
 import { PhoneStepScreen } from './screens/phone-step-screen';
 import { OTPStepScreen } from './screens/otp-step-screen';
+import { cn } from '@/lib/utils';
 
 /**
  * Auth Modal component
@@ -80,7 +81,7 @@ const AuthModal = (): React.ReactNode => {
     <AnimatePresence>
       {isModalOpen && (
         <motion.div
-          className="fixed inset-0 z-100 flex flex-col"
+          className="fixed inset-0 z-100 flex flex-col md:items-center md:justify-center md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -97,11 +98,22 @@ const AuthModal = (): React.ReactNode => {
 
           {/* Modal Container - handles slide-up entrance */}
           <motion.div
-            className="relative flex flex-col h-full overflow-hidden"
+            className={cn(
+              'relative flex h-full flex-col overflow-hidden md:w-[560px] md:max-w-[calc(100vw-2rem)] md:rounded-3xl md:bg-white md:shadow-2xl',
+              currentStep === 'phone'
+                ? 'md:h-auto'
+                : 'md:h-[min(720px,calc(100vh-3rem))] md:overflow-x-hidden md:overflow-y-auto'
+            )}
+            layout
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            transition={{
+              type: 'spring',
+              damping: 28,
+              stiffness: 300,
+              layout: { duration: 0.2, ease: 'easeInOut' },
+            }}
           >
             {/* Screen transitions - use sync mode to avoid a visible gap when switching */}
             <AnimatePresence mode="sync" initial={false}>
@@ -115,6 +127,7 @@ const AuthModal = (): React.ReactNode => {
                   onPhoneChange={handlePhoneChange}
                   onContinue={handleSendOtp}
                   onClose={handleClose}
+                  isDesktopModal
                 />
               ) : (
                 <OTPStepScreen
@@ -128,6 +141,7 @@ const AuthModal = (): React.ReactNode => {
                   onResend={handleResendOtp}
                   onBack={handleBack}
                   onClose={handleClose}
+                  isDesktopModal
                 />
               )}
             </AnimatePresence>

@@ -26,11 +26,18 @@ export const OTPStepScreen = ({
   onClose,
   headerHeightPercent = 65,
   headerHeight = 'threeQuarter',
+  isDesktopModal = false,
 }: OTPStepScreenProps): React.ReactNode => {
   const isOtpComplete = otpValue.length === 6;
   const containerStyle: React.CSSProperties = useAppHeight();
-  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent
-    ? { height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})` }
+  const usesResponsiveModalHeight = isDesktopModal && headerHeightPercent === 65;
+  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent && !usesResponsiveModalHeight
+    ? {
+      height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})`,
+    }
+    : undefined;
+  const headerClassName = usesResponsiveModalHeight
+    ? 'h-[calc(var(--app-height,1vh)*65)] md:h-[300px]'
     : undefined;
   const resolvedHeaderHeight: HeaderHeightPreset | undefined =
     headerHeightPercent ? undefined : headerHeight;
@@ -45,8 +52,11 @@ export const OTPStepScreen = ({
 
   return (
     <motion.div
-      className="relative flex flex-col bg-white"
-      style={containerStyle}
+      className={cn(
+        'relative flex flex-col bg-white',
+        isDesktopModal && 'min-h-[calc(var(--app-height,1vh)*100)] md:h-auto md:min-h-0'
+      )}
+      style={isDesktopModal ? undefined : containerStyle}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -77,13 +87,20 @@ export const OTPStepScreen = ({
         variant="with-illustration"
         height={resolvedHeaderHeight}
         style={headerHeightStyle}
+        className={cn(
+          headerClassName,
+          'md:bg-[#0B63D8]',
+          'md:[&>div:last-child]:flex md:[&>div:last-child]:items-center md:[&>div:last-child]:justify-center',
+          'md:[&>div:last-child>div]:flex md:[&>div:last-child>div]:h-full md:[&>div:last-child>div]:items-center md:[&>div:last-child>div]:justify-center',
+          'md:[&_img]:h-full md:[&_img]:max-h-[280px] md:[&_img]:w-full md:[&_img]:object-contain'
+        )}
         illustration={IMAGES.ILLUSTRATIONS.OTP_SMS}
         illustrationAlt="OTP verification illustration"
       />
 
       {/* White Content Section - fills remaining space */}
       <form
-        className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pb-8 pt-6 flex flex-col relative z-10"
+        className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pb-8 pt-6 flex flex-col relative z-10 md:flex-none md:px-10 md:pt-8"
         onSubmit={handleFormSubmit}
         noValidate
       >
@@ -108,7 +125,7 @@ export const OTPStepScreen = ({
             value={otpValue}
             onChange={onOtpChange}
             onResend={onResend}
-            onChangeNumber={onBack} 
+            onChangeNumber={onBack}
             error={error || undefined}
             disabled={isLoading}
             variant="default"
@@ -118,7 +135,7 @@ export const OTPStepScreen = ({
         </motion.div>
 
         {/* Spacer to push button to bottom */}
-        <div className="flex-1" />
+        <div className="flex-1 md:hidden" />
 
         {/* Continue Button */}
         <motion.button
