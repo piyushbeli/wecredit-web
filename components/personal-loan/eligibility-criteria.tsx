@@ -9,8 +9,6 @@ import { JSX } from 'react';
 import { motion } from 'framer-motion';
 import { ChartNoAxesColumnIncreasing, CreditCard, Hourglass, Landmark, WalletCards } from 'lucide-react';
 import { ELIGIBILITY_CRITERIA, ELIGIBILITY_SECTION_INFO, EligibilityItem } from './constants';
-import { IMAGES } from '@/lib/constants/images';
-import Image from 'next/image';
 
 const DESKTOP_ICONS = [Hourglass, WalletCards, CreditCard, Landmark, ChartNoAxesColumnIncreasing];
 
@@ -36,8 +34,7 @@ const EligibilityCard = ({ item, index }: EligibilityCardProps): JSX.Element => 
     >
       {/* Icon Container */}
       <div className="w-9 h-9 bg-wc-blue-100 rounded flex items-center justify-center shrink-0 md:h-16 md:w-16 md:rounded-md">
-        <Image src={IMAGES.ICONS.HOURGLASS} alt="Hourglass Icon" width={24} height={24} className="w-5 h-5 md:hidden" />
-        <DesktopIcon className="hidden h-8 w-8 text-brand-primary md:block" strokeWidth={1.8} />
+        <DesktopIcon className="h-5 w-5 md:h-8 md:w-8 text-brand-primary" strokeWidth={1.8} />
       </div>
       {/* Text Content */}
       <div className="flex-1 min-w-0 pt-0.5">

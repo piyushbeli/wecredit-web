@@ -23,7 +23,9 @@ const ConditionalMobileHeader = (props: ConditionalMobileHeaderProps) => {
   const isMobilePlatform = useIsMobilePlatform();
 
   // Check if current route should hide the header
-  const shouldHideHeader = HEADER_EXCLUDED_ROUTES.includes(pathname);
+  const shouldHideHeader =
+    HEADER_EXCLUDED_ROUTES.includes(pathname) ||
+    HEADER_EXCLUDED_ROUTES.includes(`${pathname}/`);
 
   if (isMobilePlatform || shouldHideHeader) {
     return null;

@@ -65,7 +65,7 @@ const PersonalLoanPage = (): React.ReactNode => {
       <WhyWeCredit />
 
       {/* Testimonials - Reused from home */}
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
 
       {/* Partners - Reused from home */}
       <PartnersSection />
