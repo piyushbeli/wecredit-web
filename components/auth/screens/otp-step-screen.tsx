@@ -26,11 +26,18 @@ export const OTPStepScreen = ({
   onClose,
   headerHeightPercent = 65,
   headerHeight = 'threeQuarter',
+  isDesktopModal = false,
 }: OTPStepScreenProps): React.ReactNode => {
   const isOtpComplete = otpValue.length === 6;
   const containerStyle: React.CSSProperties = useAppHeight();
-  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent
-    ? { height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})` }
+  const usesResponsiveModalHeight = isDesktopModal && headerHeightPercent === 65;
+  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent && !usesResponsiveModalHeight
+    ? {
+      height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})`,
+    }
+    : undefined;
+  const headerClassName = usesResponsiveModalHeight
+    ? 'h-[calc(var(--app-height,1vh)*65)] md:h-[300px]'
     : undefined;
   const resolvedHeaderHeight: HeaderHeightPreset | undefined =
     headerHeightPercent ? undefined : headerHeight;
@@ -45,12 +52,11 @@ export const OTPStepScreen = ({
 
   return (
     <motion.div
-      className="relative flex flex-col bg-white"
-      style={containerStyle}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ type: 'tween', duration: 0.25, ease: 'easeInOut' }}
+      className={cn(
+        'relative flex flex-col bg-white',
+        isDesktopModal && 'min-h-[calc(var(--app-height,1vh)*100)] md:h-auto md:min-h-0 md:bg-[#0B63D8]'
+      )}
+      style={isDesktopModal ? undefined : containerStyle}
     >
       {/* Back Button */}
       <button
@@ -77,48 +83,50 @@ export const OTPStepScreen = ({
         variant="with-illustration"
         height={resolvedHeaderHeight}
         style={headerHeightStyle}
+        className={cn(
+          headerClassName,
+          'md:bg-[#0B63D8]',
+          'md:rounded-t-3xl md:overflow-hidden md:[&>div:first-child]:hidden',
+          'md:[&>div:last-child]:flex md:[&>div:last-child]:items-center md:[&>div:last-child]:justify-center',
+          'md:[&>div:last-child>div]:flex md:[&>div:last-child>div]:h-full md:[&>div:last-child>div]:items-center md:[&>div:last-child>div]:justify-center',
+          'md:[&_img]:h-full md:[&_img]:max-h-[280px] md:[&_img]:w-full md:[&_img]:object-contain'
+        )}
         illustration={IMAGES.ILLUSTRATIONS.OTP_SMS}
         illustrationAlt="OTP verification illustration"
       />
 
       {/* White Content Section - fills remaining space */}
       <form
-        className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pb-8 pt-6 flex flex-col relative z-10"
+        className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pb-8 pt-6 flex flex-col relative z-10 md:mt-0 md:flex-none md:rounded-t-none md:px-10 md:pt-8"
         onSubmit={handleFormSubmit}
         noValidate
       >
         {/* Title */}
-        <motion.h1
+        <h1
           className="text-2xl font-bold text-gray-900 mb-6 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
         >
           Enter your OTP
-        </motion.h1>
+        </h1>
 
         {/* OTP Input */}
-        <motion.div
+        <div
           className="w-full mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
         >
           <OTPInput
             value={otpValue}
             onChange={onOtpChange}
             onResend={onResend}
-            onChangeNumber={onBack} 
+            onChangeNumber={onBack}
             error={error || undefined}
             disabled={isLoading}
             variant="default"
             showResend={true}
             phoneNumber={phoneNumber}
           />
-        </motion.div>
+        </div>
 
         {/* Spacer to push button to bottom */}
-        <div className="flex-1" />
+        <div className="flex-1 md:hidden" />
 
         {/* Continue Button */}
         <motion.button
@@ -130,9 +138,6 @@ export const OTPStepScreen = ({
               ? 'bg-wc-blue-500 text-white shadow-lg shadow-wc-blue-500/30 hover:bg-wc-blue-600 active:scale-[0.98]'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           )}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
           whileTap={isOtpComplete && !isLoading ? { scale: 0.98 } : {}}
         >
           {isLoading ? (

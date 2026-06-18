@@ -341,23 +341,23 @@ const TrendingOfferCard = ({
         >
           {/* Header: Logo + Badge */}
           <div className="flex items-center justify-between mb-1 h-[30px]">
-          <div className="w-[80px] h-[30px] flex items-center justify-start overflow-hidden">
-    {hasValidLogoPath ? (
-      <Image
-        src={logoPath?.trim() ?? ''}
-        alt={lenderName}
-        width={80}
-        height={30}
-        className="max-h-[30px] w-auto object-contain"
-        priority
-      />
-    ) : (
-      <span className="font-medium text-sm text-gray-700 truncate w-full">  {lenderName}</span>
-    )}
-  </div>
+            <div className="w-[80px] h-[30px] flex items-center justify-start overflow-hidden">
+              {hasValidLogoPath ? (
+                <Image
+                  src={logoPath?.trim() ?? ''}
+                  alt={lenderName}
+                  width={80}
+                  height={30}
+                  className="max-h-[30px] w-auto object-contain"
+                  priority
+                />
+              ) : (
+                <span className="font-medium text-sm text-gray-700 truncate w-full">  {lenderName}</span>
+              )}
+            </div>
 
-  {badge && <ArrowBadge text={badge} />}
-  </div>
+            {badge && <ArrowBadge text={badge} />}
+          </div>
 
 
 
@@ -365,14 +365,14 @@ const TrendingOfferCard = ({
           <>
             {/* Amount - Italic blue text */}
             <h3 className="font-medium text-sm leading-[120%] mb-2">
-            {amountUptoLabel} {amount}
+              {amountUptoLabel} {amount}
             </h3>
 
             {/* Rate & Tenure - With proper icons */}
             <div className="flex items-center gap-6 text-sm text-gray-600">
               <div className="flex items-center gap-1.5">
                 <PercentIcon />
-               <span className="text-gray-500 text-xs font-light leading-none">Int. rate {interestRate}</span>
+                <span className="text-gray-500 text-xs font-light leading-none">Int. rate {interestRate}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CalendarIcon />
@@ -390,7 +390,7 @@ const TrendingOfferCard = ({
             onClick={handleCheckEligibility}
             disabled={isCheckingEligibility}
             fullWidth
-            className="text-xs font-medium rounded-full py-1 h-6"
+            className="text-xs cursor-pointer font-medium rounded-full py-1 h-6"
           >
             {isCheckingEligibility ? 'Checking...' : 'Check Eligibility'}
           </ActionButton>

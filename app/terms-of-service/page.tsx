@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
-import { sanitizeExternalHtml } from '@/lib/seo/sanitize-external-html';
+import { linkContactDetails, sanitizeExternalHtml } from '@/lib/seo/sanitize-external-html';
 import TermsOfUseWrapper from '@/components/shared/terms-of-use-wrapper';
 /** Force static generation with 30-minute revalidation */
 export const dynamic = 'force-static';
@@ -26,7 +26,7 @@ async function getTermsContent(): Promise<string> {
   const html = await res.text();
 
   // Strip document-level tags and first <h1> (page renders its own semantic H1)
-  return sanitizeExternalHtml(html);
+  return linkContactDetails(sanitizeExternalHtml(html));
 }
 
 
@@ -37,7 +37,7 @@ const TermsOfServicePage = async (): Promise<React.ReactNode> => {
   const htmlContent = await getTermsContent();
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <TermsOfUseWrapper htmlContent={htmlContent} />
     </div>
   );

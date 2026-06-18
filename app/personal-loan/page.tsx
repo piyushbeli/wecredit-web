@@ -40,8 +40,8 @@ const PersonalLoanPage = (): React.ReactNode => {
       <HeroSection />
 
       {/* EMI Calculator - Interactive */}
-      <div className="px-4 pb-4 max-w-3xl mx-auto">
-        <EmiCalculator title='Personal Loan Calculator' />
+      <div className="mx-auto max-w-7xl px-4 pb-4 sm:px-6 lg:px-8 xl:px-0">
+        <EmiCalculator title="Personal Loan EMI Calculator" />
       </div>
 
       <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
@@ -65,7 +65,7 @@ const PersonalLoanPage = (): React.ReactNode => {
       <WhyWeCredit />
 
       {/* Testimonials - Reused from home */}
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
 
       {/* Partners - Reused from home */}
       <PartnersSection />

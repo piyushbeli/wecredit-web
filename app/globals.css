@@ -167,6 +167,44 @@
   }
 }
 
+@layer components {
+  .wc-static-content {
+    @apply text-[13px] leading-6 text-zinc-600 sm:text-sm sm:leading-7 lg:text-base lg:leading-8;
+  }
+
+  .wc-static-content :where(p, ul, ol, table, blockquote) {
+    @apply mb-4;
+  }
+
+  .wc-static-content :where(h2, h3, h4) {
+    @apply mt-6 mb-3 text-zinc-900 font-semibold leading-snug;
+  }
+
+  .wc-static-content :where(h2) {
+    @apply text-base sm:text-lg lg:text-xl;
+  }
+
+  .wc-static-content :where(h3) {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .wc-static-content :where(a) {
+    @apply text-blue-700 underline underline-offset-2;
+  }
+
+  .wc-static-content :where(ul, ol) {
+    @apply pl-5;
+  }
+
+  .wc-static-content :where(ul) {
+    @apply list-disc;
+  }
+
+  .wc-static-content :where(ol) {
+    @apply list-decimal;
+  }
+}
+
 /* =============================================================================
  * WeCredit Home Screen Styles
  * ============================================================================= */
@@ -297,15 +335,22 @@
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Scrolled state - solid white pill */
 .wc-header-pill-scrolled {
   background-color: rgba(255, 255, 255, 1);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+@media (max-width: 768px) {
+  .wc-header-pill-scrolled {
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  }
+  .wc-header-pill {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
 
 /* Menu button glass effect */

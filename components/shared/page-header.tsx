@@ -56,7 +56,7 @@ const PageHeader = ({ title, onBack, isOfferStatus = false }: PageHeaderProps): 
       <div className="px-4 py-4">
         <div className="flex items-center gap-4">
           {renderBackButton()}
-          <h1 className="font-['Poppins'] font-normal text-sm leading-7 tracking-normal text-gray-900">
+          <h1 className=" font-normal text-sm leading-7 tracking-normal text-gray-900">
             {title}
           </h1>
         </div>

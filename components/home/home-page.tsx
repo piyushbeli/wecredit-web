@@ -29,11 +29,10 @@ const HomePage = (): React.ReactNode => {
       <div className="wc-hero-gradient-wrapper">
         {/* Hero Section with Carousel */}
         <HeroCarousel />
-        
-        {/* Stats Section - integrated into gradient */}
-        <StatsSection />
       </div>
-      
+
+      <StatsSection />
+
       {/* Products Section - on white background */}
       <ProductsSection />
 
@@ -47,7 +46,7 @@ const HomePage = (): React.ReactNode => {
 
       {/* Certifications Section */}
       <CertificationsSection />
-      
+
       {/* Testimonials Section */}
       {/* <TestimonialsSection /> */}
 

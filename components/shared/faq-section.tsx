@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { STANDARD_FAQS, type FaqItem } from '@/lib/constants/faqs';
+import { cn } from '@/lib/utils';
 
 /** Props for FaqAccordionItem component */
 interface FaqAccordionItemProps {
@@ -17,6 +18,12 @@ interface FaqAccordionItemProps {
 	isExpanded: boolean;
 	onToggle: () => void;
 	index: number;
+}
+
+interface FaqSectionProps {
+	showTitle?: boolean;
+	className?: string;
+	listClassName?: string;
 }
 
 /**
@@ -46,9 +53,8 @@ const FaqAccordionItem = ({
 					{item.question}
 				</span>
 				<ChevronDown
-					className={`w-5 h-5 text-gray-500 shrink-0 transition-transform duration-300 ${
-						isExpanded ? 'rotate-180' : ''
-					}`}
+					className={`w-5 h-5 text-gray-500 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''
+						}`}
 				/>
 			</button>
 			<AnimatePresence initial={false}>
@@ -76,7 +82,11 @@ const FaqAccordionItem = ({
  * Frequently Asked Questions section with accordion
  * Displays common questions about personal loans
  */
-const FaqSection = (): React.ReactNode => {
+const FaqSection = ({
+	showTitle = true,
+	className,
+	listClassName,
+}: FaqSectionProps): React.ReactNode => {
 	const [expandedId, setExpandedId] = useState<string | null>(null);
 
 	const handleToggle = (id: string): void => {
@@ -84,20 +94,22 @@ const FaqSection = (): React.ReactNode => {
 	};
 
 	return (
-		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
+		<section className={cn('bg-white py-4 sm:py-10 md:py-12 px-4', className)}>
 			{/* Section Title */}
-			<motion.h2
-				className="text-lg md:text-[18px] md:text-2xl font-medium text-center mb-6 sm:mb-8"
-				initial={{ opacity: 0, y: 10 }}
-				whileInView={{ opacity: 1, y: 0 }}
-				viewport={{ once: true }}
-				transition={{ duration: 0.4 }}
-			>
-				Frequently Asked Questions
-			</motion.h2>
+			{showTitle && (
+				<motion.h2
+					className="text-xl font-semibold text-gray-900 text-center mb-8"
+					initial={{ opacity: 0, y: 10 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true }}
+					transition={{ duration: 0.4 }}
+				>
+					Frequently Asked Questions
+				</motion.h2>
+			)}
 
 			{/* FAQ Accordion */}
-			<div className="max-w-6xl mx-auto space-y-1">
+			<div className={cn('max-w-6xl mx-auto space-y-1', listClassName)}>
 				{STANDARD_FAQS.map((item, index) => (
 					<FaqAccordionItem
 						key={item.id}

@@ -9,11 +9,11 @@ const ContactUsWrapper = (): ReactNode => {
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'CONTACT US',
+        title: 'Contact Us',
         iconImage: IMAGES.ICONS.CONTACT_US,
         iconAlt: 'Contact Us Icon',
       }}
-      contentClassName="mx-4 px-4"
+      contentClassName="px-4"
     >
       <h1 className="sr-only">Contact WeCredit Support</h1>
       <GrievanceContactContent />

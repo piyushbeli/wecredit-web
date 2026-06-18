@@ -19,3 +19,44 @@ export function sanitizeExternalHtml(html: string): string {
     .replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/i, '')
     .trim();
 }
+
+const EMAIL_PATTERN = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
+const INDIAN_PHONE_PATTERN = /\+91[\s-]?\d(?:[\s-]?\d){9,11}\b/g;
+
+const phoneToTelHref = (phone: string): string =>
+  `tel:${phone.replace(/[^\d+]/g, '')}`;
+
+/**
+ * Adds mailto/tel links to contact details inside HTML text nodes.
+ * It intentionally skips tag chunks so existing attributes and links are not rewritten.
+ */
+export function linkContactDetails(html: string): string {
+  let isInsideAnchor = false;
+
+  return html
+    .split(/(<[^>]+>)/g)
+    .map((chunk) => {
+      if (chunk.startsWith('<') && chunk.endsWith('>')) {
+        if (/^<a\b/i.test(chunk)) {
+          isInsideAnchor = true;
+        } else if (/^<\/a>/i.test(chunk)) {
+          isInsideAnchor = false;
+        }
+
+        return chunk;
+      }
+
+      if (isInsideAnchor) {
+        return chunk;
+      }
+
+      return chunk
+        .replace(EMAIL_PATTERN, (email) => (
+          `<a href="mailto:${email}">${email}</a>`
+        ))
+        .replace(INDIAN_PHONE_PATTERN, (phone) => (
+          `<a href="${phoneToTelHref(phone)}">${phone}</a>`
+        ));
+    })
+    .join('');
+}

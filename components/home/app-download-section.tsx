@@ -14,74 +14,64 @@ import { EXTERNAL_LINKS } from '@/lib/constants/links';
  */
 const AppDownloadSection = (): React.ReactNode => {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 md:py-24">
-      <div className={cn(
-        "relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem]",
-        "px-8 py-6 md:px-20 md:py-20",
-        "flex flex-col md:flex-row items-start border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
-      )}>
-        {/* Blue Gradient/Glow behind mock - from design snippet */}
-        <div className="absolute w-[180px] h-[160px] md:w-[300px] md:h-[260px] right-0 bottom-0 bg-brand-primary blur-[60px] md:blur-[100px] opacity-70 rounded-full" />
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-4 lg:py-16 xl:px-0 xl:py-24">
+      <div
+        className={cn(
+          'relative min-h-[520px] overflow-hidden rounded-[28px] bg-white sm:min-h-[600px] md:min-h-[560px] md:rounded-[36px] lg:min-h-0',
+          'px-6 py-8 sm:px-10 sm:py-12 md:px-10 md:py-10 lg:px-12 lg:py-14 xl:px-20 xl:py-20',
+          'flex flex-col items-start lg:flex-row lg:items-center'
+        )}
+      >
+        {/* Gradient glow behind mock */}
+        <div className="absolute bottom-0 right-0 h-[62%] w-full pointer-events-none md:top-auto md:h-[58%] md:w-[76%] lg:top-0 lg:h-full lg:w-[44%] xl:w-[48%]">
+          <div className="w-full h-full bg-gradient-to-bl from-[#5EA1FF] via-[#EAF4FF] to-white opacity-95 blur-[20px] rounded-tr-[28px]" />
+        </div>
 
-        {/* Text and Badges Content */}
-        <div className="z-10 flex flex-col items-start gap-28 w-full md:w-1/2">
-          <div className="space-y-4">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium leading-tight text-gray-900">
-              No more Waiting.<br />
-              Get up to <span className="text-brand-primary">₹3 Lakh</span> in Minutes
-            </h2>
-            <div className="flex items-start gap-3 text-lg font-normal text-gray-500 md:text-2xl">
-              <span>Download The WeCredit App Now</span>
-              <ArrowDown className="h-6 w-6 md:h-8 md:w-8" />
-            </div>
-          </div>
+        {/* Left column: heading, subtitle, badges */}
+        <div className="relative z-20 w-full lg:w-2/3">
+          <h2 className="max-w-[680px] text-[28px] font-semibold leading-tight text-gray-900 sm:text-4xl md:text-[34px] lg:text-4xl xl:text-5xl">
+            No more Waiting.
+            <br />
+            Get up to <span className="text-brand-primary">₹3 Lakh</span> in Minutes
+          </h2>
 
-          <div className="space-y-6">
+          <p className="mt-5 flex items-center gap-2 text-lg text-gray-700 sm:text-2xl md:mt-5 md:gap-2 md:text-xl lg:text-2xl lg:gap-3 xl:text-3xl">
+            <span>Download The WeCredit App Now</span>
+            <ArrowDown className="h-6 w-6 shrink-0 md:h-6 md:w-6" />
+          </p>
 
-            {/* App Store Badges - Stacked vertically */}
-            <div className="flex flex-col gap-3 md:gap-4">
-              <a 
-                href={EXTERNAL_LINKS.PLAY_STORE} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="transition-all hover:opacity-80 active:scale-95 w-fit"
-              >
-                <Image
-                  src={IMAGES.APP.GOOGLE_PLAY}
-                  alt="Get it on Google Play"
-                  width={180}
-                  height={54}
-                  className="h-11 w-auto md:h-14 lg:h-16"
-                />
+          <div className="mt-8 flex items-start gap-6 md:mt-7 lg:mt-7 xl:mt-8">
+            {/* Badges stacked */}
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <a href={EXTERNAL_LINKS.PLAY_STORE} target="_blank" rel="noreferrer" className="inline-block">
+                <Image src={IMAGES.APP.GOOGLE_PLAY} alt="Get it on Google Play" width={260} height={64} className="h-12 w-auto rounded-md shadow-sm sm:h-14 md:h-11 lg:h-12 xl:h-14" />
               </a>
-              {/* <a 
-                href="#" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="transition-all hover:opacity-80 active:scale-95 w-fit"
-              >
-                <Image
-                  src={IMAGES.APP.APP_STORE}
-                  alt="Download on the App Store"
-                  width={180}
-                  height={54}
-                  className="h-11 w-auto md:h-14 lg:h-16"
-                />
-              </a> */}
+              {/* {IMAGES.APP.APP_STORE && (
+                <a href={EXTERNAL_LINKS.APP_STORE || '#'} target="_blank" rel="noreferrer" className="inline-block lg:hidden">
+                  <Image src={IMAGES.APP.APP_STORE} alt="Download on the App Store" width={260} height={64} className="h-12 w-auto rounded-md shadow-sm sm:h-14 md:h-11 lg:h-12 xl:h-14" />
+                </a>
+              )} */}
+            </div>
+
+            {/* QR block - hidden on small devices */}
+            <div className=" items-center justify-center lg:flex">
+              <Image src={IMAGES.APP.QR} alt="QR code" width={140} height={140} className="h-28 w-28 object-contain xl:h-36 xl:w-36" />
             </div>
           </div>
         </div>
 
-        {/* Phone Mockup - Positioned at bottom-right */}
-        <div className="absolute right-0 bottom-0 w-[45%] md:w-[40%] lg:w-[35%] pointer-events-none select-none">
-          <Image
-            src={IMAGES.APP.MOCKUP}
-            alt="WeCredit App Mockup"
-            width={600}
-            height={600}
-            className="h-auto w-full object-contain"
-            priority
-          />
+        {/* Right column: phone mockup covering right area (less cropped, aligned bottom-right) */}
+        <div className="absolute bottom-0 right-0 h-[58%] w-[76%] pointer-events-none select-none z-10 sm:h-[56%] sm:w-[70%] md:h-[52%] md:w-[64%] lg:inset-y-0 lg:h-full lg:w-[44%] xl:w-[50%]">
+          <div className="relative h-full w-full rounded-r-2xl overflow-hidden">
+            <Image
+              src={IMAGES.APP.MOCKUP}
+              alt="WeCredit App Mockup"
+              fill
+              className="object-contain w-full h-full"
+              style={{ objectPosition: 'right bottom' }}
+              priority
+            />
+          </div>
         </div>
       </div>
     </section>

@@ -19,6 +19,8 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/calculator/personal-loan',
   '/our-partners/',
   '/instant-personal-loan/',
+  '/login',
+  '/otp-confirmation',
   // '/blog/',
   '/offers' // Exclude /offers route
 ];

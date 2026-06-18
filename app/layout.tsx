@@ -9,7 +9,7 @@ import { AuthProvider } from '@/providers/auth-provider';
 import { ToastProvider } from '@/providers/toast-provider';
 import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
 import { LoadingScreen } from '@/components/shared/loading-screen';
-import { HEADER_LINKS, SITE_NAME } from '@/lib/config/site-navigation';
+import { SITE_NAME } from '@/lib/config/site-navigation';
 import Script from 'next/script';
 
 const geistSans = Geist({
@@ -92,10 +92,7 @@ export default async function RootLayout({
           <Suspense fallback={null}>
             <AuthProvider>
               <ToastProvider />
-              <ConditionalMobileHeader
-                headerLinks={HEADER_LINKS}
-                siteName={SITE_NAME}
-              />
+              <ConditionalMobileHeader siteName={SITE_NAME} />
               <main className="flex-1">{children}</main>
               <ConditionalFooter />
               <AuthModal />

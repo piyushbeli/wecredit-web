@@ -107,7 +107,7 @@ const PartnerCard = ({
   return (
     <div
       id={id}
-      className="w-full max-w-md bg-white rounded-2xl shadow-[0px_1px_2px_0px_rgba(27,28,28,0.05)] outline-1 -outline-offset-1 outline-neutral-200 p-5"
+      className="w-full bg-white rounded-2xl shadow-[0px_1px_2px_0px_rgba(27,28,28,0.05)] outline-1 -outline-offset-1 outline-neutral-200 p-4 sm:p-5 lg:p-6"
     >
       <div className="flex items-start gap-3">
         {/* Keep a stable icon box and show a neutral fallback if logo is unavailable. */}
@@ -120,11 +120,13 @@ const PartnerCard = ({
         </div>
 
         <div className="flex-1">
-          <div className="text-base font-medium text-zinc-900 leading-7">{partnerName}</div>
+          <div className="text-sm font-medium leading-6 text-zinc-900 sm:text-base sm:leading-7 lg:text-lg">
+            {partnerName}
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 text-sm text-zinc-500 leading-5">
+      <div className="mt-4 text-[13px] leading-6 text-zinc-600 sm:text-sm sm:leading-7 lg:text-base lg:leading-8">
         {/* Render mixed content (plain text + inline links) in order. */}
         {consentContent.map((part, index) => {
           if (part.type === 'text') {
@@ -160,7 +162,7 @@ const PartnerCard = ({
 
 const PartnerTermsAndConditionsPage = async (): Promise<JSX.Element> => {
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <PartnerTermsAndConditionsWrapper>
         {partners.map((partner) => (
           <PartnerCard key={partner.id} {...partner} />

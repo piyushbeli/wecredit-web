@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { ActionButton } from '@/components/shared';
 import { partnerWithUs } from '@/lib/api/partner-service';
 import { useAuth } from '@/hooks/use-auth';
-import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper'; 
+import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper';
 /**
  * Partner with Us page component
  * Displays a form for partnership inquiries
@@ -127,7 +127,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
       }
       // If false, error toast is already shown by API function
       // Keep form visible so user can retry
-    } catch (error) {
+    } catch {
       // Handle unexpected errors (shouldn't happen as API function catches all)
     } finally {
       setIsSubmitting(false);
@@ -186,17 +186,6 @@ const PartnerWithUsPage = (): React.ReactNode => {
   };
 
   /**
-   * Handles submit button click
-   * Wraps submitForm in error handling to prevent unhandled promise rejections
-   */
-  const handleSubmitClick = (): void => {
-    submitForm().catch((error) => {
-      // Log error for debugging, but don't show noisy console logs
-      setIsSubmitting(false);
-    });
-  };
-
-  /**
    * Handles navigation to homepage after successful submission
    */
   const handleContinueToHomepage = (): void => {
@@ -208,7 +197,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
    * Separates conditional logic from JSX for better readability
    */
   const getTextareaClassName = (): string => {
-    const baseClasses = 'w-full px-4 py-3 rounded-lg border text-base transition-colors resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+    const baseClasses = 'w-full min-h-36 px-4 py-3 rounded-lg border text-sm leading-6 transition-colors resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-base sm:leading-7';
     return errors.message
       ? `${baseClasses} border-red-300 bg-red-50`
       : `${baseClasses} border-gray-300 bg-white`;
@@ -249,21 +238,25 @@ const PartnerWithUsPage = (): React.ReactNode => {
 
   // Form state - render form layout
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4">
-          <FooterLinkPageWrapper
-            banner={{
-              title: 'PARTNER WITH US',
-              iconImage: IMAGES.ICONS.PARTNER_WITH_US,
-              iconAlt: 'Partner with Us Icon',
-            }}
-            contentClassName='px-4'
-          >
-            <h1 className="sr-only">Partner With WeCredit</h1>
+    <div className="min-h-screen">
+      <div className="mx-auto w-full max-w-7xl">
+        <FooterLinkPageWrapper
+          banner={{
+            title: 'Partner With Us',
+            iconImage: IMAGES.ICONS.PARTNER_WITH_US,
+            iconAlt: 'Partner with Us Icon',
+          }}
+          contentClassName="px-4"
+        >
+          <h1 className="sr-only">Partner With WeCredit</h1>
+
           {/* Partner Form */}
-          <div className="w-full pb-24 px-4">
-            <form onSubmit={handleSubmit} className="space-y-4" id="partner-form">
+          <div className="w-full">
+            <form
+              onSubmit={handleSubmit}
+              className="mx-auto w-full max-w-3xl space-y-4 rounded-2xl bg-white p-0 sm:space-y-5"
+              id="partner-form"
+            >
               {/* Full Name */}
               <InputField
                 label="Full Name"
@@ -312,23 +305,19 @@ const PartnerWithUsPage = (): React.ReactNode => {
                   <p className="text-xs text-red-600">{errors.message}</p>
                 )}
               </div>
+
+              <ActionButton
+                type="submit"
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                className="h-14 text-sm font-medium sm:text-base"
+                fullWidth
+              >
+                Submit
+              </ActionButton>
             </form>
           </div>
-          </FooterLinkPageWrapper>
-        </div>
-      </div>
-
-      {/* Sticky Submit Button at Bottom */}
-      <div className="sticky bottom-0 w-full px-4 pb-4 pt-4 bg-white border-t border-gray-200 shadow-sm">
-        <ActionButton
-          onClick={handleSubmitClick}
-          disabled={isSubmitting}
-          isLoading={isSubmitting}
-          className="w-full h-14 text-base font-medium"
-          fullWidth
-        >
-          Submit
-        </ActionButton>
+        </FooterLinkPageWrapper>
       </div>
     </div>
   );

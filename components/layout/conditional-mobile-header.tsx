@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import MobileHeader from '@/components/home/mobile-header';
 import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
-import type { NavigationLink } from '@/types/navigation';
 
 /** Routes where MobileHeader should NOT be displayed */
 const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/', '/business-loan/', '/gold-loan/', '/car-loan/',
@@ -11,7 +10,6 @@ const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/',
 ];
 
 interface ConditionalMobileHeaderProps {
-  headerLinks: NavigationLink[];
   siteName: string;
 }
 
@@ -25,7 +23,9 @@ const ConditionalMobileHeader = (props: ConditionalMobileHeaderProps) => {
   const isMobilePlatform = useIsMobilePlatform();
 
   // Check if current route should hide the header
-  const shouldHideHeader = HEADER_EXCLUDED_ROUTES.includes(pathname);
+  const shouldHideHeader =
+    HEADER_EXCLUDED_ROUTES.includes(pathname) ||
+    HEADER_EXCLUDED_ROUTES.includes(`${pathname}/`);
 
   if (isMobilePlatform || shouldHideHeader) {
     return null;

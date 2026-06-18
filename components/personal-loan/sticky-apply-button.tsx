@@ -33,7 +33,7 @@ const StickyApplyButton = (): JSX.Element => {
 	}, [triggerApplyFlow]);
 
 	return (
-		<div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10 ">
+		<div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t shadow-lg z-10 lg:hidden">
 			<ActionButton
 				type="button"
 				onClick={handleApplyClick}
