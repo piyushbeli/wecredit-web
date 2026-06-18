@@ -607,6 +607,7 @@ export interface ExpertQuote {
   name: string;
   designation: string;
   imageUrl: string;
+  linkedinUrl: string;
 }
 
 /** Expert testimonial quote */
@@ -615,7 +616,8 @@ export const EXPERT_QUOTE: ExpertQuote = {
     "A personal loan is not just a transaction. It is a moment in someone's life, a medical bill that could not wait, a dream that needed a push, or a gap that needed filling. When we started WeCredit, we wanted to make sure that moment felt simple, fair, and judgment-free. That has not changed, and it never will.",
   name: 'Laksh Dua',
   designation: 'Co - Founder',
-  imageUrl:IMAGES.DIRECT_CONTACT_EXPERTS.LAKASH,
+  imageUrl: IMAGES.DIRECT_CONTACT_EXPERTS.LAKASH,
+  linkedinUrl: "https://in.linkedin.com/in/laksh-dua-8a5972100"
 };
 
 /** Expert quote section content */

@@ -190,10 +190,10 @@ const TestimonialsSection = (): React.ReactNode => {
   };
 
   return (
-    <section className="bg-white py-4 sm:py-10 md:py-12 overflow-hidden">
+    <section className="bg-white py-4 sm:py-10 md:py-20 overflow-hidden">
       {/* Section Title */}
       <motion.h2
-        className="text-lg sm:text-xl md:text-2xl font-medium text-center mb-6 sm:mb-8 px-4"
+        className="text-lg sm:text-xl md:text-[36px] md:font-semibold md:leading-tight font-medium text-center mb-6 sm:mb-8 md:mb-16 px-4"
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -202,19 +202,77 @@ const TestimonialsSection = (): React.ReactNode => {
         Real Results / Testimonials
       </motion.h2>
 
-      <Carousel options={{ loop: true, align: 'center', containScroll: false }}>
-        {({ selectedIndex }) => (
-          <TestimonialsCarouselContent
-            selectedIndex={selectedIndex}
-            playingVideoId={playingVideoId}
-            setPlayingVideoId={setPlayingVideoId}
-            handlePlayClick={handlePlayClick}
-            handleVideoEnded={handleVideoEnded}
-            setVideoRef={setVideoRef}
-            videoRefs={videoRefs}
-          />
-        )}
-      </Carousel>
+      <div className="hidden md:mx-auto md:block md:max-w-7xl md:px-4 lg:px-8 xl:px-0">
+        <Carousel options={{ loop: false, align: 'start', containScroll: 'trimSnaps' }}>
+          <CarouselContent className="-ml-6">
+            {TESTIMONIALS.map((testimonial, index) => {
+              const isPlaying = playingVideoId === testimonial.id;
+
+              return (
+                <CarouselSlide
+                  key={testimonial.id}
+                  index={index}
+                  className="flex-[0_0_25%] pl-6"
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gray-100">
+                    <video
+                      ref={(el) => setVideoRef(testimonial.id, el)}
+                      src={testimonial.videoUrl}
+                      className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+                        isPlaying ? 'z-10 opacity-100' : 'z-0 opacity-0'
+                      }`}
+                      playsInline
+                      onEnded={() => handleVideoEnded(testimonial.id)}
+                    />
+                    <Image
+                      src={testimonial.thumbnailUrl}
+                      alt={`${testimonial.customerName || 'Customer'} testimonial`}
+                      fill
+                      className={`object-cover transition-opacity duration-300 ${
+                        isPlaying ? 'opacity-0' : 'opacity-100'
+                      }`}
+                      sizes="(min-width: 1024px) 25vw, 50vw"
+                    />
+                    <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                    <button
+                      type="button"
+                      onClick={() => handlePlayClick(testimonial.id)}
+                      className="absolute left-1/2 top-1/2 z-30 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl transition-transform hover:scale-105 active:scale-95"
+                      aria-label={isPlaying ? 'Pause testimonial' : 'Play testimonial'}
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-7 w-7 text-black" fill="currentColor" strokeWidth={0} />
+                      ) : (
+                        <Play className="ml-1 h-7 w-7 text-black" fill="currentColor" strokeWidth={0} />
+                      )}
+                    </button>
+                    <p className="absolute bottom-5 left-4 right-4 z-30 text-center text-base font-medium leading-5 text-white">
+                      {testimonial.quote}
+                    </p>
+                  </div>
+                </CarouselSlide>
+              );
+            })}
+          </CarouselContent>
+          <CarouselDots className="mt-8" />
+        </Carousel>
+      </div>
+
+      <div className="md:hidden">
+        <Carousel options={{ loop: true, align: 'center', containScroll: false }}>
+          {({ selectedIndex }) => (
+            <TestimonialsCarouselContent
+              selectedIndex={selectedIndex}
+              playingVideoId={playingVideoId}
+              setPlayingVideoId={setPlayingVideoId}
+              handlePlayClick={handlePlayClick}
+              handleVideoEnded={handleVideoEnded}
+              setVideoRef={setVideoRef}
+              videoRefs={videoRefs}
+            />
+          )}
+        </Carousel>
+      </div>
     </section>
   );
 };

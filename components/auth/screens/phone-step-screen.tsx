@@ -32,7 +32,7 @@ export const PhoneStepScreen = ({
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const bottomSheetClasses: string =
     bottomSheetClassName
-    ?? 'flex-1 flex flex-col md:mt-0 md:rounded-none md:shadow-none md:[&>div:first-child]:hidden';
+    ?? 'flex-1 flex flex-col md:mt-0 md:rounded-none md:shadow-none md:[&>div:first-child]:hidden md:[&>div:last-child]:p-0';
   const containerStyle: React.CSSProperties = useAppHeight();
   const usesResponsiveModalHeight = isDesktopModal && headerHeightPercent === 65;
   const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent && !usesResponsiveModalHeight
@@ -71,7 +71,7 @@ export const PhoneStepScreen = ({
       <button
         type="button"
         onClick={onClose}
-        className="absolute top-4 right-4 z-20 p-2 rounded-full transition-colors md:bg-gray-100 md:hover:bg-gray-200"
+        className="absolute top-4 right-4 z-20 rounded-full p-2 transition-colors md:top-5 md:right-5 md:bg-gray-100 md:hover:bg-gray-200"
         aria-label="Close"
       >
         <X className="w-6 h-6 text-white md:text-gray-700" />
@@ -90,7 +90,7 @@ export const PhoneStepScreen = ({
       {/* Bottom Sheet - fills remaining 50% */}
       <BottomSheet className={bottomSheetClasses}>
         <motion.form
-          className="flex-1 flex flex-col md:mx-auto md:w-full md:max-w-[420px] md:flex-none md:py-8"
+          className="flex-1 flex flex-col md:mx-auto md:w-full md:max-w-none md:flex-none md:px-10 md:pt-14 md:pb-9"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -161,7 +161,7 @@ export const PhoneStepScreen = ({
             type="submit"
             disabled={!canContinue}
             className={cn(
-              'w-full py-4 rounded-full font-semibold text-base transition-all duration-300',
+              'w-full rounded-full py-4 font-semibold text-base transition-all duration-300 md:py-3.5',
               canContinue
                 ? 'bg-wc-blue-500 text-white shadow-lg shadow-wc-blue-500/30 hover:bg-wc-blue-600 active:scale-[0.98]'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
