@@ -18,38 +18,38 @@ interface BlogPost {
 
 /** Static blog posts data */
 const blogPosts: BlogPost[] = [
-  {
-    id: 'blog-1',
-    title: 'How to Automate Your Bank Savings Like a Pro',
-    description: 'Learn practical steps to automate your savings and grow your wealth effortlessly.',
-    imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
-    readTime: 4,
-    href: 'https://wecredit.co.in/blog/how-to-automate-your-bank-savings-like-a-pro/',
-  },
-  {
-    id: 'blog-2',
-    title: 'Secure Your Emergency Fund With These Options',
-    description: 'Explore the best options to keep your emergency fund safe and accessible.',
-    imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
-    readTime: 4,
-    href: 'https://wecredit.co.in/blog/secure-your-emergency-fund-with-these-options/',
-  },
-  {
-    id: 'blog-3',
-    title: 'India’s 5 Best Apps to Track and Save Money Easily',
-    description: 'Discover top apps for tracking expenses and boosting your savings in India.',
-    imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
-    readTime: 4,
-    href: 'https://wecredit.co.in/blog/india-s-5-best-apps-to-track-and-save-money-easily/',
-  },
-  {
-    id: 'blog-4',
-    title: 'SIP vs RD: What’s Best for Your Money Goals?',
-    description: 'Compare SIP and RD to choose the right investment for your financial goals.',
-    imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
-    readTime: 4,
-    href: 'https://wecredit.co.in/blog/sip-vs-rd-what-s-best-for-your-money-goals/',
-  },
+	{
+		id: 'blog-1',
+		title: 'How to Automate Your Bank Savings Like a Pro',
+		description: 'Learn practical steps to automate your savings and grow your wealth effortlessly.',
+		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
+		readTime: 4,
+		href: 'https://wecredit.co.in/blog/how-to-automate-your-bank-savings-like-a-pro/',
+	},
+	{
+		id: 'blog-2',
+		title: 'Secure Your Emergency Fund With These Options',
+		description: 'Explore the best options to keep your emergency fund safe and accessible.',
+		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
+		readTime: 4,
+		href: 'https://wecredit.co.in/blog/secure-your-emergency-fund-with-these-options/',
+	},
+	{
+		id: 'blog-3',
+		title: 'India’s 5 Best Apps to Track and Save Money Easily',
+		description: 'Discover top apps for tracking expenses and boosting your savings in India.',
+		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
+		readTime: 4,
+		href: 'https://wecredit.co.in/blog/india-s-5-best-apps-to-track-and-save-money-easily/',
+	},
+	{
+		id: 'blog-4',
+		title: 'SIP vs RD: What’s Best for Your Money Goals?',
+		description: 'Compare SIP and RD to choose the right investment for your financial goals.',
+		imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
+		readTime: 4,
+		href: 'https://wecredit.co.in/blog/sip-vs-rd-what-s-best-for-your-money-goals/',
+	},
 ];
 
 /** Props for BlogCard component */
@@ -109,25 +109,43 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
  */
 const BlogSection = (): React.ReactNode => {
 	return (
-		<section className="bg-white py-4 sm:py-10 md:py-12 px-4">
-			{/* Section Title */}
-			<motion.h2
-				className="text-lg md:text-[18px] md:text-2xl font-medium text-center mb-6 sm:mb-8"
-				initial={{ opacity: 0, y: 10 }}
-				whileInView={{ opacity: 1, y: 0 }}
-				viewport={{ once: true }}
-				transition={{ duration: 0.4 }}
-			>
-				Read . Learn . Grow
-			</motion.h2>
+		<section className="bg-white py-8 lg:py-10">
+			<div className="mx-auto max-w-7xl xl:px-0 px-8">
+				{/* Section Title */}
+				<motion.h2
+					className="text-xl font-semibold text-gray-900 text-center mb-8"
+					initial={{ opacity: 0, y: 10 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true }}
+					transition={{ duration: 0.4 }}
+				>
+					Read . Learn . Grow
+				</motion.h2>
 
-			{/* Blog Grid - 2x2 on mobile, 4 columns on larger screens */}
-<div className="mx-auto max-w-5xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-				{blogPosts.map((post, index) => (
-					<BlogCard key={post.id} post={post} index={index} />
-				))}
+
+
+
+				<div className="max-w-7xl mx-auto">
+					<div
+						key="blog-list"
+						className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 lg:mx-0 lg:px-0 grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 lg:overflow-visible lg:pb-0"
+					>
+						{blogPosts.map((post, index) => (
+							<div
+								key={post.id}
+								className="w-full lg:min-w-0 snap-start shrink-0 lg:shrink"
+							>
+								<BlogCard post={post} index={index} />
+							</div>
+						))}
+					</div>
+				</div>
 			</div>
 		</section>
+
+
+
+
 	);
 };
 

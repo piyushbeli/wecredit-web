@@ -12,14 +12,14 @@ const TermsOfUseWrapper = ({ htmlContent }: TermsOfUseWrapperProps): ReactNode =
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'TERMS OF USE',
+        title: 'Terms of Use',
         iconImage: IMAGES.ICONS.TERMS_OF_SERVICE,
       }}
       contentClassName='px-4'
     >
       <h1 className="sr-only">Terms of Service</h1>
       <div
-        className="prose max-w-none"
+        className="wc-static-content max-w-none"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
     </FooterLinkPageWrapper>

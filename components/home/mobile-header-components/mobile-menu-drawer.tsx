@@ -99,7 +99,7 @@ export const MobileMenuDrawer = ({
                             <motion.button
                                 type="button"
                                 onClick={closeMenu}
-                                className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                                className="p-2 text-white/70 cursor-pointer hover:text-white rounded-lg hover:bg-white/10 transition-colors"
                                 aria-label="Close menu"
                                 whileTap={{ scale: 0.95 }}
                             >
@@ -116,7 +116,7 @@ export const MobileMenuDrawer = ({
                                             <User className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            
+
                                             <p className="text-white/60 text-sm">
                                                 +91 {user?.phoneNumber}
                                             </p>
@@ -128,7 +128,7 @@ export const MobileMenuDrawer = ({
                                             logout();
                                             closeMenu();
                                         }}
-                                        className="p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                                        className="p-2 cursor-pointer text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
                                         aria-label="Logout"
                                         whileTap={{ scale: 0.95 }}
                                     >
@@ -153,27 +153,10 @@ export const MobileMenuDrawer = ({
                         {/* Navigation Links */}
                         <nav className="p-4">
                             <ul className="space-y-1">
-                                {isAuthenticated && (
-                                    <motion.li
-                                        custom={0}
-                                        variants={menuItemVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                    >
-                                        <Link
-                                            href="/offers"
-                                            onClick={closeMenu}
-                                            className="flex items-center gap-3 px-3 py-3 text-white rounded-lg hover:bg-white/10 transition-colors"
-                                        >
-                                            <span className="font-medium">Loan Status</span>
-                                        </Link>
-                                    </motion.li>
-                                )}
                                 {headerLinks.map((link, index) => (
                                     <motion.li
                                         key={link.id}
-                                        custom={isAuthenticated ? index + 1 : index}
+                                        custom={index}
                                         variants={menuItemVariants}
                                         initial="hidden"
                                         animate="visible"

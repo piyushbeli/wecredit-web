@@ -1,12 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShoppingBag, BriefcaseBusiness, ShoppingCart, CreditCard, Home } from 'lucide-react';
+import { ShoppingBag, BriefcaseBusiness, CreditCard, Home } from 'lucide-react';
 import ProductCard from './product-card';
 import { IMAGES } from '@/lib/constants/images';
 import type { LucideIcon } from 'lucide-react';
 
-/** Product configuration */
 interface Product {
   id: string;
   label: string;
@@ -15,95 +14,81 @@ interface Product {
   imagePath?: string;
 }
 
-/** Products data matching the design */
 const products: Product[] = [
   {
     id: 'personal-loan',
-    label: 'Personal\nLoan',
+    label: 'Personal Loan',
     href: '/personal-loan',
     icon: ShoppingBag,
     imagePath: IMAGES.ICONS.PERSONAL_LOAN,
   },
   {
-    id: 'credit-cards',
-    label: 'Credit\nCards',
-    href: '/credit-cards',
-    icon: CreditCard,
-    imagePath: IMAGES.ICONS.CREDIT_CARD,
-  },
-  {
     id: 'business-loan',
-    label: 'Business\nLoan',
+    label: 'Business Loan',
     href: '/business-loan',
     icon: BriefcaseBusiness,
     imagePath: IMAGES.ICONS.BUSINESS_LOAN,
   },
-  // {
-  //   id: 'pl-by-ondc',
-  //   label: 'PL By\nONDC',
-  //   href: '/pl-by-ondc',
-  //   icon: ShoppingCart,
-  //   imagePath: IMAGES.ICONS.PL_BY_ONDC,
-  // },
   {
     id: 'car-loan',
-    label: 'Car\nLoan',
+    label: 'Car Loan',
     href: '/car-loan',
     icon: ShoppingBag,
     imagePath: IMAGES.LOAN_ICONS.CAR_LOAN,
   },
   {
+    id: 'credit-cards',
+    label: 'Credit Cards',
+    href: '/credit-cards',
+    icon: CreditCard,
+    imagePath: IMAGES.ICONS.CREDIT_CARD,
+  },
+  {
     id: 'home-loan',
-    label: 'Home\nLoan',
+    label: 'Home Loan',
     href: '/home-loan',
     icon: Home,
     imagePath: IMAGES.LOAN_ICONS.HOME_LOAN,
   },
   {
     id: 'gold-loan',
-    label: 'Gold\nLoan',
+    label: 'Gold Loan',
     href: '/gold-loan',
     icon: BriefcaseBusiness,
     imagePath: IMAGES.LOAN_ICONS.GOLD_LOAN,
   },
 ];
 
-/**
- * Our Products section with 4-column grid
- */
 const ProductsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white py-4 px-4 md:mt-5 md:py-0">
-      {/* Section Title */}
-      <motion.h2
-        className="text-lg font-medium text-center mb-6"
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
-      >
-        Our Products
-      </motion.h2>
+    <section className="bg-white py-8 lg:py-10">
+      <div className="mx-auto max-w-7xl xl:px-0 px-8">
+        <motion.h2
+          className="text-xl font-semibold text-gray-900 text-center mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
+          Our Products
+        </motion.h2>
 
-      {/* Products Grid */}
-     <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 mx-auto max-w-3xl">
-
-
-        {products.map((product, index) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            label={product.label.replace('\n', ' ')}
-            href={product.href}
-            icon={product.icon}
-            imagePath={product.imagePath}
-            index={index}
-          />
-        ))}
+        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {products.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              label={product.label}
+              href={product.href}
+              icon={product.icon}
+              imagePath={product.imagePath}
+              index={index}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
 export default ProductsSection;
-

@@ -4,7 +4,6 @@
 export const EXTERNAL_LINKS = {
 	/** Google Play Store Link */
 	PLAY_STORE: "https://play.google.com/store/apps/details?id=com.wecredit.Wecredit&hl=en_IN",
-
 	/** Apple App Store Link (Placeholder) */
 	//   APP_STORE: "",  // No Apple App Store Link
 

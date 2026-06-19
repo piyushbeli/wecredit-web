@@ -23,6 +23,7 @@ export interface PhoneStepScreenProps {
   headerHeightPercent?: number;
   headerClassName?: string;
   bottomSheetClassName?: string;
+  isDesktopModal?: boolean;
 }
 
 /** Props for OTPStepScreen component */
@@ -38,4 +39,5 @@ export interface OTPStepScreenProps {
   onClose: () => void;
   headerHeightPercent?: number;
   headerHeight?: HeaderHeightPreset;
+  isDesktopModal?: boolean;
 }

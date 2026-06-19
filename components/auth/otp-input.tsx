@@ -63,13 +63,7 @@ const OTPInput = ({
    * resetting `resendTimer` to 30 would leave no active interval (UI stuck on "30s").
    */
   const [resendTimerEpoch, setResendTimerEpoch] = useState(0);
-
-  /** Sync with controlled value */
-  useEffect(() => {
-    if (controlledValue !== undefined) {
-      setOtp(controlledValue);
-    }
-  }, [controlledValue]);
+  const currentOtp = controlledValue ?? otp;
 
   /** Start / restart resend countdown (mount + each resend) */
   useEffect(() => {
@@ -90,19 +84,23 @@ const OTPInput = ({
   /** Handle OTP change */
   const handleOtpChange = useCallback(
     (value: string): void => {
-      setOtp(value);
+      if (controlledValue === undefined) {
+        setOtp(value);
+      }
       onChange?.(value);
       if (value.length === OTP_LENGTH) {
         onComplete?.(value);
       }
     },
-    [onChange, onComplete]
+    [controlledValue, onChange, onComplete]
   );
 
   /** Handle resend click */
   const handleResend = (): void => {
     if (!canResend || disabled) return;
-    setOtp('');
+    if (controlledValue === undefined) {
+      setOtp('');
+    }
     setResendTimer(RESEND_TIMER_SECONDS);
     setCanResend(false);
     setResendTimerEpoch((n) => n + 1);
@@ -110,11 +108,11 @@ const OTPInput = ({
   };
 
   /** Get input class based on variant and state */
-  const getInputClass = (hasValue: boolean): string => {
+  const getInputClass = (): string => {
     // Consistent styling for all states - matching Figma design
     if (variant === 'blue') {
       return cn(
-        'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-2 rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
+        'h-12 w-12 sm:h-14 sm:w-14 md:h-14 md:w-14 lg:h-16 lg:w-16 border-2 rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
         'border-white/30 bg-white/20 text-white placeholder:text-white/40',
         'backdrop-blur-sm ',
         disabled && 'opacity-50 cursor-not-allowed', 'focus:outline-none'
@@ -123,7 +121,7 @@ const OTPInput = ({
 
     // Default variant - matching Figma: #045CCF at 15% opacity, corner radius 4
     return cn(
-      'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-b-2 border-brand-primary rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
+      'h-12 w-12 sm:h-14 sm:w-14 md:h-14 md:w-14 lg:h-16 lg:w-16 border-b-2 border-brand-primary rounded text-center text-xl sm:text-2xl font-bold transition-all duration-200',
       error
         ? 'border-b-red-400 bg-red-50 text-gray-900'
         : 'bg-[#045CCF]/15 text-gray-900 placeholder:text-gray-400',
@@ -143,21 +141,19 @@ const OTPInput = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3 }}
-        className="mb-6 px-4 sm:px-0"
+        className="mb-6 w-full max-w-full px-4 sm:px-0"
       >
         <OtpInput
-          value={otp}
+          value={currentOtp}
           onChange={handleOtpChange}
           numInputs={OTP_LENGTH}
-          renderInput={(props, index) => {
-            const hasValue = otp[index] !== undefined && otp[index] !== '';
-            // Exclude the default style from props to allow Tailwind classes to work
-            const { style: _style, ...restProps } = props;
+          renderInput={(props) => {
+            const restProps = { ...props, style: undefined };
             return (
               <input
                 {...restProps}
                 inputMode="numeric"
-                className={getInputClass(hasValue)}
+                className={getInputClass()}
                 disabled={disabled}
               />
             );
@@ -167,7 +163,8 @@ const OTPInput = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.5rem',
+            gap: 'clamp(0.35rem, 1.4vw, 0.75rem)',
+            width: '100%',
           }}
         />
       </motion.div>
@@ -205,7 +202,7 @@ const OTPInput = ({
                 onClick={handleResend}
                 disabled={disabled}
                 className={cn(
-                  'font-semibold transition-colors',
+                  'font-semibold cursor-pointer transition-colors',
                   variant === 'blue'
                     ? 'text-white  hover:text-white/80'
                     : 'text-brand-primary hover:text-brand-primary/80',
@@ -236,7 +233,7 @@ const OTPInput = ({
               <button
                 type="button"
                 onClick={onChangeNumber}
-                className="text-wc-blue-500 font-bold hover:text-wc-blue-600 transition-colors"
+                className="text-wc-blue-500 cursor-pointer font-bold hover:text-wc-blue-600 transition-colors"
               >
                 Change Number
               </button>

@@ -9,10 +9,10 @@ const GrievanceRedressalWrapper = (): ReactNode => {
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'GRIEVANCE REDRESSAL',
+        title: 'Grievance Redressal',
         iconImage: IMAGES.ICONS.WECREDIT_HEART,
       }}
-      contentClassName="mx-4 px-4"
+      contentClassName="px-4"
     >
       <h1 className="sr-only">WeCredit Grievance Redressal</h1>
       <GrievanceContactContent />

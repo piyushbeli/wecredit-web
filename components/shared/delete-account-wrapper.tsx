@@ -2,23 +2,23 @@
 
 import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
-import GrievanceContactContent from './grievance-contact-content';
+import DeleteAccountContent from './delete-account-content';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
 
-const ContactUsWrapper = (): ReactNode => {
+const DeleteAccountWrapper = (): ReactNode => {
   return (
     <FooterLinkPageWrapper
       banner={{
-        title: 'Contact Us',
+        title: 'Delete Account',
         iconImage: IMAGES.ICONS.CONTACT_US,
-        iconAlt: 'Contact Us Icon',
+        iconAlt: 'Delete Account',
       }}
       contentClassName="px-4"
     >
-      <h1 className="sr-only">Contact WeCredit Support</h1>
-      <GrievanceContactContent />
+      <h1 className="sr-only">Delete Your WeCredit Account</h1>
+      <DeleteAccountContent />
     </FooterLinkPageWrapper>
   );
 };
 
-export default ContactUsWrapper;
+export default DeleteAccountWrapper;

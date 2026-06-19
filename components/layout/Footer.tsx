@@ -106,57 +106,60 @@ const socialLinks: SocialLink[] = [
 const Footer = () => {
   return (
     <footer className="bg-white">
-  <div className="max-w-7xl mx-auto px-4 pt-8 pb-[100px]">
+      <div className="mx-auto max-w-7xl px-5 pt-8 pb-16 sm:px-8 md:px-10 md:pt-20 md:pb-24 lg:px-12 xl:px-4">
 
         {/* Top Section - Logo, Tagline, and Social Links */}
-        <div className="mb-10">
+        <div className="mb-10 md:mb-0 md:grid md:grid-cols-[1.8fr_repeat(4,1fr)] md:gap-10 lg:grid-cols-[2.2fr_repeat(4,1fr)] lg:gap-14">
           {/* Logo */}
-          <Link href="/" className="inline-block mb-4">
-            <Image
-              src={IMAGES.LOGOS.TRANSPARENT}
-              alt="WeCredit"
-              width={106}
-              height={24}
-              className="h-6 w-auto transition-opacity duration-300"
-              priority
-            />
-          </Link>
+          <div>
+            <Link href="/" className="mb-4 inline-block md:mb-6">
+              <Image
+                src={IMAGES.LOGOS.TRANSPARENT}
+                alt="WeCredit"
+                width={170}
+                height={40}
+                className="h-9 w-auto transition-opacity duration-300 md:h-8"
+                priority
+              />
+            </Link>
 
-          {/* Tagline */}
-          <p className="text-sm text-zinc-800 font-normal font-['Poppins'] leading-5 mb-6">
-            Check your credit score, compare loans, and choose the right lender.
-          </p>
+            {/* Tagline */}
+            <p className="max-w-[560px] text-base font-normal leading-6 text-zinc-500 sm:text-lg sm:leading-7 md:max-w-[300px] md:text-base md:leading-7">
+              <span className="md:hidden">Check your credit score, compare loans, and choose the right lender.</span>
+              <span className="hidden md:inline">
+                Check your credit score, compare personal loans, and find the right lender - all in one secure, easy-to-use platform.
+              </span>
+            </p>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-6">
-            {socialLinks.map((social) => (
-              <a
-                key={social.platform}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-6 h-6 flex items-center justify-center text-blue-700 transition-colors"
-                aria-label={social.platform}
-              >
-                {social.icon}
-              </a>
-            ))}
+            {/* Social Links - mobile */}
+            <div className="mt-5 flex items-center gap-6 sm:gap-8 md:hidden">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.platform}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-6 w-6 items-center justify-center text-blue-700 transition-colors sm:h-7 sm:w-7"
+                  aria-label={social.platform}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Navigation Links - Single Column Mobile Layout */}
-        <div className="space-y-6 mb-4">
+          {/* Navigation Links */}
           {footerSections.map((section) => (
-            <div key={section.title}>
-              <h3 className="text-sm font-medium font-['Poppins'] leading-5 text-zinc-800 mb-2">
+            <div key={section.title} className="mt-7 md:mt-1">
+              <h3 className="mb-2 text-lg font-medium leading-6 text-zinc-800 sm:text-xl sm:leading-7 md:mb-4 md:text-base md:font-semibold md:leading-6">
                 {section.title}
               </h3>
-              <ul className="space-y-1">
+              <ul className="space-y-2 md:space-y-4">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm font-normal font-['Poppins'] leading-5 text-zinc-600 hover:text-zinc-800 transition-colors"
+                      className="text-base font-normal leading-6 text-zinc-500 transition-colors hover:text-zinc-800 sm:text-lg sm:leading-7 md:text-base md:leading-6"
                     >
                       {link.label}
                     </Link>
@@ -168,11 +171,27 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section - Divider and Copyright */}
-        <div className="border-t border-stone-300 pt-4">
+        <div className="mt-8 border-t border-stone-300 pt-6 md:mt-24 md:flex md:items-center md:justify-between">
           {/* Copyright */}
-          <p className="text-xs font-normal font-['Poppins'] leading-4 text-zinc-500 text-center">
+          <p className="text-center text-sm font-normal leading-5 text-zinc-500 sm:text-base sm:leading-6 md:text-left md:text-base md:leading-6">
             © 2026 Quantum X Global Private Limited. All Rights Reserved.
           </p>
+
+          {/* Social Links - tablet and desktop */}
+          <div className="hidden items-center gap-6 md:flex">
+            {socialLinks.map((social) => (
+              <a
+                key={social.platform}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-6 w-6 items-center justify-center text-blue-700 transition-colors hover:text-brand-primary"
+                aria-label={social.platform}
+              >
+                {social.icon}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

@@ -150,11 +150,11 @@ const AutoFillModal = ({ isOpen, onProceed, onClose, disableTimer = false }: Aut
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
           >
             <div className="w-full max-w-sm mx-auto px-4 pt-6 pb-8 flex flex-col items-center">
-              <h2 className="text-center text-zinc-800 text-xl font-medium font-['Poppins'] leading-6 mb-2">
+              <h2 className="text-center text-zinc-800 text-xl font-medium  leading-6 mb-2">
                 Auto- Filling your details from credit bureau
               </h2>
 
-              <p className="text-center text-zinc-500 text-xs font-normal font-['Poppins'] leading-4 mb-8">
+              <p className="text-center text-zinc-500 text-xs font-normal  leading-4 mb-8">
                 We don't put any enquiries in your credit bureau
               </p>
 

@@ -49,7 +49,7 @@ export const FooterLinkPageWrapper = ({
       )}
 
       {!isMobilePlatform && (
-        <div className="mx-4 mt-4">
+        <div className="mx-4 mt-4 sm:hidden">
           <BackToHomeButton />
         </div>
       )}

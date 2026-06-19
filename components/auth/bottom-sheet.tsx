@@ -37,7 +37,7 @@ const BottomSheet = ({ children, className }: BottomSheetProps): React.ReactNode
         <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
       </div>
       {/* Content */}
-      <div className={cn('px-6 pb-8', hasFlex && 'flex-1 flex flex-col')}>{children}</div>
+      <div className={cn('p-5', hasFlex && 'flex-1 flex flex-col')}>{children}</div>
     </motion.div>
   );
 };

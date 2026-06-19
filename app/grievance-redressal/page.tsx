@@ -14,7 +14,7 @@ export const metadata: Metadata = buildPageMetadata('/grievance-redressal/');
  */
 const GrievanceRedressalPage = (): React.ReactNode => {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <GrievanceRedressalWrapper />
     </div>
   );

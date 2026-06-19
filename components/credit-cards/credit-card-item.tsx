@@ -57,7 +57,7 @@ const CreditCardItem = ({ card, badge }: CreditCardItemProps): React.ReactNode =
       <div className="flex-1 flex flex-col p-2.5 min-h-0">
         {/* Title row with optional badge */}
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h2 className="text-neutral-900 text-[18px] leading-[22px] font-medium font-['Poppins'] text-left flex-1 min-w-0">
+          <h2 className="text-neutral-900 text-[18px] leading-[22px] font-medium  text-left flex-1 min-w-0">
             {card.title}
           </h2>
           {badge ? (

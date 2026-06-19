@@ -27,6 +27,7 @@ export const IMAGES = {
   APP: {
     GOOGLE_PLAY: `${BUCKET_IMAGE_URL}/google-play-badge.png`,
     APP_STORE: `${BUCKET_IMAGE_URL}/app-store-badge.png`,
+    QR: `${BUCKET_IMAGE_URL}/QR.png`,
     MOCKUP: `${BUCKET_IMAGE_URL}/wecredit-app-mock.png`,
   },
   ILLUSTRATIONS: {

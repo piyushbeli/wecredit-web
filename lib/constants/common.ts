@@ -81,6 +81,8 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     image: IMAGES.CAROUSEL.SLIDE_1,
     titleWhite: "More Savings",
     titleGradient: "on Every Loan",
+    description:
+      "Experience the next generation of financial freedom. We connect you with top-tier lenders using AI-driven precision for the lowest possible rates.",
     ctaText: "Apply For Loan",
     ctaLink: "/personal-loan",
   },
@@ -89,6 +91,8 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     image: IMAGES.CAROUSEL.SLIDE_2,
     titleWhite: "Find the Card",
     titleGradient: "That Fits You",
+    description:
+      "Discover credit cards tailored to your lifestyle. Compare rewards, benefits, and eligibility across India's top banks in one place.",
     ctaText: "Get Your Card",
     ctaLink: "/credit-cards",
   },
@@ -97,6 +101,8 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     image: IMAGES.CAROUSEL.SLIDE_3,
     titleWhite: "More Choices",
     titleGradient: "Better Loan Deals",
+    description:
+      "Check your credit score and unlock personalized loan offers from trusted lenders. Fast, secure, and completely free.",
     ctaText: "Check Eligibility",
     ctaLink: "/bureau-report",
   },

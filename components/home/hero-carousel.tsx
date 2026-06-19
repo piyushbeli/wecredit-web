@@ -7,52 +7,52 @@ import { usePathname } from 'next/navigation';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
 import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/components/ui/carousel';
-import { ActionButton } from '@/components/shared';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
 import type { MouseEvent } from 'react';
+
 /** Slide content configuration */
 export interface SlideContent {
   id: string;
   image: string;
   titleWhite: string;
   titleGradient: string;
+  description: string;
   ctaText: string;
   ctaLink: string;
 }
 
-
 /**
- * Hero carousel section with gradient background, 3D avatar, and swipeable slides
+ * Hero carousel section with gradient background, 3D illustration, and swipeable slides
  */
 const HeroCarousel = (): JSX.Element => {
   const pathname = usePathname();
-  const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
+  const { triggerApplyFlow } = useLoanApplicationStore();
 
   const renderCtaElement = (slide: SlideContent) => {
-  const isPersonalLoan = slide.ctaLink === '/personal-loan';
+    const isPersonalLoan = slide.ctaLink === '/personal-loan';
 
-  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    if (isPersonalLoan) {
-      e.preventDefault(); // stop navigation
-      triggerApplyFlow(); // trigger apply flow instead
-    }
+    const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
+      if (isPersonalLoan) {
+        e.preventDefault();
+        triggerApplyFlow();
+      }
+    };
+
+    return (
+      <Link
+        href={slide.ctaLink}
+        onClick={handleClick}
+        className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white text-base font-semibold rounded-lg transition-all duration-300 active:scale-95"
+      >
+        {slide.ctaText}
+      </Link>
+    );
   };
 
   return (
-    <Link
-      href={slide.ctaLink}
-      onClick={handleClick}
-      className="inline-flex items-center justify-center px-8 py-4 bg-wc-blue-500 hover:bg-wc-blue-600 text-white rounded-lg transition-all duration-300 active:scale-95"
-    >
-      {slide.ctaText}
-    </Link>
-  );
-};
+    <section className="wc-hero-bg min-h-[480px] lg:min-h-[520px] relative pt-20 lg:pt-24 pb-4">
 
-  return (
-    <section className="wc-hero-bg min-h-[40vh] relative pt-16">
-      {/* Single page-level H1 — visually hidden; carousel slide headings are decorative h2s */}
       <h1 className="sr-only">Compare Loans & Credit Offers Online</h1>
       <Carousel
         key={pathname}
@@ -62,57 +62,53 @@ const HeroCarousel = (): JSX.Element => {
       >
         <CarouselContent className="flex-1">
           {HERO_CAROUSEL_SLIDES.map((slide) => {
-            // Keep the CTA flow consistent with the personal loan page apply button.
             const ctaElement = renderCtaElement(slide);
 
             return (
               <CarouselSlide
                 key={slide.id}
-                className="flex-[0_0_100%] flex flex-col items-center justify-center px-6 pt-8"
+                className="flex-[0_0_100%] px-4 sm:px-6 lg:px-8"
               >
-                {/* 3D Hero Avatar with Floating Elements */}
-                <motion.div
-                  className="relative w-96 h-40 mb-4"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 100 }}
-                >
-                  <Image
-                    src={slide.image}
-                    alt="WeCredit Hero"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </motion.div>
+                <div className="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[360px] lg:min-h-[400px]">
+                  <motion.div
+                    className="order-2 lg:order-1 flex flex-col items-center lg:items-start text-center lg:text-left"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                      {slide.titleWhite}
+                    </h2>
+                    <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
+                      {slide.titleGradient}
+                    </p>
+                    <p className="text-sm sm:text-base text-gray-500 max-w-md mb-6 leading-relaxed">
+                      {slide.description}
+                    </p>
+                    {ctaElement}
+                  </motion.div>
 
-                {/* Title */}
-                <motion.div
-                  className="text-center mb-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                  {/* Carousel headings are decorative — the page H1 lives in HomePage */}
-                  <h2 className="text-3xl font-medium mb-1">{slide.titleWhite}</h2>
-                  <p className="text-3xl font-medium text-blue-primary">{slide.titleGradient}</p>
-                </motion.div>
-
-                {/* CTA Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                  {ctaElement}
-                </motion.div>
+                  <motion.div
+                    className="order-1 lg:order-2 relative w-full h-48 sm:h-56 lg:h-80"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 100 }}
+                  >
+                    <Image
+                      src={slide.image}
+                      alt="WeCredit Hero"
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </motion.div>
+                </div>
               </CarouselSlide>
             );
           })}
         </CarouselContent>
 
-        {/* Dot Indicators - positioned below the carousel content */}
-        <CarouselDots className="py-8 z-20" />
+        <CarouselDots className="py-6 lg:py-8 z-20" />
       </Carousel>
     </section>
   );
