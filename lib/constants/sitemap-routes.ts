@@ -12,6 +12,7 @@ export const SITEMAP_PATHS = [
   '/calculator/personal-loan/',
   '/car-loan/',
   '/contact-us/',
+  '/delete_account/',
   '/credit-cards/',
   '/faq/',
   '/gold-loan/',

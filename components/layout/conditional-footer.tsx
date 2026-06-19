@@ -15,6 +15,7 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/contact-us/',
   '/faq/',
   '/grievance-redressal/',
+  '/delete_account/',
   '/partner-terms-and-conditions/',
   '/calculator/personal-loan',
   '/our-partners/',

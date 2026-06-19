@@ -16,6 +16,7 @@ export enum WEB_SEO_ROUTES {
   CALCULATOR_PERSONAL_LOAN = '/calculator/personal-loan/',
   CAR_LOAN = '/car-loan/',
   CONTACT_US = '/contact-us/',
+  DELETE_ACCOUNT = '/delete_account/',
   CREDIT_CARDS = '/credit-cards/',
   FAQ = '/faq/',
   GOLD_LOAN = '/gold-loan/',
@@ -99,6 +100,13 @@ export const STATIC_PAGE_SEO: Record<WEB_SEO_ROUTES, StaticPageSeoEntry> = {
     description:
       'Need help with WeCredit? Contact customer support or the grievance officer for loan queries, complaints and assistance.',
     h1: 'Contact WeCredit Support',
+    priority: 'Medium',
+  },
+  [WEB_SEO_ROUTES.DELETE_ACCOUNT]: {
+    title: 'Delete Your WeCredit Account',
+    description:
+      'Request account deletion by contacting WeCredit support. Our team will verify your details and assist you with the process.',
+    h1: 'Delete Your WeCredit Account',
     priority: 'Medium',
   },
   [WEB_SEO_ROUTES.CREDIT_CARDS]: {
