@@ -29,7 +29,6 @@ const BottomSheet = ({ children, className }: BottomSheetProps): React.ReactNode
         type: 'spring',
         stiffness: 300,
         damping: 30,
-        delay: 0.2,
       }}
     >
       {/* Drag Indicator */}
