@@ -103,7 +103,7 @@ const HowToApplySteps = (): JSX.Element => {
 
 				{/* CTA Button */}
 				<ActionButton
-					className="h-14 w-full cursor-pointerf text-lg font-medium bg-[#045CD033] text-brand-primary hover:bg-[#045CD033] md:mx-auto md:flex md:h-14 md:max-w-[420px] md:text-xl"
+					className="h-14 w-full cursor-pointer text-lg font-medium bg-[#045CD033] text-brand-primary hover:bg-[#045CD033] md:mx-auto md:flex md:h-14 md:max-w-[420px] md:text-xl"
 					fullWidth
 					variant="secondary"
 					size="lg"

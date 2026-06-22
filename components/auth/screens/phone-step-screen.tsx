@@ -93,7 +93,6 @@ export const PhoneStepScreen = ({
           className="flex-1 flex flex-col md:mx-auto md:w-full md:max-w-none md:flex-none md:px-10 md:pt-14 md:pb-9"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
           onSubmit={handleFormSubmit}
           noValidate
         >

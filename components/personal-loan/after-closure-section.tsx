@@ -63,7 +63,7 @@ const AfterClosureSection = (): JSX.Element => {
           {AFTER_CLOSURE_INFO.title}
         </h2>
 
-        <div className="md:grid md:grid-cols-2 md:items-start md:gap-8">
+        <div className="md:grid md:grid-cols-2 md:items-stretch md:gap-8">
           {/* Checklist Items */}
           <div className="space-y-4 md:space-y-3">
             {AFTER_CLOSURE_CHECKLIST.map((item, index) => (
@@ -71,9 +71,9 @@ const AfterClosureSection = (): JSX.Element => {
             ))}
           </div>
 
-          <div className="relative hidden aspect-[4/3] overflow-hidden rounded-2xl md:block">
+          <div className="relative hidden md:block h-full overflow-hidden rounded-2xl">
             <Image
-              src={IMAGES.DIRECT_CONTACT_EXPERTS.LAKASH}
+              src={"/assets/images/after-closure-documents.png"}
               alt="Loan closure documents"
               fill
               className="object-cover"
