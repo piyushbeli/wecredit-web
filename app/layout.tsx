@@ -10,6 +10,7 @@ import { ToastProvider } from '@/providers/toast-provider';
 import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { SITE_NAME } from '@/lib/config/site-navigation';
+import { buildAbsoluteSiteUrl, getWebsiteBaseUrl, OG_IMAGE_URL } from '@/lib/seo/site-metadata';
 import Script from 'next/script';
 
 const geistSans = Geist({
@@ -37,10 +38,37 @@ const manrope = Manrope({
 /**
  * Metadata
  */
+const defaultTitle = 'WeCredit - Quick Personal Loans';
+const defaultDescription =
+  'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.';
+const defaultUrl = buildAbsoluteSiteUrl('/');
+
 export const metadata: Metadata = {
-  title: 'WeCredit - Quick Personal Loans',
-  description:
-    'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.',
+  metadataBase: new URL(getWebsiteBaseUrl()),
+  title: defaultTitle,
+  description: defaultDescription,
+  alternates: {
+    canonical: defaultUrl,
+  },
+  openGraph: {
+    title: defaultTitle,
+    description: defaultDescription,
+    url: defaultUrl,
+    siteName: 'WeCredit',
+    type: 'website',
+    images: [
+      {
+        url: OG_IMAGE_URL,
+        alt: 'WeCredit',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [OG_IMAGE_URL],
+  },
 };
 
 /**
