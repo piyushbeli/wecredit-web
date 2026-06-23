@@ -10,6 +10,7 @@ import { ToastProvider } from '@/providers/toast-provider';
 import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { SITE_NAME } from '@/lib/config/site-navigation';
+import { buildAbsoluteSiteUrl, getWebsiteBaseUrl, OG_IMAGE_URL } from '@/lib/seo/site-metadata';
 import Script from 'next/script';
 
 const geistSans = Geist({
@@ -37,10 +38,37 @@ const manrope = Manrope({
 /**
  * Metadata
  */
+const defaultTitle = 'WeCredit - Quick Personal Loans';
+const defaultDescription =
+  'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.';
+const defaultUrl = buildAbsoluteSiteUrl('/');
+
 export const metadata: Metadata = {
-  title: 'WeCredit - Quick Personal Loans',
-  description:
-    'Get instant access to personal loans with WeCredit. Quick approval, minimal documentation, and competitive rates.',
+  metadataBase: new URL(getWebsiteBaseUrl()),
+  title: defaultTitle,
+  description: defaultDescription,
+  alternates: {
+    canonical: defaultUrl,
+  },
+  openGraph: {
+    title: defaultTitle,
+    description: defaultDescription,
+    url: defaultUrl,
+    siteName: 'WeCredit',
+    type: 'website',
+    images: [
+      {
+        url: OG_IMAGE_URL,
+        alt: 'WeCredit',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [OG_IMAGE_URL],
+  },
 };
 
 /**
@@ -86,6 +114,36 @@ export default async function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+        <Script id="wecredit-org-jsonld" type="application/ld+json" strategy="afterInteractive">
+          {`{
+            "@context": "https://schema.org",
+            "@type": "FinancialService",
+            "@id": "https://wecredit.co.in/#organization",
+            "name": "WeCredit",
+            "url": "https://wecredit.co.in/",
+            "logo": "https://wecredit.co.in/wp-content/uploads/logo.png",
+            "image": "https://wecredit.co.in/wp-content/uploads/logo.png",
+            "description": "WeCredit is an online loan and credit marketplace in India, helping users compare personal loans, business loans, home loans, gold loans, car loans and credit cards from multiple lenders and apply online.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "India"
+            },
+            "sameAs": [
+              "https://x.com/Wecredit136650",
+              "https://www.linkedin.com/company/we-credit",
+              "https://www.facebook.com/people/Wecredit/61550321134539/",
+              "https://www.youtube.com/@WeCredit",
+              "https://www.instagram.com/we_credit/"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "care@wecredit.co.in",
+              "telephone": "+91-9240259585",
+              "areaServed": "IN"
+            }
+          }`}
+        </Script>
         {/* FeatureFlagProvider must wrap everything for dev tools */}
         <FeatureFlagProvider>
           {/* AuthProvider validates token on mount (PDF Step 1) */}
