@@ -1,17 +1,22 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, X } from 'lucide-react';
+import { ArrowLeft, Clock, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import OtpInput from 'react-otp-input';
+import { OTPInput } from '@/components/auth';
+import { GradientHeader } from '@/components/shared';
+import { useAppHeight } from '@/hooks/use-app-height';
+import { IMAGES } from '@/lib/constants/images';
 import { cn } from '@/lib/utils';
-import type { OTPStepScreenProps } from '../types';
+import type { HeaderHeightPreset, OTPStepScreenProps } from '../types';
 
 const RESEND_SECONDS = 30;
 
 /**
  * OTP step screen component
- * Simple white card layout matching the standalone OTP confirmation screen.
+ * Mobile keeps the original illustrated OTP screen; desktop modal uses the
+ * simpler standalone OTP confirmation card layout.
  * Handles OTP verification
  */
 export const OTPStepScreen = ({
@@ -24,11 +29,25 @@ export const OTPStepScreen = ({
   onResend,
   onBack,
   onClose,
+  headerHeightPercent = 65,
+  headerHeight = 'threeQuarter',
   isDesktopModal = false,
 }: OTPStepScreenProps): React.ReactNode => {
   const isOtpComplete = otpValue.length === 6;
   const [resendTimer, setResendTimer] = useState(RESEND_SECONDS);
   const [canResend, setCanResend] = useState(false);
+  const containerStyle: React.CSSProperties = useAppHeight();
+  const usesResponsiveModalHeight = isDesktopModal && headerHeightPercent === 65;
+  const headerHeightStyle: React.CSSProperties | undefined = headerHeightPercent && !usesResponsiveModalHeight
+    ? {
+      height: `calc(var(--app-height, 1vh) * ${headerHeightPercent})`,
+    }
+    : undefined;
+  const headerClassName = usesResponsiveModalHeight
+    ? 'h-[calc(var(--app-height,1vh)*43)] min-[390px]:h-[calc(var(--app-height,1vh)*46)] md:h-[300px]'
+    : undefined;
+  const resolvedHeaderHeight: HeaderHeightPreset | undefined =
+    headerHeightPercent ? undefined : headerHeight;
 
   const maskedPhone = useMemo(() => {
     const digits = phoneNumber.replace(/\D/g, '');
@@ -72,14 +91,93 @@ export const OTPStepScreen = ({
   return (
     <motion.div
       className={cn(
-        'relative flex min-h-[calc(var(--app-height,1vh)*100)] flex-col bg-white px-6 py-8',
-        isDesktopModal && 'md:min-h-0 md:p-0'
+        'relative flex flex-col bg-white',
+        isDesktopModal && 'min-h-[calc(var(--app-height,1vh)*100)] md:h-auto md:min-h-0'
       )}
+      style={isDesktopModal ? undefined : containerStyle}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ type: 'tween', duration: 0.2, ease: 'easeInOut' }}
     >
+      <div className="flex min-h-0 flex-1 flex-col md:hidden">
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-4 top-4 z-20 rounded-full bg-white/20 p-2 transition-colors hover:bg-white/30"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-6 w-6 text-white" />
+        </button>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-20 rounded-full p-2 transition-colors"
+          aria-label="Close"
+        >
+          <X className="h-6 w-6 text-white" />
+        </button>
+
+        <GradientHeader
+          variant="with-illustration"
+          height={resolvedHeaderHeight}
+          style={headerHeightStyle}
+          className={headerClassName}
+          illustration={IMAGES.ILLUSTRATIONS.OTP_SMS}
+          illustrationAlt="OTP verification illustration"
+        />
+
+        <form
+          className="relative z-10 -mt-3 flex min-h-0 flex-1 flex-col justify-between gap-4 rounded-t-3xl bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[clamp(2rem,7vh,5rem)]"
+          onSubmit={handleFormSubmit}
+          noValidate
+        >
+          <div>
+            <h1 className="mb-4 text-center text-2xl font-bold text-gray-900">
+              Enter your OTP
+            </h1>
+
+            <div className="mx-auto w-full">
+              <OTPInput
+                value={otpValue}
+                onChange={onOtpChange}
+                onResend={onResend}
+                onChangeNumber={onBack}
+                error={error || undefined}
+                disabled={isLoading}
+                variant="default"
+                showResend={true}
+                phoneNumber={phoneNumber}
+                className="[&>div:first-child]:mb-5 [&>div:first-child]:px-0 [&>div:last-child]:space-y-2"
+              />
+            </div>
+          </div>
+
+          <motion.button
+            type="submit"
+            disabled={!isOtpComplete || isLoading}
+            className={cn(
+              'mx-auto block w-full max-w-sm rounded-md py-3.5 text-base font-semibold transition-all duration-300',
+              isOtpComplete && !isLoading
+                ? 'bg-wc-blue-500 text-white shadow-lg shadow-wc-blue-500/30 hover:bg-wc-blue-600 active:scale-[0.98]'
+                : 'cursor-not-allowed bg-gray-200 text-gray-400'
+            )}
+            whileTap={isOtpComplete && !isLoading ? { scale: 0.98 } : {}}
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                Verifying...
+              </span>
+            ) : (
+              'Continue'
+            )}
+          </motion.button>
+        </form>
+      </div>
+
+      <div className="hidden md:block">
       <button
         type="button"
         onClick={onClose}
@@ -180,6 +278,7 @@ export const OTPStepScreen = ({
           )}
         </motion.button>
       </form>
+      </div>
     </motion.div>
   );
 };
