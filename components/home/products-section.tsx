@@ -36,13 +36,13 @@ const products: Product[] = [
     icon: ShoppingBag,
     imagePath: IMAGES.LOAN_ICONS.CAR_LOAN,
   },
-  {
-    id: 'credit-cards',
-    label: 'Credit Cards',
-    href: '/credit-cards',
-    icon: CreditCard,
-    imagePath: IMAGES.ICONS.CREDIT_CARD,
-  },
+  // {
+  //   id: 'credit-cards',
+  //   label: 'Credit Cards',
+  //   href: '/credit-cards',
+  //   icon: CreditCard,
+  //   imagePath: IMAGES.ICONS.CREDIT_CARD,
+  // },
   {
     id: 'home-loan',
     label: 'Home Loan',

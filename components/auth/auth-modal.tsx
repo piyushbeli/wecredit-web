@@ -102,7 +102,7 @@ const AuthModal = (): React.ReactNode => {
               'relative flex h-full flex-col overflow-hidden md:max-w-[calc(100vw-2rem)] md:rounded-3xl md:bg-white md:shadow-2xl',
               currentStep === 'phone'
                 ? 'md:h-auto md:w-[480px]'
-                : 'md:h-[min(720px,calc(100vh-3rem))] md:w-[560px] md:overflow-x-hidden md:overflow-y-auto md:bg-[#0B63D8]'
+                : 'md:h-auto md:w-[600px] md:overflow-visible md:bg-white'
             )}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}

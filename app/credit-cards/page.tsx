@@ -4,7 +4,10 @@ import { Suspense } from 'react';
 import CreditCardsPageContent from '@/components/credit-cards/credit-cards-page-content';
 import { PageLoader } from '@/components/shared/page-loader';
 
-export const metadata: Metadata = buildPageMetadata('/credit-cards/');
+export const metadata: Metadata = {
+  ...buildPageMetadata('/credit-cards/'),
+  robots: { index: false },
+};
 
 const CreditCardsPage = (): React.ReactNode => {
   return (
