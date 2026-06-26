@@ -35,7 +35,9 @@ function RecentlyClickedOfferCard({
 
 	return (
 		<button
+			type="button"
 			onClick={onClick}
+			aria-label={`View ${lenderName} offer, amount up to ${uptoAmount}`}
 			className="w-full rounded-[8px] overflow-hidden pt-2 pb-2 pr-[10px] pl-[10px] text-left relative"
 			style={{
 				background: 'linear-gradient(96.83deg, #CCDFFC 35.72%, #FAFCFF 100%)',

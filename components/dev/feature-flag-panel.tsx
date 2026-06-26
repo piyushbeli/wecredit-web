@@ -202,7 +202,11 @@ export function FeatureFlagPanel() {
                           <p className="text-xs text-gray-400">{metadata.description}</p>
                         </div>
                         <button
+                          type="button"
                           onClick={() => setFlag(flagName, !isEnabled)}
+                          role="switch"
+                          aria-checked={isEnabled}
+                          aria-label={`${isEnabled ? 'Disable' : 'Enable'} ${metadata.label}`}
                           className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${
                             isEnabled ? 'bg-green-500' : 'bg-gray-600'
                           }`}

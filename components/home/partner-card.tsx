@@ -12,7 +12,11 @@ const PartnerCard = ({ partner }: { partner: Partner }): React.ReactNode => {
 				alt={partner.name}
 				width={520}
 				height={260}
-				unoptimized
+				// unoptimized
+				// Reason: Do not use unoptimized unless required.
+				// It disables Next.js image optimization, so images may load in original size,
+				// which can increase page load time, affect LCP/Core Web Vitals,
+				// and indirectly impact SEO performance.
 				className="object-contain max-h-full max-w-full"
 			/>
 		</div>

@@ -1,8 +1,5 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import React from 'react';
 
@@ -13,7 +10,6 @@ interface ToolCardProps {
   href: string;
   imagePath?: string;
   fallbackIcon?: LucideIcon;
-  index: number;
 }
 
 const ToolCard = ({
@@ -22,21 +18,11 @@ const ToolCard = ({
   href,
   imagePath,
   fallbackIcon: FallbackIcon,
-  index,
 }: ToolCardProps): React.ReactNode => {
   const displayTitle = title.replace('\n', ' ');
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{
-        type: 'spring',
-        stiffness: 100,
-        damping: 15,
-        delay: index * 0.08,
-      }}
+    <div
       className="h-full"
     >
       <Link
@@ -46,7 +32,7 @@ const ToolCard = ({
         <h3 className="text-sm font-semibold text-gray-900 leading-tight pr-16">
           {displayTitle}
         </h3>
-        <p className="text-xs text-gray-500 mt-1 leading-snug pr-14">
+        <p className="text-xs text-gray-600 mt-1 leading-snug pr-14">
           {description}
         </p>
 
@@ -66,7 +52,7 @@ const ToolCard = ({
           ) : null}
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

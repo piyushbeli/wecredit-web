@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /** Country code configuration */
@@ -78,7 +77,6 @@ const PhoneInput = ({
   };
 
   const hasError = error && value.length > 0;
-  const isValid = validatePhone(value) && value.length > 0;
 
   return (
     <div className={cn('relative', className)}>
@@ -94,12 +92,14 @@ const PhoneInput = ({
         <button
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          aria-label={`Select country code, currently ${selectedCountry.name} ${selectedCountry.dialCode}`}
+          aria-expanded={isDropdownOpen}
           className="flex items-center gap-1 py-3 pr-3 text-gray-700 hover:text-gray-900 transition-colors"
         >
           <span className="text-xl">🇮🇳
           </span>
           <span className="text-sm font-medium">+91</span>
-          
+
         </button>
 
         {/* Divider */}
@@ -112,7 +112,7 @@ const PhoneInput = ({
           onChange={handlePhoneChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={'Enter your phone number'}
+          placeholder={placeholder || 'Enter your phone number'}
           className="flex-1 py-3 text-gray-900 text-base outline-none placeholder:text-gray-400"
           maxLength={10}
           inputMode="numeric"
@@ -162,4 +162,3 @@ const PhoneInput = ({
 };
 
 export default PhoneInput;
-
