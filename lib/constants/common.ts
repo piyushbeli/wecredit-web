@@ -86,16 +86,16 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     ctaText: "Apply For Loan",
     ctaLink: "/personal-loan",
   },
-  {
-    id: "slide-2",
-    image: IMAGES.CAROUSEL.SLIDE_2,
-    titleWhite: "Find the Card",
-    titleGradient: "That Fits You",
-    description:
-      "Discover credit cards tailored to your lifestyle. Compare rewards, benefits, and eligibility across India's top banks in one place.",
-    ctaText: "Get Your Card",
-    ctaLink: "/credit-cards",
-  },
+  // {
+  //   id: "slide-2",
+  //   image: IMAGES.CAROUSEL.SLIDE_2,
+  //   titleWhite: "Find the Card",
+  //   titleGradient: "That Fits You",
+  //   description:
+  //     "Discover credit cards tailored to your lifestyle. Compare rewards, benefits, and eligibility across India's top banks in one place.",
+  //   ctaText: "Get Your Card",
+  //   ctaLink: "/credit-cards",
+  // },
   {
     id: "slide-3",
     image: IMAGES.CAROUSEL.SLIDE_3,
@@ -107,7 +107,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     ctaLink: "/bureau-report",
   },
 ];
-  
+
 
 /** Static testimonials data */
 export const TESTIMONIALS: Testimonial[] = [
@@ -176,19 +176,19 @@ export const ACHIEVEMENTS = [
     title: 'ONDC Partnership',
     description:
       'We started working with ONDC partners in 2024, expanding our reach and collaboration in the digital commerce ecosystem.',
-      image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ondccard.png',
+    image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/ondccard.png',
   },
   {
     title: 'Jobs Created',
     description:
       'WeCredit has provided over 400 jobs, contributing to employment and growth in the financial sector.',
-      image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/jobs_created.png',
+    image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/jobs_created.png',
   },
   {
     title: 'Strong Lending Network',
     description:
       'We work with 25–30 lenders, NBFCs, fintechs, and banks, ensuring a wide range of credit options for our customers.',
-      image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/strong_lending_networks.png',
+    image: 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com/strong_lending_networks.png',
   },
 ];
 
@@ -201,7 +201,7 @@ export const BRANDS = [
     displayUrl: 'LoansBazaar',
   },
 
-  
+
   {
     name: 'FatafatLoans',
     // Temporary placeholder — replace with IMAGES.BRANDS.FATAFATLOANS when final logo is ready

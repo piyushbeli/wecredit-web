@@ -1,9 +1,7 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { ShoppingBag, BriefcaseBusiness, CreditCard, Home } from 'lucide-react';
+import { ShoppingBag, BriefcaseBusiness, Home } from 'lucide-react';
 import ProductCard from './product-card';
 import { IMAGES } from '@/lib/constants/images';
+import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
 interface Product {
@@ -63,27 +61,31 @@ const ProductsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-8 lg:py-10">
       <div className="mx-auto max-w-7xl xl:px-0 px-8">
-        <motion.h2
+        <h2
           className="text-xl font-semibold text-gray-900 text-center mb-8"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
         >
           Our Products
-        </motion.h2>
+        </h2>
 
-        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-6 gap-3 lg:flex lg:flex-wrap lg:justify-center">
           {products.map((product, index) => (
-            <ProductCard
+            <div
               key={product.id}
-              id={product.id}
-              label={product.label}
-              href={product.href}
-              icon={product.icon}
-              imagePath={product.imagePath}
-              index={index}
-            />
+              className={cn(
+                'col-span-2',
+                index === 3 && 'col-start-2',
+                index === 4 && 'col-start-4',
+                'lg:col-auto lg:w-[200px] lg:min-w-[200px]'
+              )}
+            >
+              <ProductCard
+                id={product.id}
+                label={product.label}
+                href={product.href}
+                icon={product.icon}
+                imagePath={product.imagePath}
+              />
+            </div>
           ))}
         </div>
       </div>

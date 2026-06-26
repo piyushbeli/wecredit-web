@@ -69,7 +69,7 @@ const AppDownloadSection = (): React.ReactNode => {
               fill
               className="object-contain w-full h-full"
               style={{ objectPosition: 'right bottom' }}
-              priority
+              sizes="(min-width: 1280px) 640px, (min-width: 1024px) 44vw, 76vw"
             />
           </div>
         </div>

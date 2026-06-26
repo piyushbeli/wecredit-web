@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 import type { User as UserType } from '@/stores/auth-store';
 
@@ -13,6 +13,10 @@ interface UserButtonProps {
 	openAuthModal: () => void;
 }
 
+const subscribeToHydration = (): (() => void) => () => {};
+const getClientHydrationSnapshot = (): boolean => true;
+const getServerHydrationSnapshot = (): boolean => false;
+
 export const UserButton = ({
 	isAuthenticated,
 	user,
@@ -21,8 +25,11 @@ export const UserButton = ({
 	openAuthModal,
 }: UserButtonProps) => {
 
-	const [hydrated, setHydrated] = useState(false);
-	useEffect(() => setHydrated(true), []);
+	const hydrated = useSyncExternalStore(
+		subscribeToHydration,
+		getClientHydrationSnapshot,
+		getServerHydrationSnapshot
+	);
 
 	if (!hydrated) {
 		return (
@@ -44,6 +51,7 @@ export const UserButton = ({
 						? 'text-wc-blue-600 bg-wc-blue-100 hover:bg-wc-blue-200'
 						: 'wc-menu-btn-glass text-white'
 				)}
+				aria-label={`Open user menu${user?.phoneNumber ? ` for +91 ${user.phoneNumber}` : ''}`}
 				whileTap={{ scale: 0.95 }}
 			>
 				<User className="w-5 h-5" />
