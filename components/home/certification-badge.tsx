@@ -27,7 +27,6 @@ const CertificationBadge = ({
           width={width}
           height={height}
           className={cn('object-contain', className)}
-          priority={false}
         />
       </div>
     </div>

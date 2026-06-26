@@ -92,7 +92,7 @@ const StatsSection = (): React.ReactNode => {
                   </span>
                 )}
               </div>
-              <span className="text-xs sm:text-sm text-gray-500 mt-1 leading-tight">
+              <span className="text-xs sm:text-sm text-gray-600 mt-1 leading-tight">
                 {stat.label}
               </span>
             </motion.div>
