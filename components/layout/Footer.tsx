@@ -119,7 +119,6 @@ const Footer = () => {
                 width={170}
                 height={40}
                 className="h-9 w-auto transition-opacity duration-300 md:h-8"
-                priority
               />
             </Link>
 

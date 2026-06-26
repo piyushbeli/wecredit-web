@@ -61,7 +61,7 @@ const HeroCarousel = (): JSX.Element => {
         className="relative z-10 h-full flex flex-col"
       >
         <CarouselContent className="flex-1">
-          {HERO_CAROUSEL_SLIDES.map((slide) => {
+          {HERO_CAROUSEL_SLIDES.map((slide, index) => {
             const ctaElement = renderCtaElement(slide);
 
             return (
@@ -99,7 +99,8 @@ const HeroCarousel = (): JSX.Element => {
                       alt="WeCredit Hero"
                       fill
                       className="object-contain"
-                      priority
+                      sizes="(min-width: 1024px) 50vw, 100vw"
+                      priority={index === 0}
                     />
                   </motion.div>
                 </div>

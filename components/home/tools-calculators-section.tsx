@@ -1,6 +1,3 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import { Calculator, PieChart, Briefcase, Gauge } from 'lucide-react';
 import ToolCard from './tool-card';
 import { IMAGES } from '@/lib/constants/images';
@@ -54,18 +51,14 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-8 lg:py-10">
       <div className="mx-auto max-w-7xl xl:px-0 px-8">
-        <motion.h2
+        <h2
           className="text-xl font-semibold text-gray-900 text-center mb-8"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
         >
           Tools & Calculators
-        </motion.h2>
+        </h2>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {tools.map((tool, index) => (
+          {tools.map((tool) => (
             <ToolCard
               key={tool.id}
               id={tool.id}
@@ -74,7 +67,6 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
               href={tool.href}
               imagePath={tool.imagePath}
               fallbackIcon={tool.fallbackIcon}
-              index={index}
             />
           ))}
         </div>

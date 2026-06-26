@@ -1,6 +1,3 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import { ShoppingBag, BriefcaseBusiness, Home } from 'lucide-react';
 import ProductCard from './product-card';
 import { IMAGES } from '@/lib/constants/images';
@@ -64,15 +61,11 @@ const ProductsSection = (): React.ReactNode => {
   return (
     <section className="bg-white py-8 lg:py-10">
       <div className="mx-auto max-w-7xl xl:px-0 px-8">
-        <motion.h2
+        <h2
           className="text-xl font-semibold text-gray-900 text-center mb-8"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
         >
           Our Products
-        </motion.h2>
+        </h2>
 
         <div className="grid grid-cols-6 gap-3 lg:flex lg:flex-wrap lg:justify-center">
           {products.map((product, index) => (
@@ -91,7 +84,6 @@ const ProductsSection = (): React.ReactNode => {
                 href={product.href}
                 icon={product.icon}
                 imagePath={product.imagePath}
-                index={index}
               />
             </div>
           ))}

@@ -56,7 +56,6 @@ const TrendingOfferCard = ({
   amount,
   interestRate,
   tenure,
-  href,
   index,
   skipAnimation = false,
   lenderType,
@@ -90,7 +89,6 @@ const TrendingOfferCard = ({
       try {
         // Validate that the URL can be constructed successfully.
         // This prevents runtime TypeError from Next/Image internals.
-        // eslint-disable-next-line no-new
         new URL(trimmedPath);
         return true;
       } catch {
@@ -281,11 +279,6 @@ const TrendingOfferCard = ({
           return;
         }
 
-        // Handle other errors
-        const errorMessage = error instanceof Error
-          ? error.message
-          : 'An unexpected error occurred';
-
         setIsCheckingEligibility(false);
 
         // Fallback: Never block user - allow normal navigation on error
@@ -304,7 +297,6 @@ const TrendingOfferCard = ({
       openAuthModalWithAction,
       id,
       lenderName,
-      href,
       router,
       isCheckingEligibility,
       findLenderInOffers,
@@ -349,7 +341,6 @@ const TrendingOfferCard = ({
                   width={80}
                   height={30}
                   className="max-h-[30px] w-auto object-contain"
-                  priority
                 />
               ) : (
                 <span className="font-medium text-sm text-gray-700 truncate w-full">  {lenderName}</span>

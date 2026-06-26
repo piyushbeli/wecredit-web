@@ -1,8 +1,5 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 
 interface ProductCardProps {
@@ -11,30 +8,19 @@ interface ProductCardProps {
   href: string;
   icon?: LucideIcon;
   imagePath?: string;
-  index: number;
 }
 
-const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardProps): React.ReactNode => {
+const ProductCard = ({ label, href, icon: Icon, imagePath }: ProductCardProps): React.ReactNode => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{
-        type: 'spring',
-        stiffness: 100,
-        damping: 15,
-        delay: index * 0.08,
-      }}
+    <div
       className="h-full"
     >
       <Link
         href={href}
         className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl md:border md:border-gray-100 bg-white hover:border-gray-200 transition-colors"
       >
-        <motion.div
+        <div
           className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-wc-blue-50 flex items-center justify-center"
-          whileTap={{ scale: 0.95 }}
         >
           {imagePath ? (
             <Image
@@ -47,15 +33,14 @@ const ProductCard = ({ label, href, icon: Icon, imagePath, index }: ProductCardP
           ) : Icon ? (
             <Icon className="w-7 h-7 text-wc-blue-600" strokeWidth={2} />
           ) : null}
-        </motion.div>
+        </div>
 
         <span className="text-xs sm:text-sm font-medium text-gray-700 text-center leading-tight">
           {label}
         </span>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 
 export default ProductCard;
-
