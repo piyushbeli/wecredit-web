@@ -38,7 +38,7 @@ export async function checkEligibilityStatus(
   const requestBody = {
     source: SOURCE_WEBSITE,
     agentId: '',
-    phoneNumber:  phoneDigits,
+    phoneNumber: phoneDigits,
     endpoint: 'get-bureau-url',
   };
 
@@ -66,8 +66,8 @@ export async function checkEligibilityStatus(
     const responseMessage =
       typeof responseData === 'object' && responseData
         ? (responseData as { message?: string }).message ??
-          (responseData as { error?: string }).error ??
-          (responseData as { statusMessage?: string }).statusMessage
+        (responseData as { error?: string }).error ??
+        (responseData as { statusMessage?: string }).statusMessage
         : undefined;
     return {
       showSuccess: false,
@@ -105,11 +105,11 @@ function buildEligibilityCheckHeaders(
 
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
-    mobile:  phoneNumber.replace(/\D/g, ''),
+    mobile: phoneNumber.replace(/\D/g, ''),
   };
 
   headers['X-Agent-Host'] = 'agent-backend';
-  
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -156,6 +156,15 @@ export async function submitEligibilityCheck(
     });
 
     if (response.ok) {
+      try {
+        const responseData = await response.json();
+        const pdfUrl = (responseData as { pdfUrl?: string }).pdfUrl;
+        if (pdfUrl) {
+          window.open(pdfUrl, '_blank');
+        }
+      } catch {
+        // Continue silently if unable to parse response
+      }
       return true;
     }
 
