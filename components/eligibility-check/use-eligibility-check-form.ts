@@ -32,11 +32,7 @@ export const useEligibilityCheckForm = (
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isMountedRef = useRef(true);
 
-  useEffect(() => () => {
-    isMountedRef.current = false;
-  }, []);
 
   const handleFieldChange = useCallback(
     (key: keyof EligibilityCheckFormValues, value: string): void => {
@@ -65,17 +61,13 @@ export const useEligibilityCheckForm = (
     try {
       const payload = buildEligibilityCheckPayload(formValues);
       const success = await submitEligibilityCheck(payload);
-
-      if (!isMountedRef.current) return;
       if (success && onSuccess) {
         onSuccess();
         setFormValues(DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES);
         setFormErrors({});
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
     }
   }, [formValues, isSubmitting, onSuccess, validateForm]);
 
