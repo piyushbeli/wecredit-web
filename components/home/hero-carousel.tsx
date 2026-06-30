@@ -82,7 +82,7 @@ const HeroCarousel = (): JSX.Element => {
                     <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
                       {slide.titleGradient}
                     </p>
-                    <p className="text-sm sm:text-base text-gray-600 max-w-md mb-6 leading-relaxed">
+                    <p className="text-sm hidden md:block sm:text-base text-gray-600 max-w-md mb-6 leading-relaxed">
                       {slide.description}
                     </p>
                     {ctaElement}
