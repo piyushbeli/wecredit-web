@@ -37,16 +37,16 @@ const stats: StatItem[] = [
  */
 const StatsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white py-8 lg:py-10">
+    <section className="bg-white pb-8 lg:py-10">
       <div
         className="mx-auto max-w-7xl xl:px-0 px-8"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4">
+        <div className="grid grid-cols-3 md:grid-cols-4">
           {stats.map((stat, index) => (
             <div
               key={stat.id}
-              className={`flex flex-col items-center text-center py-4 lg:py-0 ${index % 2 === 1 ? 'border-l border-gray-200' : ''
-                } ${index >= 2 ? 'md:mt-0 mt-8 border-gray-200 md:border-t-0' : ''} ${index > 0 ? 'md:border-l md:border-gray-200' : ''
+              className={`flex flex-col items-center text-center py-4 lg:py-0 ${stat.id === 'support' ? 'hidden md:flex' : ''} ${index % 2 === 1 ? 'md:border-l md:border-gray-200' : ''
+                } ${index >= 2 ? 'md:mt-0 mt-0 border-gray-200 md:border-t-0' : ''} ${index > 0 ? 'md:border-l md:border-gray-200' : ''
                 }`}
             >
               <div className="flex items-baseline">

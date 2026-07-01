@@ -35,7 +35,7 @@ const ProductCard = ({ label, href, icon: Icon, imagePath }: ProductCardProps): 
           ) : null}
         </div>
 
-        <span className="text-xs sm:text-sm font-medium text-gray-700 text-center leading-tight">
+        <span className="text-xs sm:text-sm font-medium text-gray-700 text-center leading-tight whitespace-nowrap">
           {label}
         </span>
       </Link>
