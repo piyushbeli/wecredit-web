@@ -79,6 +79,7 @@ const TrendingOffersSection = ({
             slidesToScroll: 1,
             containScroll: 'trimSnaps',
           }}
+          className='pl-2 xl:pl-0'
         >
 
           <CarouselContent>
@@ -117,8 +118,8 @@ const TrendingOffersSection = ({
           activeDotClassName="bg-wc-blue-500"
         /> */}
         </Carousel>
-      </div>
-    </section>
+      </div >
+    </section >
   );
 };
 
