@@ -12,6 +12,15 @@ import type { EligibilityCheckPayload } from '@/components/eligibility-check/eli
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
 const ELIGIBILITY_CHECK_ENDPOINT_PROD = `https://wecredit.co.in/api/wechat`;
 
+/**
+ * Extract error message from API response
+ */
+function extractErrorMessage(data: unknown): string | undefined {
+  if (typeof data !== 'object' || !data) return undefined;
+  const obj = data as { message?: string; error?: string; statusMessage?: string };
+  return obj.message ?? obj.error ?? obj.statusMessage;
+}
+
 export interface CheckEligibilityStatusResult {
   showSuccess: boolean;
   data?: unknown;
@@ -38,7 +47,7 @@ export async function checkEligibilityStatus(
   const requestBody = {
     source: SOURCE_WEBSITE,
     agentId: '',
-    phoneNumber:  phoneDigits,
+    phoneNumber: phoneDigits,
     endpoint: 'get-bureau-url',
   };
 
@@ -63,12 +72,7 @@ export async function checkEligibilityStatus(
       return { showSuccess: true, data: responseData };
     }
 
-    const responseMessage =
-      typeof responseData === 'object' && responseData
-        ? (responseData as { message?: string }).message ??
-          (responseData as { error?: string }).error ??
-          (responseData as { statusMessage?: string }).statusMessage
-        : undefined;
+    const responseMessage = extractErrorMessage(responseData);
     return {
       showSuccess: false,
       data: responseData,
@@ -105,11 +109,11 @@ function buildEligibilityCheckHeaders(
 
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
-    mobile:  phoneNumber.replace(/\D/g, ''),
+    mobile: phoneNumber.replace(/\D/g, ''),
   };
 
   headers['X-Agent-Host'] = 'agent-backend';
-  
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -156,16 +160,18 @@ export async function submitEligibilityCheck(
     });
 
     if (response.ok) {
+      const responseData = await response.json();
+      const pdfUrl = (responseData as { pdfUrl?: string }).pdfUrl;
+      if (pdfUrl) {
+        window.open(pdfUrl, '_blank');
+      }
       return true;
     }
 
     let errorMessage = 'Failed to submit eligibility check';
     try {
       const errorData = await response.json();
-      const msg =
-        (errorData as { message?: string }).message ??
-        (errorData as { error?: string }).error ??
-        (errorData as { statusMessage?: string }).statusMessage;
+      const msg = extractErrorMessage(errorData);
       if (msg) errorMessage = String(msg);
     } catch {
       errorMessage = `Request failed with status ${response.status}`;
