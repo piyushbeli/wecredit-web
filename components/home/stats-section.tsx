@@ -39,7 +39,7 @@ const StatsSection = (): React.ReactNode => {
   return (
     <section className="bg-white pb-8 lg:py-10">
       <div
-        className="mx-auto max-w-7xl xl:px-0 px-8"
+        className="mx-auto max-w-7xl xl:px-0 px-4"
       >
         <div className="grid grid-cols-3 md:grid-cols-4">
           {stats.map((stat, index) => (
