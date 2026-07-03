@@ -68,6 +68,29 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
   const [error, setError] = useState<string | null>(null);
   const bypassDedupeCheck = useFeatureFlag('bypassDedupeCheck');
 
+  // Helper function to check if user exists and needs to fill form for a single lender
+  const checkSingleLenderStatusBeforeForm = async (mobile: string, token: string, options: CheckDedupeOptions): Promise<boolean> => {
+    const lenderName = options.statusBeforeFormLenderName?.trim();
+    if (!lenderName) {
+      setNeedsForm(true);
+      return true;
+    }
+
+    const statusResult = await checkStatusAll(mobile, token);
+
+    if (!statusResult.success) {
+      const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
+      toast.error(toastMsg);
+      setError(toastMsg);
+      setNeedsForm(false);
+      return false;
+    }
+
+    const lenders = statusResult.data?.lenders ?? [];
+    setNeedsForm(!hasMatchingStatusLender(lenders, lenderName));
+    return true;
+  };
+
   /**
    * Checks if user exists and needs to fill form
    * @param mobile - User's 10-digit mobile number
@@ -105,28 +128,6 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     setResponse(null);
 
     try {
-      const checkSingleLenderStatusBeforeForm = async (): Promise<boolean> => {
-        const lenderName = options.statusBeforeFormLenderName?.trim();
-        if (!lenderName) {
-          setNeedsForm(true);
-          return true;
-        }
-
-        const statusResult = await checkStatusAll(mobile, token);
-
-        if (!statusResult.success) {
-          const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
-          toast.error(toastMsg);
-          setError(toastMsg);
-          setNeedsForm(false);
-          return false;
-        }
-
-        const lenders = statusResult.data?.lenders ?? [];
-        setNeedsForm(!hasMatchingStatusLender(lenders, lenderName));
-        return true;
-      };
-
       const result: LeadServiceResult<CheckDedupeResponse> = await leadService.checkDedupe(
         mobile,
         partnerCode
@@ -150,7 +151,7 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
 
       // 1003: new user always needs to fill the form
       if (isNewUserStatus) {
-        return checkSingleLenderStatusBeforeForm();
+        return checkSingleLenderStatusBeforeForm(mobile, token, options);
       }
 
       if (isExistingMobileStatus) {
