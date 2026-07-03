@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCookie } from 'cookies-next';
-import { useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname, useParams } from 'next/navigation';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { CheckStatusAllResponse } from '@/types/wecredit';
@@ -42,6 +42,7 @@ const API_TIMEOUT = 15000; // 15 seconds
 // (ALL IMPORTS REMAIN EXACTLY THE SAME)
 
 export function useOffers(): UseOffersReturn {
+  const { lender: lenderNameFromParams } = useParams<{ lender?: string }>()
   const {
     offers,
     isLoading,
@@ -386,6 +387,12 @@ export function useOffers(): UseOffersReturn {
 
   const categorizedOffers = useMemo(() => categorizeOffers(offers), [offers]);
 
+  const shouldNavigateToOffersPage =() => {
+    if (!lenderNameFromParams) return false;
+    const result = offers.length > 0 && offers.some(offer => offer.lenderName === lenderNameFromParams);
+    return result
+  };
+
   return {
     offers,
     exploreOffers: categorizedOffers.explore,
@@ -407,5 +414,6 @@ export function useOffers(): UseOffersReturn {
     selectedStatus,
     setSelectedStatus,
     shouldTriggerApply,
+    shouldNavigateToOffersPage: shouldNavigateToOffersPage(),
   };
 }
