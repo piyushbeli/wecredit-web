@@ -87,8 +87,8 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     }
 
     const lenders = statusResult.data?.lenders ?? [];
-    setNeedsForm(!hasMatchingStatusLender(lenders, lenderName));
-    return true;
+    const result= hasMatchingStatusLender(lenders, lenderName);
+    return result;
   };
 
   /**
@@ -151,7 +151,11 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
 
       // 1003: new user always needs to fill the form
       if (isNewUserStatus) {
-        return checkSingleLenderStatusBeforeForm(mobile, token, options);
+        // const result = await checkSingleLenderStatusBeforeForm(mobile, token, options);
+        // setNeedsForm(!result);
+        // return result;
+        setNeedsForm(true);
+        return true;
       }
 
       if (isExistingMobileStatus) {
