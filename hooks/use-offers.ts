@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCookie } from 'cookies-next';
-import { useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname, useParams } from 'next/navigation';
 import { checkStatusAll, hitAllLenders } from '@/lib/api/wecredit';
 import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import type { CheckStatusAllResponse } from '@/types/wecredit';
@@ -15,6 +15,7 @@ import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
 import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
+import { normalizeLenderNameForMatch } from '@/lib/utils/lenders';
 
 export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
@@ -42,6 +43,7 @@ const API_TIMEOUT = 15000; // 15 seconds
 // (ALL IMPORTS REMAIN EXACTLY THE SAME)
 
 export function useOffers(): UseOffersReturn {
+  const { lender: lenderNameFromParams } = useParams<{ lender?: string }>()
   const {
     offers,
     isLoading,
@@ -386,6 +388,15 @@ export function useOffers(): UseOffersReturn {
 
   const categorizedOffers = useMemo(() => categorizeOffers(offers), [offers]);
 
+  const shouldNavigateToOffersPage =() => {
+    if (!lenderNameFromParams) return false;
+    const normalizedParam = normalizeLenderNameForMatch(lenderNameFromParams);
+    const result = offers.length > 0 && offers.some(
+      offer => normalizeLenderNameForMatch(offer.lenderName) === normalizedParam
+    );
+    return result
+  };
+
   return {
     offers,
     exploreOffers: categorizedOffers.explore,
@@ -407,5 +418,6 @@ export function useOffers(): UseOffersReturn {
     selectedStatus,
     setSelectedStatus,
     shouldTriggerApply,
+    shouldNavigateToOffersPage: shouldNavigateToOffersPage(),
   };
 }
