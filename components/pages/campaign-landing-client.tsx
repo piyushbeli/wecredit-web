@@ -13,7 +13,6 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { getCookie } from 'cookies-next';
 import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { MoneyViewForm } from '@/components/moneyview';
@@ -21,9 +20,7 @@ import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 import { useAuth } from '@/hooks/use-auth';
 import { useRequireLogin } from '@/hooks/use-require-login';
-import { checkStatusAll } from '@/lib/api';
-import { hasMatchingStatusLender } from '@/lib/utils/common-helper';
-import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
+import { useLenderStatusRedirect } from '@/hooks/use-lender-status-redirect';
 import { PageLoader } from '../shared/page-loader';
 
 interface CampaignLandingClientProps {
@@ -45,21 +42,12 @@ export const CampaignLandingClient = ({
     // No mobile - fetch generic active lenders
   });
 
-  // Side-effect-free check for an existing offer with this specific lender
-  // (no polling / hitAllLenders — those belong to the offers page, not this landing page).
-  const [isOffersLoading, setIsOffersLoading] = useState<boolean>(true);
-  const [shouldNavigateToOffersPage, setShouldNavigateToOffersPage] = useState<boolean>(false);
-
   // State for auto-fill modal and fetchDetails
   const [showAutoFillModal, setShowAutoFillModal] = useState<boolean>(false);
   const [showLeadFormModal, setShowLeadFormModal] = useState<boolean>(false);
   const [fetchDetails, setFetchDetails] = useState<boolean>(true);
   const loginTriggeredRef = useRef(false);
   const alreadyLoggedInToastRef = useRef(false);
-
-
-  // Show loading when checking offers or during initial load
-  const showLoading = isLoading || isOffersLoading;
 
   // Debug mode: skip auto-fill modal when ?debugAutoFill=true is in URL
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
@@ -70,41 +58,15 @@ export const CampaignLandingClient = ({
 
   const mobile = searchParams.get('mn');
   const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
-
-  // Once the lender is resolved and the user is authenticated, check whether this
-  // specific lender already has a status entry — if so, skip the form and go to offers.
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!canonicalLenderName || !isAuthenticated) {
-      setIsOffersLoading(false);
-      return;
-    }
-
-    const mobileCookie = getCookie(STORAGE_MOBILE) as string | undefined;
-    if (!mobileCookie) {
-      setIsOffersLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    setIsOffersLoading(true);
-    const token = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
-
-    checkStatusAll(mobileCookie, token).then((result) => {
-      if (cancelled) return;
-      if (result.success && result.data) {
-        setShouldNavigateToOffersPage(
-          hasMatchingStatusLender(result.data.lenders ?? [], canonicalLenderName)
-        );
-      }
-      setIsOffersLoading(false);
+  const { isCheckingStatus: isOffersLoading, shouldNavigateToOffers: shouldNavigateToOffersPage } =
+    useLenderStatusRedirect({
+      isLenderResolved: !isLoading,
+      canonicalLenderName,
+      isAuthenticated,
     });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoading, canonicalLenderName, isAuthenticated]);
+  // Show loading when checking offers or during initial load
+  const showLoading = isLoading || isOffersLoading;
 
   // No mobile param: require login first, same auth-first gate the multi-lender apply
   // flow uses (PersonalLoanContent.handleOpenModal opens the auth modal before any apply modal).
