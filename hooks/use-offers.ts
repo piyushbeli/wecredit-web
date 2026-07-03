@@ -15,6 +15,7 @@ import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
 import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
+import { normalizeLenderNameForMatch } from '@/lib/utils/lenders';
 
 export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
@@ -389,7 +390,10 @@ export function useOffers(): UseOffersReturn {
 
   const shouldNavigateToOffersPage =() => {
     if (!lenderNameFromParams) return false;
-    const result = offers.length > 0 && offers.some(offer => offer.lenderName === lenderNameFromParams);
+    const normalizedParam = normalizeLenderNameForMatch(lenderNameFromParams);
+    const result = offers.length > 0 && offers.some(
+      offer => normalizeLenderNameForMatch(offer.lenderName) === normalizedParam
+    );
     return result
   };
 
