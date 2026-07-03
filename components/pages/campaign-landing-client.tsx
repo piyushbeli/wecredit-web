@@ -20,7 +20,7 @@ import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 import { useAuth } from '@/hooks/use-auth';
 import { useRequireLogin } from '@/hooks/use-require-login';
-import { useOffers } from '@/hooks/use-offers';
+import { useLenderStatusRedirect } from '@/hooks/use-lender-status-redirect';
 import { PageLoader } from '../shared/page-loader';
 
 interface CampaignLandingClientProps {
@@ -42,22 +42,12 @@ export const CampaignLandingClient = ({
     // No mobile - fetch generic active lenders
   });
 
-  // Hook to check existing offers
-  const {
-    isLoading: isOffersLoading,
-    shouldNavigateToOffersPage,
-  } = useOffers();
-
   // State for auto-fill modal and fetchDetails
   const [showAutoFillModal, setShowAutoFillModal] = useState<boolean>(false);
   const [showLeadFormModal, setShowLeadFormModal] = useState<boolean>(false);
   const [fetchDetails, setFetchDetails] = useState<boolean>(true);
   const loginTriggeredRef = useRef(false);
   const alreadyLoggedInToastRef = useRef(false);
-
-
-  // Show loading when checking offers or during initial load
-  const showLoading = isLoading || isOffersLoading;
 
   // Debug mode: skip auto-fill modal when ?debugAutoFill=true is in URL
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
@@ -68,6 +58,15 @@ export const CampaignLandingClient = ({
 
   const mobile = searchParams.get('mn');
   const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
+  const { isCheckingStatus: isOffersLoading, shouldNavigateToOffers: shouldNavigateToOffersPage } =
+    useLenderStatusRedirect({
+      isLenderResolved: !isLoading,
+      canonicalLenderName,
+      isAuthenticated,
+    });
+
+  // Show loading when checking offers or during initial load
+  const showLoading = isLoading || isOffersLoading;
 
   // No mobile param: require login first, same auth-first gate the multi-lender apply
   // flow uses (PersonalLoanContent.handleOpenModal opens the auth modal before any apply modal).
