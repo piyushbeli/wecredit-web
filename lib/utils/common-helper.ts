@@ -1,6 +1,3 @@
-import { LenderOfferStatus } from "@/types/wecredit";
-import { normalizeLenderNameForMatch } from "./lenders";
-
 /** Same rule as phone step: 10 digits starting with 6–9 (India mobile). */
 export const isValidMobile = (mobile: string | null): mobile is string => {
     if (!mobile) return false;
@@ -41,12 +38,3 @@ export const mapingLenderNameToLenderCode = (lenderName: string): string => {
 export const isUpswingRedirectAllowed = (lenderName: string): boolean => {
     return lenderName.toLowerCase() === 'lnt' || lenderName.toLowerCase() === 'upswing_lnt' || lenderName.toLowerCase() === 'upswing_dmi';
 };
-
-export function hasMatchingStatusLender(lenders: LenderOfferStatus[], lenderName: string): boolean {
-    const normalizedLenderName = normalizeLenderNameForMatch(lenderName);
-    if (!normalizedLenderName) {
-        return false;
-    }
-
-    return lenders.some((lender) => normalizeLenderNameForMatch(lender.lenderName ?? '') === normalizedLenderName);
-}
