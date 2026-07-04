@@ -9,7 +9,7 @@
  * covers footer from first paint to avoid flash (no FOOTER_EXCLUDED_ROUTES needed).
  */
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -57,7 +57,11 @@ export const CampaignLandingClient = ({
   }, [router]);
 
   const mobile = searchParams.get('mn');
-  const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
+  
+  // Memoize canonicalLenderName to prevent unnecessary recalculations
+  const canonicalLenderName = useMemo(() => {
+    return getMatchedLenderCanonicalName(lenderName, activeLenders);
+  }, [lenderName, activeLenders]);
   const { isCheckingStatus: isOffersLoading, shouldNavigateToOffers: shouldNavigateToOffersPage } =
     useLenderStatusRedirect({
       isLenderResolved: !isLoading,
@@ -88,22 +92,28 @@ export const CampaignLandingClient = ({
     }
   }, [shouldNavigateToOffersPage, router]);
 
-  // Redirect to home with error if lender is invalid (after load completes)
+  // Handle API errors and lender validation
   useEffect(() => {
-
     if (isLoading) return;
+    
     // API failed: redirect with generic error
     if (error) {
       toast.error('Failed to load lenders. Please try again.');
       router.replace('/');
       return;
     }
+    
     // Lender not in active list: redirect with specific error
     if (!canonicalLenderName) {
       toast.error(INCORRECT_LENDER_ERROR);
       router.replace('/');
       return;
     }
+  }, [isLoading, error, canonicalLenderName, router]);
+
+  // Handle mobile phone authentication logic
+  useEffect(() => {
+    if (isLoading || error || !canonicalLenderName) return;
 
     if (mobile && isAuthenticated && !alreadyLoggedInToastRef.current) {
       const existingDigits = (user?.phoneNumber || '').replace(/\D/g, '');
@@ -123,6 +133,11 @@ export const CampaignLandingClient = ({
       openAuthModalWithPhone(mobile);
       return;
     }
+  }, [mobile, isAuthenticated, user?.phoneNumber, openAuthModalWithPhone, isLoading, error, canonicalLenderName]);
+
+  // Show auto-fill modal when all conditions are met
+  useEffect(() => {
+    if (isLoading || error || !canonicalLenderName) return;
 
     // No mobile param and not authenticated: useRequireLogin above owns the auth
     // gate (opens the login modal, redirects home on cancel) — wait for it.
@@ -132,8 +147,7 @@ export const CampaignLandingClient = ({
 
     // Valid lender: show auto-fill modal first
     setShowAutoFillModal(true);
-
-  }, [isLoading, error, canonicalLenderName, mobile, router, isAuthenticated, user, openAuthModalWithPhone]);
+  }, [isLoading, error, canonicalLenderName, mobile, isAuthenticated]);
 
   /**
    * Handle auto-fill modal proceed
@@ -157,7 +171,10 @@ export const CampaignLandingClient = ({
   }, [isDebugMode]);
 
   // Guard: Do not render form if API failed or lender is invalid (will redirect from useEffect)
-  const showForm = !error && !!canonicalLenderName;
+  // Memoize to prevent unnecessary re-renders
+  const showForm = useMemo(() => {
+    return !error && !!canonicalLenderName;
+  }, [error, canonicalLenderName]);
 
   // Check if this is a MoneyView lender for custom form rendering
   const isMoneyViewLender = canonicalLenderName?.toLowerCase() === 'moneyview';
@@ -190,7 +207,7 @@ export const CampaignLandingClient = ({
       <LeadFormModal
         isOpen={showLeadFormModal}
         onClose={handleCloseModal}
-        lenderName={canonicalLenderName}
+        lenderName={canonicalLenderName || ''}
         partnerCode={partnerCode}
         fetchDetails={fetchDetails}
       />
@@ -216,6 +233,11 @@ export const CampaignLandingClient = ({
     // Close entire page
     handleCloseModal();
   };
+
+  // Debug log moved to useEffect to prevent excessive logging
+  useEffect(() => {
+    console.log('[auto-fill] showAutoFillModal: ', {showAutoFillModal, showForm});
+  }, [showAutoFillModal, showForm]);
 
   return (
     <>
