@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { fetchActiveLendersForUser } from '@/lib/api/wecredit';
@@ -30,15 +30,33 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
   const [isLoadingUserLenders, setIsLoadingUserLenders] = useState(false);
   const hasFetchedForUser = useRef<string | null>(null);
 
-  // Directly check cookies for auth state to avoid hydration delays/multiple re-renders
-  // causing double API calls
+  // Single source of truth for auth state - but only after hydration
   const { mobile: mobileCookie, token: tokenCookie, hasAuthCookies } = useAuthCookies();
+  
+  // Derive a stable auth state that combines both sources intelligently
+  // Only trust auth state after hydration to prevent SSR mismatch
+  const authState = useMemo(() => {
+    // During SSR or before hydration, assume not authenticated
+    if (!isHydrated) {
+      return {
+        mobile: null,
+        isAuthenticated: false,
+      };
+    }
+
+    const mobile = mobileCookie || user?.phoneNumber;
+    const isAuth = hasAuthCookies || isAuthenticated;
+    
+    return {
+      mobile,
+      isAuthenticated: isAuth && !!mobile,
+    };
+  }, [isHydrated, mobileCookie, user?.phoneNumber, hasAuthCookies, isAuthenticated]);
 
   // PDF Step 2: Fetch generic lenders (always fetched as fallback)
-  // Only fetch generic if we don't have auth cookies (meaning user isn't logged in)
-  // If they are logged in, we'll fetch personalized offers immediately
+  // Only fetch generic if user is not authenticated, and only after hydration
   const { activeLenders: genericLenders, isLoading: isLoadingGeneric } = useFilteredActiveLenders({
-    fetchOnMount: !hasAuthCookies,
+    fetchOnMount: isHydrated && !authState.isAuthenticated,
   });
 
   /**
@@ -52,29 +70,31 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
 
   useEffect(() => {
     const fetchUserLenders = async (): Promise<void> => {
-      // Prioritize cookie data for faster/more stable check
-      const currentMobile = mobileCookie || user?.phoneNumber;
-      const isUserAuthenticated = !!((tokenCookie && mobileCookie) || (isAuthenticated && user?.phoneNumber));
+      // Don't fetch until hydration is complete
+      if (!isHydrated) {
+        return;
+      }
 
-      // User not logged in - use generic lenders
-      if (!isUserAuthenticated || !currentMobile) {
+      // User not authenticated - clear user lenders
+      if (!authState.isAuthenticated || !authState.mobile) {
         setUserLenders(null);
         hasFetchedForUser.current = null;
         return;
       }
 
       // Already fetched for this user - skip
-      if (hasFetchedForUser.current === currentMobile) {
+      if (hasFetchedForUser.current === authState.mobile) {
         return;
       }
 
       setIsLoadingUserLenders(true);
 
       try {
-        const response = await fetchActiveLendersForUser(currentMobile);
+        const response = await fetchActiveLendersForUser(authState.mobile);
+        console.log('[response] user lenders: ', response);
         const filteredLenders = filterActiveLenders(response);
         setUserLenders(filteredLenders);
-        hasFetchedForUser.current = currentMobile;
+        hasFetchedForUser.current = authState.mobile;
       } catch (error) {
         // Fall back to generic lenders on error
         setUserLenders(null);
@@ -84,18 +104,16 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
     };
 
     fetchUserLenders();
-    // We intentionally depend on the cookie values + store values to be reactive
-    // but the hasFetchedForUser ref prevents duplicate calls for the same mobile
-  }, [mobileCookie, tokenCookie, isAuthenticated, user?.phoneNumber]);
+  }, [isHydrated, authState.isAuthenticated, authState.mobile]);
 
   // Determine which lenders to display
   // Priority: User-specific lenders (if logged in and fetched) > Generic lenders
-  const displayLenders = (hasAuthCookies || isAuthenticated) && userLenders !== null
+  const displayLenders = authState.isAuthenticated && userLenders !== null
     ? userLenders
     : genericLenders;
 
   // Show loading state if either generic or user-specific lenders are loading
-  const isAnyLoading = isLoadingGeneric || (isLoadingUserLenders && (hasAuthCookies || isAuthenticated));
+  const isAnyLoading = isLoadingGeneric || (isLoadingUserLenders && authState.isAuthenticated);
 
   const showSkeleton =
     !isHydrated || (displayLenders.length === 0 && isAnyLoading);
@@ -113,7 +131,7 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
             <div className="absolute top-2 right-4 z-10">
               <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded-full shadow-sm">
                 <span className="w-3 h-3 border-2 border-wc-blue-500/30 border-t-wc-blue-500 rounded-full animate-spin" />
-                <span>{(isLoadingUserLenders && (hasAuthCookies || isAuthenticated)) ? 'Personalizing...' : 'Loading...'}</span>
+                <span>{(isLoadingUserLenders && authState.isAuthenticated) ? 'Personalizing...' : 'Loading...'}</span>
               </div>
             </div>
           )}
