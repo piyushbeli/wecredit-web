@@ -40,6 +40,5 @@ export interface UseOffersReturn {
     /** Set selected status filter */
     setSelectedStatus: (status: StatusFilter) => void;
     shouldTriggerApply: boolean;
-    /** Whether to navigate to the offers page */
-    shouldNavigateToOffersPage: boolean;
+
   }

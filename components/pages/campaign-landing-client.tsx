@@ -20,8 +20,6 @@ import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
 import { useAuth } from '@/hooks/use-auth';
 import { useRequireLogin } from '@/hooks/use-require-login';
-import { useLenderStatusRedirect } from '@/hooks/use-lender-status-redirect';
-import { PageLoader } from '../shared/page-loader';
 
 interface CampaignLandingClientProps {
   lenderName: string;
@@ -58,15 +56,6 @@ export const CampaignLandingClient = ({
 
   const mobile = searchParams.get('mn');
   const canonicalLenderName = getMatchedLenderCanonicalName(lenderName, activeLenders);
-  const { isCheckingStatus: isOffersLoading, shouldNavigateToOffers: shouldNavigateToOffersPage } =
-    useLenderStatusRedirect({
-      isLenderResolved: !isLoading,
-      canonicalLenderName,
-      isAuthenticated,
-    });
-
-  // Show loading when checking offers or during initial load
-  const showLoading = isLoading || isOffersLoading;
 
   // No mobile param: require login first, same auth-first gate the multi-lender apply
   // flow uses (PersonalLoanContent.handleOpenModal opens the auth modal before any apply modal).
@@ -81,16 +70,8 @@ export const CampaignLandingClient = ({
     setShowLeadFormModal(false);
   }, []);
 
-  useEffect(() => {
-    if (shouldNavigateToOffersPage) {
-      router.push('/offers');
-      return;
-    }
-  }, [shouldNavigateToOffersPage, router]);
-
   // Redirect to home with error if lender is invalid (after load completes)
   useEffect(() => {
-
     if (isLoading) return;
     // API failed: redirect with generic error
     if (error) {
@@ -132,7 +113,6 @@ export const CampaignLandingClient = ({
 
     // Valid lender: show auto-fill modal first
     setShowAutoFillModal(true);
-
   }, [isLoading, error, canonicalLenderName, mobile, router, isAuthenticated, user, openAuthModalWithPhone]);
 
   /**
@@ -143,13 +123,13 @@ export const CampaignLandingClient = ({
   const handleAutoFillProceed = useCallback((shouldFetchDetails: boolean): void => {
     setFetchDetails(shouldFetchDetails);
     setShowAutoFillModal(false);
-
+    
     // In debug mode, just close the modal without opening lead form
     if (isDebugMode) {
       console.log('[Debug] AutoFillModal closed with fetchDetails:', shouldFetchDetails);
       return;
     }
-
+    
     // Open lead form modal after auto-fill modal closes
     setTimeout(() => {
       setShowLeadFormModal(true);
@@ -162,73 +142,47 @@ export const CampaignLandingClient = ({
   // Check if this is a MoneyView lender for custom form rendering
   const isMoneyViewLender = canonicalLenderName?.toLowerCase() === 'moneyview';
 
-  /**
-   * Render the lead form content
-   * If loading, show the loader
-   * If lead form modal is open, show the lead form
-   * Otherwise, return null
-   */
-  const renderLeadFormContent = () => {
-    if (showLoading || !showForm) {
-      return (
-        <div className="flex-1 flex items-center justify-center bg-gray-50">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
-        </div>
-      );
-    }
-
-    if (isMoneyViewLender) {
-      return (
-        <MoneyViewForm
-          onSuccess={() => setShowLeadFormModal(false)}
-          onClose={handleCloseModal}
-        />
-      );
-    }
-
-    return (
-      <LeadFormModal
-        isOpen={showLeadFormModal}
-        onClose={handleCloseModal}
-        lenderName={canonicalLenderName}
-        partnerCode={partnerCode}
-        fetchDetails={fetchDetails}
-      />
-    );
-  };
-
-  /**
-   * Render the page content
-   * If loading, show the loader
-   * If lead form modal is open, show the lead form
-   * Otherwise, return null
-   */
-  const renderPageContent = () => {
-    if (showLoading) return <PageLoader />;
-    if (showLeadFormModal) return <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto">{renderLeadFormContent()}</div>;
-    return null;
-  };
-
-  const handleAutoFillCloseModal = () => {
-    setShowAutoFillModal(false);
-    // Reset fetchDetails to default when closing without proceeding
-    setFetchDetails(true);
-    // Close entire page
-    handleCloseModal();
-  };
-
   return (
     <>
       {/* Auto-Fill Modal - shown first (renders above the original page background) */}
       <AutoFillModal
         isOpen={showAutoFillModal && showForm}
         onProceed={handleAutoFillProceed}
-        onClose={handleAutoFillCloseModal}
+        onClose={() => {
+          setShowAutoFillModal(false);
+          // Reset fetchDetails to default when closing without proceeding
+          setFetchDetails(true);
+          // Close entire page
+          handleCloseModal();
+        }}
         disableTimer={isDebugMode}
       />
 
       {/* Fixed overlay - only shown AFTER auto-fill modal closes */}
-      {renderPageContent()}
+      {showLeadFormModal && (
+        <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto">
+          {isLoading || !showForm ? (
+            <div className="flex-1 flex items-center justify-center bg-gray-50">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+            </div>
+          ) : isMoneyViewLender ? (
+            <MoneyViewForm
+              onSuccess={() => {
+                setShowLeadFormModal(false);
+              }}
+              onClose={handleCloseModal}
+            />
+          ) : (
+            <LeadFormModal
+              isOpen={showLeadFormModal}
+              onClose={handleCloseModal}
+              lenderName={canonicalLenderName}
+              partnerCode={partnerCode}
+              fetchDetails={fetchDetails}
+            />
+          )}
+        </div>
+      )}
     </>
   );
 };
