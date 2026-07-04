@@ -57,3 +57,4 @@ export const getLenderNameFromUrl = (searchParams: ReadonlyURLSearchParams, lend
     .trim()
     .toLowerCase()
 }
+};
