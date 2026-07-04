@@ -15,7 +15,6 @@ import { getCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { toast } from 'sonner';
 import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
-import { hasMatchingStatusLender } from '@/lib/utils/common-helper';
 
 /**
  * Return type for useCheckDedupe hook
@@ -43,7 +42,6 @@ interface CheckDedupeOptions {
   statusBeforeFormLenderName?: string;
 }
 
-
 /**
  * Custom hook for check-dedupe API
  * 
@@ -69,27 +67,27 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
   const bypassDedupeCheck = useFeatureFlag('bypassDedupeCheck');
 
   // Helper function to check if user exists and needs to fill form for a single lender
-  const checkSingleLenderStatusBeforeForm = async (mobile: string, token: string, options: CheckDedupeOptions): Promise<boolean> => {
-    const lenderName = options.statusBeforeFormLenderName?.trim();
-    if (!lenderName) {
-      setNeedsForm(true);
-      return true;
-    }
+  // const checkSingleLenderStatusBeforeForm = async (mobile: string, token: string, options: CheckDedupeOptions): Promise<boolean> => {
+  //   const lenderName = options.statusBeforeFormLenderName?.trim();
+  //   if (!lenderName) {
+  //     setNeedsForm(true);
+  //     return true;
+  //   }
 
-    const statusResult = await checkStatusAll(mobile, token);
+  //   const statusResult = await checkStatusAll(mobile, token);
 
-    if (!statusResult.success) {
-      const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
-      toast.error(toastMsg);
-      setError(toastMsg);
-      setNeedsForm(false);
-      return false;
-    }
+  //   if (!statusResult.success) {
+  //     const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
+  //     toast.error(toastMsg);
+  //     setError(toastMsg);
+  //     setNeedsForm(false);
+  //     return false;
+  //   }
 
-    const lenders = statusResult.data?.lenders ?? [];
-    const result= hasMatchingStatusLender(lenders, lenderName);
-    return result;
-  };
+  //   const lenders = statusResult.data?.lenders ?? [];
+  //   const result= hasMatchingStatusLender(lenders, lenderName);
+  //   return result;
+  // };
 
   /**
    * Checks if user exists and needs to fill form
@@ -99,8 +97,7 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
    */
   const checkDedupe = useCallback(async (
     mobile: string,
-    partnerCode: string,
-    options: CheckDedupeOptions = {}
+    partnerCode: string
   ): Promise<boolean> => {
 
     // Get token from cookies

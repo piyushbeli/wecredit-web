@@ -57,16 +57,6 @@ export const PersonalLoanContent = (): JSX.Element => {
   // Debug mode: open AutoFillModal when ?debugAutoFill=true is in URL
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
 
-  const getLenderName = useCallback((): string => {
-    if (isUnitySingleLenderFromAffiliate) {
-      return 'unity';
-    }
-    if (affiliateLenderSlug) {
-      return affiliateLenderSlug;
-    }
-    return '';
-  }, [isUnitySingleLenderFromAffiliate, affiliateLenderSlug]);
-
   const runCheckDedupeAfterAuth = useCallback(async (): Promise<void> => {
     const mobile = getCookie(STORAGE_MOBILE) as string;
     if (!mobile) {
@@ -76,11 +66,19 @@ export const PersonalLoanContent = (): JSX.Element => {
       openModal();
       return;
     }
-    await checkDedupe(mobile, effectivePartnerCode, {
-      statusBeforeFormLenderName: getLenderName(),
-    });
+    await checkDedupe(mobile, effectivePartnerCode);
     hasCheckedDedupe.current = true;
-  }, [checkDedupe, effectivePartnerCode, getLenderName, logout, openModal]);
+  }, [checkDedupe, effectivePartnerCode, logout, openModal]);
+
+  const getLenderName = useCallback((): string => {
+    if (isUnitySingleLenderFromAffiliate) {
+      return 'unity';
+    }
+    if (affiliateLenderSlug) {
+      return affiliateLenderSlug;
+    }
+    return '';
+  }, [isUnitySingleLenderFromAffiliate, affiliateLenderSlug]);
 
   // Prime PL dedupe is also terminal — dismiss overlay and return to home.
   const handlePrimePlDedupeContinue = useCallback((): void => {
@@ -210,9 +208,7 @@ export const PersonalLoanContent = (): JSX.Element => {
     }
     
     hasCheckedDedupe.current = true;
-    await checkDedupe(mobile, effectivePartnerCode, {
-      statusBeforeFormLenderName: getLenderName(),
-    });
+    await checkDedupe(mobile, effectivePartnerCode);
   };
 
   return (
