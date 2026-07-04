@@ -15,6 +15,8 @@ import { getCookie } from 'cookies-next';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { toast } from 'sonner';
 import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
+import { getLenderNameFromUrl, hasMatchingStatusLender } from '@/lib/utils/common-helper';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
  * Return type for useCheckDedupe hook
@@ -62,32 +64,34 @@ interface CheckDedupeOptions {
 export function useCheckDedupe(): UseCheckDedupeReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [needsForm, setNeedsForm] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [response, setResponse] = useState<CheckDedupeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const bypassDedupeCheck = useFeatureFlag('bypassDedupeCheck');
 
   // Helper function to check if user exists and needs to fill form for a single lender
-  // const checkSingleLenderStatusBeforeForm = async (mobile: string, token: string, options: CheckDedupeOptions): Promise<boolean> => {
-  //   const lenderName = options.statusBeforeFormLenderName?.trim();
-  //   if (!lenderName) {
-  //     setNeedsForm(true);
-  //     return true;
-  //   }
+  const checkSingleLenderStatusBeforeForm = async (mobile: string, token: string, options: CheckDedupeOptions): Promise<boolean> => {
+    const lenderName = options.statusBeforeFormLenderName?.trim();
+    if (!lenderName) {
+      setNeedsForm(true);
+      return true;
+    }
 
-  //   const statusResult = await checkStatusAll(mobile, token);
+    const statusResult = await checkStatusAll(mobile, token);
 
-  //   if (!statusResult.success) {
-  //     const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
-  //     toast.error(toastMsg);
-  //     setError(toastMsg);
-  //     setNeedsForm(false);
-  //     return false;
-  //   }
+    if (!statusResult.success) {
+      const toastMsg = statusResult.error || 'Unable to verify your application status. Please try again.';
+      toast.error(toastMsg);
+      setError(toastMsg);
+      setNeedsForm(false);
+      return false;
+    }
 
-  //   const lenders = statusResult.data?.lenders ?? [];
-  //   const result= hasMatchingStatusLender(lenders, lenderName);
-  //   return result;
-  // };
+    const lenders = statusResult.data?.lenders ?? [];
+    const result= hasMatchingStatusLender(lenders, lenderName);
+    return result;
+  };
 
   /**
    * Checks if user exists and needs to fill form
@@ -106,6 +110,16 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     if (!token) {
       setError('Session expired. Please login again.');
       return false; // STOP
+    }
+
+    // Check if lender name is in the URL
+    const lenderName = getLenderNameFromUrl(searchParams);
+    if (lenderName) {
+      const foundInOffersData = await checkSingleLenderStatusBeforeForm(mobile, token, { statusBeforeFormLenderName: lenderName });
+      if (foundInOffersData) {
+        router.push(`/offers?lendername=${lenderName}`);
+        return true;
+      }
     }
 
     // Feature flag: Bypass dedupe check for testing
