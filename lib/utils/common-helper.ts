@@ -1,5 +1,6 @@
 import { LenderOfferStatus } from "@/types/wecredit";
 import { normalizeLenderNameForMatch } from "./lenders";
+import { ReadonlyURLSearchParams } from "next/navigation";
 
 /** Same rule as phone step: 10 digits starting with 6–9 (India mobile). */
 export const isValidMobile = (mobile: string | null): mobile is string => {
@@ -49,4 +50,10 @@ export function hasMatchingStatusLender(lenders: LenderOfferStatus[], lenderName
     }
 
     return lenders.some((lender) => normalizeLenderNameForMatch(lender.lenderName ?? '') === normalizedLenderName);
+}
+
+export const getLenderNameFromUrl = (searchParams: ReadonlyURLSearchParams, lendernameFromStore?: string): string => {
+    return (searchParams?.get('lendername') ?? searchParams?.get('lender_name') ?? lendernameFromStore ?? '')
+    .trim()
+    .toLowerCase()
 }
