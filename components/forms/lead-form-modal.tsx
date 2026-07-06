@@ -248,7 +248,6 @@ const LeadFormModal = ({
     isPrimePlLeadSuccess,
   } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
-  const [showSuccess, setShowSuccess] = useState(false);
   const [lntCompanyName, setLntCompanyName] = useState('');
   const [showPartnerConsentError, setShowPartnerConsentError] = useState(false);
   const {isAffiliate} = useInfoSearchParams();
@@ -302,7 +301,6 @@ const LeadFormModal = ({
   // Reset any retained state on close (component stays mounted even when hidden).
   useEffect(() => {
     if (isOpen) return;
-    setShowSuccess(false);
     setShowPartnerConsentError(false);
     setUserIp('');
     isIpFetchInFlight.current = false;
@@ -460,7 +458,6 @@ const LeadFormModal = ({
 
     const submission = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
     if (submission.success) {
-      setShowSuccess(true);
       // Immediate navigation unmounts this route's modal before the overlay paints; Prime PL stays here.
       if (submission.isPrimePlLead) {
         console.info('[LeadFormModal] Prime PL lead — skipping /offers navigation so success overlay stays visible.', {
@@ -829,7 +826,7 @@ const LeadFormModal = ({
       >
         {/* Success Overlay */}
         <AnimatePresence>
-          {showSuccess && (
+          {isPrimePlLeadSuccess && (
             <motion.div
               className="absolute inset-0 bg-white z-100 flex flex-col items-center justify-center"
               initial={{ opacity: 0 }}
