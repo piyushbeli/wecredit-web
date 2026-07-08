@@ -812,6 +812,16 @@ const LeadFormModal = ({
     );
   };
 
+  const renderModalheadingLabel = () => {
+    if (lenderName === 'basichomeloan') {
+      return `Home loan (${currentStep}/4)`;
+    }
+    if (isAllLenders) {
+      return 'Personal Loan';
+    }
+    return `Personal loan (${currentStep}/4)`;
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -880,7 +890,7 @@ const LeadFormModal = ({
             <ArrowLeft className="w-6 h-6" />
           </button>}
           <h1 className="text-base font-medium text-gray-900">
-            {isAllLenders ? 'Personal Loan' : `Personal Loan (${currentStep}/4)`}
+            {renderModalheadingLabel()}
           </h1>
         </div>
 

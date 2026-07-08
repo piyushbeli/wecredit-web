@@ -57,3 +57,12 @@ export const getLenderNameFromUrl = (searchParams: ReadonlyURLSearchParams, lend
     .trim()
     .toLowerCase()
 }
+
+export const formatToTwoDecimals = (amount: string | number | undefined): string => {
+    if (!amount) return '0';
+
+    const value = String(amount).toLowerCase().trim();
+
+    const numeric = parseFloat(value.replace(/[^\d.]/g, ''));
+    return isNaN(numeric) ? '0' : numeric.toFixed(2);
+}

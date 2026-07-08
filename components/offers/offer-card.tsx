@@ -12,6 +12,7 @@ import { ApprovalBadge } from './approval-badge';
 import { StatusBadge, getStatusCtaLabel } from './status-badge';
 import { ActionButton } from '../shared';
 import { cn } from '@/lib/utils';
+import { formatToTwoDecimals } from '@/lib/utils/common-helper';
 
 interface OfferCardProps {
   /** Lender offer data */
@@ -128,7 +129,7 @@ export function OfferCard({ offer, onClick, variant = 'explore' }: OfferCardProp
           <div className="flex items-center gap-1.5">
             <PercentIcon />
             <span className="font-light leading-none">
-              Int. rate {intRate}%
+              Int. rate {formatToTwoDecimals(intRate)}%
             </span>
           </div>
         )}
