@@ -12,6 +12,7 @@ import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/compon
 import Image from 'next/image';
 import { PercentIcon, CalendarIcon } from '@/components/icons';
 import { StatusBadge } from './status-badge';
+import { formatToTwoDecimals } from '@/lib/utils/common-helper';
 
 interface RecentlyClickedOffersCarouselProps {
 	/** Array of recently clicked offers */
@@ -84,7 +85,7 @@ function RecentlyClickedOfferCard({
 				{intRate && (
 					<div className="flex items-center gap-1.5 font-light leading-none">
 						<PercentIcon />
-						<span>Int. rate {intRate}%</span>
+						<span>Int. rate {formatToTwoDecimals(intRate)}%</span>
 					</div>
 				)}
 				{tenure && (

@@ -11,6 +11,7 @@ import {
   CarouselSlide,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
+import { formatToTwoDecimals } from '@/lib/utils/common-helper';
 
 interface TrendingOffersSectionProps {
   activeLenders: ActiveLender[];
@@ -99,7 +100,7 @@ const TrendingOffersSection = ({
                       badge="Fast Disbursal"
                       amount={lender.UptoAmount || 'N/A'}
                       interestRate={
-                        lender.IntRate ? `${lender.IntRate}%` : 'N/A'
+                        lender.IntRate ? `${formatToTwoDecimals(lender.IntRate)}%` : 'N/A'
                       }
                       tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
                       href={lender.utmLink || `/offers/${id}`}
