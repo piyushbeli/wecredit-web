@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
 import { useCreateLead } from '@/hooks/use-create-lead' ;
 import { useLeadForm } from '@/hooks/use-lead-form';
@@ -19,13 +19,23 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/shared';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
-import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
+import { fetchUserIp } from '@/lib/api/lead-service';
 import {
   isMultiLenderCreditCardSectionComplete,
 } from '@/lib/utils/form-helpers';
+import {
+  MULTI_LENDER_PARTNER_CONSENT_KEY,
+  LNT_CONSENTS,
+  areLntConsentsComplete,
+  getPrefilledFields,
+  shouldRenderFieldGivenCreditCardChoice,
+  buildOffersPathAfterLeadSuccess,
+  buildLeadFormData,
+} from '@/lib/utils/lead-form-modal-helpers';
 import { MULTILENDER_PARTNER_TERMS_HREF, UNITY_CONSENT } from '@/lib/constants/common';
-import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
+import type { FormField, FormFieldKey } from '@/types/lead';
 import DynamicField from './dynamic-field';
+import PrimePlSuccessOverlay from './prime-pl-success-overlay';
 import Link from 'next/link';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { pushOfferpageEvent } from '@/lib/gtm';
@@ -42,7 +52,6 @@ interface LeadFormModalProps {
 
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
-const MULTI_LENDER_PARTNER_CONSENT_KEY: FormFieldKey = 'consentPartnerTerms';
 
 const STEP_SECTIONS: Array<{ title: string; fieldKeys: FormFieldKey[] }> = [
   {
@@ -62,170 +71,6 @@ const STEP_SECTIONS: Array<{ title: string; fieldKeys: FormFieldKey[] }> = [
     fieldKeys: ['pan', 'hasCreditCard', 'creditCardLimit', 'consent'],
   },
 ];
-
-/* LNT CONSENTS */
-const LNT_CONSENTS = [
-  {
-    key: 'consentHardPull',
-    consentCode: 'HARD_PULL',
-    apiText:
-      'I confirm that submission of Aadhaar/Proof of possession of AADHAAR number for KYC purposes is not mandatory, however, I voluntarily consent for providing the same for authentication & verification.',
-    uiText:
-      'I confirm that submission of Aadhaar/Proof of possession of AADHAAR number for KYC purposes is not mandatory, however, I voluntarily consent for providing the same for authentication & verification.'
-  },
-  {
-    key: 'consentPrivacyPolicy',
-    consentCode: 'PRIVACY_POLICY',
-    apiText:
-      'I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data...',
-    uiText:
-      'I hereby also agree to have read & understood the Personal Loan Terms & Conditions and Privacy Policy and consent to the same.',
-    links: [
-      {
-        label: 'Personal Loan Terms & Conditions',
-        url: 'https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3',
-      },
-      {
-        label: 'Privacy Policy',
-        url: 'https://www.ltfinance.com/privacy-policy',
-      },
-    ],
-  },
-  {
-    key: 'consentIndianResident',
-    consentCode: 'RESIDENTIAL_STATUS_INDIAN',
-    apiText: 'I hereby consent that I am an Indian Resident.',
-    uiText: 'I confirm that I am an Indian resident.',
-  },
-  {
-    key: 'consentIncome',
-    consentCode: 'HOUSEHOLD_INCOME_GTE_3L',
-    apiText: 'I hereby consent that my household income is greater than Rs 3,00,000.',
-    uiText: 'I hereby consent that my household income is greater than Rs 3,00,000',
-  },
-];
-
-interface LntConsentPayload {
-  consentCode: string;
-  consentText: string;
-  submittedAt: string;
-}
-
-const sampleLeadValues: Partial<Record<FormFieldKey, string>> = {
-  name: 'Test User',
-  mobile: '9876543210',
-  phone: '9876543210',
-  dob: '05-05-1999',
-  email: 'test.user@example.com',
-  pan: 'ABCDE1234F',
-  pincode: '560001',
-  gender: 'male',
-  employmentType: 'salaried',
-  salary: '50000',
-  monthlyIncome: '50000',
-  declaredIncome: '50000',
-  loanAmount: '100000',
-  requiredLoanAmount: '100000',
-  companyName: 'Test Company',
-  companyAddress: '123 Test Street',
-  companyPincode: '560001',
-  permanentAddress: '123 Test Street',
-  addressType: 'current',
-  maritalStatus: 'single',
-  modeOfSalary: 'bank',
-  consent: 'true',
-};
-
-interface PrefillOptions {
-  fields: FormField[];
-  isEnabled: boolean;
-  userIp: string;
-}
-
-function getPrefillValue(fieldKey: FormFieldKey, userIp: string): string | null {
-  if (fieldKey === 'ConsentIp' && userIp) return userIp;
-  const sampleValue = sampleLeadValues[fieldKey];
-  return sampleValue ?? null;
-}
-
-function getPrefilledFields({ fields, isEnabled, userIp }: PrefillOptions): FormField[] {
-  if (!isEnabled) return fields;
-  return fields.map((field) => {
-    if (field.value?.trim()) return field;
-    const prefillValue = getPrefillValue(field.key, userIp);
-    if (!prefillValue) return field;
-    return { ...field, value: prefillValue };
-  });
-}
-
-/**
- * Maps Yes/No strings from the dynamic form to the boolean on LeadFormData.
- * Returns undefined when the lender did not ask the question or the answer is not yet Yes/No.
- */
-function resolveHasCreditCardForLeadPayload(
-  hasCreditCardQuestionField: boolean,
-  creditCardAnswer: string | undefined,
-): boolean | undefined {
-  if (!hasCreditCardQuestionField) {
-    return undefined;
-  }
-  if (creditCardAnswer === 'true') {
-    return true;
-  }
-  if (creditCardAnswer === 'false') {
-    return false;
-  }
-  return undefined;
-}
-
-/**
- * Hide credit limit until the user selects Yes, regardless of single-page or stepper layout.
- */
-function shouldRenderFieldGivenCreditCardChoice(
-  field: FormField,
-  isCreditCardYes: boolean,
-): boolean {
-  return field.key !== 'creditCardLimit' || isCreditCardYes;
-}
-
-/**
- * Builds `/offers` navigation with `newLead=true`, optional `lenderName` from the form,
- * and affiliate / tracking params preserved from the current page query and session store
- * (so UTM, partner, etc. survive after submit when they were present on the landing URL).
- */
-function buildOffersPathAfterLeadSuccess(
-  lenderNameProp: string,
-  searchParams: ReadonlyURLSearchParams | null,
-): string {
-  const qs = new URLSearchParams(searchParams?.toString() ?? '');
-  qs.delete('pre_auth');
-  qs.delete('mn');
-  qs.set('newLead', 'true');
-  if (lenderNameProp) {
-    qs.set('lenderName', lenderNameProp);
-  }
-
-  const st = useUrlParamsStore.getState();
-  const mergeIfMissing = (key: string, value: string | null): void => {
-    if (!value?.trim()) return;
-    if (!qs.has(key)) {
-      qs.set(key, value.trim());
-    }
-  };
-  mergeIfMissing('partner', st.partner);
-  mergeIfMissing('originSubLender', st.originSubLender);
-  mergeIfMissing('utm_source', st.utm_source);
-  mergeIfMissing('utm_medium', st.utm_medium);
-  mergeIfMissing('utm_campaign', st.utm_campaign);
-
-  if (!lenderNameProp && st.lendername) {
-    if (!qs.has('lenderName') && !qs.has('lendername')) {
-      qs.set('lenderName', st.lendername);
-    }
-  }
-
-  return `/offers?${qs.toString()}`;
-}
 
 const LeadFormModal = ({
   isOpen,
@@ -248,7 +93,6 @@ const LeadFormModal = ({
     isPrimePlLeadSuccess,
   } = useCreateLead();
   const [userIp, setUserIp] = useState<string>('');
-  const [showSuccess, setShowSuccess] = useState(false);
   const [lntCompanyName, setLntCompanyName] = useState('');
   const [showPartnerConsentError, setShowPartnerConsentError] = useState(false);
   const {isAffiliate} = useInfoSearchParams();
@@ -302,7 +146,6 @@ const LeadFormModal = ({
   // Reset any retained state on close (component stays mounted even when hidden).
   useEffect(() => {
     if (isOpen) return;
-    setShowSuccess(false);
     setShowPartnerConsentError(false);
     setUserIp('');
     isIpFetchInFlight.current = false;
@@ -386,29 +229,9 @@ const LeadFormModal = ({
       return;
     }
 
-    let consents: LntConsentPayload[] = [];
-
-    if (isLntLenderOrUpswignLntLender) {
-
-      const allChecked = LNT_CONSENTS.every(c => formValues[c.key] === 'true');
-      if (!allChecked) return;
-
-      consents = LNT_CONSENTS.map(c => ({
-        consentCode: c.consentCode,
-        consentText: c.apiText,
-        submittedAt: new Date().toISOString()
-      }));
-
+    if (isLntLenderOrUpswignLntLender && !areLntConsentsComplete(formValues)) {
+      return;
     }
-
-    const formatDateForApi = (dateStr: string): string => {
-      if (!dateStr) return '';
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-        const [year, month, day] = dateStr.split('-');
-        return `${day}-${month}-${year}`;
-      }
-      return dateStr;
-    };
 
     // Multi-lender + flag: enforce credit card answers before hitting the API.
     if (
@@ -421,46 +244,17 @@ const LeadFormModal = ({
       return;
     }
 
-    const creditCardBool = resolveHasCreditCardForLeadPayload(
+    const formData = buildLeadFormData({
+      formValues,
+      userIp,
+      isLntLenderOrUpswignLntLender,
+      lntCompanyName,
+      originSubLender,
       hasCreditCardQuestionField,
-      creditCardAnswer,
-    );
-
-    const formData: LeadFormData = {
-      name: (formValues.name || '').trim(),
-      mobile: formValues.mobile || '',
-      phone: formValues.phone || '',
-      dob: formatDateForApi(formValues.dob || ''),
-      email: formValues.email || '',
-      pan: formValues.pan || '',
-      pincode: formValues.pincode || '',
-      gender: formValues.gender || '',
-      employmentType: formValues.employmentType || '',
-      salary: formValues.salary || '',
-      monthlyIncome: formValues.monthlyIncome || '',
-      declaredIncome: formValues.declaredIncome || '',
-      loanAmount: formValues.loanAmount || '',
-      requiredLoanAmount: formValues.requiredLoanAmount || '',
-      maritalStatus: formValues.maritalStatus || '',
-      addressType: formValues.addressType || '',
-      permanentAddress: formValues.permanentAddress || '',
-      modeOfSalary: formValues.modeOfSalary || '',
-      companyName: isLntLenderOrUpswignLntLender ? lntCompanyName : formValues.companyName || '',
-      companyAddress: formValues.companyAddress || '',
-      companyPincode: formValues.companyPincode || '',
-      ConsentIp: userIp || formValues.ConsentIp || '',
-      ConsentDateTime: getCurrentDateTime(),
-      consent: formValues.consent || 'false',
-      consentPartnerTerms: formValues[MULTI_LENDER_PARTNER_CONSENT_KEY] || 'false',
-      ...(isLntLenderOrUpswignLntLender && { consents }),
-      ...(originSubLender && { originSubLender }),
-      hasCreditCard: creditCardBool,
-      creditCardLimit: formValues.creditCardLimit || '',
-    };
+    });
 
     const submission = await createLead(formData, effectivePartnerCode, lenderName, lenderUniqueId);
     if (submission.success) {
-      setShowSuccess(true);
       // Immediate navigation unmounts this route's modal before the overlay paints; Prime PL stays here.
       if (submission.isPrimePlLead) {
         console.info('[LeadFormModal] Prime PL lead — skipping /offers navigation so success overlay stays visible.', {
@@ -484,7 +278,6 @@ const LeadFormModal = ({
     formValues,
     validateCurrentStep,
     fields,
-    formValues,
     hasPartnerConsent,
     hasWeCreditConsent,
     isAllLenders,
@@ -548,9 +341,7 @@ const LeadFormModal = ({
     }
 
     // Always require consent in last step
-    const hasLntConsents =
-      !isLntLenderOrUpswignLntLender ||
-      LNT_CONSENTS.every(c => formValues[c.key] === 'true');
+    const hasLntConsents = !isLntLenderOrUpswignLntLender || areLntConsentsComplete(formValues);
     const requiresPartnerConsent = isAllLenders;
     const canSubmitMultiLender = !requiresPartnerConsent || hasPartnerConsent;
 
@@ -681,20 +472,21 @@ const LeadFormModal = ({
               return null;
             }
 
-            const fieldsToRender =
-              section.title === 'Identity Verification'
-                ? sectionFields.filter((field) => shouldRenderFieldGivenCreditCardChoice(field, isCreditCardYes))
-                : sectionFields;
+            const isIdentityVerificationSection = section.title === 'Identity Verification';
+            let sectionFieldsToRender: FormField[];
+            if (isIdentityVerificationSection) {
+              sectionFieldsToRender = sectionFields
+                .filter((field) => shouldRenderFieldGivenCreditCardChoice(field, isCreditCardYes))
+                .filter((field) => field.key !== 'consent');
+            } else {
+              sectionFieldsToRender = sectionFields;
+            }
             return (
               <section key={section.title} className="space-y-4">
                 <h3 className="lead-form-heading">{section.title}</h3>
                 <div className="space-y-5">
-                  {section.title === 'Identity Verification'
-                    ? fieldsToRender
-                      .filter((field) => field.key !== 'consent')
-                      .map((field) => renderField(field))
-                    : fieldsToRender.map((field) => renderField(field))}
-                  {section.title === 'Identity Verification' && (
+                  {sectionFieldsToRender.map((field) => renderField(field))}
+                  {isIdentityVerificationSection && (
                     <>
                       {renderMultiLenderWeCreditConsent()}
                       {renderMultiLenderPartnerConsent()}
@@ -724,69 +516,71 @@ const LeadFormModal = ({
         <>
           {lastStepFieldsToRender.map((field) => renderField(field))}
           {isLntLenderOrUpswignLntLender && (
-            <div className="space-y-2">
-              <label className="lead-form-label">
-                Company Name
-              </label>
+            <>
+              <div className="space-y-2">
+                <label className="lead-form-label">
+                  Company Name
+                </label>
 
-              <input
-                type="text"
-                value={lntCompanyName}
-                onChange={(e) => setLntCompanyName(e.target.value)}
-                placeholder="Enter company name"
-                className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white
+                <input
+                  type="text"
+                  value={lntCompanyName}
+                  onChange={(e) => setLntCompanyName(e.target.value)}
+                  placeholder="Enter company name"
+                  className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white
       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          )}
-            {isLntLenderOrUpswignLntLender && LNT_CONSENTS.map(consent => (
-            <div key={consent.key} className="space-y-1">
+                />
+              </div>
+              {LNT_CONSENTS.map(consent => (
+              <div key={consent.key} className="space-y-1">
 
-              <DynamicField
-                field={{
-                  key: consent.key as FormFieldKey,
-                  title:
+                <DynamicField
+                  field={{
+                    key: consent.key as FormFieldKey,
+                    title:
   consent.key === 'consentPrivacyPolicy'
     ? `I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data (incl. Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the`
     : consent.uiText,
-                  type: 'boolean',
-                  options: [],
-                  value: 'true',
-                  isMandatory: true,
-                  order: 998,
-                }}
-                value={formValues[consent.key] || 'false'}
-                onChange={(val) => handleFieldChange(consent.key as FormFieldKey, val)}
-                onBlur={() => validateField(consent.key as FormFieldKey)}
-                error={formErrors[consent.key]}
-                disabled={isSubmitting}
-              />
-  {consent.key === 'consentPrivacyPolicy' && (
-  <div className="ml-7 text-sm">
-    <a
-      href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 underline mr-2"
-    >
-      Personal Loan terms & Conditions
-    </a>
-    and
-    <a
-      href="https://www.ltfinance.com/privacy-policy"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 underline ml-2"
-    >
-      Privacy Policy
-    </a>
-    {' '}and consent to the same
-  </div>
-)}
-             
+                    type: 'boolean',
+                    options: [],
+                    value: 'true',
+                    isMandatory: true,
+                    order: 998,
+                  }}
+                  value={formValues[consent.key] || 'false'}
+                  onChange={(val) => handleFieldChange(consent.key as FormFieldKey, val)}
+                  onBlur={() => validateField(consent.key as FormFieldKey)}
+                  error={formErrors[consent.key]}
+                  disabled={isSubmitting}
+                />
+    {consent.key === 'consentPrivacyPolicy' && (
+    <div className="ml-7 text-sm">
+      <a
+        href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline mr-2"
+      >
+        Personal Loan terms & Conditions
+      </a>
+      and
+      <a
+        href="https://www.ltfinance.com/privacy-policy"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline ml-2"
+      >
+        Privacy Policy
+      </a>
+      {' '}and consent to the same
+    </div>
+  )}
 
-            </div>
-          ))}
+
+              </div>
+              ))}
+            </>
+          )}
           <DynamicField
             field={{
               key: 'consent',
@@ -815,6 +609,108 @@ const LeadFormModal = ({
     );
   };
 
+  const renderModalBody = (): React.ReactElement => {
+    if (isFieldsLoading) {
+      return (
+        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-4">
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-12 bg-gray-200 rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (fieldsError) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="lead-form-heading mb-2">Unable to load form</h3>
+            <p className="text-red-600 mb-6">{fieldsError}</p>
+            <Button
+              onClick={() => {
+                if (isAllLenders) {
+                  fetchFields('', fetchDetails);
+                } else {
+                  fetchFields(lenderName, fetchDetails);
+                }
+              }}
+              variant="outline"
+              className="min-w-[140px]"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    let stepContent: React.ReactNode;
+    if (isSinglePage) {
+      stepContent = (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-5"
+        >
+          {renderStepContent()}
+        </motion.div>
+      );
+    } else {
+      stepContent = (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-5"
+          >
+            {renderStepContent()}
+          </motion.div>
+        </AnimatePresence>
+      );
+    }
+
+    return (
+      <>
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+            {!isSinglePage && (
+              <h2 className="lead-form-heading">
+                {currentStepConfig.title}
+              </h2>
+            )}
+
+            {stepContent}
+
+            {renderSubmitError()}
+          </form>
+        </div>
+
+        {/* Footer Button */}
+        <div className="border-t bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shrink-0">
+          {renderFooterButton()}
+        </div>
+      </>
+    );
+  };
+
+  const renderModalheadingLabel = () => {
+    if (lenderName === 'basichomeloan') {
+      return `Home loan (${currentStep}/4)`;
+    }
+    if (isAllLenders) {
+      return 'Personal Loan';
+    }
+    return `Personal loan (${currentStep}/4)`;
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -828,49 +724,10 @@ const LeadFormModal = ({
         transition={{ duration: 0.2 }}
       >
         {/* Success Overlay */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div
-              className="absolute inset-0 bg-white z-100 flex flex-col items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div className="text-center space-y-4">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', delay: 0.1 }}
-                >
-                  <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {isPrimePlLeadSuccess ? 'Thank you' : 'Success!'}
-                  </h3>
-                  <p className="text-gray-600 mt-2">
-                    {isPrimePlLeadSuccess
-                      ? 'Our team will contact you shortly.'
-                      : 'Your application has been submitted'}
-                  </p>
-                  {isPrimePlLeadSuccess ? (
-                    <ActionButton
-                      type="button"
-                      className="mt-8 min-w-[200px]"
-                      onClick={handlePrimePlContinueClick}
-                    >
-                      Continue
-                    </ActionButton>
-                  ) : null}
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <PrimePlSuccessOverlay
+          isVisible={isPrimePlLeadSuccess}
+          onContinue={handlePrimePlContinueClick}
+        />
 
         {/* Header */}
         <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
@@ -883,86 +740,13 @@ const LeadFormModal = ({
             <ArrowLeft className="w-6 h-6" />
           </button>}
           <h1 className="text-base font-medium text-gray-900">
-            {isAllLenders ? 'Personal Loan' : `Personal Loan (${currentStep}/4)`}
+            {renderModalheadingLabel()}
           </h1>
         </div>
 
         {/* Content */}
         <div className="flex flex-col flex-1 min-h-0 max-w-xl mx-auto w-full">
-          {isFieldsLoading ? (
-            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-4">
-                  <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-12 bg-gray-200 rounded animate-pulse" />
-                </div>
-              ))}
-            </div>
-          ) : fieldsError ? (
-            <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center">
-                <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h3 className="lead-form-heading mb-2">Unable to load form</h3>
-                <p className="text-red-600 mb-6">{fieldsError}</p>
-                <Button
-                  onClick={() => {
-                    if (isAllLenders) {
-                      fetchFields('', fetchDetails);
-                    } else {
-                      fetchFields(lenderName, fetchDetails);
-                    }
-                  }}
-                  variant="outline"
-                  className="min-w-[140px]"
-                >
-                  Try Again
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex-1 overflow-y-auto">
-                <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
-                  {!isSinglePage && (
-                    <h2 className="lead-form-heading">
-                      {currentStepConfig.title}
-                    </h2>
-                  )}
-
-                  {isSinglePage ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-5"
-                    >
-                      {renderStepContent()}
-                    </motion.div>
-                  ) : (
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentStep}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.2 }}
-                        className="space-y-5"
-                      >
-                        {renderStepContent()}
-                      </motion.div>
-                    </AnimatePresence>
-                  )}
-
-                  {renderSubmitError()}
-                </form>
-              </div>
-
-              {/* Footer Button */}
-              <div className="border-t bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shrink-0">
-                {renderFooterButton()}
-              </div>
-            </>
-          )}
+          {renderModalBody()}
         </div>
       </motion.div>
     </AnimatePresence>

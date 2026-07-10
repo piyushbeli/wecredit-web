@@ -20,6 +20,7 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { PARTNER_CODE, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
 import { ActionButton } from '@/components/shared';
+import { getLenderNameFromUrl } from '@/lib/utils/common-helper';
 
 type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
 
@@ -39,11 +40,8 @@ export const PersonalLoanContent = (): JSX.Element => {
   const effectivePartnerCode = partner || PARTNER_CODE;
 
   // Affiliate query e.g. ?lendername=unity → Unity single-lender flow (wizard + Unity consent), not multi-lender one-page.
-  const affiliateLenderSlug = (
-    (searchParams?.get('lendername') ?? searchParams?.get('lender_name') ?? lendernameFromStore ?? '')
-      .trim()
-      .toLowerCase()
-  );
+  const affiliateLenderSlug = getLenderNameFromUrl(searchParams, lendernameFromStore ?? '');
+  
   const isUnitySingleLenderFromAffiliate = affiliateLenderSlug === 'unity';
   const hasCheckedDedupe = useRef<boolean>(false);
   const wasAuthenticated = useRef<boolean>(isAuthenticated);

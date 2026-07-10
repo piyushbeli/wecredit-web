@@ -10,7 +10,7 @@ export interface ActiveLender {
  * Normalizes a string for lender name comparison.
  * Lowercase, trim, collapse spaces to single hyphen for slug-like matching.
  */
-function normalizeLenderNameForMatch(name: string): string {
+export function normalizeLenderNameForMatch(name: string): string {
   if (!name || typeof name !== 'string') return '';
   return name
     .toLowerCase()

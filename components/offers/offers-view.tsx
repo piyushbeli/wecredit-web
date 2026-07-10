@@ -13,8 +13,6 @@ import {
 
 import {
   OfferCard,
-  OffersHero,
-  OffersLoadingSkeleton,
   ErrorState,
   PollingState,
   EmptyState,
@@ -48,11 +46,11 @@ export const OffersView = () => {
     '';
 
   const isLntLender = rawLender.toLowerCase() === 'lnt';
+  const isBasicHomeLoanLender = rawLender.toLowerCase() === 'basichomeloan';
   const isLntLenderOrUpswignLntLender = isLntLender || rawLender.toLowerCase() === 'upswing_lnt';
-  // Hide "Explore more" for affiliate flows (?partner=…) and LNT single-lender view
   const { isAffiliate } = useInfoSearchParams();
-  const hideExploreMoreOffersCta = isAffiliate || isLntLender;
-  const hideExploreOtherOffersCta = !isAffiliate && !isLntLender;
+  // Affiliate and scoped lender flows should not offer navigation to other lenders.
+  const canExploreOtherOffers = !isAffiliate && !isLntLender && !isBasicHomeLoanLender;
   const lenderNameParam = (rawLender);
   const lenderNameParamPollMessage = mapingLenderNameToLenderCode(rawLender);
   const hasFiredOfferpageEventRef = useRef(false);
@@ -286,7 +284,7 @@ export const OffersView = () => {
         return (
           <div className="space-y-6 max-w-xl mx-auto">
             {renderOfferSection('', filteredExploreOffers)}
-            {!hideExploreMoreOffersCta && (
+            {canExploreOtherOffers && (
               <>
                 <p className="text-[14px] text-gray-600">
                   More lenders might have exciting offers waiting for you. Take a moment to explore your options.
@@ -300,7 +298,7 @@ export const OffersView = () => {
                     isLoading={isReHitting}
                     disabled={isReHitting}
                   >
-                    Explore More Offers 
+                    Explore More Offers
                   </ActionButton>
                 </div>
               </>
@@ -311,7 +309,7 @@ export const OffersView = () => {
       return (
         <div className="flex flex-col items-center justify-center text-center ">
           <EmptyState title="No offers available from this lender" description=" " />
-          {hideExploreOtherOffersCta && (
+          {canExploreOtherOffers && (
             <ActionButton
               type="button"
               onClick={handleExploreMore}
@@ -320,7 +318,8 @@ export const OffersView = () => {
               disabled={isReHitting}
             >
               Explore Other Offers
-            </ActionButton>)}
+            </ActionButton>
+          )}
         </div>
       );
     }
