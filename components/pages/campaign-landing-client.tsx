@@ -139,15 +139,15 @@ export const CampaignLandingClient = ({
   useEffect(() => {
     if (isLoading || error || !canonicalLenderName) return;
 
-    // No mobile param and not authenticated: useRequireLogin above owns the auth
-    // gate (opens the login modal, redirects home on cancel) — wait for it.
-    if (!mobile && !isAuthenticated) {
+    // Auth owns all lender form access. With ?mn=, the OTP modal opens above;
+    // wait for OTP success before showing auto-fill or mounting the form.
+    if (!isAuthenticated) {
       return;
     }
 
     // Valid lender: show auto-fill modal first
     setShowAutoFillModal(true);
-  }, [isLoading, error, canonicalLenderName, mobile, isAuthenticated]);
+  }, [isLoading, error, canonicalLenderName, isAuthenticated]);
 
   /**
    * Handle auto-fill modal proceed
