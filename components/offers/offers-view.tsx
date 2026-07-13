@@ -31,6 +31,39 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { pushOfferpageEvent } from '@/lib/gtm';
 import { cn } from '@/lib/utils';
 
+const OFFER_CONTENT_STATUS = {
+  ALL_OFFERS: 'all-offers',
+  EMPTY: 'empty',
+  REDIRECTING_SINGLE_LENDER: 'redirecting-single-lender',
+  SINGLE_LENDER_EMPTY: 'single-lender-empty',
+  SINGLE_LENDER_OFFERS: 'single-lender-offers',
+} as const;
+
+const resolveOfferContentStatus = (
+  lenderNameParam: string,
+  singleLenderHasNonInitiatedOffer: boolean,
+  filteredExploreOffersCount: number,
+  hasOffers: boolean,
+) => {
+  if (lenderNameParam && singleLenderHasNonInitiatedOffer) {
+    return OFFER_CONTENT_STATUS.REDIRECTING_SINGLE_LENDER;
+  }
+
+  if (lenderNameParam && filteredExploreOffersCount > 0) {
+    return OFFER_CONTENT_STATUS.SINGLE_LENDER_OFFERS;
+  }
+
+  if (lenderNameParam) {
+    return OFFER_CONTENT_STATUS.SINGLE_LENDER_EMPTY;
+  }
+
+  if (!hasOffers) {
+    return OFFER_CONTENT_STATUS.EMPTY;
+  }
+
+  return OFFER_CONTENT_STATUS.ALL_OFFERS;
+};
+
 export const OffersView = () => {
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
@@ -39,7 +72,7 @@ export const OffersView = () => {
   const empType = useOfferStore((state) => state.empType);
   const requiredLoanAmount = useOfferStore((state) => state.requiredLoanAmount);
   const searchParams = useSearchParams();
-  const {partner} = useUrlParamsStore()
+  const { partner } = useUrlParamsStore()
   const rawLender =
     searchParams.get('lenderName') ??
     searchParams.get('lendername') ??
@@ -55,6 +88,8 @@ export const OffersView = () => {
   const lenderNameParamPollMessage = mapingLenderNameToLenderCode(rawLender);
   const hasFiredOfferpageEventRef = useRef(false);
 
+  const noOffersMessage = isBasicHomeLoanLender ? 'Our executive will contact you shortly' : 'No offers available from this lender';
+  
   const pollingMessage = lenderNameParamPollMessage
     ? `Please wait while we fetch offer from ${lenderNameParamPollMessage.charAt(0).toUpperCase() + lenderNameParamPollMessage.slice(1)} for you.`
     : 'Please wait while we fetch the best offers for you.';
@@ -91,8 +126,8 @@ export const OffersView = () => {
     () =>
       Boolean(
         lenderNameParam &&
-          filteredExploreOffers.length === 1 &&
-          filteredExploreOffers[0].wcStatus !== 'INITIATED',
+        filteredExploreOffers.length === 1 &&
+        filteredExploreOffers[0].wcStatus !== 'INITIATED',
       ),
     [lenderNameParam, filteredExploreOffers],
   );
@@ -276,61 +311,89 @@ export const OffersView = () => {
    * Non-initiated single-lender case is handled by redirect; we render nothing here while that runs.
    */
   const renderMainOffersContent = (): ReactNode => {
-    if (lenderNameParam) {
-      if (singleLenderHasNonInitiatedOffer) {
-        return null;
-      }
-      if (filteredExploreOffers.length > 0) {
-        return (
-          <div className="space-y-6 max-w-xl mx-auto">
-            {renderOfferSection('', filteredExploreOffers)}
-            {canExploreOtherOffers && (
-              <>
-                <p className="text-[14px] text-gray-600">
-                  More lenders might have exciting offers waiting for you. Take a moment to explore your options.
-                </p>
-                <div className="flex justify-center w-full ">
-                  <ActionButton
-                    type="button"
-                    onClick={handleExploreMore}
-                    className="w-[200px] px-10"
-                    rightIcon="🔍"
-                    isLoading={isReHitting}
-                    disabled={isReHitting}
-                  >
-                    Explore More Offers
-                  </ActionButton>
-                </div>
-              </>
-            )}
-          </div>
+    const offerContentStatus = resolveOfferContentStatus(
+      lenderNameParam,
+      singleLenderHasNonInitiatedOffer,
+      filteredExploreOffers.length,
+      hasOffers,
+    );
+
+    if (
+      offerContentStatus === OFFER_CONTENT_STATUS.REDIRECTING_SINGLE_LENDER ||
+      offerContentStatus === OFFER_CONTENT_STATUS.EMPTY
+    ) {
+      return null;
+    }
+
+    if (offerContentStatus === OFFER_CONTENT_STATUS.SINGLE_LENDER_OFFERS) {
+      let exploreOtherOffersContent: ReactNode = null;
+
+      if (canExploreOtherOffers) {
+        exploreOtherOffersContent = (
+          <>
+            <p className="text-[14px] text-gray-600">
+              More lenders might have exciting offers waiting for you. Take a moment to explore your options.
+            </p>
+            <div className="flex justify-center w-full">
+              <ActionButton
+                type="button"
+                onClick={handleExploreMore}
+                className="w-[200px] px-10"
+                rightIcon="🔍"
+                isLoading={isReHitting}
+                disabled={isReHitting}
+              >
+                Explore More Offers
+              </ActionButton>
+            </div>
+          </>
         );
       }
+
       return (
-        <div className="flex flex-col items-center justify-center text-center ">
-          <EmptyState title="No offers available from this lender" description=" " />
-          {canExploreOtherOffers && (
-            <ActionButton
-              type="button"
-              onClick={handleExploreMore}
-              className="w-full max-w-xs"
-              isLoading={isReHitting}
-              disabled={isReHitting}
-            >
-              Explore Other Offers
-            </ActionButton>
-          )}
+        <div className="space-y-6 max-w-xl mx-auto">
+          {renderOfferSection('', filteredExploreOffers)}
+          {exploreOtherOffersContent}
         </div>
       );
     }
 
-    if (!hasOffers) {
-      return null;
+    if (offerContentStatus === OFFER_CONTENT_STATUS.SINGLE_LENDER_EMPTY) {
+      let exploreOtherOffersButton: ReactNode = null;
+
+      if (canExploreOtherOffers) {
+        exploreOtherOffersButton = (
+          <ActionButton
+            type="button"
+            onClick={handleExploreMore}
+            className="w-full max-w-xs"
+            isLoading={isReHitting}
+            disabled={isReHitting}
+          >
+            Explore Other Offers
+          </ActionButton>
+        );
+      }
+
+      return (
+        <div className="flex flex-col items-center justify-center text-center">
+          <EmptyState title={noOffersMessage} description=" " />
+          {exploreOtherOffersButton}
+        </div>
+      );
     }
-    return (
-      <div className={cn("space-y-6 max-w-xl mx-auto", exploreOffers.length <= 0 && "mt-10")}>
-        {exploreOffers.length > 0 ? renderOfferSection('', exploreOffers) : null}
-        {canReHit && newPLEnabled && <ActionButton
+
+    let offerSection: ReactNode = null;
+    let exploreMoreButton: ReactNode = null;
+    let unmatchedOffersSection: ReactNode = null;
+
+    if (exploreOffers.length > 0) {
+      offerSection = renderOfferSection('', exploreOffers);
+    }
+
+    if (canReHit && newPLEnabled) {
+      exploreMoreButton = (
+        <ActionButton
           type="button"
           onClick={handleExploreMore}
           rightIcon="🔍"
@@ -339,8 +402,19 @@ export const OffersView = () => {
           disabled={isReHitting}
         >
           Explore More Offers
-        </ActionButton>}
-        {unmatchedOffers.length > 0 && <UnmatchedOffersSection offers={unmatchedOffers} />}
+        </ActionButton>
+      );
+    }
+
+    if (unmatchedOffers.length > 0) {
+      unmatchedOffersSection = <UnmatchedOffersSection offers={unmatchedOffers} />;
+    }
+
+    return (
+      <div className={cn("space-y-6 max-w-xl mx-auto", exploreOffers.length <= 0 && "mt-10")}>
+        {offerSection}
+        {exploreMoreButton}
+        {unmatchedOffersSection}
       </div>
     );
   };
@@ -382,7 +456,7 @@ export const OffersView = () => {
   // }
 
   const recentStatusOffers = newPLEnabled ? statusOffers : statusOffers.filter((offer) => offer.isWebHookSent !== 2);
-  
+
   return (
     <div className="min-h-screen ">
       <PageHeader title="Offers for you" onBack={handleGoBack} />
