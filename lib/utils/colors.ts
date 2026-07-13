@@ -105,6 +105,31 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
 }
 
 /**
+ * Normalizes backend hex colors into valid CSS hex values.
+ * Accepts values with or without "#"; returns null for empty/invalid values.
+ */
+export function normalizeHexColor(color?: string | null): string | null {
+  if (!color || typeof color !== 'string') return null;
+
+  const value = color.trim();
+  if (!value || value.toLowerCase() === 'null' || value.toLowerCase() === 'undefined') {
+    return null;
+  }
+
+  const hex = value.startsWith('#') ? value.slice(1) : value;
+
+  if (/^[0-9A-Fa-f]{3}$/.test(hex)) {
+    return `#${hex.split('').map((char) => `${char}${char}`).join('')}`;
+  }
+
+  if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
+    return `#${hex}`;
+  }
+
+  return null;
+}
+
+/**
  * Applies opacity to a hex color
  * 
  * @param hex - Hex color string (with or without #)

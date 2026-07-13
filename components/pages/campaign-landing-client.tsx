@@ -17,11 +17,19 @@ import LeadFormModal from '@/components/forms/lead-form-modal';
 import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { MoneyViewForm } from '@/components/moneyview';
 import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
-import { getMatchedLenderCanonicalName } from '@/lib/utils/lenders';
+import {
+  getMatchedActiveLender,
+  getMatchedLenderCanonicalName,
+} from '@/lib/utils/lenders';
 import { useAuth } from '@/hooks/use-auth';
 import { useRequireLogin } from '@/hooks/use-require-login';
 import { useLenderStatusRedirect } from '@/hooks/use-lender-status-redirect';
 import { PageLoader } from '../shared/page-loader';
+import {
+  isTrendingOffersLenderSource,
+  TRENDING_OFFERS_RETURN_PATH,
+} from '@/lib/utils/internal-lender-navigation';
+import { normalizeHexColor } from '@/lib/utils/colors';
 
 interface CampaignLandingClientProps {
   lenderName: string;
@@ -29,6 +37,7 @@ interface CampaignLandingClientProps {
 }
 
 const INCORRECT_LENDER_ERROR = 'Incorrect Lender name';
+const FALLBACK_LENDER_BRAND_COLOUR = '#005AAA';
 
 export const CampaignLandingClient = ({
   lenderName,
@@ -51,10 +60,15 @@ export const CampaignLandingClient = ({
 
   // Debug mode: skip auto-fill modal when ?debugAutoFill=true is in URL
   const isDebugMode = searchParams?.get('debugAutoFill') === 'true';
+  const showBackHeader = isTrendingOffersLenderSource(searchParams);
 
   const handleCloseModal = useCallback(() => {
     window.location.href = window.location.origin;
   }, [router]);
+  const handleBackToTrendingOffers = useCallback(() => {
+    router.push(TRENDING_OFFERS_RETURN_PATH);
+  }, [router]);
+  const handleFormClose = showBackHeader ? handleBackToTrendingOffers : handleCloseModal;
 
   const mobile = searchParams.get('mn');
   
@@ -62,6 +76,23 @@ export const CampaignLandingClient = ({
   const canonicalLenderName = useMemo(() => {
     return getMatchedLenderCanonicalName(lenderName, activeLenders);
   }, [lenderName, activeLenders]);
+  const matchedActiveLender = useMemo(() => {
+    return getMatchedActiveLender(lenderName, activeLenders);
+  }, [lenderName, activeLenders]);
+  const lenderBranding = useMemo(() => {
+    const backendTopColour = normalizeHexColor(matchedActiveLender?.lender.topColour);
+    const backendBackColour = normalizeHexColor(matchedActiveLender?.lender.backColour);
+    const topColour = backendTopColour || backendBackColour || FALLBACK_LENDER_BRAND_COLOUR;
+    const backColour = backendBackColour || backendTopColour || FALLBACK_LENDER_BRAND_COLOUR;
+
+    return {
+      displayName: matchedActiveLender?.lender.Name,
+      logo: matchedActiveLender?.lender.logo,
+      imageUrl: matchedActiveLender?.lender.ImageUrl,
+      topColour,
+      backColour,
+    };
+  }, [matchedActiveLender]);
   const { isCheckingStatus: isOffersLoading, shouldNavigateToOffers: shouldNavigateToOffersPage } =
     useLenderStatusRedirect({
       isLenderResolved: !isLoading,
@@ -198,7 +229,9 @@ export const CampaignLandingClient = ({
       return (
         <MoneyViewForm
           onSuccess={() => setShowLeadFormModal(false)}
-          onClose={handleCloseModal}
+          onClose={handleFormClose}
+          showBackHeader={showBackHeader}
+          lenderBranding={lenderBranding}
         />
       );
     }
@@ -206,10 +239,12 @@ export const CampaignLandingClient = ({
     return (
       <LeadFormModal
         isOpen={showLeadFormModal}
-        onClose={handleCloseModal}
+        onClose={handleFormClose}
         lenderName={canonicalLenderName || ''}
         partnerCode={partnerCode}
         fetchDetails={fetchDetails}
+        showBackHeader={showBackHeader}
+        lenderBranding={lenderBranding}
       />
     );
   };

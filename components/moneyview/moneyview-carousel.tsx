@@ -5,7 +5,7 @@
  * Auto-rotating carousel showing loan benefits (Low Interest, Higher Limits, Quick Approval)
  */
 
-import { Shield, Coins, Zap } from 'lucide-react';
+import { Shield, Coins, Zap, type LucideIcon } from 'lucide-react';
 import Autoplay from 'embla-carousel-autoplay';
 import {
   Carousel,
@@ -14,10 +14,11 @@ import {
   CarouselDots,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
+import { normalizeHexColor } from '@/lib/utils/colors';
 
 interface BenefitCard {
   id: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   title: string;
   subtitle: string;
 }
@@ -25,19 +26,19 @@ interface BenefitCard {
 const BENEFIT_CARDS: BenefitCard[] = [
   {
     id: 'low-interest',
-    icon: <Shield className="w-6 h-6 text-mv-green" />,
+    icon: Shield,
     title: 'Low Interest Rate',
     subtitle: 'Starts 12% p.a.',
   },
   {
     id: 'higher-limits',
-    icon: <Coins className="w-6 h-6 text-mv-green" />,
+    icon: Coins,
     title: 'Higher Limits',
     subtitle: 'Get higher approved amounts.',
   },
   {
     id: 'quick-approval',
-    icon: <Zap className="w-6 h-6 text-mv-green" />,
+    icon: Zap,
     title: 'Quick Approval',
     subtitle: 'Apply today, get money fast',
   },
@@ -45,9 +46,14 @@ const BENEFIT_CARDS: BenefitCard[] = [
 
 interface MoneyViewCarouselProps {
   className?: string;
+  accentColor?: string;
 }
 
-const MoneyViewCarousel = ({ className }: MoneyViewCarouselProps) => {
+const FALLBACK_LENDER_BRAND_COLOUR = '#005AAA';
+
+const MoneyViewCarousel = ({ className, accentColor }: MoneyViewCarouselProps) => {
+  const resolvedAccentColor = normalizeHexColor(accentColor) || FALLBACK_LENDER_BRAND_COLOUR;
+
   return (
     <Carousel
       options={{ loop: true, align: 'center' }}
@@ -55,30 +61,37 @@ const MoneyViewCarousel = ({ className }: MoneyViewCarouselProps) => {
       className={cn('w-full max-w-[297px] mx-auto', className)}
     >
       <CarouselContent className="-ml-2">
-        {BENEFIT_CARDS.map((card, index) => (
-          <CarouselSlide
-            key={card.id}
-            index={index}
-            className="pl-2 basis-full"
-          >
-            <div className="border border-white/30 rounded-md p-4 min-h-[92px] flex items-center gap-4">
-              {/* Icon container */}
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
-                {card.icon}
-              </div>
+        {BENEFIT_CARDS.map((card, index) => {
+          const Icon = card.icon;
 
-              {/* Text content */}
-              <div className="flex flex-col">
-                <span className="text-white font-medium text-sm leading-tight">
-                  {card.title}
-                </span>
-                <span className="text-white/80 text-xs leading-tight mt-1">
-                  {card.subtitle}
-                </span>
+          return (
+            <CarouselSlide
+              key={card.id}
+              index={index}
+              className="pl-2 basis-full"
+            >
+              <div className="border border-white/30 rounded-md p-4 min-h-[92px] flex items-center gap-4">
+                {/* Icon container */}
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
+                  <Icon
+                    className="w-6 h-6"
+                    style={{ color: resolvedAccentColor }}
+                  />
+                </div>
+
+                {/* Text content */}
+                <div className="flex flex-col">
+                  <span className="text-white font-medium text-sm leading-tight">
+                    {card.title}
+                  </span>
+                  <span className="text-white/80 text-xs leading-tight mt-1">
+                    {card.subtitle}
+                  </span>
+                </div>
               </div>
-            </div>
-          </CarouselSlide>
-        ))}
+            </CarouselSlide>
+          );
+        })}
       </CarouselContent>
 
       {/* Pagination dots */}

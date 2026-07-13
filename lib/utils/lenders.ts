@@ -38,6 +38,18 @@ export function getMatchedLenderCanonicalName(
   urlLenderName: string,
   activeLenders: ActiveLender[]
 ): string | null {
+  const matched = getMatchedActiveLender(urlLenderName, activeLenders);
+  if (!matched) return null;
+  return matched.lender.Name || matched.id;
+}
+
+/**
+ * Returns the active lender object that matches a URL/canonical lender name.
+ */
+export function getMatchedActiveLender(
+  urlLenderName: string,
+  activeLenders: ActiveLender[]
+): ActiveLender | null {
   if (!urlLenderName || typeof urlLenderName !== 'string' || urlLenderName.trim() === '') {
     return null;
   }
@@ -54,8 +66,7 @@ export function getMatchedLenderCanonicalName(
       lender.Name?.toLowerCase().trim() === urlLenderName.toLowerCase().trim()
     );
   });
-  if (!matched) return null;
-  return matched.lender.Name || matched.id;
+  return matched || null;
 }
 
 /**

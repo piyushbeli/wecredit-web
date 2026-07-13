@@ -39,6 +39,8 @@ import PrimePlSuccessOverlay from './prime-pl-success-overlay';
 import Link from 'next/link';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { pushOfferpageEvent } from '@/lib/gtm';
+import LenderCoBrandHeader, { type LenderBranding } from './lender-co-brand-header';
+import MoneyViewHero from '../moneyview/moneyview-hero';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -48,10 +50,26 @@ interface LeadFormModalProps {
   onSuccess?: (leadId: string) => void;
   isAllLenders?: boolean;
   fetchDetails?: boolean;
+  lenderBranding?: LenderBranding | null;
+  showBackHeader?: boolean;
 }
 
 const PREFILL_QUERY_KEY = 'prefill';
 const PREFILL_QUERY_VALUE = '1';
+
+const getReadableTextColor = (backgroundColor?: string | null): string => {
+  if (!backgroundColor) return '#FFFFFF';
+
+  const hex = backgroundColor.replace('#', '').trim();
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return '#FFFFFF';
+
+  const red = Number.parseInt(hex.slice(0, 2), 16);
+  const green = Number.parseInt(hex.slice(2, 4), 16);
+  const blue = Number.parseInt(hex.slice(4, 6), 16);
+  const luminance = (red * 299 + green * 587 + blue * 114) / 1000;
+
+  return luminance > 160 ? '#111827' : '#FFFFFF';
+};
 
 const STEP_SECTIONS: Array<{ title: string; fieldKeys: FormFieldKey[] }> = [
   {
@@ -79,6 +97,8 @@ const LeadFormModal = ({
   partnerCode = PARTNER_CODE,
   isAllLenders = false,
   fetchDetails = true,
+  lenderBranding,
+  showBackHeader = false,
 }: LeadFormModalProps) => {
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
@@ -104,6 +124,17 @@ const LeadFormModal = ({
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
   const isLntLenderOrUpswignLntLender = lenderName?.toLowerCase() === 'lnt' || lenderName?.toLowerCase() === 'upswing_lnt';
+  const isSingleLenderFlow = !isAllLenders;
+  const lenderActionColor = isSingleLenderFlow
+    ? lenderBranding?.backColour || lenderBranding?.topColour || null
+    : null;
+  const lenderActionButtonStyle = lenderActionColor
+    ? {
+      backgroundColor: lenderActionColor,
+      borderColor: lenderActionColor,
+      color: getReadableTextColor(lenderActionColor),
+    }
+    : undefined;
   /**
    * Credit card questions are only valid for all-lenders flow when:
    * user chose to proceed without full details fetch.
@@ -124,7 +155,7 @@ const LeadFormModal = ({
     validateField,
     initializeFormValues,
     isSinglePage,
-  } = useLeadForm(fields, { singlePage: isAllLenders });
+  } = useLeadForm(fields, { singlePage: true });
 
   /** UI stores Yes/No as 'true' | 'false' strings — never use Boolean(string) here. */
   const creditCardAnswer = formValues.hasCreditCard;
@@ -333,7 +364,9 @@ const LeadFormModal = ({
           type="button"
           onClick={handleNext}
           fullWidth
-          className="h-14 text-base"
+          variant={lenderActionButtonStyle ? 'secondary' : 'default'}
+          className="h-14 text-base hover:opacity-90"
+          style={lenderActionButtonStyle}
         >
           Next
         </ActionButton>
@@ -360,7 +393,9 @@ const LeadFormModal = ({
         disabled={isSubmitDisabled}
         isLoading={isSubmitting}
         fullWidth
-        className="h-14 text-base"
+        variant={lenderActionButtonStyle ? 'secondary' : 'default'}
+        className="h-14 text-base hover:opacity-90"
+        style={lenderActionButtonStyle}
       >
         Submit
       </ActionButton>
@@ -679,8 +714,8 @@ const LeadFormModal = ({
 
     return (
       <>
-        <div className="flex-1 overflow-y-auto">
-          <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+        <div className="flex-1">
+          <form onSubmit={handleFormSubmit} className="mx-auto w-full max-w-xl p-6 space-y-6">
             {!isSinglePage && (
               <h2 className="lead-form-heading">
                 {currentStepConfig.title}
@@ -695,7 +730,9 @@ const LeadFormModal = ({
 
         {/* Footer Button */}
         <div className="border-t bg-white px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shrink-0">
-          {renderFooterButton()}
+          <div className="mx-auto w-full max-w-xl">
+            {renderFooterButton()}
+          </div>
         </div>
       </>
     );
@@ -708,8 +745,8 @@ const LeadFormModal = ({
     if (isAllLenders) {
       return 'Personal Loan';
     }
-    return `Personal loan (${currentStep}/4)`;
-  }
+    return 'Personal loan';
+  };
 
   if (!isOpen) return null;
 
@@ -730,22 +767,38 @@ const LeadFormModal = ({
         />
 
         {/* Header */}
-        <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
-          {!isAffiliate &&<button
-            type="button"
-            onClick={handleHeaderBackClick}
-            className="p-1 text-gray-700 hover:text-gray-900"
-            aria-label={isAllLenders || isFirstStep ? 'Close' : 'Back'}
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>}
-          <h1 className="text-base font-medium text-gray-900">
-            {renderModalheadingLabel()}
-          </h1>
-        </div>
+        {isAllLenders && (
+          <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
+            {!isAffiliate &&<button
+              type="button"
+              onClick={handleHeaderBackClick}
+              className="p-1 text-gray-700 hover:text-gray-900"
+              aria-label={isAllLenders || isFirstStep ? 'Close' : 'Back'}
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>}
+            <h1 className="text-base font-medium text-gray-900">
+              {renderModalheadingLabel()}
+            </h1>
+          </div>
+        )}
 
         {/* Content */}
-        <div className="flex flex-col flex-1 min-h-0 max-w-xl mx-auto w-full">
+        <div className="flex flex-col flex-1 min-h-0 w-full overflow-y-auto">
+          {isSingleLenderFlow && (
+            <>
+              <LenderCoBrandHeader
+                lenderName={lenderName}
+                branding={lenderBranding}
+                showBackButton={showBackHeader && !isAffiliate}
+                onBackClick={handleHeaderBackClick}
+              />
+              <MoneyViewHero
+                backgroundColor={lenderBranding?.backColour || lenderBranding?.topColour}
+                accentColor={lenderBranding?.topColour || lenderBranding?.backColour}
+              />
+            </>
+          )}
           {renderModalBody()}
         </div>
       </motion.div>
