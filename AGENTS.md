@@ -1,18 +1,3 @@
-# CLAUDE.md
-
-Guidance for Claude Code when working in this repository.
-
-## Hydration warnings on `<body>`
-
-`app/layout.tsx` sets `suppressHydrationWarning` on the `<body>` tag. Browser
-extensions (Grammarly, password managers, ad blockers, etc.) inject attributes
-like `data-new-gr-c-s-check-loaded` and `data-gr-ext-installed` into `<body>`
-before React hydrates, which trips Next.js's hydration mismatch warning even
-though nothing is actually broken. Do not remove `suppressHydrationWarning`
-from `<body>` to "fix" this warning, and do not chase down attribute mismatches
-on `<body>` that come from extension-injected `data-*` attributes — they are
-expected and harmless.
-
 ## Coding Rules
 
 ### DRY Principles
