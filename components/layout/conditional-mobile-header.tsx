@@ -3,35 +3,57 @@
 import { usePathname } from 'next/navigation';
 import MobileHeader from '@/components/home/mobile-header';
 import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
+import { cn } from '@/lib/utils';
 
-/** Routes where MobileHeader should NOT be displayed */
-const HEADER_EXCLUDED_ROUTES = ['/offers/', '/offers/status/', '/our-partners/', '/business-loan/', '/gold-loan/', '/car-loan/',
-  '/home-loan/', '/primepl-lead/', '/business-loan/', '/instant-personal-loan/'
-];
+/** Routes where MobileHeader should NOT be displayed (with or without trailing slash). */
+const HEADER_EXCLUDED_ROUTES = [
+  '/offers',
+  '/our-partners',
+  '/business-loan',
+  '/gold-loan',
+  '/car-loan',
+  '/home-loan',
+  '/primepl-lead',
+  '/instant-personal-loan',
+  '/credit-score',
+  '/bureau-report',
+] as const;
 
 interface ConditionalMobileHeaderProps {
   siteName: string;
 }
 
 /**
- * Wrapper component that conditionally renders MobileHeader based on current route.
- * Returns null for routes listed in HEADER_EXCLUDED_ROUTES, or when the session
- * URL includes `?platform=mobile` (e.g. opened from a mobile app webview).
+ * Returns true when the current pathname should not show the global mobile header.
  */
-const ConditionalMobileHeader = (props: ConditionalMobileHeaderProps) => {
+function isHeaderExcludedPath(pathname: string | null): boolean {
+  if (!pathname) {
+    return false;
+  }
+  return HEADER_EXCLUDED_ROUTES.some((route) => {
+    return pathname === route || pathname.startsWith(`${route}/`);
+  });
+}
+
+/**
+ * Wrapper that hides MobileHeader on fullscreen / app-shell routes.
+ * Always keeps the same DOM structure on server and client to avoid hydration mismatches
+ * when pathname/searchParams resolve differently during SSR vs first client paint.
+ */
+const ConditionalMobileHeader = (props: ConditionalMobileHeaderProps): React.ReactNode => {
   const pathname = usePathname();
   const isMobilePlatform = useIsMobilePlatform();
+  const shouldHideHeader = isHeaderExcludedPath(pathname) || isMobilePlatform;
 
-  // Check if current route should hide the header
-  const shouldHideHeader =
-    HEADER_EXCLUDED_ROUTES.includes(pathname) ||
-    HEADER_EXCLUDED_ROUTES.includes(`${pathname}/`);
-
-  if (isMobilePlatform || shouldHideHeader) {
-    return null;
-  }
-
-  return <MobileHeader {...props} />;
+  return (
+    <div
+      suppressHydrationWarning
+      className={cn(shouldHideHeader && 'hidden')}
+      aria-hidden={shouldHideHeader}
+    >
+      <MobileHeader {...props} />
+    </div>
+  );
 };
 
 export default ConditionalMobileHeader;

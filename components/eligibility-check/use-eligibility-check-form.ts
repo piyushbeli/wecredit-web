@@ -60,8 +60,8 @@ export const useEligibilityCheckForm = (
     setIsSubmitting(true);
     try {
       const payload = buildEligibilityCheckPayload(formValues);
-      const success = await submitEligibilityCheck(payload);
-      if (success && onSuccess) {
+      const result = await submitEligibilityCheck(payload);
+      if (result.success && onSuccess) {
         onSuccess();
         setFormValues(DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES);
         setFormErrors({});

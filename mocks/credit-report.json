@@ -1,0 +1,126 @@
+{
+  "user": {
+    "firstName": "Rahul"
+  },
+  "creditScore": {
+    "bureau": "EQUIFAX",
+    "score": 765,
+    "minimumScore": 300,
+    "maximumScore": 900,
+    "rating": "GOOD",
+    "monthlyChange": 12,
+    "changeType": "INCREASED",
+    "lastUpdatedAt": "2026-06-26T10:30:00.000Z",
+    "canRefresh": true
+  },
+  "loanOffer": {
+    "isEligible": true,
+    "isPreApproved": true,
+    "offerId": "OFF-102938",
+    "loanType": "PERSONAL_LOAN",
+    "maximumAmount": 500000,
+    "currency": "INR",
+    "minimumInterestRate": 10.49,
+    "interestRateType": "PER_ANNUM",
+    "disbursalTime": "24 hrs",
+    "collateralRequired": false,
+    "creditScoreImpact": false,
+    "ctaText": "Apply now"
+  },
+  "fullCreditReport": {
+    "reportId": "CR-102938",
+    "bureau": "EQUIFAX",
+    "status": "LOCKED",
+    "isAvailable": true,
+    "originalPrice": 199,
+    "sellingPrice": 2,
+    "currency": "INR",
+    "desktopTitle": "Get your full credit report",
+    "mobileTitle": "Full credit report",
+    "description": "Complete report — account-level details, full payment history, every enquiry & address on record. Download as PDF instantly.",
+    "mobileDescription": "EQUIFAX official · account-level details & PDF",
+    "ctaText": "Unlock report"
+  },
+  "scoreFactors": [
+    {
+      "key": "PAYMENT_HISTORY",
+      "label": "Payment history",
+      "rating": "EXCELLENT",
+      "displayValue": "Excellent",
+      "progress": 100
+    },
+    {
+      "key": "CREDIT_UTILIZATION",
+      "label": "Credit utilization",
+      "rating": "GOOD",
+      "displayValue": "Good · 32%",
+      "progress": 32
+    },
+    {
+      "key": "CREDIT_AGE",
+      "label": "Credit age",
+      "rating": "FAIR",
+      "displayValue": "Fair",
+      "progress": 40
+    },
+    {
+      "key": "RECENT_ENQUIRIES",
+      "label": "Recent enquiries",
+      "rating": "LOW",
+      "displayValue": "Low",
+      "progress": 100,
+      "hideOnMobile": true
+    }
+  ],
+  "creditSummary": [
+    {
+      "key": "ACTIVE_ACCOUNTS",
+      "label": "Active accounts",
+      "value": 4,
+      "valueType": "NUMBER"
+    },
+    {
+      "key": "ON_TIME_PAYMENTS",
+      "label": "On-time payments",
+      "value": 98,
+      "valueType": "PERCENTAGE",
+      "highlight": true
+    },
+    {
+      "key": "TOTAL_ENQUIRIES",
+      "label": "Total enquiries",
+      "value": 2,
+      "valueType": "NUMBER"
+    },
+    {
+      "key": "TOTAL_CREDIT_LIMIT",
+      "label": "Total credit limit",
+      "value": 320000,
+      "valueType": "CURRENCY_COMPACT",
+      "currency": "INR",
+      "hideOnMobile": true
+    }
+  ],
+  "improvementTips": [
+    {
+      "id": "TIP-1",
+      "text": "Keep credit utilization under 30%"
+    },
+    {
+      "id": "TIP-2",
+      "text": "Avoid multiple loan enquiries at once"
+    },
+    {
+      "id": "TIP-3",
+      "text": "Always pay EMIs & bills on time"
+    }
+  ],
+  "visibility": {
+    "showStartOver": true,
+    "showLoanOffer": true,
+    "showFullReport": true,
+    "showScoreFactors": true,
+    "showCreditSummary": true,
+    "showImprovementTips": true
+  }
+}

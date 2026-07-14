@@ -3,48 +3,59 @@
 import { usePathname } from 'next/navigation';
 import Footer from '@/components/layout/Footer';
 import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
+import { cn } from '@/lib/utils';
 
-/** Routes where Footer should NOT be displayed */
+/** Routes where Footer should NOT be displayed (prefix match). */
 const FOOTER_EXCLUDED_ROUTES: string[] = [
-  // Add routes here where footer should always be hidden
-  // Example: '/partner-with-us' when showing success state
   '/partner-with-us',
-  '/terms-of-service/',
-  '/privacy-policy/',
-  '/about-us/',
-  '/contact-us/',
-  '/faq/',
-  '/grievance-redressal/',
-  '/delete_account/',
-  '/partner-terms-and-conditions/',
+  '/terms-of-service',
+  '/privacy-policy',
+  '/about-us',
+  '/contact-us',
+  '/faq',
+  '/grievance-redressal',
+  '/delete_account',
+  '/partner-terms-and-conditions',
   '/calculator/personal-loan',
-  '/our-partners/',
-  '/instant-personal-loan/',
+  '/our-partners',
+  '/instant-personal-loan',
   '/login',
   '/otp-confirmation',
-  // '/blog/',
-  '/offers' // Exclude /offers route
+  '/offers',
+  '/credit-score',
+  '/bureau-report',
 ];
 
 /**
- * Wrapper component that conditionally renders Footer based on current route.
- * Returns null for routes listed in FOOTER_EXCLUDED_ROUTES, or when the session
- * URL includes `?platform=mobile` (e.g. opened from a mobile app webview).
+ * Returns true when the current pathname should not show the global footer.
+ */
+function isFooterExcludedPath(pathname: string | null): boolean {
+  if (!pathname) {
+    return false;
+  }
+  return FOOTER_EXCLUDED_ROUTES.some((route) => {
+    return pathname === route || pathname.startsWith(`${route}/`);
+  });
+}
+
+/**
+ * Wrapper that hides Footer on excluded routes.
+ * Keeps a stable DOM wrapper so SSR/client pathname differences do not hydrate-mismatch.
  */
 const ConditionalFooter = (): React.ReactNode => {
   const pathname = usePathname();
   const isMobilePlatform = useIsMobilePlatform();
+  const shouldHideFooter = isFooterExcludedPath(pathname) || isMobilePlatform;
 
-  // Check if current route should hide the footer
-  const shouldHideFooter = FOOTER_EXCLUDED_ROUTES.some((route) =>
-    pathname?.startsWith(route)
+  return (
+    <div
+      suppressHydrationWarning
+      className={cn(shouldHideFooter && 'hidden')}
+      aria-hidden={shouldHideFooter}
+    >
+      <Footer />
+    </div>
   );
-
-  if (isMobilePlatform || shouldHideFooter) {
-    return null;
-  }
-
-  return <Footer />;
 };
 
 export default ConditionalFooter;

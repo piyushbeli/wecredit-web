@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { wecreditConfig } from '@/lib/config';
 import { SOURCE_WEBSITE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import type { EligibilityCheckPayload } from '@/components/eligibility-check/eligibility-check-form.config';
+import { extractBureauPdfUrl, storeBureauResponse } from '@/lib/utils/bureau-pdf';
 
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
 const ELIGIBILITY_CHECK_ENDPOINT_PROD = `https://wecredit.co.in/api/wechat`;
@@ -69,6 +70,7 @@ export async function checkEligibilityStatus(
     }
 
     if (response.ok) {
+      storeBureauResponse(responseData);
       return { showSuccess: true, data: responseData };
     }
 
@@ -121,19 +123,24 @@ function buildEligibilityCheckHeaders(
   return headers;
 }
 
+export interface SubmitEligibilityCheckResult {
+  success: boolean;
+  pdfUrl?: string;
+}
+
 /**
  * Submit eligibility check (bureau report) to wechat API.
- * Returns true on success, false on failure (errors surfaced via toast).
+ * Stores pdfUrl for the credit-score screen; does not open the PDF here.
  */
 export async function submitEligibilityCheck(
   payload: EligibilityCheckPayload
-): Promise<boolean> {
+): Promise<SubmitEligibilityCheckResult> {
   const phoneDigits = payload.phoneNumber.replace(/\D/g, '');
   if (!/^[0-9]{10}$/.test(phoneDigits)) {
     toast.error('Invalid phone number', {
       description: 'Please enter a valid 10-digit phone number.',
     });
-    return false;
+    return { success: false };
   }
 
   const requestBody = {
@@ -161,11 +168,9 @@ export async function submitEligibilityCheck(
 
     if (response.ok) {
       const responseData = await response.json();
-      const pdfUrl = (responseData as { pdfUrl?: string }).pdfUrl;
-      if (pdfUrl) {
-        window.open(pdfUrl, '_blank');
-      }
-      return true;
+      const pdfUrl = extractBureauPdfUrl(responseData);
+      storeBureauResponse(responseData);
+      return { success: true, pdfUrl };
     }
 
     let errorMessage = 'Failed to submit eligibility check';
@@ -180,13 +185,13 @@ export async function submitEligibilityCheck(
     toast.error(errorMessage, {
       description: 'Unable to submit your request. Please try again.',
     });
-    return false;
+    return { success: false };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Network error occurred';
     toast.error(errorMessage, {
       description: 'Failed to submit your request. Please check your connection.',
     });
-    return false;
+    return { success: false };
   }
 }
