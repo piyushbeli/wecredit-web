@@ -218,7 +218,7 @@ export const OTPStepScreen = ({
                     inputMode="numeric"
                     disabled={isLoading}
                     className={cn(
-                      'h-12 w-12 rounded border-b-2 bg-[#045CCF]/15 text-center text-xl font-semibold text-gray-900 outline-none disabled:opacity-60 sm:h-14 sm:w-14 md:h-16 md:w-16 md:text-2xl',
+                      'h-12 w-12 cursor-rounded border-b-2 bg-[#045CCF]/15 text-center text-xl font-semibold text-gray-900 outline-none disabled:opacity-60 sm:h-14 sm:w-14 md:h-16 md:w-16 md:text-2xl',
                       error ? 'border-red-400 bg-red-50' : 'border-brand-primary'
                     )}
                   />
@@ -261,7 +261,7 @@ export const OTPStepScreen = ({
             type="submit"
             disabled={!isOtpComplete || isLoading}
             className={cn(
-              'mt-9 flex h-14 w-full items-center justify-center rounded-md text-base font-semibold transition-colors md:text-lg',
+              'mt-9 cursor-pointer flex h-14 w-full items-center justify-center rounded-md text-base font-semibold transition-colors md:text-lg',
               isOtpComplete && !isLoading
                 ? 'bg-brand-primary text-white hover:bg-brand-primary/90'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
