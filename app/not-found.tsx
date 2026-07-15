@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
  */
 const NotFound = () => {
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-16 bg-gradient-to-b from-background via-background to-muted/30">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-16 bg-linear-to-b from-background via-background to-muted/30">
       {/* Animated SVG Illustration */}
       <div className="relative mb-8">
         <svg
