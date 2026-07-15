@@ -742,9 +742,9 @@ const LeadFormModal = ({
     if (lenderName === 'basichomeloan') {
       return `Home loan (${currentStep}/4)`;
     }
-    if (isAllLenders) {
-      return 'Personal Loan';
-    }
+    // if (isAllLenders) {
+    //   return 'Personal Loan';
+    // }
     return 'Personal loan';
   };
 

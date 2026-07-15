@@ -218,7 +218,7 @@ export const OTPStepScreen = ({
                     inputMode="numeric"
                     disabled={isLoading}
                     className={cn(
-                      'h-12 w-12 cursor-rounded border-b-2 bg-[#045CCF]/15 text-center text-xl font-semibold text-gray-900 outline-none disabled:opacity-60 sm:h-14 sm:w-14 md:h-16 md:w-16 md:text-2xl',
+                      'h-12 w-12 border-b-2 bg-[#045CCF]/15 text-center text-xl font-semibold text-gray-900 outline-none disabled:opacity-60 sm:h-14 sm:w-14 md:h-16 md:w-16 md:text-2xl',
                       error ? 'border-red-400 bg-red-50' : 'border-brand-primary'
                     )}
                   />
