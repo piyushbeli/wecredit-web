@@ -102,6 +102,12 @@ export interface ScoreFactorToneClasses {
  * Maps factor rating to semantic Tailwind classes (no hex in mock data).
  */
 export function getScoreFactorToneClasses(rating: ScoreFactorRating): ScoreFactorToneClasses {
+  if (rating === 'NEUTRAL') {
+    return {
+      textClassName: 'text-gray-500',
+      barClassName: 'bg-gray-400',
+    };
+  }
   if (rating === 'EXCELLENT' || rating === 'GOOD' || rating === 'LOW') {
     return {
       textClassName: 'text-[#1FAF5A]',

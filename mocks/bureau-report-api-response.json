@@ -1,0 +1,391 @@
+
+ 
+{
+    "success": true,
+    "message": "Bureau report fetched successfully",
+    "pdfUrl": "https://zapcash-staging.s3.ap-south-1.amazonaws.com/applicant/7989432589/equifax-report/Equifax_Report_7989432589_1784120955755.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2OIVDJBJFJWJZNMR%2F20260715%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20260715T130917Z&X-Amz-Expires=900&X-Amz-Signature=b06dd22453c727bdd012e5da3610e80688d4251ef6dc6eb822be7e7b3f83244e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject%22",
+    "data": {
+        "creditScore": 668,
+        "consumer": {
+            "name": "DUGGASANI ESWARREDDY SIVANAGIREDDY",
+            "dob": "1996-03-23T00:00:00.000Z",
+            "email": "eeswar992@gmail.com",
+            "pan": "CRFPD4807G",
+            "mobile": "9581373076",
+            "address": "S/O DUGGASANI SIVA NAGI REDDY 38/4567 TILAK NAGAR  CHINNA CHOWK CHINNACHOWK CHINNACHOWK CUDDAPAH ANDHRA PRADESH IN  NR RAMALAYAM 516002"
+        },
+        "creditHealthBreakdown": {
+            "paymentHistory": {
+                "category": "Payment History",
+                "rating": "Poor",
+                "percentage": 45,
+                "description": "10 account(s) with past due"
+            },
+            "creditUtilization": {
+                "category": "Credit Utilization",
+                "rating": "Poor",
+                "percentage": 30,
+                "description": "Using Infinity% of total credit limit"
+            },
+            "creditAge": {
+                "category": "Credit Age",
+                "rating": "Excellent",
+                "percentage": 100,
+                "description": "Average account age: 7 years 8 months"
+            },
+            "creditEnquiries": {
+                "category": "Credit Enquiries",
+                "rating": "Excellent",
+                "percentage": 90,
+                "description": "1 hard enquiry in last 6 months"
+            },
+            "creditMix": {
+                "category": "Credit Mix",
+                "rating": "Excellent",
+                "percentage": 100,
+                "description": "Healthy mix of secured & unsecured credit"
+            }
+        },
+        "creditSummary": {
+            "activeAccounts": 37,
+            "totalAccounts": 106,
+            "onTimePaymentsPercentage": 45,
+            "totalEnquiries": 8,
+            "totalCreditLimit": 0
+        },
+        "accounts": [
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 264880,
+                "outstanding": 1590,
+                "status": "1-29 days past due"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 100960,
+                "outstanding": 100960,
+                "status": "1-29 days past due"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 30560,
+                "outstanding": 30560,
+                "status": "1-29 days past due"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 66220,
+                "outstanding": 66220,
+                "status": "1-29 days past due"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 248160,
+                "outstanding": 248160,
+                "status": "New Account"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 171760,
+                "outstanding": 171760,
+                "status": "New Account"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 49760,
+                "outstanding": 0,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Personal Loan",
+                "sanctioned": 30367,
+                "outstanding": 30367,
+                "status": "New Account"
+            },
+            {
+                "lender": "Bajaj Finance Limited",
+                "type": "Personal Loan",
+                "sanctioned": 412006,
+                "outstanding": 188548,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Gold Loan",
+                "sanctioned": 120160,
+                "outstanding": 0,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Ensemble Holdings & Limited",
+                "type": "Gold Loan",
+                "sanctioned": 26560,
+                "outstanding": 0,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Bajaj Finance Limited",
+                "type": "Consumer Loan",
+                "sanctioned": 18000,
+                "outstanding": 11250,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Bajaj Finance Limited",
+                "type": "Consumer Loan",
+                "sanctioned": 16500,
+                "outstanding": 10311,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Bajaj Finance Limited",
+                "type": "Consumer Loan",
+                "sanctioned": 12500,
+                "outstanding": 6251,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Bajaj Finance Limited",
+                "type": "Consumer Loan",
+                "sanctioned": 1599,
+                "outstanding": 999,
+                "status": "Current Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 644248,
+                "outstanding": 644248,
+                "status": "Standard"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 250092,
+                "outstanding": 250092,
+                "status": "Standard"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 120898,
+                "outstanding": 120898,
+                "status": "Standard"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 120580,
+                "outstanding": 120580,
+                "status": "Standard"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 42940,
+                "outstanding": 42940,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 25240,
+                "outstanding": 25240,
+                "status": "Standard"
+            },
+            {
+                "lender": "R K BANSAL FINANCE PRIVATE LIMITED",
+                "type": "Short Term Personal Loan",
+                "sanctioned": 16456,
+                "outstanding": 16456,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 12440,
+                "outstanding": 12440,
+                "status": "Current Account"
+            },
+            {
+                "lender": "CHHOTARIA SECURITIES PVT LTD",
+                "type": "Short Term Personal Loan",
+                "sanctioned": 8400,
+                "outstanding": 10500,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 601494,
+                "outstanding": 601494,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 472750,
+                "outstanding": 0,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 279326,
+                "outstanding": 279326,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 233722,
+                "outstanding": 233722,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 124906,
+                "outstanding": 124906,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 113266,
+                "outstanding": 113266,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 112557,
+                "outstanding": 112557,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 554200,
+                "outstanding": 554200,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 425000,
+                "outstanding": 425000,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 261200,
+                "outstanding": 261200,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 213113,
+                "outstanding": 213113,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 108200,
+                "outstanding": 108200,
+                "status": "New Account"
+            },
+            {
+                "lender": "Finkurve Financial Services Ltd",
+                "type": "Gold Loan",
+                "sanctioned": 102714,
+                "outstanding": 102714,
+                "status": "New Account"
+            }
+        ],
+        "paymentHistory12Months": [
+            {
+                "key": "07-26",
+                "DaysPastDue": 21
+            },
+            {
+                "key": "06-26",
+                "DaysPastDue": 7
+            },
+            {
+                "key": "05-26",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "04-26",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "03-26",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "02-26",
+                "DaysPastDue": 43
+            },
+            {
+                "key": "01-26",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "12-25",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "11-25",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "10-25",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "09-25",
+                "DaysPastDue": 0
+            },
+            {
+                "key": "08-25",
+                "DaysPastDue": 0
+            }
+        ],
+        "recentEnquiries": [
+            {
+                "lender": "North East Hire Purchase Co. (India) Private. Limited",
+                "type": "PERSONAL LOAN",
+                "date": "2026-06-07T00:00:00.000Z"
+            },
+            {
+                "lender": "Mpokket Financial Services Privat Limited",
+                "type": "Others",
+                "date": "2026-03-22T00:00:00.000Z"
+            },
+            {
+                "lender": "Bhanix Finance And Investment Limited",
+                "type": "PERSONAL LOAN",
+                "date": "2024-08-16T00:00:00.000Z"
+            },
+            {
+                "lender": "Bhanix Finance And Investment Limited",
+                "type": "PERSONAL LOAN",
+                "date": "2024-08-15T00:00:00.000Z"
+            }
+        ]
+    }
+}
+ 

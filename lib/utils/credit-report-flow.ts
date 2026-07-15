@@ -189,6 +189,11 @@ export function openCreditReportPdf(pdfUrl: string): boolean {
   if (!pdfUrl.trim()) {
     return false;
   }
-  window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+  const openedWindow = window.open('', '_blank');
+  if (!openedWindow) {
+    return false;
+  }
+  openedWindow.opener = null;
+  openedWindow.location.href = pdfUrl;
   return true;
 }

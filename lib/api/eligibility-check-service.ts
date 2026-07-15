@@ -5,13 +5,17 @@
 
 import { getCookie } from 'cookies-next';
 import { toast } from 'sonner';
-import { wecreditConfig } from '@/lib/config';
+import bureauReportMockData from '@/mocks/bureau-report-api-response.json';
+import { bureauReportConfig, wecreditConfig } from '@/lib/config';
 import { SOURCE_WEBSITE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import type { EligibilityCheckPayload } from '@/components/eligibility-check/eligibility-check-form.config';
 import { extractBureauPdfUrl, storeBureauResponse } from '@/lib/utils/bureau-pdf';
+import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
+import type { BureauReportApiResponse } from '@/types/credit-report';
 
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
 const ELIGIBILITY_CHECK_ENDPOINT_PROD = `https://wecredit.co.in/api/wechat`;
+const BUREAU_REPORT_MOCK = bureauReportMockData satisfies BureauReportApiResponse;
 
 /**
  * Extract error message from API response
@@ -43,6 +47,10 @@ export async function checkEligibilityStatus(
     return { showSuccess: false, error: 'Invalid mobile number' };
   }
 
+  if (bureauReportConfig.useMockData) {
+    return { showSuccess: false };
+  }
+
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
 
   const requestBody = {
@@ -69,7 +77,7 @@ export async function checkEligibilityStatus(
       responseData = undefined;
     }
 
-    if (response.ok) {
+    if (response.ok && isUsableBureauReportResponse(responseData)) {
       storeBureauResponse(responseData);
       return { showSuccess: true, data: responseData };
     }
@@ -78,7 +86,7 @@ export async function checkEligibilityStatus(
     return {
       showSuccess: false,
       data: responseData,
-      error: responseMessage ?? `Request failed with status ${response.status}`,
+      error: responseMessage ?? 'Credit report data is not available yet',
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
@@ -107,14 +115,17 @@ function buildEligibilityCheckHeaders(
   excludeAgentHost?: boolean
 ): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
-  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
 
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
     mobile: phoneNumber.replace(/\D/g, ''),
   };
 
-  headers['X-Agent-Host'] = 'agent-backend';
+  if (excludeAgentHost) {
+    delete headers['X-Agent-Host'];
+  } else {
+    headers['X-Agent-Host'] = 'agent-backend';
+  }
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -143,6 +154,15 @@ export async function submitEligibilityCheck(
     return { success: false };
   }
 
+
+  if (bureauReportConfig.useMockData) {
+    storeBureauResponse(BUREAU_REPORT_MOCK);
+    return {
+      success: true,
+      pdfUrl: extractBureauPdfUrl(BUREAU_REPORT_MOCK),
+    };
+  }
+
   const requestBody = {
     source: SOURCE_WEBSITE,
     agentId: '',
@@ -168,6 +188,12 @@ export async function submitEligibilityCheck(
 
     if (response.ok) {
       const responseData = await response.json();
+      if (!isUsableBureauReportResponse(responseData)) {
+        toast.error('Credit report data is unavailable', {
+          description: 'Please retry your credit report request.',
+        });
+        return { success: false };
+      }
       const pdfUrl = extractBureauPdfUrl(responseData);
       storeBureauResponse(responseData);
       return { success: true, pdfUrl };

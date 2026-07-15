@@ -4,7 +4,7 @@
 
 export type CreditScoreChangeType = 'INCREASED' | 'DECREASED' | 'UNCHANGED';
 
-export type ScoreFactorRating = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'LOW';
+export type ScoreFactorRating = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'LOW' | 'NEUTRAL';
 
 export type SummaryValueType = 'NUMBER' | 'PERCENTAGE' | 'CURRENCY_COMPACT';
 
@@ -161,6 +161,7 @@ export interface CreditReportAccount {
 export interface CreditReportPaymentHistoryItem {
   readonly month: string;
   readonly status: CreditReportPaymentStatus;
+  readonly daysPastDue: string | number;
 }
 
 export interface CreditReportEnquiry {
@@ -168,18 +169,93 @@ export interface CreditReportEnquiry {
   readonly lenderName: string;
   readonly enquiryType: string;
   readonly enquiredAt: string;
+  readonly enquiryTime: string;
+  readonly amount: number | null;
 }
 
 export interface CreditReportData {
   readonly reportId: string;
   readonly generatedAt: string;
-  readonly pdfUrl: string;
+  readonly pdfUrl: string | null;
   readonly bureau: 'EQUIFAX';
   readonly score: CreditReportScoreDetails;
   readonly consumer: CreditReportConsumer;
   readonly accounts: readonly CreditReportAccount[];
   readonly paymentHistory: readonly CreditReportPaymentHistoryItem[];
   readonly enquiries?: readonly CreditReportEnquiry[];
+}
+
+export interface BureauConsumer {
+  readonly name?: string | null;
+  readonly dob?: string | null;
+  readonly email?: string | null;
+  readonly pan?: string | null;
+  readonly mobile?: string | null;
+  readonly address?: string | null;
+}
+
+export interface CreditHealthBreakdown {
+  readonly paymentHistory?: CreditHealthFactor | null;
+  readonly creditUtilization?: CreditHealthFactor | null;
+  readonly creditAge?: CreditHealthFactor | null;
+  readonly creditEnquiries?: CreditHealthFactor | null;
+  readonly creditMix?: CreditHealthFactor | null;
+}
+
+export interface CreditHealthFactor {
+  readonly category?: string | null;
+  readonly rating?: string | null;
+  readonly percentage?: number | null;
+  readonly description?: string | null;
+}
+
+export interface CreditSummary {
+  readonly activeAccounts?: number | null;
+  readonly totalAccounts?: number | null;
+  readonly onTimePaymentsPercentage?: string | number | null;
+  readonly totalEnquiries?: number | null;
+  readonly totalCreditLimit?: number | null;
+}
+
+export interface BureauAccount {
+  readonly lender?: string | null;
+  readonly type?: string | null;
+  readonly sanctioned?: number | null;
+  readonly outstanding?: number | null;
+  readonly status?: string | null;
+}
+
+export interface PaymentHistoryItem {
+  readonly key?: string | null;
+  readonly DaysPastDue?: string | number | null;
+}
+
+export interface RecentEnquiry {
+  readonly lender?: string | null;
+  readonly type?: string | null;
+  readonly date?: string | null;
+  readonly enquiryInstitution?: string | null;
+  readonly enquiryDate?: string | null;
+  readonly enquiryTime?: string | null;
+  readonly enquiryPurpose?: string | null;
+  readonly enquiryAmount?: number | null;
+}
+
+export interface BureauReportData {
+  readonly creditScore?: number | string | null;
+  readonly consumer?: BureauConsumer | null;
+  readonly creditHealthBreakdown?: CreditHealthBreakdown | null;
+  readonly creditSummary?: CreditSummary | null;
+  readonly accounts?: readonly BureauAccount[] | null;
+  readonly paymentHistory12Months?: readonly PaymentHistoryItem[] | null;
+  readonly recentEnquiries?: readonly RecentEnquiry[] | null;
+}
+
+export interface BureauReportApiResponse {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly pdfUrl?: string | null;
+  readonly data?: BureauReportData | null;
 }
 
 export interface CreditReportProgressStep {
