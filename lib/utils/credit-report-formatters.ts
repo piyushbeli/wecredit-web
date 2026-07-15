@@ -165,12 +165,12 @@ export function formatMonthlyChangeLabel(
 }
 
 /**
- * Mobile unlock CTA label.
+ * Mobile full-report CTA label.
  */
 export function formatUnlockReportCta(sellingPrice: number, currency = 'INR'): string {
-  const price =
-    currency === 'INR' ? formatInrPriceLabel(sellingPrice) : `${currency} ${sellingPrice}`;
-  return `Unlock report for ${price}`;
+  void sellingPrice;
+  void currency;
+  return 'View full report';
 }
 
 /**
@@ -179,7 +179,7 @@ export function formatUnlockReportCta(sellingPrice: number, currency = 'INR'): s
 export function formatGetFullReportCta(sellingPrice: number, currency = 'INR'): string {
   const price =
     currency === 'INR' ? formatInrPriceLabel(sellingPrice) : `${currency} ${sellingPrice}`;
-  return `Get full report · ${price}`;
+  return `Get full report `;
 }
 
 /**

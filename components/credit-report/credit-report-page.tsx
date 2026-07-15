@@ -2,50 +2,79 @@
 
 import type { ReactNode } from 'react';
 import { useCreditReportPage } from '@/hooks/use-credit-report-page';
+import { CREDIT_REPORT_ERROR_COPY } from '@/lib/constants/credit-report-flow';
 import { formatGetFullReportCta } from '@/lib/utils/credit-report-formatters';
 import { CreditReportHeader } from './credit-report-header';
+import { CreditReportNavHeader } from './credit-report-nav-header';
 import { CreditReportPageIntro } from './credit-report-page-intro';
 import { CreditReportSkeleton } from './credit-report-skeleton';
 import { CreditScoreCard } from './credit-score-card';
 import { CreditSummaryCard } from './credit-summary-card';
+import { FetchingCreditScore } from './fetching-credit-score';
+import { FullCreditReport } from './full-credit-report';
 import { FullCreditReportCard } from './full-credit-report-card';
 import { ImprovementTipsCard } from './improvement-tips-card';
 import { LoanOfferCard } from './loan-offer-card';
+import { ProcessingFullReport } from './processing-full-report';
+import { ReportErrorState } from './report-error-state';
 import { ScoreFactorsCard } from './score-factors-card';
 
 /**
- * Credit-report page: loads service data and composes presentational cards.
+ * Credit-report flow: fetching → summary → processing → full report.
  */
 export function CreditReportPage(): ReactNode {
   const {
-    status,
+    isBootstrapped,
+    view,
     data,
+    fullReport,
+    progressSteps,
+    failurePhase,
+    isUnlockPending,
     handleRetry,
     handleRefresh,
     handleStartOver,
     handleApplyLoan,
     handleUnlockReport,
+    handleDownloadPdf,
     handleTalkToUs,
+    handleBack,
   } = useCreditReportPage();
 
+  const isFlowView = view === 'fetching' || view === 'processing' || view === 'full_report'
+    || (view === 'error' && failurePhase !== null);
+  const isCenteredFlowCard = view === 'fetching' || view === 'processing'
+    || (view === 'error' && failurePhase !== null);
+
   let body: ReactNode;
-  if (status === 'error') {
+  if (!isBootstrapped) {
+    body = <CreditReportSkeleton />;
+  } else if (view === 'fetching') {
+    body = <FetchingCreditScore steps={progressSteps} />;
+  } else if (view === 'processing') {
+    body = <ProcessingFullReport />;
+  } else if (view === 'full_report' && fullReport) {
+    body = <FullCreditReport report={fullReport} onDownloadPdf={handleDownloadPdf} />;
+  } else if (view === 'error') {
+    let errorTitle: string = CREDIT_REPORT_ERROR_COPY.scoreTitle;
+    let errorDescription: string = CREDIT_REPORT_ERROR_COPY.scoreDescription;
+    if (failurePhase === 'full_report') {
+      errorTitle = CREDIT_REPORT_ERROR_COPY.fullReportTitle;
+      errorDescription = CREDIT_REPORT_ERROR_COPY.fullReportDescription;
+    }
     body = (
-      <div className="rounded-2xl border border-red-100 bg-white p-8 text-center shadow-sm">
-        <h2 className="text-lg font-semibold text-[#1F2937]">Unable to load credit report</h2>
-        <p className="mt-2 text-sm text-gray-500">Please try again in a moment.</p>
-        <button
-          type="button"
-          onClick={handleRetry}
-          className="mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-brand-primary px-5 text-sm font-semibold text-white"
-        >
-          Retry
-        </button>
+      <div className="flex min-h-[70vh] items-center justify-center lg:min-h-[calc(100vh-5rem)]">
+        <div className="w-full max-w-md lg:rounded-2xl lg:border lg:border-black/[0.04] lg:bg-white lg:px-6 lg:py-4 lg:shadow-[0_12px_40px_rgba(16,24,40,0.08)]">
+          <ReportErrorState
+            title={errorTitle}
+            description={errorDescription}
+            onRetry={handleRetry}
+            isRetryDisabled={isUnlockPending}
+          />
+        </div>
       </div>
     );
-  } else if (status === 'loading' || !data) {
-    body = <CreditReportSkeleton />;
-  } else {
+  } else if (view === 'summary' && data) {
     const { visibility, loanOffer, fullCreditReport } = data;
     const canShowLoanOffer = visibility.showLoanOffer && loanOffer.isEligible;
     const canShowFullReport = visibility.showFullReport && fullCreditReport.isAvailable;
@@ -68,7 +97,10 @@ export function CreditReportPage(): ReactNode {
             ) : null}
           </div>
           {canShowFullReport ? (
-            <FullCreditReportCard report={fullCreditReport} onUnlock={handleUnlockReport} />
+            <FullCreditReportCard
+              report={fullCreditReport}
+              onUnlock={handleUnlockReport}
+            />
           ) : null}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
             {visibility.showScoreFactors ? (
@@ -81,20 +113,62 @@ export function CreditReportPage(): ReactNode {
               <ImprovementTipsCard
                 tips={data.improvementTips}
                 ctaLabel={tipsCtaLabel}
-                onGetFullReport={handleUnlockReport}
+                onGetFullReport={handleDownloadPdf}
               />
             ) : null}
           </div>
         </div>
       </>
     );
+  } else {
+    body = <CreditReportSkeleton />;
+  }
+
+  let shellClassName = 'min-h-screen bg-[#F4F6F9] lg:px-6 lg:py-8';
+  let panelClassName =
+    'mx-auto w-full max-w-lg lg:max-w-6xl lg:overflow-hidden lg:rounded-[28px] lg:bg-[#F7F9FC] lg:shadow-[0_20px_60px_rgba(16,24,40,0.08)]';
+  let mainClassName = 'px-4 py-4 pb-10 lg:px-8 lg:pb-10 lg:pt-6';
+
+  if (isBootstrapped && isFlowView) {
+    if (isCenteredFlowCard) {
+      shellClassName = 'min-h-screen bg-white lg:bg-[#F4F6F9]';
+      panelClassName = 'mx-auto flex min-h-screen w-full max-w-lg flex-col lg:max-w-none';
+      mainClassName = 'flex flex-1 flex-col px-0 lg:px-6';
+    } else {
+      // Full report — wide desktop canvas with logo header
+      shellClassName = 'min-h-screen bg-white lg:bg-[#F4F6F9] lg:px-6 lg:py-8';
+      panelClassName =
+        'mx-auto w-full max-w-lg lg:max-w-6xl lg:overflow-hidden lg:rounded-[28px] lg:bg-white lg:shadow-[0_20px_60px_rgba(16,24,40,0.08)]';
+      mainClassName = 'px-4 py-4 pb-10 lg:px-8 lg:pb-10 lg:pt-6';
+    }
+  }
+
+  let header: ReactNode;
+  if (isBootstrapped && isFlowView) {
+    const canGoBack = view !== 'processing';
+    header = (
+      <>
+        <div className="lg:hidden">
+          <CreditReportNavHeader onBack={canGoBack ? handleBack : undefined} />
+        </div>
+        <div className="hidden lg:block">
+          <CreditReportHeader
+            onTalkToUs={handleTalkToUs}
+            showTalkToUs={!isCenteredFlowCard}
+            className={isCenteredFlowCard ? 'lg:rounded-none' : undefined}
+          />
+        </div>
+      </>
+    );
+  } else {
+    header = <CreditReportHeader onTalkToUs={handleTalkToUs} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] lg:px-6 lg:py-8">
-      <div className="mx-auto w-full max-w-lg lg:max-w-6xl lg:overflow-hidden lg:rounded-[28px] lg:bg-[#F7F9FC] lg:shadow-[0_20px_60px_rgba(16,24,40,0.08)]">
-        <CreditReportHeader onTalkToUs={handleTalkToUs} />
-        <main className="px-4 py-4 pb-10 lg:px-8 lg:pb-10 lg:pt-6">{body}</main>
+    <div className={shellClassName}>
+      <div className={panelClassName}>
+        {header}
+        <main className={mainClassName}>{body}</main>
       </div>
     </div>
   );

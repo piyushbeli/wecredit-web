@@ -1,0 +1,90 @@
+{
+  "reportId": "EQ-2026-7741920",
+  "generatedAt": "2026-06-26T10:00:00.000Z",
+  "pdfUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+  "bureau": "EQUIFAX",
+  "score": {
+    "value": 765,
+    "min": 300,
+    "max": 900,
+    "category": "GOOD",
+    "riskLabel": "Low risk",
+    "change": 12
+  },
+  "consumer": {
+    "name": "Rahul Sharma",
+    "pan": "ABCDE1234F",
+    "dateOfBirth": "1992-08-14",
+    "mobile": "+91 98765 43210",
+    "email": "rahul.sharma@email.com",
+    "address": "24 Green Park, New Delhi"
+  },
+  "accounts": [
+    {
+      "id": "ACC-001",
+      "lenderName": "HDFC Bank",
+      "accountType": "Credit Card",
+      "creditLimit": 150000,
+      "outstandingAmount": 48000,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "ACC-002",
+      "lenderName": "Bajaj Finance",
+      "accountType": "Personal Loan",
+      "sanctionedAmount": 200000,
+      "outstandingAmount": 86400,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "ACC-003",
+      "lenderName": "SBI",
+      "accountType": "Auto Loan",
+      "sanctionedAmount": 650000,
+      "outstandingAmount": 210000,
+      "status": "ACTIVE"
+    },
+    {
+      "id": "ACC-004",
+      "lenderName": "Amazon Pay",
+      "accountType": "Pay Later",
+      "creditLimit": 60000,
+      "outstandingAmount": 4200,
+      "status": "ACTIVE"
+    }
+  ],
+  "paymentHistory": [
+    { "month": "Jul", "status": "ON_TIME" },
+    { "month": "Aug", "status": "ON_TIME" },
+    { "month": "Sep", "status": "ON_TIME" },
+    { "month": "Oct", "status": "DELAYED" },
+    { "month": "Nov", "status": "ON_TIME" },
+    { "month": "Dec", "status": "ON_TIME" },
+    { "month": "Jan", "status": "ON_TIME" },
+    { "month": "Feb", "status": "ON_TIME" },
+    { "month": "Mar", "status": "ON_TIME" },
+    { "month": "Apr", "status": "ON_TIME" },
+    { "month": "May", "status": "ON_TIME" },
+    { "month": "Jun", "status": "ON_TIME" }
+  ],
+  "enquiries": [
+    {
+      "id": "ENQ-001",
+      "lenderName": "WeCredit",
+      "enquiryType": "Personal Loan",
+      "enquiredAt": "2026-06-12T00:00:00.000Z"
+    },
+    {
+      "id": "ENQ-002",
+      "lenderName": "HDFC Bank",
+      "enquiryType": "Credit Card",
+      "enquiredAt": "2026-04-03T00:00:00.000Z"
+    },
+    {
+      "id": "ENQ-003",
+      "lenderName": "Bajaj Finance",
+      "enquiryType": "Consumer Loan",
+      "enquiredAt": "2026-01-21T00:00:00.000Z"
+    }
+  ]
+}

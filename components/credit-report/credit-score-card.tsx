@@ -40,7 +40,7 @@ export function CreditScoreCard({ creditScore, onRefresh }: CreditScoreCardProps
             aria-label="Refresh credit score"
             className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-brand-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary lg:hidden"
           >
-            <RefreshCw className="h-4 w-4" aria-hidden />
+            <RefreshCw className="h-4 w-4 " aria-hidden />
             Refresh
           </button>
         ) : null}

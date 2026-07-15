@@ -57,18 +57,18 @@ export function FullCreditReportCard({
                   {report.description}
                 </p>
               </div>
-              <div className="flex shrink-0 flex-col items-end lg:hidden">
+              {/* <div className="flex shrink-0 flex-col items-end lg:hidden">
                 <span className="text-xs text-gray-400 line-through">{originalPrice}</span>
                 <span className="text-lg font-bold text-[#1F2937]">{sellingPrice}</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
         <div className="flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
-          <p className="hidden items-baseline gap-2 lg:flex">
+          {/* <p className="hidden items-baseline gap-2 lg:flex">
             <span className="text-sm text-gray-400 line-through">{originalPrice}</span>
             <span className="text-2xl font-bold text-[#1F2937]">{sellingPrice}</span>
-          </p>
+          </p> */}
           <button
             type="button"
             onClick={onUnlock}

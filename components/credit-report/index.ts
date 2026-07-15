@@ -1,1 +1,13 @@
 export { CreditReportPage } from './credit-report-page';
+export { CreditReportLoader } from './credit-report-loader';
+export { CreditReportProgressSteps } from './credit-report-progress-steps';
+export { CreditScoreGauge } from './credit-score-gauge';
+export { ConsumerInformation } from './consumer-information';
+export { AccountDetailsList } from './account-details-list';
+export { PaymentHistoryGrid } from './payment-history-grid';
+export { FullCreditReport } from './full-credit-report';
+export { ReportErrorState } from './report-error-state';
+export { FetchingCreditScore } from './fetching-credit-score';
+export { ProcessingFullReport } from './processing-full-report';
+export { RecentEnquiries } from './recent-enquiries';
+export { EquifaxFetchBadge } from './equifax-fetch-badge';

@@ -10,6 +10,35 @@ export type SummaryValueType = 'NUMBER' | 'PERCENTAGE' | 'CURRENCY_COMPACT';
 
 export type FullCreditReportStatus = 'LOCKED' | 'UNLOCKED';
 
+/**
+ * End-to-end credit-report flow status (score fetch → summary → full report).
+ * Maps 1:1 to backend job status when APIs are wired.
+ */
+export type CreditReportStatus =
+  | 'idle'
+  | 'verifying_identity'
+  | 'connecting_bureau'
+  | 'generating_score'
+  | 'score_ready'
+  | 'generating_full_report'
+  | 'full_report_ready'
+  | 'failed';
+
+export type CreditReportProgressStepState = 'pending' | 'active' | 'completed' | 'failed';
+
+export type CreditReportAccountStatus = 'ACTIVE' | 'CLOSED' | 'OVERDUE';
+
+export type CreditReportPaymentStatus = 'ON_TIME' | 'DELAYED' | 'MISSED' | 'NO_DATA';
+
+export type CreditReportFailurePhase = 'score' | 'full_report';
+
+export type CreditReportView =
+  | 'fetching'
+  | 'summary'
+  | 'processing'
+  | 'full_report'
+  | 'error';
+
 export interface CreditReportUser {
   readonly firstName: string;
 }
@@ -101,4 +130,63 @@ export interface CreditReportDashboard {
   readonly visibility: CreditReportVisibility;
 }
 
+export interface CreditReportScoreDetails {
+  readonly value: number;
+  readonly min: number;
+  readonly max: number;
+  readonly category: string;
+  readonly riskLabel: string;
+  readonly change: number;
+}
+
+export interface CreditReportConsumer {
+  readonly name: string;
+  readonly pan: string;
+  readonly dateOfBirth: string;
+  readonly mobile: string;
+  readonly email?: string;
+  readonly address?: string;
+}
+
+export interface CreditReportAccount {
+  readonly id: string;
+  readonly lenderName: string;
+  readonly accountType: string;
+  readonly sanctionedAmount?: number;
+  readonly creditLimit?: number;
+  readonly outstandingAmount: number;
+  readonly status: CreditReportAccountStatus;
+}
+
+export interface CreditReportPaymentHistoryItem {
+  readonly month: string;
+  readonly status: CreditReportPaymentStatus;
+}
+
+export interface CreditReportEnquiry {
+  readonly id: string;
+  readonly lenderName: string;
+  readonly enquiryType: string;
+  readonly enquiredAt: string;
+}
+
+export interface CreditReportData {
+  readonly reportId: string;
+  readonly generatedAt: string;
+  readonly pdfUrl: string;
+  readonly bureau: 'EQUIFAX';
+  readonly score: CreditReportScoreDetails;
+  readonly consumer: CreditReportConsumer;
+  readonly accounts: readonly CreditReportAccount[];
+  readonly paymentHistory: readonly CreditReportPaymentHistoryItem[];
+  readonly enquiries?: readonly CreditReportEnquiry[];
+}
+
+export interface CreditReportProgressStep {
+  readonly id: string;
+  readonly label: string;
+  readonly state: CreditReportProgressStepState;
+}
+
+/** @deprecated Prefer CreditReportStatus-driven views via useCreditReportPage */
 export type CreditReportPageStatus = 'loading' | 'ready' | 'error';
