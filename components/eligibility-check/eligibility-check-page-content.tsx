@@ -13,7 +13,7 @@ const EligibilityCheckPageContent = (): React.ReactNode => {
     router.push('/');
   }, [router]);
 
-  const handleSuccess = useCallback(() => {
+  const handleProcessing = useCallback(() => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(STORAGE_CREDIT_SCORE_FETCH_PENDING, '1');
     }
@@ -22,7 +22,11 @@ const EligibilityCheckPageContent = (): React.ReactNode => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <EligibilityCheckFormModal onClose={handleCloseModal} onSuccess={handleSuccess} />
+      <EligibilityCheckFormModal
+        onClose={handleCloseModal}
+        onSuccess={handleProcessing}
+        onProcessing={handleProcessing}
+      />
     </div>
   );
 };

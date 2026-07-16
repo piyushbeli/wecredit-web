@@ -1,6 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+import { useEffect, type ReactNode } from 'react';
 import { useCreditReportPage } from '@/hooks/use-credit-report-page';
 import { CREDIT_REPORT_ERROR_COPY } from '@/lib/constants/credit-report-flow';
 import { formatGetFullReportCta } from '@/lib/utils/credit-report-formatters';
@@ -11,13 +12,20 @@ import { CreditReportSkeleton } from './credit-report-skeleton';
 import { CreditScoreCard } from './credit-score-card';
 import { CreditSummaryCard } from './credit-summary-card';
 import { FetchingCreditScore } from './fetching-credit-score';
-import { FullCreditReport } from './full-credit-report';
 import { FullCreditReportCard } from './full-credit-report-card';
 import { ImprovementTipsCard } from './improvement-tips-card';
 import { LoanOfferCard } from './loan-offer-card';
 import { ProcessingFullReport } from './processing-full-report';
 import { ReportErrorState } from './report-error-state';
 import { ScoreFactorsCard } from './score-factors-card';
+
+const FullCreditReport = dynamic(
+  () => import('./full-credit-report').then((module) => module.FullCreditReport),
+  {
+    ssr: false,
+    loading: () => <CreditReportSkeleton />,
+  }
+);
 
 /**
  * Credit-report flow: fetching → summary → processing → full report.
@@ -40,6 +48,13 @@ export function CreditReportPage(): ReactNode {
     handleTalkToUs,
     handleBack,
   } = useCreditReportPage();
+
+  // Prefetch screen 4 while summary/processing is visible so unlock does not flash skeleton.
+  useEffect(() => {
+    if (view === 'summary' || view === 'processing') {
+      void import('./full-credit-report');
+    }
+  }, [view]);
 
   const isFlowView = view === 'fetching' || view === 'processing' || view === 'full_report'
     || (view === 'error' && failurePhase !== null);
@@ -113,7 +128,7 @@ export function CreditReportPage(): ReactNode {
               <ImprovementTipsCard
                 tips={data.improvementTips}
                 ctaLabel={tipsCtaLabel}
-                onGetFullReport={handleDownloadPdf}
+                onGetFullReport={handleUnlockReport}
               />
             ) : null}
           </div>

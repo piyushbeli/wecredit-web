@@ -11,14 +11,14 @@ interface EligibilityCheckFormProps {
   onClose?: () => void;
   /** When true, form is embedded in modal; root uses flex-1 min-h-0 and back calls onClose */
   isModal?: boolean;
-  /** Called when the API submit succeeds so the parent can show success state. */
-  onSuccess?: () => void;
+  /** Called after validation to open the bureau processing screen. */
+  onProcessing?: () => void;
 }
 
 const EligibilityCheckForm = ({
   onClose,
   isModal = false,
-  onSuccess,
+  onProcessing,
 }: EligibilityCheckFormProps): React.ReactNode => {
   const {
     formValues,
@@ -27,7 +27,7 @@ const EligibilityCheckForm = ({
     handleSubmit,
     isSubmitting,
     canSubmit,
-  } = useEligibilityCheckForm({ onSuccess });
+  } = useEligibilityCheckForm({ onProcessing });
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 

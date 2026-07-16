@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
-import { checkEligibilityStatus } from '@/lib/api/eligibility-check-service';
+import {
+  checkEligibilityStatus,
+  clearQueuedEligibilityCheck,
+  hasQueuedEligibilityCheck,
+  runQueuedEligibilityCheck,
+} from '@/lib/api/eligibility-check-service';
 import {
   getCreditReportDashboard,
   pollCreditScoreStatus,
@@ -39,7 +44,6 @@ interface UseCreditReportPageReturn {
   readonly progressSteps: readonly CreditReportProgressStep[];
   readonly failurePhase: CreditReportFailurePhase | null;
   readonly isUnlockPending: boolean;
-  readonly isPdfOpening: boolean;
   readonly handleRetry: () => void;
   readonly handleRefresh: () => void;
   readonly handleStartOver: () => void;
@@ -68,6 +72,30 @@ function writeSessionFlag(key: string, value: boolean): void {
   sessionStorage.removeItem(key);
 }
 
+function markCreditScoreReady(): void {
+  writeSessionFlag(STORAGE_CREDIT_SCORE_READY, true);
+  writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+}
+
+function clearCreditScoreSessionFlags(): void {
+  writeSessionFlag(STORAGE_CREDIT_SCORE_READY, false);
+  writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+}
+
+function resolveCreditReportPdfUrl(fullReportPdfUrl: string | null | undefined): string {
+  const storedPdfUrl = getStoredBureauPdfUrl()?.trim() ?? '';
+  if (storedPdfUrl) {
+    return storedPdfUrl;
+  }
+  const reportPdfUrl = fullReportPdfUrl?.trim() ?? '';
+  const isPlaceholderPdf =
+    reportPdfUrl.includes('dummy.pdf') || reportPdfUrl.includes('w3.org/WAI');
+  if (reportPdfUrl && !isPlaceholderPdf) {
+    return reportPdfUrl;
+  }
+  return '';
+}
+
 /**
  * Single state controller for score-fetch → summary → full-report flow.
  */
@@ -77,16 +105,19 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
   const scoreAbortRef = useRef<AbortController | null>(null);
   const fullReportAbortRef = useRef<AbortController | null>(null);
   const unlockInFlightRef = useRef(false);
+  const isPdfOpeningRef = useRef(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
   const [status, setStatus] = useState<CreditReportStatus>('idle');
   const [data, setData] = useState<CreditReportDashboard | null>(null);
   const [fullReport, setFullReport] = useState<CreditReportData | null>(null);
   const [failurePhase, setFailurePhase] = useState<CreditReportFailurePhase | null>(null);
   const [isUnlockPending, setIsUnlockPending] = useState(false);
-  const [isPdfOpening, setIsPdfOpening] = useState(false);
   const [scoreFetchKey, setScoreFetchKey] = useState(0);
   const [fullReportFetchKey, setFullReportFetchKey] = useState(0);
   const [shouldFetchScore, setShouldFetchScore] = useState(false);
+  const [hasPendingEligibilitySubmission, setHasPendingEligibilitySubmission] =
+    useState(false);
+  const [eligibilitySubmitKey, setEligibilitySubmitKey] = useState(0);
 
   const view = getCreditReportView(status);
   const progressSteps = buildCreditScoreProgressSteps(status, failurePhase === 'score');
@@ -107,8 +138,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
       setData(dashboard);
       setStatus('score_ready');
       setFailurePhase(null);
-      writeSessionFlag(STORAGE_CREDIT_SCORE_READY, true);
-      writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+      markCreditScoreReady();
     } catch {
       setFailurePhase('score');
       setStatus('failed');
@@ -128,6 +158,18 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     setScoreFetchKey((previous) => previous + 1);
   }, [abortFullReportFetch]);
 
+  const startFullReportFetch = useCallback((): void => {
+    if (unlockInFlightRef.current) {
+      return;
+    }
+    unlockInFlightRef.current = true;
+    setIsUnlockPending(true);
+    setFailurePhase(null);
+    setFullReport(null);
+    setStatus('generating_full_report');
+    setFullReportFetchKey((previous) => previous + 1);
+  }, []);
+
   useEffect(() => {
     if (isAuthLoading) {
       return;
@@ -137,6 +179,14 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     const controller = new AbortController();
 
     const bootstrap = async (): Promise<void> => {
+      if (hasQueuedEligibilityCheck()) {
+        await Promise.resolve();
+        setHasPendingEligibilitySubmission(true);
+        setStatus('generating_score');
+        setFailurePhase(null);
+        setIsBootstrapped(true);
+        return;
+      }
       let hasReport = hasStoredReport;
       if (!hasReport && isAuthenticated && user?.phoneNumber) {
         const result = await checkEligibilityStatus(user.phoneNumber, controller.signal);
@@ -147,8 +197,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
       }
 
       if (!hasReport) {
-        writeSessionFlag(STORAGE_CREDIT_SCORE_READY, false);
-        writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+        clearCreditScoreSessionFlags();
         toast.message('Generate your credit report first');
         router.replace('/bureau-report/');
         setIsBootstrapped(true);
@@ -176,13 +225,45 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
   }, [isAuthLoading, isAuthenticated, loadReadyDashboard, router, user?.phoneNumber]);
 
   useEffect(() => {
+    if (!hasPendingEligibilitySubmission) {
+      return;
+    }
+    let isActive = true;
+    void (async () => {
+      const request = runQueuedEligibilityCheck();
+      if (!request) {
+        setFailurePhase('score');
+        setStatus('failed');
+        return;
+      }
+      const result = await request;
+      if (!isActive) {
+        return;
+      }
+      if (!result.success) {
+        setFailurePhase('score');
+        setStatus('failed');
+        return;
+      }
+      clearQueuedEligibilityCheck();
+      setHasPendingEligibilitySubmission(false);
+      setFailurePhase(null);
+      setStatus('verifying_identity');
+      setShouldFetchScore(true);
+      setScoreFetchKey((previous) => previous + 1);
+    })();
+    return () => {
+      isActive = false;
+    };
+  }, [eligibilitySubmitKey, hasPendingEligibilitySubmission]);
+
+  useEffect(() => {
     if (!isBootstrapped || !shouldFetchScore) {
       return;
     }
     abortScoreFetch();
     const controller = new AbortController();
     scoreAbortRef.current = controller;
-    setFailurePhase(null);
     void (async () => {
       try {
         const dashboard = await pollCreditScoreStatus({
@@ -198,8 +279,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
         }
         setData(dashboard);
         setStatus('score_ready');
-        writeSessionFlag(STORAGE_CREDIT_SCORE_READY, true);
-        writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+        markCreditScoreReady();
         setShouldFetchScore(false);
       } catch {
         if (controller.signal.aborted) {
@@ -222,9 +302,6 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     abortFullReportFetch();
     const controller = new AbortController();
     fullReportAbortRef.current = controller;
-    setFailurePhase(null);
-    setFullReport(null);
-    setStatus('generating_full_report');
     void (async () => {
       try {
         const report = await pollFullCreditReportStatus({
@@ -267,12 +344,13 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
 
   const handleRetry = (): void => {
     if (failurePhase === 'full_report') {
-      if (unlockInFlightRef.current) {
-        return;
-      }
-      unlockInFlightRef.current = true;
-      setIsUnlockPending(true);
-      setFullReportFetchKey((previous) => previous + 1);
+      startFullReportFetch();
+      return;
+    }
+    if (hasPendingEligibilitySubmission) {
+      setFailurePhase(null);
+      setStatus('generating_score');
+      setEligibilitySubmitKey((previous) => previous + 1);
       return;
     }
     startScoreFetch();
@@ -288,8 +366,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
   const handleStartOver = (): void => {
     abortScoreFetch();
     abortFullReportFetch();
-    writeSessionFlag(STORAGE_CREDIT_SCORE_READY, false);
-    writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+    clearCreditScoreSessionFlags();
     router.push('/bureau-report/');
   };
 
@@ -299,31 +376,18 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
   };
 
   const handleUnlockReport = (): void => {
-    if (unlockInFlightRef.current || isUnlockPending) {
-      return;
-    }
-    if (status === 'generating_full_report') {
+    if (unlockInFlightRef.current || isUnlockPending || status === 'generating_full_report') {
       return;
     }
     // TODO: Replace with paid unlock / payment flow when backend is ready.
-    unlockInFlightRef.current = true;
-    setIsUnlockPending(true);
-    setFullReportFetchKey((previous) => previous + 1);
+    startFullReportFetch();
   };
 
   const handleDownloadPdf = (): void => {
-    if (isPdfOpening) {
+    if (isPdfOpeningRef.current) {
       return;
     }
-    // Existing project pattern: open backend-provided PDF URL (no client PDF generation).
-    const storedPdfUrl = getStoredBureauPdfUrl()?.trim() ?? '';
-    const reportPdfUrl = fullReport?.pdfUrl?.trim() ?? '';
-    const isPlaceholderPdf =
-      reportPdfUrl.includes('dummy.pdf') || reportPdfUrl.includes('w3.org/WAI');
-    let pdfUrl = storedPdfUrl;
-    if (!pdfUrl && reportPdfUrl && !isPlaceholderPdf) {
-      pdfUrl = reportPdfUrl;
-    }
+    const pdfUrl = resolveCreditReportPdfUrl(fullReport?.pdfUrl);
     if (!pdfUrl) {
       toast.message('PDF download unavailable', {
         description:
@@ -331,10 +395,10 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
       });
       return;
     }
-    setIsPdfOpening(true);
+    isPdfOpeningRef.current = true;
     window.requestAnimationFrame(() => {
       const didOpen = openCreditReportPdf(pdfUrl);
-      setIsPdfOpening(false);
+      isPdfOpeningRef.current = false;
       if (!didOpen) {
         toast.error('Could not open the PDF report', {
           description: 'The link may have expired or the browser blocked the new tab.',
@@ -373,7 +437,6 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     progressSteps,
     failurePhase,
     isUnlockPending,
-    isPdfOpening,
     handleRetry,
     handleRefresh,
     handleStartOver,

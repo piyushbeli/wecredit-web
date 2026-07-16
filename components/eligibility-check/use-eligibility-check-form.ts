@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { submitEligibilityCheck } from '@/lib/api/eligibility-check-service';
+import { useCallback, useMemo, useState } from 'react';
+import { queueEligibilityCheck } from '@/lib/api/eligibility-check-service';
 import {
   DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES,
   buildEligibilityCheckPayload,
@@ -19,19 +19,19 @@ interface UseEligibilityCheckFormReturn {
 }
 
 interface UseEligibilityCheckFormOptions {
-  /** Called when the API submit succeeds so the parent can show success state. */
-  onSuccess?: () => void;
+  /** Opens the credit-score processing screen after local validation. */
+  onProcessing?: () => void;
 }
 
 export const useEligibilityCheckForm = (
   options: UseEligibilityCheckFormOptions = {}
 ): UseEligibilityCheckFormReturn => {
-  const { onSuccess } = options;
+  const { onProcessing } = options;
   const [formValues, setFormValues] = useState<EligibilityCheckFormValues>(
     DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting = false;
 
 
   const handleFieldChange = useCallback(
@@ -54,22 +54,14 @@ export const useEligibilityCheckForm = (
   }, [formValues]);
 
   const handleSubmit = useCallback(async (): Promise<void> => {
-    if (isSubmitting) return;
     if (!validateForm()) return;
 
-    setIsSubmitting(true);
-    try {
-      const payload = buildEligibilityCheckPayload(formValues);
-      const result = await submitEligibilityCheck(payload);
-      if (result.success && onSuccess) {
-        onSuccess();
-        setFormValues(DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES);
-        setFormErrors({});
-      }
-    } finally {
-      setIsSubmitting(false);
+    const payload = buildEligibilityCheckPayload(formValues);
+    queueEligibilityCheck(payload);
+    if (onProcessing) {
+      onProcessing();
     }
-  }, [formValues, isSubmitting, onSuccess, validateForm]);
+  }, [formValues, onProcessing, validateForm]);
 
   const canSubmit = useMemo((): boolean => {
     const requiredFilled =

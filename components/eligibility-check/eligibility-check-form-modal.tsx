@@ -17,6 +17,7 @@ interface EligibilityCheckFormModalProps {
   onClose: () => void;
   /** Called when bureau submit (or existing status) succeeds — typically navigate to credit score. */
   onSuccess?: () => void;
+  onProcessing?: () => void;
 }
 
 /** Adapter: hook expects (phone, signal) => Promise<boolean>; service returns { showSuccess }. */
@@ -31,12 +32,13 @@ async function checkBureauReportStatus(
 const EligibilityCheckFormModal = ({
   onClose,
   onSuccess,
+  onProcessing,
 }: EligibilityCheckFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
   useBodyScrollLock(true);
 
   const isReady = isAuthenticated && !!user?.phoneNumber;
-  const { state, transitionToSuccess } = useLoanModalState({
+  const { state } = useLoanModalState({
     checkStatus: checkBureauReportStatus,
     loadingMessage: 'Checking your bureau report status...',
     loadingSubtext: 'Please wait while we fetch your details.',
@@ -63,7 +65,7 @@ const EligibilityCheckFormModal = ({
           <EligibilityCheckForm
             onClose={onClose}
             isModal
-            onSuccess={transitionToSuccess}
+            onProcessing={onProcessing}
           />
         );
 

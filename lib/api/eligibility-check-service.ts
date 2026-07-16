@@ -16,6 +16,37 @@ import type { BureauReportApiResponse } from '@/types/credit-report';
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
 const ELIGIBILITY_CHECK_ENDPOINT_PROD = `https://wecredit.co.in/api/wechat`;
 const BUREAU_REPORT_MOCK = bureauReportMockData satisfies BureauReportApiResponse;
+let queuedEligibilityPayload: EligibilityCheckPayload | null = null;
+let queuedEligibilityRequest: Promise<SubmitEligibilityCheckResult> | null = null;
+
+export function queueEligibilityCheck(payload: EligibilityCheckPayload): void {
+  queuedEligibilityPayload = payload;
+  queuedEligibilityRequest = null;
+}
+
+export function hasQueuedEligibilityCheck(): boolean {
+  return queuedEligibilityPayload !== null;
+}
+
+export function runQueuedEligibilityCheck(): Promise<SubmitEligibilityCheckResult> | null {
+  if (!queuedEligibilityPayload) {
+    return null;
+  }
+  if (!queuedEligibilityRequest) {
+    queuedEligibilityRequest = submitEligibilityCheck(queuedEligibilityPayload).then((result) => {
+      if (!result.success) {
+        queuedEligibilityRequest = null;
+      }
+      return result;
+    });
+  }
+  return queuedEligibilityRequest;
+}
+
+export function clearQueuedEligibilityCheck(): void {
+  queuedEligibilityPayload = null;
+  queuedEligibilityRequest = null;
+}
 
 /**
  * Extract error message from API response
