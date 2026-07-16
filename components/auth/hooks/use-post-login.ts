@@ -16,6 +16,7 @@ import {
   PRIMEPL_LEAD_SUBMIT_SUCCESS_EVENT,
 } from '@/lib/constants/events';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
+import { buildInternalLenderNavigationHref } from '@/lib/utils/internal-lender-navigation';
 
 type SubmitFn<TPayload> = (payload: TPayload) => Promise<boolean>;
 
@@ -88,7 +89,7 @@ export const usePostLogin = (): void => {
 
       case 'check_eligibility':
         if (action.lenderName) {
-          router.push(`/personal-loan/lender/${action.lenderName}`);
+          router.push(buildInternalLenderNavigationHref(action.lenderName));
         }
         break;
       case 'submit_business_loan':

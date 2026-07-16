@@ -131,9 +131,14 @@ export const PhoneStepScreen = ({
             />
             <p
               id="login-consent-description"
-              className="text-xs leading-5 text-gray-500"
+              className="text-xs leading-5 text-gray-500 "
             >
-              By clicking, I accept the{' '}
+              <span
+                className="cursor-pointer"
+                onClick={() => setHasAcceptedTerms((prev) => !prev)}
+              >
+                By clicking, I accept the{' '}
+              </span>
               <Link
                 href="/terms-of-service"
                 className="text-gray-900 font-semibold hover:underline"
@@ -160,7 +165,7 @@ export const PhoneStepScreen = ({
             type="submit"
             disabled={!canContinue}
             className={cn(
-              'w-full rounded-full py-4 font-semibold text-base transition-all duration-300 md:py-3.5',
+              'w-full cursor-pointer rounded-full py-4 font-semibold text-base transition-all duration-300 md:py-3.5',
               canContinue
                 ? 'bg-wc-blue-500 text-white shadow-lg shadow-wc-blue-500/30 hover:bg-wc-blue-600 active:scale-[0.98]'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'

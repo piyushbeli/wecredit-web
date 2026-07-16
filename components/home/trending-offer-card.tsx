@@ -13,6 +13,7 @@ import { checkStatusAll } from '@/lib/api/wecredit';
 import { STORAGE_MOBILE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import type { LenderOfferStatus, LenderType } from '@/types/wecredit';
 import { getAmountUptoLabel } from '@/lib/lender-display';
+import { buildInternalLenderNavigationHref } from '@/lib/utils/internal-lender-navigation';
 
 /** Props for TrendingOfferCard component */
 interface TrendingOfferCardProps {
@@ -100,6 +101,12 @@ const TrendingOfferCard = ({
 
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithAction } = useAuth();
+  const navigateToLenderForm = useCallback(
+    (targetLenderName: string): void => {
+      router.push(buildInternalLenderNavigationHref(targetLenderName));
+    },
+    [router]
+  );
 
   // State for eligibility check loading (UI remains unchanged, only button disabled during check)
   const [isCheckingEligibility, setIsCheckingEligibility] = useState<boolean>(false);
@@ -190,7 +197,7 @@ const TrendingOfferCard = ({
       // Guard: Validate lenderName exists before proceeding
       if (!lenderName || typeof lenderName !== 'string') {
         // Fallback: Navigate to normal flow even if lenderName is invalid
-        router.push(`/personal-loan/lender/${lenderName || 'unknown'}`);
+        navigateToLenderForm(lenderName || 'unknown');
         return;
       }
 
@@ -207,7 +214,7 @@ const TrendingOfferCard = ({
       if (!mobile || typeof mobile !== 'string') {
         console.warn('[TrendingOfferCard] Mobile number not found, falling back to normal navigation');
         // Fallback: Allow normal navigation flow instead of blocking user
-        router.push(`/personal-loan/lender/${lenderName}`);
+        navigateToLenderForm(lenderName);
         return;
       }
 
@@ -238,7 +245,7 @@ const TrendingOfferCard = ({
         if (!result.success || !result.data) {
           setIsCheckingEligibility(false);
           // Fallback: Don't block user - allow normal navigation
-          router.push(`/personal-loan/lender/${lenderName}`);
+          navigateToLenderForm(lenderName);
           return;
         }
 
@@ -248,7 +255,7 @@ const TrendingOfferCard = ({
           console.warn('[TrendingOfferCard] Invalid lenders array in API response');
           setIsCheckingEligibility(false);
           // Fallback: Navigate normally if response structure is invalid
-          router.push(`/personal-loan/lender/${lenderName}`);
+          navigateToLenderForm(lenderName);
           return;
         }
 
@@ -265,7 +272,7 @@ const TrendingOfferCard = ({
         } else {
           // Lender not found: User hasn't applied to this lender yet
           // Proceed with normal flow (navigate to lender page)
-          router.push(`/personal-loan/lender/${lenderName}`);
+          navigateToLenderForm(lenderName);
         }
       } catch (error) {
         // Guard: Only update state if component is still mounted
@@ -282,7 +289,7 @@ const TrendingOfferCard = ({
         setIsCheckingEligibility(false);
 
         // Fallback: Never block user - allow normal navigation on error
-        router.push(`/personal-loan/lender/${lenderName}`);
+        navigateToLenderForm(lenderName);
       } finally {
         // Cleanup: Reset loading state if component is still mounted
         if (isMountedRef.current) {
@@ -300,6 +307,7 @@ const TrendingOfferCard = ({
       router,
       isCheckingEligibility,
       findLenderInOffers,
+      navigateToLenderForm,
     ]
   );
 
