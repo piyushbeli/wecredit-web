@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { useFetchFormFields } from '@/hooks/use-fetch-form-fields';
-import { useCreateLead } from '@/hooks/use-create-lead' ;
+import { useCreateLead } from '@/hooks/use-create-lead';
 import { useLeadForm } from '@/hooks/use-lead-form';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useAuth } from '@/hooks/use-auth';
@@ -39,6 +39,7 @@ import PrimePlSuccessOverlay from './prime-pl-success-overlay';
 import Link from 'next/link';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { pushOfferpageEvent } from '@/lib/gtm';
+import { getLenderThemeColor } from '@/lib/utils/colors';
 import LenderCoBrandHeader, { type LenderBranding } from './lender-co-brand-header';
 import MoneyViewHero from '../moneyview/moneyview-hero';
 
@@ -105,7 +106,14 @@ const LeadFormModal = ({
   const router = useRouter();
   const { partner, originSubLender } = useUrlParamsStore();
   const lenderUniqueId = useUrlParamsStore.getState().lenderUniqueId ?? '';
-  const { fields, isLoading: isFieldsLoading, error: fieldsError, fetchFields, reset: resetFields } = useFetchFormFields();
+  const {
+    fields,
+    isLoading: isFieldsLoading,
+    error: fieldsError,
+    topColour,
+    fetchFields,
+    reset: resetFields,
+  } = useFetchFormFields();
   const {
     createLead,
     isLoading: isSubmitting,
@@ -115,24 +123,23 @@ const LeadFormModal = ({
   const [userIp, setUserIp] = useState<string>('');
   const [lntCompanyName, setLntCompanyName] = useState('');
   const [showPartnerConsentError, setShowPartnerConsentError] = useState(false);
-  const {isAffiliate} = useInfoSearchParams();
+  const { isAffiliate } = useInfoSearchParams();
 
   const isIpFetchInFlight = useRef(false);
-  
+
   // Use partner from URL if available and not yet consumed, otherwise use prop or default
-  const effectivePartnerCode =  partner ? partner : partnerCode;
+  const effectivePartnerCode = partner ? partner : partnerCode;
   const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
   const isLntLenderOrUpswignLntLender = lenderName?.toLowerCase() === 'lnt' || lenderName?.toLowerCase() === 'upswing_lnt';
   const isSingleLenderFlow = !isAllLenders;
-  const lenderActionColor = isSingleLenderFlow
-    ? lenderBranding?.backColour || lenderBranding?.topColour || null
-    : null;
-  const lenderActionButtonStyle = lenderActionColor
+  const lenderThemeColor = getLenderThemeColor(topColour);
+  const checkboxColor = isSingleLenderFlow ? lenderThemeColor : undefined;
+  const lenderActionButtonStyle = isSingleLenderFlow
     ? {
-      backgroundColor: lenderActionColor,
-      borderColor: lenderActionColor,
-      color: getReadableTextColor(lenderActionColor),
+      backgroundColor: lenderThemeColor,
+      borderColor: lenderThemeColor,
+      color: getReadableTextColor(lenderThemeColor),
     }
     : undefined;
   /**
@@ -384,7 +391,7 @@ const LeadFormModal = ({
       formValues.creditCardLimit,
     );
 
-    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender ;
+    const isSubmitDisabled = !hasLntConsents || !isCreditCardSectionComplete || !canSubmitMultiLender;
 
     return (
       <ActionButton
@@ -411,6 +418,7 @@ const LeadFormModal = ({
       onBlur={() => validateField(field.key)}
       error={formErrors[field.key]}
       disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
+      checkboxColor={checkboxColor}
     />
   );
 
@@ -464,6 +472,7 @@ const LeadFormModal = ({
       onBlur={() => validateField('consent')}
       error={formErrors.consent}
       disabled={isSubmitting}
+      checkboxColor={checkboxColor}
     />
   );
 
@@ -567,52 +576,53 @@ const LeadFormModal = ({
                 />
               </div>
               {LNT_CONSENTS.map(consent => (
-              <div key={consent.key} className="space-y-1">
+                <div key={consent.key} className="space-y-1">
 
-                <DynamicField
-                  field={{
-                    key: consent.key as FormFieldKey,
-                    title:
-  consent.key === 'consentPrivacyPolicy'
-    ? `I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data (incl. Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the`
-    : consent.uiText,
-                    type: 'boolean',
-                    options: [],
-                    value: 'true',
-                    isMandatory: true,
-                    order: 998,
-                  }}
-                  value={formValues[consent.key] || 'false'}
-                  onChange={(val) => handleFieldChange(consent.key as FormFieldKey, val)}
-                  onBlur={() => validateField(consent.key as FormFieldKey)}
-                  error={formErrors[consent.key]}
-                  disabled={isSubmitting}
-                />
-    {consent.key === 'consentPrivacyPolicy' && (
-    <div className="ml-7 text-sm">
-      <a
-        href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 underline mr-2"
-      >
-        Personal Loan terms & Conditions
-      </a>
-      and
-      <a
-        href="https://www.ltfinance.com/privacy-policy"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 underline ml-2"
-      >
-        Privacy Policy
-      </a>
-      {' '}and consent to the same
-    </div>
-  )}
+                  <DynamicField
+                    field={{
+                      key: consent.key as FormFieldKey,
+                      title:
+                        consent.key === 'consentPrivacyPolicy'
+                          ? `I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data (incl. Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the`
+                          : consent.uiText,
+                      type: 'boolean',
+                      options: [],
+                      value: 'true',
+                      isMandatory: true,
+                      order: 998,
+                    }}
+                    value={formValues[consent.key] || 'false'}
+                    onChange={(val) => handleFieldChange(consent.key as FormFieldKey, val)}
+                    onBlur={() => validateField(consent.key as FormFieldKey)}
+                    error={formErrors[consent.key]}
+                    disabled={isSubmitting}
+                    checkboxColor={checkboxColor}
+                  />
+                  {consent.key === 'consentPrivacyPolicy' && (
+                    <div className="ml-7 text-sm">
+                      <a
+                        href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline mr-2"
+                      >
+                        Personal Loan terms & Conditions
+                      </a>
+                      and
+                      <a
+                        href="https://www.ltfinance.com/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline ml-2"
+                      >
+                        Privacy Policy
+                      </a>
+                      {' '}and consent to the same
+                    </div>
+                  )}
 
 
-              </div>
+                </div>
               ))}
             </>
           )}
@@ -632,6 +642,7 @@ const LeadFormModal = ({
             onBlur={() => validateField('consent')}
             error={formErrors['consent']}
             disabled={isSubmitting}
+            checkboxColor={checkboxColor}
           />
         </>
       );
@@ -769,7 +780,7 @@ const LeadFormModal = ({
         {/* Header */}
         {isAllLenders && (
           <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
-            {!isAffiliate &&<button
+            {!isAffiliate && <button
               type="button"
               onClick={handleHeaderBackClick}
               className="p-1 text-gray-700 hover:text-gray-900"
@@ -794,8 +805,7 @@ const LeadFormModal = ({
                 onBackClick={handleHeaderBackClick}
               />
               <MoneyViewHero
-                backgroundColor={lenderBranding?.backColour || lenderBranding?.topColour}
-                accentColor={lenderBranding?.topColour || lenderBranding?.backColour}
+                backgroundColor={lenderThemeColor}
               />
             </>
           )}

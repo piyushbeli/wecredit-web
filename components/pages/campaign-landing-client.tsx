@@ -29,7 +29,7 @@ import {
   isTrendingOffersLenderSource,
   TRENDING_OFFERS_RETURN_PATH,
 } from '@/lib/utils/internal-lender-navigation';
-import { normalizeHexColor } from '@/lib/utils/colors';
+import { getLenderThemeColor } from '@/lib/utils/colors';
 
 interface CampaignLandingClientProps {
   lenderName: string;
@@ -37,7 +37,6 @@ interface CampaignLandingClientProps {
 }
 
 const INCORRECT_LENDER_ERROR = 'Incorrect Lender name';
-const FALLBACK_LENDER_BRAND_COLOUR = '#005AAA';
 
 export const CampaignLandingClient = ({
   lenderName,
@@ -80,17 +79,13 @@ export const CampaignLandingClient = ({
     return getMatchedActiveLender(lenderName, activeLenders);
   }, [lenderName, activeLenders]);
   const lenderBranding = useMemo(() => {
-    const backendTopColour = normalizeHexColor(matchedActiveLender?.lender.topColour);
-    const backendBackColour = normalizeHexColor(matchedActiveLender?.lender.backColour);
-    const topColour = backendTopColour || backendBackColour || FALLBACK_LENDER_BRAND_COLOUR;
-    const backColour = backendBackColour || backendTopColour || FALLBACK_LENDER_BRAND_COLOUR;
+    const topColour = getLenderThemeColor(matchedActiveLender?.lender.topColour);
 
     return {
       displayName: matchedActiveLender?.lender.Name,
       logo: matchedActiveLender?.lender.logo,
       imageUrl: matchedActiveLender?.lender.ImageUrl,
       topColour,
-      backColour,
     };
   }, [matchedActiveLender]);
   const { isCheckingStatus: isOffersLoading, shouldNavigateToOffers: shouldNavigateToOffersPage } =
@@ -231,7 +226,6 @@ export const CampaignLandingClient = ({
           onSuccess={() => setShowLeadFormModal(false)}
           onClose={handleFormClose}
           showBackHeader={showBackHeader}
-          lenderBranding={lenderBranding}
         />
       );
     }

@@ -14,7 +14,6 @@ import {
   CarouselDots,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
-import { normalizeHexColor } from '@/lib/utils/colors';
 
 interface BenefitCard {
   id: string;
@@ -46,14 +45,10 @@ const BENEFIT_CARDS: BenefitCard[] = [
 
 interface MoneyViewCarouselProps {
   className?: string;
-  accentColor?: string;
+  accentColor: string;
 }
 
-const FALLBACK_LENDER_BRAND_COLOUR = '#005AAA';
-
 const MoneyViewCarousel = ({ className, accentColor }: MoneyViewCarouselProps) => {
-  const resolvedAccentColor = normalizeHexColor(accentColor) || FALLBACK_LENDER_BRAND_COLOUR;
-
   return (
     <Carousel
       options={{ loop: true, align: 'center' }}
@@ -75,7 +70,7 @@ const MoneyViewCarousel = ({ className, accentColor }: MoneyViewCarouselProps) =
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
                   <Icon
                     className="w-6 h-6"
-                    style={{ color: resolvedAccentColor }}
+                    style={{ color: accentColor }}
                   />
                 </div>
 

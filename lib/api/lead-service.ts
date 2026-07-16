@@ -10,10 +10,9 @@ import { ENDPOINTS, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/a
 import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
 import { toast } from 'sonner';
 import { useUrlParamsStore } from '@/stores/url-params-store';
-import { getAttributionHeaders, getAttributionHeadersCommon, getAttributionUtmUrl } from './attribution-headers';
+import { getAttributionHeadersCommon } from './attribution-headers';
 import { notifyCreateLeadNavigationEvent } from './upswing-navigation-event';
 import type {
-  FormField,
   FetchFormFieldsResponse,
   CheckDedupeRequest,
   CheckDedupeResponse,
@@ -260,7 +259,7 @@ async function checkDedupe(
 async function fetchFormFields(
   lenderName: string,
   fetchDetails: boolean = true
-): Promise<LeadServiceResult<FormField[]>> {
+): Promise<LeadServiceResult<FetchFormFieldsResponse>> {
   const requestBody = {
     endpoint: ENDPOINTS.PUBLIC.LENDERS_FORM_FILLED,
     partnerCode: getEffectivePartnerCode(),
@@ -288,7 +287,10 @@ async function fetchFormFields(
     const sortedFields = data.fields.sort((a, b) => a.order - b.order);
     return {
       success: true,
-      data: sortedFields,
+      data: {
+        fields: sortedFields,
+        topColour: data.topColour,
+      },
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Network error';

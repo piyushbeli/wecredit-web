@@ -106,7 +106,8 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
 
 /**
  * Normalizes backend hex colors into valid CSS hex values.
- * Accepts values with or without "#"; returns null for empty/invalid values.
+ * Accepts ARGB values and hex values with or without "#".
+ * Returns null for empty/invalid values.
  */
 export function normalizeHexColor(color?: string | null): string | null {
   if (!color || typeof color !== 'string') return null;
@@ -114,6 +115,11 @@ export function normalizeHexColor(color?: string | null): string | null {
   const value = color.trim();
   if (!value || value.toLowerCase() === 'null' || value.toLowerCase() === 'undefined') {
     return null;
+  }
+
+  const argbMatch = value.match(/^0x([0-9A-Fa-f]{8})$/);
+  if (argbMatch) {
+    return `#${argbMatch[1].slice(2)}`;
   }
 
   const hex = value.startsWith('#') ? value.slice(1) : value;
@@ -127,6 +133,21 @@ export function normalizeHexColor(color?: string | null): string | null {
   }
 
   return null;
+}
+
+export const DEFAULT_LENDER_COLOR = '#045BCF';
+
+/**
+ * Returns the lender theme color or the default when it is missing or invalid.
+ */
+export function getLenderThemeColor(topColour?: string | null): string {
+  const color = topColour?.trim();
+
+  if (color && /^#[0-9A-Fa-f]{6}$/.test(color)) {
+    return color;
+  }
+
+  return DEFAULT_LENDER_COLOR;
 }
 
 /**

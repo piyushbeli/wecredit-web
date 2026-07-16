@@ -8,7 +8,7 @@
 
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -21,25 +21,22 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import { isMultiLenderCreditCardSectionComplete } from '@/lib/utils/form-helpers';
-import { normalizeHexColor } from '@/lib/utils/colors';
+import { getLenderThemeColor } from '@/lib/utils/colors';
 
 import DynamicField from '@/components/forms/dynamic-field';
 import { ActionButton } from '@/components/shared';
 import MoneyViewHeader from './moneyview-header';
 import MoneyViewHero from './moneyview-hero';
-import type { LenderBranding } from '@/components/forms/lender-co-brand-header';
 
-import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
+import type { FormField, LeadFormData } from '@/types/lead';
 
 interface MoneyViewFormProps {
   onSuccess?: (leadId: string) => void;
   onClose?: () => void;
   showBackHeader?: boolean;
-  lenderBranding?: LenderBranding | null;
 }
 
 const LENDER_NAME = 'moneyview';
-const FALLBACK_LENDER_BRAND_COLOUR = '#005AAA';
 
 /**
  * Maps Yes/No strings to boolean for the API payload
@@ -66,7 +63,6 @@ const MoneyViewForm = ({
   onSuccess,
   onClose,
   showBackHeader = false,
-  lenderBranding,
 }: MoneyViewFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -78,6 +74,7 @@ const MoneyViewForm = ({
     fields,
     isLoading: isFieldsLoading,
     error: fieldsError,
+    topColour,
     fetchFields,
     reset: resetFields,
   } = useFetchFormFields();
@@ -95,15 +92,10 @@ const MoneyViewForm = ({
 
   const effectivePartnerCode = partner || PARTNER_CODE;
   const hasCreditCardQuestionField = fields.some((field) => field.key === 'hasCreditCard');
-  const normalizedBackColour = normalizeHexColor(lenderBranding?.backColour);
-  const normalizedTopColour = normalizeHexColor(lenderBranding?.topColour);
-  const brandBackgroundColor =
-    normalizedBackColour || normalizedTopColour || FALLBACK_LENDER_BRAND_COLOUR;
-  const brandAccentColor =
-    normalizedTopColour || normalizedBackColour || FALLBACK_LENDER_BRAND_COLOUR;
+  const lenderThemeColor = getLenderThemeColor(topColour);
   const brandButtonStyle = {
-    backgroundColor: brandBackgroundColor,
-    borderColor: brandBackgroundColor,
+    backgroundColor: lenderThemeColor,
+    borderColor: lenderThemeColor,
     color: '#FFFFFF',
   };
 
@@ -115,7 +107,6 @@ const MoneyViewForm = ({
     validateCurrentStep,
     validateField,
     initializeFormValues,
-    isSinglePage,
   } = useLeadForm(fields, { singlePage: true });
 
   const creditCardAnswer = formValues.hasCreditCard;
@@ -272,6 +263,7 @@ const MoneyViewForm = ({
       error={formErrors[field.key]}
       disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
       theme="moneyview"
+      checkboxColor={lenderThemeColor}
     />
   );
 
@@ -308,7 +300,7 @@ const MoneyViewForm = ({
           >
             <CheckCircle2
               className="w-16 h-16 mx-auto"
-              style={{ color: brandAccentColor }}
+              style={{ color: lenderThemeColor }}
             />
           </motion.div>
           <motion.div
@@ -345,7 +337,9 @@ const MoneyViewForm = ({
     return (
       <div className="min-h-screen bg-white">
         <MoneyViewHeader showBackButton={showBackHeader} onBackClick={onClose} />
-        <MoneyViewHero backgroundColor={brandBackgroundColor} accentColor={brandAccentColor} />
+        <MoneyViewHero
+          backgroundColor={lenderThemeColor}
+        />
         <div className="p-6 space-y-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="space-y-2">
@@ -387,7 +381,9 @@ const MoneyViewForm = ({
       <MoneyViewHeader showBackButton={showBackHeader} onBackClick={onClose} />
 
       {/* Hero with carousel */}
-      <MoneyViewHero backgroundColor={brandBackgroundColor} accentColor={brandAccentColor} />
+      <MoneyViewHero
+        backgroundColor={lenderThemeColor}
+      />
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col max-w-xl mx-auto w-full">
@@ -403,7 +399,7 @@ const MoneyViewForm = ({
                 checked={hasWeCreditConsent}
                 onChange={(e) => handleFieldChange('consent', e.target.checked ? 'true' : 'false')}
                 className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 cursor-pointer shrink-0"
-                style={{ accentColor: brandAccentColor }}
+                style={{ accentColor: lenderThemeColor }}
               />
               <label htmlFor="consent" className="text-sm text-gray-700 leading-relaxed">
                 I agree to the{' '}
@@ -411,7 +407,7 @@ const MoneyViewForm = ({
                   href="/terms-of-service"
                   target="_blank"
                   className="underline"
-                  style={{ color: brandAccentColor }}
+                  style={{ color: lenderThemeColor }}
                 >
                   Terms of Services.
                 </Link>
