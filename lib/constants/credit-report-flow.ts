@@ -33,6 +33,9 @@ export const FULL_REPORT_PROCESSING_COPY = {
 export const CREDIT_REPORT_ERROR_COPY = {
   scoreTitle: 'Something went wrong',
   scoreDescription: 'We could not fetch your credit score. Please try again.',
+  unavailableTitle: 'Credit score unavailable',
+  unavailableDescription:
+    'We could not generate your credit score at the moment. Please try again later.',
   fullReportTitle: 'Something went wrong',
   fullReportDescription: 'We could not generate your full credit report. Please try again.',
   retryLabel: 'Retry',

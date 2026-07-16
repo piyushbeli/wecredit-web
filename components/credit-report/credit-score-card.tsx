@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import type { CreditScoreInfo } from '@/types/credit-report';
 import {
   formatLastUpdatedLabel,
-  formatMonthlyChangeLabel,
   getMonthlyChangeClassName,
 } from '@/lib/utils/credit-report-formatters';
 import { CreditReportCard } from './credit-report-card';
@@ -20,11 +19,20 @@ interface CreditScoreCardProps {
  * Equifax score card with gauge and meta row.
  */
 export function CreditScoreCard({ creditScore, onRefresh }: CreditScoreCardProps): ReactNode {
-  const changeLabel = formatMonthlyChangeLabel(
-    creditScore.monthlyChange,
-    creditScore.changeType
-  );
-  const changeClassName = getMonthlyChangeClassName(creditScore.changeType);
+  const scoreTrend = creditScore.scoreTrend;
+  const trendMessage = scoreTrend?.message?.trim() || 'No change';
+  const trendPoints = Number(scoreTrend?.points);
+  let trendChangeType = creditScore.changeType;
+  if (Number.isFinite(trendPoints) && trendPoints > 0) {
+    trendChangeType = 'INCREASED';
+  } else if (Number.isFinite(trendPoints) && trendPoints < 0) {
+    trendChangeType = 'DECREASED';
+  }
+  const changeClassName = getMonthlyChangeClassName(trendChangeType);
+  let monthSuffix: ReactNode = null;
+  if (!scoreTrend?.message?.trim()) {
+    monthSuffix = <span className="hidden lg:inline"> this month</span>;
+  }
 
   return (
     <CreditReportCard className="h-full">
@@ -58,8 +66,8 @@ export function CreditScoreCard({ creditScore, onRefresh }: CreditScoreCardProps
           Range {creditScore.minimumScore}–{creditScore.maximumScore}
         </span>
         <span className={`font-semibold ${changeClassName}`}>
-          {changeLabel}
-          <span className="hidden lg:inline"> this month</span>
+          {trendMessage}
+          {monthSuffix}
         </span>
       </div>
       <p className="mt-3 text-center text-xs text-gray-400">

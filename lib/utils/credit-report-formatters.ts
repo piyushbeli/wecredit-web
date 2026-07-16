@@ -66,15 +66,13 @@ export function formatSummaryValue(
  * Formats ISO last-updated date for display, e.g. "Last updated 26 Jun 2026".
  */
 export function formatLastUpdatedLabel(isoDate: string): string {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) {
-    return 'Last updated —';
-  }
+  const now = new Date();
+  const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const formatted = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-  }).format(date);
+  }).format(firstDayOfCurrentMonth);
   return `Last updated ${formatted}`;
 }
 

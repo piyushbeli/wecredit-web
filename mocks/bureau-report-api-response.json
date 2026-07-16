@@ -1,11 +1,13 @@
-
- 
 {
     "success": true,
     "message": "Bureau report fetched successfully",
     "pdfUrl": "https://zapcash-staging.s3.ap-south-1.amazonaws.com/applicant/7989432589/equifax-report/Equifax_Report_7989432589_1784120955755.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2OIVDJBJFJWJZNMR%2F20260715%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20260715T130917Z&X-Amz-Expires=900&X-Amz-Signature=b06dd22453c727bdd012e5da3610e80688d4251ef6dc6eb822be7e7b3f83244e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject%22",
     "data": {
         "creditScore": 668,
+        "scoreTrend": {
+            "points": "0",
+            "message": "No Change this month"
+        },
         "consumer": {
             "name": "DUGGASANI ESWARREDDY SIVANAGIREDDY",
             "dob": "1996-03-23T00:00:00.000Z",

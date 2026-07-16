@@ -6,6 +6,7 @@ import type {
   CreditReportData,
   CreditReportEnquiry,
   CreditReportPaymentHistoryItem,
+  CreditScoreInfo,
   CreditSummaryItem,
   ScoreFactorItem,
 } from '@/types/credit-report';
@@ -149,6 +150,14 @@ export function adaptBureauReport(value: unknown): { dashboard: CreditReportDash
     amount: typeof item.enquiryAmount === 'number' && Number.isFinite(item.enquiryAmount) ? item.enquiryAmount : null,
   }));
   const score = parseCreditScore(data.creditScore) ?? 0;
+  const scoreTrend = buildScoreTrend(data.scoreTrend);
+  const monthlyChange = scoreTrend?.points ?? 0;
+  let changeType: CreditScoreInfo['changeType'] = 'UNCHANGED';
+  if (monthlyChange > 0) {
+    changeType = 'INCREASED';
+  } else if (monthlyChange < 0) {
+    changeType = 'DECREASED';
+  }
   const dashboardTemplate = creditReportDashboardMock as CreditReportDashboard;
   const loanOffer = bureauReportConfig.useMockData
     ? dashboardTemplate.loanOffer
@@ -164,7 +173,15 @@ export function adaptBureauReport(value: unknown): { dashboard: CreditReportDash
   return {
     dashboard: {
       user: { firstName: optionalText(consumer.name)?.split(/\s+/)[0] ?? 'there' },
-      creditScore: { ...dashboardTemplate.creditScore, score, rating: '', monthlyChange: 0, changeType: 'UNCHANGED', lastUpdatedAt: '' },
+      creditScore: {
+        ...dashboardTemplate.creditScore,
+        score,
+        rating: '',
+        monthlyChange,
+        changeType,
+        lastUpdatedAt: '',
+        scoreTrend,
+      },
       loanOffer,
       fullCreditReport: dashboardTemplate.fullCreditReport,
       scoreFactors: buildFactors(data),
@@ -180,6 +197,20 @@ export function adaptBureauReport(value: unknown): { dashboard: CreditReportDash
       consumer: { name: optionalText(consumer.name) ?? FALLBACK, pan: maskPan(consumer.pan), dateOfBirth: optionalText(consumer.dob) ?? '', mobile: maskMobile(consumer.mobile), email: optionalText(consumer.email) ?? undefined, address: optionalText(consumer.address) ?? undefined },
       accounts, paymentHistory, enquiries,
     },
+  };
+}
+
+function buildScoreTrend(
+  value: BureauReportData['scoreTrend']
+): CreditScoreInfo['scoreTrend'] {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const points = Number(value.points);
+  const message = optionalText(value.message) ?? '';
+  return {
+    points: Number.isFinite(points) ? points : 0,
+    message,
   };
 }
 

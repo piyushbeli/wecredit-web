@@ -56,16 +56,29 @@ export function CreditReportPage(): ReactNode {
     }
   }, [view]);
 
+  const isCreditScoreUnavailable = data?.creditScore.score === -1;
   const isFlowView = view === 'fetching' || view === 'processing' || view === 'full_report'
-    || (view === 'error' && failurePhase !== null);
+    || isCreditScoreUnavailable || (view === 'error' && failurePhase !== null);
   const isCenteredFlowCard = view === 'fetching' || view === 'processing'
-    || (view === 'error' && failurePhase !== null);
+    || isCreditScoreUnavailable || (view === 'error' && failurePhase !== null);
 
   let body: ReactNode;
   if (!isBootstrapped) {
     body = <CreditReportSkeleton />;
   } else if (view === 'fetching') {
     body = <FetchingCreditScore steps={progressSteps} />;
+  } else if (isCreditScoreUnavailable) {
+    body = (
+      <div className="flex min-h-[70vh] items-center justify-center lg:min-h-[calc(100vh-5rem)]">
+        <div className="w-full max-w-md lg:rounded-2xl lg:border lg:border-black/[0.04] lg:bg-white lg:px-6 lg:py-4 lg:shadow-[0_12px_40px_rgba(16,24,40,0.08)]">
+          <ReportErrorState
+            title={CREDIT_REPORT_ERROR_COPY.unavailableTitle}
+            description={CREDIT_REPORT_ERROR_COPY.unavailableDescription}
+            onRetry={handleRetry}
+          />
+        </div>
+      </div>
+    );
   } else if (view === 'processing') {
     body = <ProcessingFullReport />;
   } else if (view === 'full_report' && fullReport) {

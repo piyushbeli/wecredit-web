@@ -24,7 +24,7 @@ export function ReportErrorState({
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
       <div
-        className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#F8EDEF] text-2xl font-bold text-[#8B1E2D]"
+        className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#FFF7ED] text-2xl font-bold text-brand-primary"
         aria-hidden
       >
         !
@@ -35,7 +35,7 @@ export function ReportErrorState({
         type="button"
         onClick={onRetry}
         disabled={isRetryDisabled}
-        className="mt-6 inline-flex h-12 min-w-[160px] cursor-pointer items-center justify-center rounded-xl bg-[#8B1E2D] px-6 text-sm font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E2D]"
+        className="mt-6 inline-flex h-12 min-w-[160px] cursor-pointer items-center justify-center rounded-xl bg-brand-primary px-6 text-sm font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B1E2D]"
       >
         {retryLabel}
       </button>

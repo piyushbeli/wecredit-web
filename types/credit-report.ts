@@ -43,6 +43,11 @@ export interface CreditReportUser {
   readonly firstName: string;
 }
 
+export interface CreditScoreTrend {
+  readonly points: number;
+  readonly message: string;
+}
+
 export interface CreditScoreInfo {
   readonly bureau: string;
   readonly score: number;
@@ -53,6 +58,7 @@ export interface CreditScoreInfo {
   readonly changeType: CreditScoreChangeType;
   readonly lastUpdatedAt: string;
   readonly canRefresh: boolean;
+  readonly scoreTrend?: CreditScoreTrend | null;
 }
 
 export interface LoanOfferInfo {
@@ -241,8 +247,14 @@ export interface RecentEnquiry {
   readonly enquiryAmount?: number | null;
 }
 
+export interface BureauScoreTrend {
+  readonly points?: string | number | null;
+  readonly message?: string | null;
+}
+
 export interface BureauReportData {
   readonly creditScore?: number | string | null;
+  readonly scoreTrend?: BureauScoreTrend | null;
   readonly consumer?: BureauConsumer | null;
   readonly creditHealthBreakdown?: CreditHealthBreakdown | null;
   readonly creditSummary?: CreditSummary | null;
