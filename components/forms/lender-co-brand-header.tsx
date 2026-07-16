@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import { cn } from '@/lib/utils';
 
@@ -84,16 +85,19 @@ const LenderCoBrandHeader = ({
   );
 
 
-  const backButton = showBackButton ? (
-    <button
-      type="button"
-      onClick={onBackClick}
-      aria-label="Back"
-      className="shrink-0 p-1 text-gray-700 hover:text-gray-900 md:absolute md:left-0"
-    >
-      <ArrowLeft className="h-6 w-6" />
-    </button>
-  ) : null;
+  let backButton: ReactNode;
+  if (showBackButton) {
+    backButton = (
+      <button
+        type="button"
+        onClick={onBackClick}
+        aria-label="Back"
+        className="shrink-0 p-1 text-gray-700 hover:text-gray-900 md:absolute md:left-0"
+      >
+        <ArrowLeft className="h-6 w-6" />
+      </button>
+    );
+  }
 
   return (
     <header
