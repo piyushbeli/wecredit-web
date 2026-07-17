@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import InputField from '@/components/forms/input-field';
 import ButtonGroup from '@/components/forms/button-group';
 import DateOfBirthField from '@/components/forms/date-of-birth-field';
@@ -149,9 +150,32 @@ const EligibilityCheckFields = ({
         />
       </div>
 
-      <p className="text-xs text-gray-500">
-        By proceeding, you consent and allow us to pull your credit report.
-      </p>
+      <label className="flex cursor-pointer items-start gap-2 text-xs leading-4 text-gray-500">
+        <input
+          type="checkbox"
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-gray-300 accent-brand-primary"
+        />
+        <span>
+          I authorize WeCredit to fetch my credit report from EQUIFAX and agree to the{' '}
+          <Link
+            href="/partner-terms-and-conditions/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-brand-primary underline"
+          >
+            Terms
+          </Link>{' '}
+          &amp;{' '}
+          <Link
+            href="/privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-brand-primary underline"
+          >
+            Privacy Policy
+          </Link>
+        </span>
+      </label>
     </>
   );
 };
