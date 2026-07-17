@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
@@ -69,7 +68,7 @@ const LenderCoBrandHeader = ({
   );
 
   const weCreditLogo = (
-    <Link
+    <a
       href="/"
       aria-label="Go to WeCredit home page"
       className="flex shrink-0 items-center"
@@ -81,7 +80,7 @@ const LenderCoBrandHeader = ({
         height={26}
         className="h-6 w-auto"
       />
-    </Link>
+    </a>
   );
 
 

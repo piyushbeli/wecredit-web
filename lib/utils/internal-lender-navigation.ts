@@ -1,6 +1,6 @@
 export const LENDER_SOURCE_PARAM = 'source';
 export const TRENDING_OFFERS_SOURCE = 'trending-offers';
-export const TRENDING_OFFERS_RETURN_PATH = '/personal-loan';
+export const TRENDING_OFFERS_RETURN_PATH = '/';
 
 export const buildInternalLenderNavigationHref = (lenderName: string): string => {
   const encodedLender = encodeURIComponent(lenderName.trim() || 'unknown');

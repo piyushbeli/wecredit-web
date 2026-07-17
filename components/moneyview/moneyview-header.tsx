@@ -6,7 +6,6 @@
  */
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 import { IMAGES } from '@/lib/constants/images';
@@ -60,7 +59,7 @@ const MoneyViewHeader = ({
   );
 
   const weCreditLogo = (
-    <Link
+    <a
       href="/"
       className="flex items-center"
       aria-label="Go to WeCredit home page"
@@ -72,7 +71,7 @@ const MoneyViewHeader = ({
         height={18}
         className="h-4 w-auto"
       />
-    </Link>
+    </a>
   );
 
   return (
