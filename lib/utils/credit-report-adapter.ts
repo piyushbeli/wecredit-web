@@ -11,7 +11,6 @@ import type {
   ScoreFactorItem,
 } from '@/types/credit-report';
 import creditReportDashboardMock from '@/mocks/credit-report.json';
-import { bureauReportConfig } from '@/lib/config';
 
 const FALLBACK = '—';
 
@@ -159,16 +158,12 @@ export function adaptBureauReport(value: unknown): { dashboard: CreditReportDash
     changeType = 'DECREASED';
   }
   const dashboardTemplate = creditReportDashboardMock as CreditReportDashboard;
-  const loanOffer = bureauReportConfig.useMockData
-    ? dashboardTemplate.loanOffer
-    : { ...dashboardTemplate.loanOffer, isEligible: false };
-  const improvementTips = bureauReportConfig.useMockData
-    ? dashboardTemplate.improvementTips
-    : [];
+  const loanOffer = dashboardTemplate.loanOffer;
+  const improvementTips = dashboardTemplate.improvementTips;
   const visibility = {
     ...dashboardTemplate.visibility,
-    showLoanOffer: bureauReportConfig.useMockData,
-    showImprovementTips: bureauReportConfig.useMockData,
+    showLoanOffer: dashboardTemplate.visibility.showLoanOffer,
+    showImprovementTips: dashboardTemplate.visibility.showImprovementTips,
   };
   return {
     dashboard: {

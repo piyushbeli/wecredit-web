@@ -141,7 +141,7 @@ export function CreditReportPage(): ReactNode {
               <ImprovementTipsCard
                 tips={data.improvementTips}
                 ctaLabel={tipsCtaLabel}
-                onGetFullReport={handleUnlockReport}
+                onGetFullReport={handleDownloadPdf}
               />
             ) : null}
           </div>

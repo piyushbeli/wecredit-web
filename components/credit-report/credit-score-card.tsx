@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import type { CreditScoreInfo } from '@/types/credit-report';
 import {
   formatLastUpdatedLabel,
+  formatMonthlyChangeLabel,
   getMonthlyChangeClassName,
 } from '@/lib/utils/credit-report-formatters';
 import { CreditReportCard } from './credit-report-card';
@@ -20,7 +21,6 @@ interface CreditScoreCardProps {
  */
 export function CreditScoreCard({ creditScore, onRefresh }: CreditScoreCardProps): ReactNode {
   const scoreTrend = creditScore.scoreTrend;
-  const trendMessage = scoreTrend?.message?.trim() || 'No change';
   const trendPoints = Number(scoreTrend?.points);
   let trendChangeType = creditScore.changeType;
   if (Number.isFinite(trendPoints) && trendPoints > 0) {
@@ -29,9 +29,10 @@ export function CreditScoreCard({ creditScore, onRefresh }: CreditScoreCardProps
     trendChangeType = 'DECREASED';
   }
   const changeClassName = getMonthlyChangeClassName(trendChangeType);
-  let monthSuffix: ReactNode = null;
-  if (!scoreTrend?.message?.trim()) {
-    monthSuffix = <span className="hidden lg:inline"> this month</span>;
+  let trendContent: ReactNode = null;
+  if (Number.isFinite(trendPoints) && trendPoints > 0) {
+    const trendValue = formatMonthlyChangeLabel(trendPoints, trendChangeType);
+    trendContent = <span className={`font-semibold ${changeClassName}`}>{trendValue}</span>;
   }
 
   return (
@@ -65,10 +66,7 @@ export function CreditScoreCard({ creditScore, onRefresh }: CreditScoreCardProps
         <span className="text-gray-500">
           Range {creditScore.minimumScore}–{creditScore.maximumScore}
         </span>
-        <span className={`font-semibold ${changeClassName}`}>
-          {trendMessage}
-          {monthSuffix}
-        </span>
+        {trendContent}
       </div>
       <p className="mt-3 text-center text-xs text-gray-400">
         {formatLastUpdatedLabel(creditScore.lastUpdatedAt)}

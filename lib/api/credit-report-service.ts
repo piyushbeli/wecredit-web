@@ -1,12 +1,9 @@
-import { bureauReportConfig } from '@/lib/config';
 import { STORAGE_BUREAU_RESPONSE } from '@/lib/constants/api-keys';
 import { adaptBureauReport } from '@/lib/utils/credit-report-adapter';
 import type { CreditReportDashboard, CreditReportData, CreditReportStatus } from '@/types/credit-report';
 
-/** Dev/mock only — simulates bureau score request latency. */
-const MOCK_SCORE_DELAY_MS = 1500;
-/** Dev/mock only — simulates full-report generation latency. */
-const MOCK_FULL_REPORT_DELAY_MS = 1500;
+const SCORE_PROGRESS_DURATION_MS = 1500;
+const FULL_REPORT_PROCESSING_DURATION_MS = 1500;
 
 const SCORE_STATUS_STEPS = [
   'verifying_identity',
@@ -44,9 +41,9 @@ function getAdaptedStoredReport(): ReturnType<typeof adaptBureauReport> {
 }
 
 /**
- * Abort-aware delay used only to simulate async API latency in mock mode.
+ * Abort-aware delay that keeps report progress states visible.
  */
-function waitForMockDelay(ms: number, signal: AbortSignal): Promise<void> {
+function waitForProgressDelay(ms: number, signal: AbortSignal): Promise<void> {
   if (signal.aborted) {
     return Promise.reject(new DOMException('Aborted', 'AbortError'));
   }
@@ -83,20 +80,12 @@ export async function pollCreditScoreStatus(options: {
 }): Promise<CreditReportDashboard> {
   assertNotAborted(options.signal);
 
-  if (bureauReportConfig.useMockData) {
-    const stepDelayMs = Math.floor(MOCK_SCORE_DELAY_MS / SCORE_STATUS_STEPS.length);
-    for (const nextStatus of SCORE_STATUS_STEPS) {
-      assertNotAborted(options.signal);
-      options.onStatus(nextStatus);
-      await waitForMockDelay(stepDelayMs, options.signal);
-    }
-    const dashboard = await getCreditReportDashboard();
+  const stepDelayMs = Math.floor(SCORE_PROGRESS_DURATION_MS / SCORE_STATUS_STEPS.length);
+  for (const nextStatus of SCORE_STATUS_STEPS) {
     assertNotAborted(options.signal);
-    options.onStatus('score_ready');
-    return dashboard;
+    options.onStatus(nextStatus);
+    await waitForProgressDelay(stepDelayMs, options.signal);
   }
-
-  options.onStatus('generating_score');
   const dashboard = await getCreditReportDashboard();
   assertNotAborted(options.signal);
   options.onStatus('score_ready');
@@ -110,9 +99,7 @@ export async function pollFullCreditReportStatus(options: {
   assertNotAborted(options.signal);
   options.onStatus('generating_full_report');
 
-  if (bureauReportConfig.useMockData) {
-    await waitForMockDelay(MOCK_FULL_REPORT_DELAY_MS, options.signal);
-  }
+  await waitForProgressDelay(FULL_REPORT_PROCESSING_DURATION_MS, options.signal);
 
   const report = await getFullCreditReport();
   assertNotAborted(options.signal);
