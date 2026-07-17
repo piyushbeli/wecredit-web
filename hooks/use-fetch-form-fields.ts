@@ -21,6 +21,8 @@ interface UseFetchFormFieldsReturn {
   isLoading: boolean;
   /** Error message if fetch failed */
   error: string | null;
+  /** Web-compatible lender color returned with the form configuration */
+  topColour: string | null;
   /** Function to fetch form fields for a lender */
   fetchFields: (lenderName: string, fetchDetails?: boolean) => Promise<void>;
   /** Reset fields and error state */
@@ -55,6 +57,7 @@ export function useFetchFormFields(): UseFetchFormFieldsReturn {
   const [fields, setFields] = useState<FormField[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [topColour, setTopColour] = useState<string | null>(null);
   const { showLoading, hideLoading } = useLoading();
 
   const fetchFields = useCallback(async (
@@ -64,13 +67,15 @@ export function useFetchFormFields(): UseFetchFormFieldsReturn {
     // Always fetch from API (no FE caching) to guarantee fresh values.
     setIsLoading(true);
     setError(null);
+    setTopColour(null);
 
     showLoading('Loading form...', 'Preparing your application.');
     try {
       const result = await leadService.fetchFormFields(lenderName, fetchDetails);
 
       if (result.success && result.data) {
-        setFields(result.data);
+        setFields(result.data.fields);
+        setTopColour(result.data.topColour ?? null);
       } else {
         setError(result.error || 'Failed to fetch form fields');
       }
@@ -83,6 +88,7 @@ export function useFetchFormFields(): UseFetchFormFieldsReturn {
   const reset = useCallback((): void => {
     setFields([]);
     setError(null);
+    setTopColour(null);
     setIsLoading(false);
   }, []);
 
@@ -95,6 +101,7 @@ export function useFetchFormFields(): UseFetchFormFieldsReturn {
     fields,
     isLoading,
     error,
+    topColour,
     fetchFields,
     reset,
     clearCache,

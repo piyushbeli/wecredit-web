@@ -69,6 +69,7 @@ export function isSelectField(field: FormField): boolean {
 /** Response from lenders-form-filled API */
 export interface FetchFormFieldsResponse {
   fields: FormField[];
+  topColour?: string | null;
 }
 
 // ============================================
