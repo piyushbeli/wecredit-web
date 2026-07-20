@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import { queueEligibilityCheck } from '@/lib/api/eligibility-check-service';
 import {
   DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES,
@@ -27,11 +28,24 @@ export const useEligibilityCheckForm = (
   options: UseEligibilityCheckFormOptions = {}
 ): UseEligibilityCheckFormReturn => {
   const { onProcessing } = options;
+  const { isAuthenticated, user } = useAuth();
   const [formValues, setFormValues] = useState<EligibilityCheckFormValues>(
     DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const isSubmitting = false;
+  const hasPrefilledRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user || hasPrefilledRef.current) return;
+    hasPrefilledRef.current = true;
+
+    setFormValues((prev) => ({
+      ...prev,
+      ...(user.phoneNumber && !prev.phoneNumber ? { phoneNumber: user.phoneNumber } : {}),
+      ...(user.email && !prev.email ? { email: user.email } : {}),
+    }));
+  }, [isAuthenticated, user]);
 
 
   const handleFieldChange = useCallback(

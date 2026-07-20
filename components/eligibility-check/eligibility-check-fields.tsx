@@ -4,6 +4,7 @@ import Link from 'next/link';
 import InputField from '@/components/forms/input-field';
 import ButtonGroup from '@/components/forms/button-group';
 import DateOfBirthField from '@/components/forms/date-of-birth-field';
+import { useAuth } from '@/hooks/use-auth';
 import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
 import {
   GENDER_OPTIONS,
@@ -21,6 +22,8 @@ const EligibilityCheckFields = ({
   formErrors,
   handleFieldChange,
 }: EligibilityCheckFieldsProps): React.ReactNode => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -82,6 +85,7 @@ const EligibilityCheckFields = ({
           inputMode="numeric"
           maxLength={10}
           required
+          disabled={isAuthenticated}
           autoComplete="tel"
         />
       </div>
