@@ -8,7 +8,7 @@
 
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -21,17 +21,19 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
 import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp, getCurrentDateTime } from '@/lib/api/lead-service';
 import { isMultiLenderCreditCardSectionComplete } from '@/lib/utils/form-helpers';
+import { getLenderThemeColor } from '@/lib/utils/colors';
 
 import DynamicField from '@/components/forms/dynamic-field';
 import { ActionButton } from '@/components/shared';
 import MoneyViewHeader from './moneyview-header';
 import MoneyViewHero from './moneyview-hero';
 
-import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
+import type { FormField, LeadFormData } from '@/types/lead';
 
 interface MoneyViewFormProps {
   onSuccess?: (leadId: string) => void;
   onClose?: () => void;
+  showBackHeader?: boolean;
 }
 
 const LENDER_NAME = 'moneyview';
@@ -57,7 +59,11 @@ function shouldRenderFieldGivenCreditCardChoice(
   return field.key !== 'creditCardLimit' || isCreditCardYes;
 }
 
-const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
+const MoneyViewForm = ({
+  onSuccess,
+  onClose,
+  showBackHeader = false,
+}: MoneyViewFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
@@ -68,6 +74,7 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
     fields,
     isLoading: isFieldsLoading,
     error: fieldsError,
+    topColour,
     fetchFields,
     reset: resetFields,
   } = useFetchFormFields();
@@ -85,6 +92,12 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
 
   const effectivePartnerCode = partner || PARTNER_CODE;
   const hasCreditCardQuestionField = fields.some((field) => field.key === 'hasCreditCard');
+  const lenderThemeColor = getLenderThemeColor(topColour);
+  const brandButtonStyle = {
+    backgroundColor: lenderThemeColor,
+    borderColor: lenderThemeColor,
+    color: '#FFFFFF',
+  };
 
   const {
     formValues,
@@ -94,7 +107,6 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
     validateCurrentStep,
     validateField,
     initializeFormValues,
-    isSinglePage,
   } = useLeadForm(fields, { singlePage: true });
 
   const creditCardAnswer = formValues.hasCreditCard;
@@ -251,6 +263,7 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
       error={formErrors[field.key]}
       disabled={isSubmitting || ((field.key === 'mobile' || field.key === 'phone') && isAuthenticated)}
       theme="moneyview"
+      checkboxColor={lenderThemeColor}
     />
   );
 
@@ -285,7 +298,10 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.1 }}
           >
-            <CheckCircle2 className="w-16 h-16 text-mv-green mx-auto" />
+            <CheckCircle2
+              className="w-16 h-16 mx-auto"
+              style={{ color: lenderThemeColor }}
+            />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -303,7 +319,8 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
             {isPrimePlLeadSuccess && (
               <ActionButton
                 type="button"
-                className="mt-8 min-w-[200px] bg-mv-green! hover:bg-mv-green/90!"
+                className="mt-8 min-w-[200px] hover:opacity-90"
+                style={brandButtonStyle}
                 onClick={handlePrimePlContinue}
               >
                 Continue
@@ -319,8 +336,10 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
   if (isFieldsLoading) {
     return (
       <div className="min-h-screen bg-white">
-        <MoneyViewHeader />
-        <MoneyViewHero />
+        <MoneyViewHeader showBackButton={showBackHeader} onBackClick={onClose} />
+        <MoneyViewHero
+          backgroundColor={lenderThemeColor}
+        />
         <div className="p-6 space-y-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="space-y-2">
@@ -337,7 +356,7 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
   if (fieldsError) {
     return (
       <div className="min-h-screen bg-white">
-        <MoneyViewHeader />
+        <MoneyViewHeader showBackButton={showBackHeader} onBackClick={onClose} />
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -345,7 +364,8 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
             <p className="text-red-600 mb-6">{fieldsError}</p>
             <ActionButton
               onClick={() => fetchFields(LENDER_NAME, true)}
-              className="bg-mv-green! hover:bg-mv-green/90!"
+              className="hover:opacity-90"
+              style={brandButtonStyle}
             >
               Try Again
             </ActionButton>
@@ -358,10 +378,12 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
   return (
     <div className="min-h-screen bg-white flex flex-col ">
       {/* Header */}
-      <MoneyViewHeader />
+      <MoneyViewHeader showBackButton={showBackHeader} onBackClick={onClose} />
 
       {/* Hero with carousel */}
-      <MoneyViewHero />
+      <MoneyViewHero
+        backgroundColor={lenderThemeColor}
+      />
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col max-w-xl mx-auto w-full">
@@ -376,14 +398,16 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
                 id="consent"
                 checked={hasWeCreditConsent}
                 onChange={(e) => handleFieldChange('consent', e.target.checked ? 'true' : 'false')}
-                className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 accent-mv-green focus:ring-mv-green cursor-pointer shrink-0"
+                className="mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 cursor-pointer shrink-0"
+                style={{ accentColor: lenderThemeColor }}
               />
               <label htmlFor="consent" className="text-sm text-gray-700 leading-relaxed">
                 I agree to the{' '}
                 <Link
                   href="/terms-of-service"
                   target="_blank"
-                  className="text-mv-green underline"
+                  className="underline"
+                  style={{ color: lenderThemeColor }}
                 >
                   Terms of Services.
                 </Link>
@@ -404,7 +428,8 @@ const MoneyViewForm = ({ onSuccess, onClose }: MoneyViewFormProps) => {
             disabled={!hasWeCreditConsent || !isCreditCardSectionComplete}
             isLoading={isSubmitting}
             fullWidth
-            className="h-12 text-lg !bg-mv-green hover:!bg-mv-green/90"
+            className="h-12 text-lg hover:opacity-90"
+            style={brandButtonStyle}
           >
             Next
           </ActionButton>

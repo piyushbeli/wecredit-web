@@ -32,6 +32,8 @@ interface DynamicFieldProps {
   disabled?: boolean;
   /** Visual theme for lender-specific branding */
   theme?: 'default' | 'moneyview';
+  /** Resolved lender color for checkbox controls */
+  checkboxColor?: string;
 }
 
 const FIELD_THEMES = {
@@ -177,6 +179,7 @@ const DynamicField = ({
   error,
   disabled = false,
   theme = 'default',
+  checkboxColor,
 }: DynamicFieldProps) => {
   const { title, key, type, options, isMandatory } = field;
   const themeStyles = FIELD_THEMES[theme];
@@ -231,6 +234,7 @@ const DynamicField = ({
               id={key}
               checked={isChecked}
               onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
+              style={{ accentColor: checkboxColor }}
               className={cn(
                 'mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 cursor-pointer shrink-0',
                 themeStyles.checkbox,
@@ -254,6 +258,7 @@ const DynamicField = ({
             id={key}
             checked={isChecked}
             onChange={(event) => onChange(event.target.checked ? 'true' : 'false')}
+            style={{ accentColor: checkboxColor }}
                           className={cn(
                 'mt-1 h-5 w-5 min-w-[20px] min-h-[20px] rounded border-gray-300 cursor-pointer shrink-0',
                 themeStyles.checkbox,
