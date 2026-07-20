@@ -476,6 +476,75 @@ const LeadFormModal = ({
     />
   );
 
+  const renderLntFields = (): React.ReactElement | null => {
+    if (!isLntLenderOrUpswignLntLender) return null;
+
+    return (
+      <>
+        <div className="space-y-2">
+          <label className="lead-form-label">Company Name</label>
+          <input
+            type="text"
+            value={lntCompanyName}
+            onChange={(event) => setLntCompanyName(event.target.value)}
+            placeholder="Enter company name"
+            className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        {LNT_CONSENTS.map((consent) => {
+          let title = consent.uiText;
+          if (consent.key === 'consentPrivacyPolicy') {
+            title = 'I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data (incl. Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the';
+          }
+
+          return (
+            <div key={consent.key} className="space-y-1">
+              <DynamicField
+                field={{
+                  key: consent.key as FormFieldKey,
+                  title,
+                  type: 'boolean',
+                  options: [],
+                  value: 'true',
+                  isMandatory: true,
+                  order: 998,
+                }}
+                value={formValues[consent.key] || 'false'}
+                onChange={(value) => handleFieldChange(consent.key as FormFieldKey, value)}
+                onBlur={() => validateField(consent.key as FormFieldKey)}
+                error={formErrors[consent.key]}
+                disabled={isSubmitting}
+                checkboxColor={checkboxColor}
+              />
+              {consent.key === 'consentPrivacyPolicy' && (
+                <div className="ml-7 text-sm">
+                  <a
+                    href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline mr-2"
+                  >
+                    Personal Loan terms & Conditions
+                  </a>
+                  and
+                  <a
+                    href="https://www.ltfinance.com/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline ml-2"
+                  >
+                    Privacy Policy
+                  </a>{' '}
+                  and consent to the same
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </>
+    );
+  };
+
   const renderStepContent = (): React.ReactElement | null => {
     // Debug logging
     if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
@@ -532,6 +601,7 @@ const LeadFormModal = ({
                   {sectionFieldsToRender.map((field) => renderField(field))}
                   {isIdentityVerificationSection && (
                     <>
+                      {renderLntFields()}
                       {renderMultiLenderWeCreditConsent()}
                       {renderMultiLenderPartnerConsent()}
                     </>
@@ -559,73 +629,7 @@ const LeadFormModal = ({
       return (
         <>
           {lastStepFieldsToRender.map((field) => renderField(field))}
-          {isLntLenderOrUpswignLntLender && (
-            <>
-              <div className="space-y-2">
-                <label className="lead-form-label">
-                  Company Name
-                </label>
-
-                <input
-                  type="text"
-                  value={lntCompanyName}
-                  onChange={(e) => setLntCompanyName(e.target.value)}
-                  placeholder="Enter company name"
-                  className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white
-      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              {LNT_CONSENTS.map(consent => (
-                <div key={consent.key} className="space-y-1">
-
-                  <DynamicField
-                    field={{
-                      key: consent.key as FormFieldKey,
-                      title:
-                        consent.key === 'consentPrivacyPolicy'
-                          ? `I hereby consent in favour of L&T Finance Ltd. to collect, store & process my personal data (incl. Aadhaar details, location, audio/video data collected during appraisal process) including fetching and verifying my KYC, bureau and digilocker information and sharing it with third parties for my loan application. I hereby also agree to have read & understood the`
-                          : consent.uiText,
-                      type: 'boolean',
-                      options: [],
-                      value: 'true',
-                      isMandatory: true,
-                      order: 998,
-                    }}
-                    value={formValues[consent.key] || 'false'}
-                    onChange={(val) => handleFieldChange(consent.key as FormFieldKey, val)}
-                    onBlur={() => validateField(consent.key as FormFieldKey)}
-                    error={formErrors[consent.key]}
-                    disabled={isSubmitting}
-                    checkboxColor={checkboxColor}
-                  />
-                  {consent.key === 'consentPrivacyPolicy' && (
-                    <div className="ml-7 text-sm">
-                      <a
-                        href="https://www.ltfinance.com/docs/default-source/default-document-library/pl_application_t-c.pdf?sfvrsn=ebbca65c_3"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline mr-2"
-                      >
-                        Personal Loan terms & Conditions
-                      </a>
-                      and
-                      <a
-                        href="https://www.ltfinance.com/privacy-policy"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline ml-2"
-                      >
-                        Privacy Policy
-                      </a>
-                      {' '}and consent to the same
-                    </div>
-                  )}
-
-
-                </div>
-              ))}
-            </>
-          )}
+          {renderLntFields()}
           <DynamicField
             field={{
               key: 'consent',

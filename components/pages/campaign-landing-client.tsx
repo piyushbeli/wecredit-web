@@ -18,6 +18,7 @@ import AutoFillModal from '@/components/personal-loan/auto-fill-modal';
 import { MoneyViewForm } from '@/components/moneyview';
 import { useFilteredActiveLenders } from '@/hooks/use-filtered-active-lenders';
 import {
+  getCampaignFormLenderName,
   getMatchedActiveLender,
   getMatchedLenderCanonicalName,
 } from '@/lib/utils/lenders';
@@ -75,6 +76,10 @@ export const CampaignLandingClient = ({
   const canonicalLenderName = useMemo(() => {
     return getMatchedLenderCanonicalName(lenderName, activeLenders);
   }, [lenderName, activeLenders]);
+  const formLenderName = useMemo(() => {
+    if (!canonicalLenderName) return '';
+    return getCampaignFormLenderName(lenderName, canonicalLenderName);
+  }, [canonicalLenderName, lenderName]);
   const matchedActiveLender = useMemo(() => {
     return getMatchedActiveLender(lenderName, activeLenders);
   }, [lenderName, activeLenders]);
@@ -234,7 +239,7 @@ export const CampaignLandingClient = ({
       <LeadFormModal
         isOpen={showLeadFormModal}
         onClose={handleFormClose}
-        lenderName={canonicalLenderName || ''}
+        lenderName={formLenderName}
         partnerCode={partnerCode}
         fetchDetails={fetchDetails}
         showBackHeader={showBackHeader}
