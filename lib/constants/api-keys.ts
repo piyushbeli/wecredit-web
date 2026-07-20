@@ -16,6 +16,18 @@ export const CONTENT_TYPE_JSON = 'application/json';
 export const STORAGE_AUTH_TOKEN = 'auth_token';
 export const STORAGE_MOBILE = 'mobile';
 
+/** SessionStorage: bureau report PDF URL after fetch-bureau / get-bureau-url */
+export const STORAGE_BUREAU_PDF_URL = 'bureau_pdf_url';
+
+/** SessionStorage: full bureau API JSON for dynamic credit-score dashboard */
+export const STORAGE_BUREAU_RESPONSE = 'bureau_score_response';
+
+/** SessionStorage: credit score fetch completed for current session */
+export const STORAGE_CREDIT_SCORE_READY = 'credit_score_ready';
+
+/** SessionStorage: force score-fetch screen after bureau form submit */
+export const STORAGE_CREDIT_SCORE_FETCH_PENDING = 'credit_score_fetch_pending';
+
 /** Auth cookie configuration (7 days) shared across all auth flows */
 export const AUTH_COOKIE_OPTIONS = {
   maxAge: 60 * 60 * 24 * 7,

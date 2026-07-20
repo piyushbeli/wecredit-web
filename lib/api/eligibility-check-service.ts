@@ -5,12 +5,48 @@
 
 import { getCookie } from 'cookies-next';
 import { toast } from 'sonner';
-import { wecreditConfig } from '@/lib/config';
+import bureauReportMockData from '@/mocks/bureau-report-api-response.json';
+import { bureauReportConfig, wecreditConfig } from '@/lib/config';
 import { SOURCE_WEBSITE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import type { EligibilityCheckPayload } from '@/components/eligibility-check/eligibility-check-form.config';
+import { extractBureauPdfUrl, storeBureauResponse } from '@/lib/utils/bureau-pdf';
+import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
+import type { BureauReportApiResponse } from '@/types/credit-report';
 
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
 const ELIGIBILITY_CHECK_ENDPOINT_PROD = `https://wecredit.co.in/api/wechat`;
+const BUREAU_REPORT_MOCK = bureauReportMockData satisfies BureauReportApiResponse;
+let queuedEligibilityPayload: EligibilityCheckPayload | null = null;
+let queuedEligibilityRequest: Promise<SubmitEligibilityCheckResult> | null = null;
+
+export function queueEligibilityCheck(payload: EligibilityCheckPayload): void {
+  queuedEligibilityPayload = payload;
+  queuedEligibilityRequest = null;
+}
+
+export function hasQueuedEligibilityCheck(): boolean {
+  return queuedEligibilityPayload !== null;
+}
+
+export function runQueuedEligibilityCheck(): Promise<SubmitEligibilityCheckResult> | null {
+  if (!queuedEligibilityPayload) {
+    return null;
+  }
+  if (!queuedEligibilityRequest) {
+    queuedEligibilityRequest = submitEligibilityCheck(queuedEligibilityPayload).then((result) => {
+      if (!result.success) {
+        queuedEligibilityRequest = null;
+      }
+      return result;
+    });
+  }
+  return queuedEligibilityRequest;
+}
+
+export function clearQueuedEligibilityCheck(): void {
+  queuedEligibilityPayload = null;
+  queuedEligibilityRequest = null;
+}
 
 /**
  * Extract error message from API response
@@ -42,6 +78,10 @@ export async function checkEligibilityStatus(
     return { showSuccess: false, error: 'Invalid mobile number' };
   }
 
+  if (bureauReportConfig.useMockData) {
+    return { showSuccess: false };
+  }
+
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
 
   const requestBody = {
@@ -68,7 +108,8 @@ export async function checkEligibilityStatus(
       responseData = undefined;
     }
 
-    if (response.ok) {
+    if (response.ok && isUsableBureauReportResponse(responseData)) {
+      storeBureauResponse(responseData);
       return { showSuccess: true, data: responseData };
     }
 
@@ -76,7 +117,7 @@ export async function checkEligibilityStatus(
     return {
       showSuccess: false,
       data: responseData,
-      error: responseMessage ?? `Request failed with status ${response.status}`,
+      error: responseMessage ?? 'Credit report data is not available yet',
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
@@ -105,14 +146,17 @@ function buildEligibilityCheckHeaders(
   excludeAgentHost?: boolean
 ): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
-  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
 
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
     mobile: phoneNumber.replace(/\D/g, ''),
   };
 
-  headers['X-Agent-Host'] = 'agent-backend';
+  if (excludeAgentHost) {
+    delete headers['X-Agent-Host'];
+  } else {
+    headers['X-Agent-Host'] = 'agent-backend';
+  }
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -121,19 +165,33 @@ function buildEligibilityCheckHeaders(
   return headers;
 }
 
+export interface SubmitEligibilityCheckResult {
+  success: boolean;
+  pdfUrl?: string;
+}
+
 /**
  * Submit eligibility check (bureau report) to wechat API.
- * Returns true on success, false on failure (errors surfaced via toast).
+ * Stores pdfUrl for the credit-score screen; does not open the PDF here.
  */
 export async function submitEligibilityCheck(
   payload: EligibilityCheckPayload
-): Promise<boolean> {
+): Promise<SubmitEligibilityCheckResult> {
   const phoneDigits = payload.phoneNumber.replace(/\D/g, '');
   if (!/^[0-9]{10}$/.test(phoneDigits)) {
     toast.error('Invalid phone number', {
       description: 'Please enter a valid 10-digit phone number.',
     });
-    return false;
+    return { success: false };
+  }
+
+
+  if (bureauReportConfig.useMockData) {
+    storeBureauResponse(BUREAU_REPORT_MOCK);
+    return {
+      success: true,
+      pdfUrl: extractBureauPdfUrl(BUREAU_REPORT_MOCK),
+    };
   }
 
   const requestBody = {
@@ -161,11 +219,15 @@ export async function submitEligibilityCheck(
 
     if (response.ok) {
       const responseData = await response.json();
-      const pdfUrl = (responseData as { pdfUrl?: string }).pdfUrl;
-      if (pdfUrl) {
-        window.open(pdfUrl, '_blank');
+      if (!isUsableBureauReportResponse(responseData)) {
+        toast.error('Credit report data is unavailable', {
+          description: 'Please retry your credit report request.',
+        });
+        return { success: false };
       }
-      return true;
+      const pdfUrl = extractBureauPdfUrl(responseData);
+      storeBureauResponse(responseData);
+      return { success: true, pdfUrl };
     }
 
     let errorMessage = 'Failed to submit eligibility check';
@@ -180,13 +242,13 @@ export async function submitEligibilityCheck(
     toast.error(errorMessage, {
       description: 'Unable to submit your request. Please try again.',
     });
-    return false;
+    return { success: false };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Network error occurred';
     toast.error(errorMessage, {
       description: 'Failed to submit your request. Please check your connection.',
     });
-    return false;
+    return { success: false };
   }
 }
