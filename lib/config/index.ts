@@ -160,5 +160,9 @@ export const wecreditConfig = {
   headers: environment.wecreditHeaders,
 } as const;
 
+export const bureauReportConfig = {
+  useMockData: process.env.NEXT_PUBLIC_ENABLE_BUREAU_REPORT_MOCK_DATA === 'true',
+} as const;
+
 /** Export types */
 export type { EnvironmentConfig, EnvironmentType };

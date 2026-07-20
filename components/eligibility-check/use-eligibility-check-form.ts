@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { submitEligibilityCheck } from '@/lib/api/eligibility-check-service';
+import { useAuth } from '@/hooks/use-auth';
+import { queueEligibilityCheck } from '@/lib/api/eligibility-check-service';
 import {
   DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES,
   buildEligibilityCheckPayload,
@@ -19,19 +20,32 @@ interface UseEligibilityCheckFormReturn {
 }
 
 interface UseEligibilityCheckFormOptions {
-  /** Called when the API submit succeeds so the parent can show success state. */
-  onSuccess?: () => void;
+  /** Opens the credit-score processing screen after local validation. */
+  onProcessing?: () => void;
 }
 
 export const useEligibilityCheckForm = (
   options: UseEligibilityCheckFormOptions = {}
 ): UseEligibilityCheckFormReturn => {
-  const { onSuccess } = options;
+  const { onProcessing } = options;
+  const { isAuthenticated, user } = useAuth();
   const [formValues, setFormValues] = useState<EligibilityCheckFormValues>(
     DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting = false;
+  const hasPrefilledRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user || hasPrefilledRef.current) return;
+    hasPrefilledRef.current = true;
+
+    setFormValues((prev) => ({
+      ...prev,
+      ...(user.phoneNumber && !prev.phoneNumber ? { phoneNumber: user.phoneNumber } : {}),
+      ...(user.email && !prev.email ? { email: user.email } : {}),
+    }));
+  }, [isAuthenticated, user]);
 
 
   const handleFieldChange = useCallback(
@@ -54,22 +68,14 @@ export const useEligibilityCheckForm = (
   }, [formValues]);
 
   const handleSubmit = useCallback(async (): Promise<void> => {
-    if (isSubmitting) return;
     if (!validateForm()) return;
 
-    setIsSubmitting(true);
-    try {
-      const payload = buildEligibilityCheckPayload(formValues);
-      const success = await submitEligibilityCheck(payload);
-      if (success && onSuccess) {
-        onSuccess();
-        setFormValues(DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES);
-        setFormErrors({});
-      }
-    } finally {
-      setIsSubmitting(false);
+    const payload = buildEligibilityCheckPayload(formValues);
+    queueEligibilityCheck(payload);
+    if (onProcessing) {
+      onProcessing();
     }
-  }, [formValues, isSubmitting, onSuccess, validateForm]);
+  }, [formValues, onProcessing, validateForm]);
 
   const canSubmit = useMemo((): boolean => {
     const requiredFilled =

@@ -44,9 +44,11 @@ next-env.d.ts
 .vscode
 
 
-docs
+# local documentation and handoff files
+/docs/
 
 .cursor
 
 .cursorrules
 stack
+
