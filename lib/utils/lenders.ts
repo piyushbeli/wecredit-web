@@ -44,6 +44,22 @@ export function getMatchedLenderCanonicalName(
 }
 
 /**
+ * Keeps lender integration identifiers that drive lender-specific form and payload behavior.
+ * Other campaign URLs continue to use the active lender's canonical API name.
+ */
+export function getCampaignFormLenderName(
+  urlLenderName: string,
+  canonicalLenderName: string
+): string {
+  const normalizedUrlLenderName = urlLenderName.toLowerCase().trim();
+  if (normalizedUrlLenderName === 'lnt' || normalizedUrlLenderName === 'upswing_lnt') {
+    return normalizedUrlLenderName;
+  }
+
+  return canonicalLenderName;
+}
+
+/**
  * Returns the active lender object that matches a URL/canonical lender name.
  */
 export function getMatchedActiveLender(
