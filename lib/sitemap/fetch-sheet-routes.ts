@@ -5,10 +5,15 @@ export interface SheetRouteMapping {
   source: string;
 }
 
+export interface SheetRoutesRequestOptions {
+  requestTimeoutMs?: number;
+}
+
 interface FetchSheetRoutesOptions {
   gid: string;
   sourcePathPrefix: string;
   logLabel: string;
+  requestTimeoutMs?: number;
 }
 
 /** Builds the public CSV export URL for a specific sheet tab. */
@@ -95,11 +100,16 @@ function parseRoutesFromCsv(
 export async function fetchRoutesFromSheet(
   options: FetchSheetRoutesOptions
 ): Promise<SheetRouteMapping[]> {
-  const { gid, logLabel } = options;
+  const { gid, logLabel, requestTimeoutMs } = options;
+  const controller = requestTimeoutMs ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), requestTimeoutMs)
+    : null;
 
   try {
     const response = await fetch(getSheetExportUrl(gid), {
       cache: 'no-store',
+      signal: controller?.signal,
     });
 
     if (!response.ok) {
@@ -114,5 +124,7 @@ export async function fetchRoutesFromSheet(
   } catch (error) {
     console.warn(`[${logLabel}] Unable to load routes from sheet:`, error);
     return [];
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
