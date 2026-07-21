@@ -22,34 +22,45 @@ interface UseEligibilityCheckFormReturn {
 interface UseEligibilityCheckFormOptions {
   /** Opens the credit-score processing screen after local validation. */
   onProcessing?: () => void;
+  initialValues?: EligibilityCheckFormValues | null;
 }
 
 export const useEligibilityCheckForm = (
   options: UseEligibilityCheckFormOptions = {}
 ): UseEligibilityCheckFormReturn => {
-  const { onProcessing } = options;
+  const { initialValues, onProcessing } = options;
   const { isAuthenticated, user } = useAuth();
   const [formValues, setFormValues] = useState<EligibilityCheckFormValues>(
-    DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES
+    initialValues ?? DEFAULT_ELIGIBILITY_CHECK_FORM_VALUES
   );
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const isSubmitting = false;
-  const hasPrefilledRef = useRef(false);
+  const hasPrefilledRef = useRef(Boolean(initialValues));
+  const hasUserEditedRef = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated || !user || hasPrefilledRef.current) return;
     hasPrefilledRef.current = true;
+    let isActive = true;
 
-    setFormValues((prev) => ({
-      ...prev,
-      ...(user.phoneNumber && !prev.phoneNumber ? { phoneNumber: user.phoneNumber } : {}),
-      ...(user.email && !prev.email ? { email: user.email } : {}),
-    }));
+    void Promise.resolve().then(() => {
+      if (!isActive || hasUserEditedRef.current) return;
+      setFormValues((prev) => ({
+        ...prev,
+        ...(user.phoneNumber && !prev.phoneNumber ? { phoneNumber: user.phoneNumber } : {}),
+        ...(user.email && !prev.email ? { email: user.email } : {}),
+      }));
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [isAuthenticated, user]);
 
 
   const handleFieldChange = useCallback(
     (key: keyof EligibilityCheckFormValues, value: string): void => {
+      hasUserEditedRef.current = true;
       setFormValues((prev) => ({ ...prev, [key]: value }));
       setFormErrors((prev) => {
         if (!(key in prev)) return prev;

@@ -5,11 +5,15 @@
  * Uses useLoanModalState for loading → form | success flow, consistent with car/gold loan modals.
  */
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
-import { checkEligibilityStatus } from '@/lib/api/eligibility-check-service';
+import {
+  checkEligibilityStatus,
+  getSavedEligibilityValues,
+} from '@/lib/api/eligibility-check-service';
+import type { EligibilityCheckFormValues } from './eligibility-check-form.config';
 import EligibilityCheckForm from './eligibility-check-form';
 import { LoadingScreen } from '../shared/loading-screen';
 
@@ -20,22 +24,23 @@ interface EligibilityCheckFormModalProps {
   onProcessing?: () => void;
 }
 
-/** Adapter: hook expects (phone, signal) => Promise<boolean>; service returns { showSuccess }. */
-async function checkBureauReportStatus(
-  phoneNumber: string,
-  signal: AbortSignal
-): Promise<boolean> {
-  const result = await checkEligibilityStatus(phoneNumber, signal);
-  return result.showSuccess;
-}
-
 const EligibilityCheckFormModal = ({
   onClose,
   onSuccess,
   onProcessing,
 }: EligibilityCheckFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
+  const [savedValues, setSavedValues] = useState<EligibilityCheckFormValues | null>(null);
   useBodyScrollLock(true);
+
+  const checkBureauReportStatus = useCallback(
+    async (phoneNumber: string, signal: AbortSignal): Promise<boolean> => {
+      const result = await checkEligibilityStatus(phoneNumber, signal);
+      setSavedValues(getSavedEligibilityValues(result.data));
+      return result.showSuccess;
+    },
+    []
+  );
 
   const isReady = isAuthenticated && !!user?.phoneNumber;
   const { state } = useLoanModalState({
@@ -65,6 +70,7 @@ const EligibilityCheckFormModal = ({
           <EligibilityCheckForm
             onClose={onClose}
             isModal
+            initialValues={savedValues}
             onProcessing={onProcessing}
           />
         );

@@ -8,12 +8,16 @@ import { toast } from 'sonner';
 import bureauReportMockData from '@/mocks/bureau-report-api-response.json';
 import { bureauReportConfig, wecreditConfig } from '@/lib/config';
 import { SOURCE_WEBSITE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
-import type { EligibilityCheckPayload } from '@/components/eligibility-check/eligibility-check-form.config';
+import type {
+  EligibilityCheckFormValues,
+  EligibilityCheckPayload,
+} from '@/components/eligibility-check/eligibility-check-form.config';
 import {
   extractBureauPdfUrl,
   storeBureauResponse,
 } from '@/lib/utils/bureau-pdf';
 import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
+import { dobToNativeFormat } from '@/lib/utils/form-helpers';
 import type { BureauReportApiResponse } from '@/types/credit-report';
 
 const ELIGIBILITY_CHECK_ENDPOINT = `${wecreditConfig.apiUrl}/api/wechat`;
@@ -64,6 +68,36 @@ export interface CheckEligibilityStatusResult {
   showSuccess: boolean;
   data?: unknown;
   error?: string;
+}
+
+export function getSavedEligibilityValues(data: unknown): EligibilityCheckFormValues | null {
+  if (!data || typeof data !== 'object') return null;
+
+  const response = data as Record<string, unknown>;
+  if (!response.details || typeof response.details !== 'object') return null;
+  const savedData = response.details as Record<string, unknown>;
+  const readValue = (key: string): string => {
+    const value = savedData[key];
+    return typeof value === 'string' ? value : '';
+  };
+  const genderValue = readValue('gender').toLowerCase();
+  const gender =
+    genderValue === 'male' || genderValue === 'female' || genderValue === 'other'
+      ? `${genderValue.charAt(0).toUpperCase()}${genderValue.slice(1)}`
+      : '';
+  const values = {
+    firstName: readValue('firstName'),
+    middleName: readValue('middleName'),
+    lastName: readValue('lastName'),
+    phoneNumber: readValue('phoneNumber'),
+    email: readValue('email'),
+    dob: dobToNativeFormat(readValue('dob')),
+    gender,
+    pincode: readValue('pincode'),
+    pan: readValue('pan').toUpperCase(),
+  } satisfies EligibilityCheckFormValues;
+
+  return Object.values(values).some((value) => value.trim()) ? values : null;
 }
 
 interface BureauUrlApiResult {
