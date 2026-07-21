@@ -93,18 +93,14 @@ export function extractBureauCreditScore(data: unknown, depth = 0): number | und
  * Extracts a PDF URL from bureau API response shapes.
  */
 export function extractBureauPdfUrl(data: unknown): string | undefined {
-  if (typeof data !== 'object' || !data) {
-    return undefined;
-  }
-  const record = data as Record<string, unknown>;
-  if (typeof record.pdfUrl === 'string' && record.pdfUrl.trim()) {
-    return record.pdfUrl.trim();
-  }
-  if (typeof record.url === 'string' && record.url.trim().toLowerCase().includes('.pdf')) {
-    return record.url.trim();
-  }
-  if (typeof record.data === 'object' && record.data) {
-    return extractBureauPdfUrl(record.data);
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    'pdfUrl' in data &&
+    typeof data.pdfUrl === 'string' &&
+    data.pdfUrl.length > 0
+  ) {
+    return data.pdfUrl;
   }
   return undefined;
 }

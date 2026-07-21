@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import {
   checkEligibilityStatus,
   clearQueuedEligibilityCheck,
+  fetchFreshBureauPdfUrl,
   hasQueuedEligibilityCheck,
   runQueuedEligibilityCheck,
 } from '@/lib/api/eligibility-check-service';
@@ -19,12 +20,11 @@ import {
   STORAGE_CREDIT_SCORE_FETCH_PENDING,
   STORAGE_CREDIT_SCORE_READY,
 } from '@/lib/constants/api-keys';
-import { getStoredBureauPdfUrl, getStoredBureauResponse } from '@/lib/utils/bureau-pdf';
+import { getStoredBureauResponse } from '@/lib/utils/bureau-pdf';
 import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
 import {
   buildCreditScoreProgressSteps,
   getCreditReportView,
-  openCreditReportPdf,
 } from '@/lib/utils/credit-report-flow';
 import type {
   CreditReportDashboard,
@@ -80,20 +80,6 @@ function markCreditScoreReady(): void {
 function clearCreditScoreSessionFlags(): void {
   writeSessionFlag(STORAGE_CREDIT_SCORE_READY, false);
   writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
-}
-
-function resolveCreditReportPdfUrl(fullReportPdfUrl: string | null | undefined): string {
-  const storedPdfUrl = getStoredBureauPdfUrl()?.trim() ?? '';
-  if (storedPdfUrl) {
-    return storedPdfUrl;
-  }
-  const reportPdfUrl = fullReportPdfUrl?.trim() ?? '';
-  const isPlaceholderPdf =
-    reportPdfUrl.includes('dummy.pdf') || reportPdfUrl.includes('w3.org/WAI');
-  if (reportPdfUrl && !isPlaceholderPdf) {
-    return reportPdfUrl;
-  }
-  return '';
 }
 
 /**
@@ -383,28 +369,41 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     startFullReportFetch();
   };
 
-  const handleDownloadPdf = (): void => {
+  const handleDownloadPdf = async (): Promise<void> => {
     if (isPdfOpeningRef.current) {
       return;
     }
-    const pdfUrl = resolveCreditReportPdfUrl(fullReport?.pdfUrl);
-    if (!pdfUrl) {
-      toast.message('PDF download unavailable', {
-        description:
-          'Equifax PDF opens from the bureau pdfUrl. Submit the credit form first, or wait for the full-report API to return pdfUrl.',
+    isPdfOpeningRef.current = true;
+    const pdfWindow = window.open('', '_blank');
+    if (!pdfWindow) {
+      isPdfOpeningRef.current = false;
+      toast.error('Could not open the PDF report', {
+        description: 'Please allow pop-ups for this site and try again.',
       });
       return;
     }
-    isPdfOpeningRef.current = true;
-    window.requestAnimationFrame(() => {
-      const didOpen = openCreditReportPdf(pdfUrl);
-      isPdfOpeningRef.current = false;
-      if (!didOpen) {
-        toast.error('Could not open the PDF report', {
-          description: 'The link may have expired or the browser blocked the new tab.',
-        });
+    pdfWindow.opener = null;
+
+    let pdfUrl: string | undefined;
+    try {
+      if (user?.phoneNumber) {
+        pdfUrl = await fetchFreshBureauPdfUrl(user.phoneNumber);
       }
-    });
+    } catch {
+      pdfUrl = undefined;
+    }
+
+    if (!pdfUrl) {
+      pdfWindow.close();
+      isPdfOpeningRef.current = false;
+      toast.message('PDF download unavailable', {
+        description: 'Could not get a fresh PDF link. Please try again.',
+      });
+      return;
+    }
+
+    pdfWindow.location.href = pdfUrl;
+    isPdfOpeningRef.current = false;
   };
 
   const handleTalkToUs = (): void => {

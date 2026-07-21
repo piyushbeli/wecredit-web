@@ -9,7 +9,10 @@ import bureauReportMockData from '@/mocks/bureau-report-api-response.json';
 import { bureauReportConfig, wecreditConfig } from '@/lib/config';
 import { SOURCE_WEBSITE, STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import type { EligibilityCheckPayload } from '@/components/eligibility-check/eligibility-check-form.config';
-import { extractBureauPdfUrl, storeBureauResponse } from '@/lib/utils/bureau-pdf';
+import {
+  extractBureauPdfUrl,
+  storeBureauResponse,
+} from '@/lib/utils/bureau-pdf';
 import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
 import type { BureauReportApiResponse } from '@/types/credit-report';
 
@@ -63,6 +66,43 @@ export interface CheckEligibilityStatusResult {
   error?: string;
 }
 
+interface BureauUrlApiResult {
+  response: Response;
+  data: unknown;
+}
+
+async function requestBureauUrl(
+  phoneDigits: string,
+  signal?: AbortSignal
+): Promise<BureauUrlApiResult> {
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
+  const eligibilityCheckEndpoint =
+    environment === 'staging'
+      ? ELIGIBILITY_CHECK_ENDPOINT
+      : ELIGIBILITY_CHECK_ENDPOINT_PROD;
+
+  const response = await fetch(eligibilityCheckEndpoint, {
+    method: 'POST',
+    headers: buildEligibilityCheckHeaders(phoneDigits),
+    body: JSON.stringify({
+      source: SOURCE_WEBSITE,
+      agentId: '',
+      phoneNumber: phoneDigits,
+      endpoint: 'get-bureau-url',
+    }),
+    signal,
+  });
+
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    data = undefined;
+  }
+
+  return { response, data };
+}
+
 /**
  * Check eligibility / bureau status (get-bureau-url).
  * Used on page load to decide whether to show success screen or form.
@@ -82,31 +122,11 @@ export async function checkEligibilityStatus(
     return { showSuccess: false };
   }
 
-  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT?.toLowerCase();
-
-  const requestBody = {
-    source: SOURCE_WEBSITE,
-    agentId: '',
-    phoneNumber: phoneDigits,
-    endpoint: 'get-bureau-url',
-  };
-
-  const eligibilityCheckEndpoint = environment === "staging" ? ELIGIBILITY_CHECK_ENDPOINT : ELIGIBILITY_CHECK_ENDPOINT_PROD;
-
   try {
-    const response = await fetch(eligibilityCheckEndpoint, {
-      method: 'POST',
-      headers: buildEligibilityCheckHeaders(phoneDigits, true),
-      body: JSON.stringify(requestBody),
-      signal,
-    });
-
-    let responseData: unknown;
-    try {
-      responseData = await response.json();
-    } catch {
-      responseData = undefined;
-    }
+    const { response, data: responseData } = await requestBureauUrl(
+      phoneDigits,
+      signal
+    );
 
     if (response.ok && isUsableBureauReportResponse(responseData)) {
       storeBureauResponse(responseData);
@@ -129,6 +149,27 @@ export async function checkEligibilityStatus(
   }
 }
 
+/**
+ * Fetches a fresh presigned bureau PDF URL without modifying it.
+ */
+export async function fetchFreshBureauPdfUrl(
+  phoneNumber: string
+): Promise<string | undefined> {
+  const phoneDigits = phoneNumber.replace(/\D/g, '');
+  if (!/^[0-9]{10}$/.test(phoneDigits)) {
+    return undefined;
+  }
+
+  const { response, data: responseData } = await requestBureauUrl(phoneDigits);
+
+  if (!response.ok) {
+    return undefined;
+  }
+
+  const pdfUrl = extractBureauPdfUrl(responseData);
+  return pdfUrl;
+}
+
 function buildDefaultHeaders(): Record<string, string> {
   return {
     ...wecreditConfig.headers,
@@ -146,7 +187,6 @@ function buildEligibilityCheckHeaders(
   excludeAgentHost?: boolean
 ): Record<string, string> {
   const token = getCookie(STORAGE_AUTH_TOKEN);
-
   const headers: Record<string, string> = {
     ...buildDefaultHeaders(),
     mobile: phoneNumber.replace(/\D/g, ''),
