@@ -87,12 +87,13 @@ function getBureauResponseRecord(value: unknown): Record<string, unknown> | null
 function normalizeResponse(value: unknown): BureauReportApiResponse {
   const record = getBureauResponseRecord(value);
   if (!record) throw new Error('Invalid bureau report response');
-  if (record.success !== true) {
+  const isSuccessful = record.success === true || record.status === 200;
+  if (!isSuccessful) {
     throw new Error(optionalText(record.message) ?? 'Bureau report request failed');
   }
   if (!isRecord(record.data)) throw new Error('Bureau report data is missing');
   if (parseCreditScore(record.data.creditScore) === null) throw new Error('Credit score is missing');
-  return record as unknown as BureauReportApiResponse;
+  return { ...record, success: true } as unknown as BureauReportApiResponse;
 }
 
 function buildFactors(data: BureauReportData): readonly ScoreFactorItem[] {

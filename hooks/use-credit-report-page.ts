@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
@@ -21,7 +21,10 @@ import {
   STORAGE_CREDIT_SCORE_READY,
 } from '@/lib/constants/api-keys';
 import { getStoredBureauResponse } from '@/lib/utils/bureau-pdf';
-import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
+import {
+  adaptBureauReport,
+  isUsableBureauReportResponse,
+} from '@/lib/utils/credit-report-adapter';
 import {
   buildCreditScoreProgressSteps,
   getCreditReportView,
@@ -85,17 +88,29 @@ function clearCreditScoreSessionFlags(): void {
 /**
  * Single state controller for score-fetch → summary → full-report flow.
  */
-export function useCreditReportPage(): UseCreditReportPageReturn {
+export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPageReturn {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
+  const initialReport = useMemo(() => {
+    if (!bureauResponse || !isUsableBureauReportResponse(bureauResponse)) {
+      return null;
+    }
+    return adaptBureauReport(bureauResponse);
+  }, [bureauResponse]);
   const scoreAbortRef = useRef<AbortController | null>(null);
   const fullReportAbortRef = useRef<AbortController | null>(null);
   const unlockInFlightRef = useRef(false);
   const isPdfOpeningRef = useRef(false);
-  const [isBootstrapped, setIsBootstrapped] = useState(false);
-  const [status, setStatus] = useState<CreditReportStatus>('idle');
-  const [data, setData] = useState<CreditReportDashboard | null>(null);
-  const [fullReport, setFullReport] = useState<CreditReportData | null>(null);
+  const [isBootstrapped, setIsBootstrapped] = useState(initialReport !== null);
+  const [status, setStatus] = useState<CreditReportStatus>(
+    initialReport ? 'score_ready' : 'idle'
+  );
+  const [data, setData] = useState<CreditReportDashboard | null>(
+    initialReport?.dashboard ?? null
+  );
+  const [fullReport, setFullReport] = useState<CreditReportData | null>(
+    initialReport?.report ?? null
+  );
   const [failurePhase, setFailurePhase] = useState<CreditReportFailurePhase | null>(null);
   const [isUnlockPending, setIsUnlockPending] = useState(false);
   const [scoreFetchKey, setScoreFetchKey] = useState(0);
@@ -157,6 +172,9 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
   }, []);
 
   useEffect(() => {
+    if (bureauResponse) {
+      return;
+    }
     if (isAuthLoading) {
       return;
     }
@@ -208,7 +226,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     return () => {
       controller.abort();
     };
-  }, [isAuthLoading, isAuthenticated, loadReadyDashboard, router, user?.phoneNumber]);
+  }, [bureauResponse, isAuthLoading, isAuthenticated, loadReadyDashboard, router, user?.phoneNumber]);
 
   useEffect(() => {
     if (!hasPendingEligibilitySubmission) {

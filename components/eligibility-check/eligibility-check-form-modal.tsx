@@ -5,7 +5,7 @@
  * Uses useLoanModalState for loading → form | success flow, consistent with car/gold loan modals.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
@@ -16,13 +16,9 @@ import {
 import type { EligibilityCheckFormValues } from './eligibility-check-form.config';
 import EligibilityCheckForm from './eligibility-check-form';
 import { LoadingScreen } from '../shared/loading-screen';
-
-interface EligibilityCheckFormModalProps {
-  onClose: () => void;
-  /** Called when bureau submit (or existing status) succeeds — typically navigate to credit score. */
-  onSuccess?: () => void;
-  onProcessing?: () => void;
-}
+import { CreditReportPage } from '../credit-report';
+import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
+import type { EligibilityCheckFormModalProps } from './eligibility-check-form-modal.types';
 
 const EligibilityCheckFormModal = ({
   onClose,
@@ -31,6 +27,7 @@ const EligibilityCheckFormModal = ({
 }: EligibilityCheckFormModalProps): React.ReactNode => {
   const { isAuthenticated, user } = useAuth();
   const [savedValues, setSavedValues] = useState<EligibilityCheckFormValues | null>(null);
+  const [bureauResponse, setBureauResponse] = useState<unknown | null>(null);
   useBodyScrollLock(true);
 
   const checkBureauReportStatus = useCallback(
@@ -38,7 +35,9 @@ const EligibilityCheckFormModal = ({
       const result = await checkEligibilityStatus(phoneNumber, signal);
       const existingValues = getSavedEligibilityValues(result.data);
       setSavedValues(existingValues);
-      return result.showSuccess && !existingValues;
+      const hasReport = result.showSuccess && isUsableBureauReportResponse(result.data);
+      setBureauResponse(hasReport ? result.data : null);
+      return hasReport;
     },
     []
   );
@@ -52,19 +51,27 @@ const EligibilityCheckFormModal = ({
     phoneNumber: user?.phoneNumber,
   });
 
-  useEffect(() => {
-    if (state === 'success' && onSuccess) {
-      onSuccess();
-    }
-  }, [state, onSuccess]);
-
   const renderContent = (): React.ReactNode => {
     switch (state) {
       case 'loading':
         return <LoadingScreen />;
 
       case 'success':
-        return <LoadingScreen />;
+        if (bureauResponse) {
+          return (
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <CreditReportPage bureauResponse={bureauResponse} />
+            </div>
+          );
+        }
+        return (
+          <EligibilityCheckForm
+            onClose={onClose}
+            isModal
+            initialValues={savedValues}
+            onProcessing={onProcessing ?? onSuccess}
+          />
+        );
 
       case 'form':
         return (
