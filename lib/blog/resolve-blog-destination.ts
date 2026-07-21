@@ -1,54 +1,21 @@
 import {
   fetchBlogRoutesFromSheet,
 } from '@/lib/sitemap/fetch-blog-routes-from-sheet';
-import { normalizeSheetSourcePath } from '@/lib/sitemap/fetch-sheet-routes';
+import { GOOGLE_SHEET_ROUTES } from '@/lib/constants/google-sheet-routes';
+import { createCachedSheetRouteResolver } from '@/lib/sitemap/create-cached-sheet-route-resolver';
 
 /** Fallback when pathname is not in the sheet (matches /blogs redirect target). */
 const BLOG_HOME_DESTINATION = 'https://blog.wecredit.co.in/';
 
-type BlogRouteCache = {
-  map: Map<string, string>;
-  expiresAt: number;
-};
-
-let routeCache: BlogRouteCache | null = null;
-
-const buildRouteMap = async (): Promise<Map<string, string>> => {
-  const routes = await fetchBlogRoutesFromSheet();
-  const map = new Map<string, string>();
-
-  for (const route of routes) {
-    const source = normalizeSheetSourcePath(route.source);
-    if (source && route.destination) {
-      map.set(source, route.destination);
-    }
-  }
-
-  return map;
-};
-
-const getCachedRouteMap = async (): Promise<Map<string, string>> => {
-  const now = Date.now();
-
-  if (routeCache && routeCache.expiresAt > now) {
-    return routeCache.map;
-  }
-
-  const map = await buildRouteMap();
-  routeCache = {
-    map,
-    expiresAt: now + 60 * 1000, // every 1 minute
-  };
-
-  return map;
-};
+const resolveBlogRoute = createCachedSheetRouteResolver({
+  cacheTtlMs: GOOGLE_SHEET_ROUTES.CACHE_TTL_MS,
+  fetchRoutes: fetchBlogRoutesFromSheet,
+});
 
 /**
  * Resolves the external blog URL for an on-site /blog path.
  * Uses a TTL cache so middleware does not fetch the sheet on every request.
  */
 export const getBlogDestination = async (pathname: string): Promise<string> => {
-  const normalizedPath = normalizeSheetSourcePath(pathname);
-  const map = await getCachedRouteMap();
-  return map.get(normalizedPath) ?? BLOG_HOME_DESTINATION;
+  return (await resolveBlogRoute(pathname)) ?? BLOG_HOME_DESTINATION;
 };

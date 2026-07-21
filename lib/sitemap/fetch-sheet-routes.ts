@@ -96,10 +96,16 @@ export async function fetchRoutesFromSheet(
   options: FetchSheetRoutesOptions
 ): Promise<SheetRouteMapping[]> {
   const { gid, logLabel } = options;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    GOOGLE_SHEET_ROUTES.REQUEST_TIMEOUT_MS
+  );
 
   try {
     const response = await fetch(getSheetExportUrl(gid), {
       cache: 'no-store',
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -114,5 +120,7 @@ export async function fetchRoutesFromSheet(
   } catch (error) {
     console.warn(`[${logLabel}] Unable to load routes from sheet:`, error);
     return [];
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
