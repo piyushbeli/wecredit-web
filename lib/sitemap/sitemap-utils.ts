@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
+import { getWebsiteBaseUrl } from '@/lib/seo/site-metadata';
 
 /** Canonical site origin without trailing slash */
 export const getSiteBaseUrl = (): string => {
-  return process.env.NEXT_PUBLIC_WEBSITE_BASE_URL?.replace(/\/$/, '') ?? '';
+  return getWebsiteBaseUrl();
 };
 
 /**

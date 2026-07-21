@@ -23,8 +23,9 @@ interface PageProps {
  */
 const OffersPage = async ({ searchParams }: PageProps) => {
   const cookieStore = await cookies();
-  const token = cookieStore.get(STORAGE_AUTH_TOKEN)?.value;
   const resolvedSearchParams = await searchParams;
+  const preAuth = resolvedSearchParams.pre_auth;
+  const token = cookieStore.get(STORAGE_AUTH_TOKEN)?.value ?? preAuth;
   if (!token) {
     const queryString = serializeAppRouterSearchParams(resolvedSearchParams);
     redirect(buildPathWithQuery('/personal-loan', queryString));
