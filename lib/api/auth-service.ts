@@ -274,12 +274,15 @@ function buildDefaultHeaders(): Record<string, string> {
 
 /**
  * Builds HTTP headers for authenticated API requests
- * Retrieves token and mobile from cookies and includes them in headers
+ * Retrieves token and mobile from cookies (or explicit overrides) and includes them in headers
  * @returns Headers object with Authorization, mobile, and deviceInfo
  */
-function buildAuthHeaders(): Record<string, string> {
-  const token = getCookie(STORAGE_AUTH_TOKEN);
-  const mobile = getCookie(STORAGE_MOBILE);
+function buildAuthHeaders(overrides?: {
+  token?: string;
+  mobile?: string;
+}): Record<string, string> {
+  const token = overrides?.token ?? getCookie(STORAGE_AUTH_TOKEN);
+  const mobile = overrides?.mobile ?? getCookie(STORAGE_MOBILE);
   const deviceInfo = getDeviceInfo();
   return {
     ...buildDefaultHeaders(),
@@ -324,15 +327,36 @@ async function authPost<T>(payload: unknown): Promise<{ data: T | null; error: s
  * Makes a GET request to the auth endpoint with auth headers
  * Used for token validation
  * @param endpoint - Optional endpoint query parameter (e.g., 'validate')
+ * @param authOverrides - Optional token/mobile when cookies are not yet readable
  */
-async function authGet<T>(endpoint?: string): Promise<{ data: T | null; error: string | null; code: number | null }> {
+async function authGet<T>(
+  endpoint?: string,
+  authOverrides?: { token?: string; mobile?: string }
+): Promise<{ data: T | null; error: string | null; code: number | null }> {
   try {
     const url = endpoint ? `${AUTH_ENDPOINT}?endpoint=${endpoint}` : AUTH_ENDPOINT;
     const response = await fetch(url, {
       method: 'GET',
-      headers: buildAuthHeaders(),
+      headers: buildAuthHeaders(authOverrides),
     });
-    const data = await response.json() as AuthApiResponse;
+    // Gateway may return plain text (e.g. 401 Unauthorized) instead of JSON.
+    let data: AuthApiResponse | null = null;
+    try {
+      data = await response.json() as AuthApiResponse;
+    } catch {
+      if (!response.ok) {
+        return {
+          data: null,
+          error: `HTTP ${response.status}`,
+          code: response.status,
+        };
+      }
+      return {
+        data: null,
+        error: 'Invalid response from auth API',
+        code: null,
+      };
+    }
     return {
       data: data as T,
       error: null,
@@ -495,11 +519,24 @@ async function resendOtp(mobile: string): Promise<AuthResult<ResendOtpResponse>>
 /**
  * Validates existing auth token
  * Makes GET request to /api/auth?endpoint=validate
+ * Pre-auth affiliate JWTs use the same validate call (no separate exchange endpoint).
+ * @param credentials - Optional token/mobile overrides (used right after setting cookies)
  * @returns Validation result with profile status
  */
-async function validateToken(): Promise<ValidateTokenResponse> {
-  const { data, error: networkError } = await authGet<AuthApiResponse>('validate');
+async function validateToken(credentials?: {
+  token?: string;
+  mobile?: string;
+}): Promise<ValidateTokenResponse> {
+  const { data, error: networkError, code } = await authGet<AuthApiResponse>(
+    'validate',
+    credentials
+  );
   if (networkError) {
+    // HTTP 401 from gateway means the token is not accepted — treat as invalid, not transient.
+    if (code === 401) {
+      clearAuthData();
+      return { isValid: false, code: 401, failureReason: 'invalid_token' };
+    }
     // A transient network issue should not force-logout a valid user session.
     return {
       isValid: false,
@@ -518,6 +555,11 @@ async function validateToken(): Promise<ValidateTokenResponse> {
       requiresProfileCompletion: data.code === AUTH_RESPONSE_CODES.PROFILE_INCOMPLETE,
       message: data.message,
     };
+  }
+  // 4011 = Missing or invalid Authorization header / token rejected by gateway
+  if (data.code === 4011 || data.code === 401) {
+    clearAuthData();
+    return { isValid: false, code: data.code, failureReason: 'invalid_token' };
   }
   // Token invalid - clear stored data
   clearAuthData();
