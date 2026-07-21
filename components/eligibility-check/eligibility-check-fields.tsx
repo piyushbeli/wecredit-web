@@ -162,7 +162,7 @@ const EligibilityCheckFields = ({
         <span>
           I authorize WeCredit to fetch my credit report from EQUIFAX and agree to the{' '}
           <Link
-            href="/terms-of-service/"
+            href="/partner-terms-and-conditions/"
             target="_blank"
             rel="noopener noreferrer"
             className="font-semibold text-brand-primary underline"

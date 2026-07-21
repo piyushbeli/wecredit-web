@@ -1,21 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
-import { authService, clearAuthData, setAuthToken, setMobile } from '@/lib/api';
+import { authService, setAuthToken, setMobile } from '@/lib/api';
 import { getCookie, deleteCookie } from 'cookies-next';
 import { AUTH_COOKIE_OPTIONS, STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { isAffiliateMnHubPath, runAffiliateMnFlow } from '@/lib/auth/affiliate-mn-flow';
 import { getLoggedInAffiliateApplyTrigger } from '@/lib/auth/logged-in-affiliate-apply-trigger';
-import {
-  buildOffersRedirectPath,
-  extractMobileFromPreAuthToken,
-  normalizeMnQueryParam,
-  removePreAuthFromUrl,
-} from '@/lib/auth/pre-auth-token';
 import { useAuthCookieSync } from '@/hooks/use-auth-cookie-sync';
 
 /**
@@ -25,20 +19,25 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-type PreAuthHandleResult = 'applied' | 'skipped' | 'failed';
-
 /**
  * AuthProvider Component
  * Validates existing auth token on app mount and syncs auth state with backend.
- * Supports affiliate pre-auth via URL `pre_auth` (mobile from JWT `phoneNumber` claim or `mn` query).
+ * Supports pre-authentication via URL parameters (pre_auth & mn).
  * Also handles partner and originSubLender URL params for lead creation.
- *
- * Pre-auth tokens are stored as the app auth token and confirmed via GET /api/auth?endpoint=validate
- * (no separate exchange endpoint in this codebase).
+ * 
+ * Flow (per PDF Step 1 - App Launch → Login State Identification):
+ * 1. On mount, check for pre-auth parameters in URL
+ * 2. If pre-auth found, apply it and skip validation
+ * 3. Extract partner and originSubLender from URL if present
+ * 4. Trigger apply flow if pre-auth params are present
+ * 5. Otherwise, check if token exists in cookies
+ * 6. If token exists, call validateToken API
+ * 7. If valid, keep user authenticated
+ * 8. If invalid, clear auth data and logout
  */
 export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
   const hasInitialized = useRef(false);
-  const preAuthPromiseRef = useRef<Promise<PreAuthHandleResult> | null>(null);
+  const preAuthHandled = useRef(false);
   const mnAffiliateOtpOpenedRef = useRef(false);
   /**
    * Prevents double-opening apply (guest modal or logged-in triggerApplyFlow) when affiliate
@@ -46,7 +45,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
    */
   const partnerLenderApplyModalOpenedRef = useRef(false);
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   // Stable dependency for effects: `searchParams` object identity may not change on SPA navigation.
   const searchParamsString = searchParams?.toString() ?? '';
@@ -141,150 +139,88 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactNode {
     [clearParams, normalizeParam, searchParams, setAttributionParams, setUrlParams]
   );
   /**
-   * Affiliate pre-auth: read `pre_auth`, resolve mobile from `mn` or JWT `phoneNumber`,
-   * validate via backend, then redirect to /offers.
+   * Handle pre-authentication from URL parameters
+   * Extracts pre_auth, mn, partner, and originSubLender from query params
+   * @returns true if pre-auth was applied, false otherwise
    */
-  const handlePreAuth = useCallback(async (): Promise<PreAuthHandleResult> => {
-    const preAuth = normalizeParam(searchParams?.get('pre_auth'));
-    if (!preAuth) {
-      return 'skipped';
+  const handlePreAuth = useCallback((): boolean => {
+    const preAuth = searchParams?.get('pre_auth');
+    const mobile = searchParams?.get('mn');
+
+    
+    // Both pre_auth and mobile must be present for authentication
+    if (!preAuth || !mobile) {
+      // Without pre_auth, do not capture partner/originSubLender params
+      return false;
     }
-    if (preAuthPromiseRef.current) {
-      return preAuthPromiseRef.current;
+
+    // Capture partner + marketing attribution params for API calls.
+    captureAttributionFromUrl({ cleanUrl: false });
+
+    // Only skip if we've already handled THIS EXACT pre_auth in this session
+    // Compare against stored values to allow new pre-auth params
+    if (typeof window !== 'undefined') {
+      const storedPreAuth = sessionStorage.getItem('pre_auth_token');
+      const storedMobile = sessionStorage.getItem('pre_auth_mobile');
+      if (storedPreAuth === preAuth && storedMobile === mobile) {
+        // Same user → only update attribution
+
+        // Remove only the token from the URL; keep affiliate params visible for partners.
+        const url = new URL(window.location.href);
+        url.searchParams.delete('pre_auth');
+        window.history.replaceState({}, '', url.toString());
+
+        return true;
+      }
     }
 
-    const runPreAuth = async (): Promise<PreAuthHandleResult> => {
-      captureAttributionFromUrl({ cleanUrl: false });
-
-      const phoneFromQuery = normalizeMnQueryParam(searchParams?.get('mn'));
-      const phoneFromToken = extractMobileFromPreAuthToken(preAuth);
-      const resolvedPhoneNumber = phoneFromQuery ?? phoneFromToken;
-
-      if (typeof window !== 'undefined') {
-        const storedPreAuth = sessionStorage.getItem('pre_auth_token');
-        if (storedPreAuth === preAuth) {
-          removePreAuthFromUrl();
-          const existingToken = getCookie(STORAGE_AUTH_TOKEN);
-          const existingMobile = getCookie(STORAGE_MOBILE);
-          if (existingToken && existingMobile) {
-            if (!isAuthenticated) {
-              setUser(
-                {
-                  id: `user-${existingMobile}`,
-                  phoneNumber: existingMobile.toString(),
-                  name: `User ${existingMobile.toString().slice(-4)}`,
-                },
-                existingToken.toString()
-              );
-            }
-            if (!pathname.startsWith('/offers')) {
-              router.replace(buildOffersRedirectPath(searchParamsString));
-            }
-            return 'applied';
-          }
-        }
-      }
-
-      if (!resolvedPhoneNumber) {
-        removePreAuthFromUrl();
-        return 'failed';
-      }
-
-      setLoading(true);
-      try {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('pre_auth_handled', '1');
-        sessionStorage.setItem('pre_auth_token', preAuth);
-        sessionStorage.setItem('pre_auth_mobile', resolvedPhoneNumber);
-      }
-
-      // Skip duplicate validate when Strict Mode / remount replays the same pre_auth token.
-      const validateDedupeKey = `pre_auth_validated:${preAuth}`;
-      if (typeof window !== 'undefined' && sessionStorage.getItem(validateDedupeKey) === '1') {
-        const existingToken = getCookie(STORAGE_AUTH_TOKEN);
-        const existingMobile = getCookie(STORAGE_MOBILE);
-        if (existingToken && existingMobile) {
-          setUser(
-            {
-              id: `user-${resolvedPhoneNumber}`,
-              phoneNumber: resolvedPhoneNumber,
-              name: `User ${resolvedPhoneNumber.slice(-4)}`,
-            },
-            preAuth
-          );
-          removePreAuthFromUrl();
-          if (!pathname.startsWith('/offers')) {
-            router.replace(buildOffersRedirectPath(searchParamsString));
-          }
-          return 'applied';
-        }
-      }
-
-      deleteCookie(STORAGE_AUTH_TOKEN, { path: AUTH_COOKIE_OPTIONS.path });
-        deleteCookie(STORAGE_MOBILE, { path: AUTH_COOKIE_OPTIONS.path });
-        setAuthToken(preAuth);
-        setMobile(resolvedPhoneNumber);
-
-        // Pass credentials explicitly so validate does not rely on cookie read timing.
-        const result = await authService.validateToken({
-          token: preAuth,
-          mobile: resolvedPhoneNumber,
-        });
-        if (!result.isValid) {
-          clearAuthData();
-          removePreAuthFromUrl();
-          return 'failed';
-        }
-
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem(`pre_auth_validated:${preAuth}`, '1');
-        }
-
-        setUser(
-          {
-            id: `user-${resolvedPhoneNumber}`,
-            phoneNumber: resolvedPhoneNumber,
-            name: `User ${resolvedPhoneNumber.slice(-4)}`,
-          },
-          preAuth
-        );
-        removePreAuthFromUrl();
-        router.replace(buildOffersRedirectPath(searchParamsString));
-        return 'applied';
-      } catch {
-        clearAuthData();
-        removePreAuthFromUrl();
-        return 'failed';
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    preAuthPromiseRef.current = runPreAuth();
-    try {
-      return await preAuthPromiseRef.current;
-    } finally {
-      preAuthPromiseRef.current = null;
+    preAuthHandled.current = true;
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('pre_auth_handled', '1');
+      sessionStorage.setItem('pre_auth_token', preAuth);
+      sessionStorage.setItem('pre_auth_mobile', mobile);
     }
-  }, [
-    captureAttributionFromUrl,
-    isAuthenticated,
-    normalizeParam,
-    pathname,
-    router,
-    searchParams,
-    searchParamsString,
-    setLoading,
-    setUser,
-  ]);
+
+    // Clear old auth cookies to prevent stale data
+    deleteCookie(STORAGE_AUTH_TOKEN, { path: AUTH_COOKIE_OPTIONS.path });
+    deleteCookie(STORAGE_MOBILE, { path: AUTH_COOKIE_OPTIONS.path });
+
+    // Use centralized helpers so cookie path/security settings stay consistent across flows.
+    setAuthToken(preAuth);
+    setMobile(mobile);
+    // Update auth store
+    setUser(
+      {
+        id: `user-${mobile}`,
+        phoneNumber: mobile,
+        name: `User ${mobile.slice(-4)}`,
+      },
+      preAuth
+    );
+    
+    // Trigger apply flow after a short delay to ensure auth state is set
+    setTimeout(() => {
+      triggerApplyFlow();
+    }, 100);
+
+    // Remove only the pre_auth token from the URL; keep affiliate query params.
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('pre_auth');
+      window.history.replaceState({}, '', url.toString());
+    }
+    return true; // Pre-auth was applied
+  }, [captureAttributionFromUrl, searchParams, setUser, triggerApplyFlow]);
 
   /**
    * Validates the existing auth token on app mount
    * Called once on initial render if user appears to be authenticated
    */
   const initializeAuth = useCallback(async (): Promise<void> => {
-    const preAuthResult = await handlePreAuth();
-    if (preAuthResult === 'applied') {
+    // First check for pre-auth in URL
+    const preAuthApplied = handlePreAuth();
+    if (preAuthApplied) {
+      // Pre-auth was applied, skip token validation
       setAuthInitialized(true);
       return;
     }
