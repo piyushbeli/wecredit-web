@@ -36,8 +36,9 @@ const EligibilityCheckFormModal = ({
   const checkBureauReportStatus = useCallback(
     async (phoneNumber: string, signal: AbortSignal): Promise<boolean> => {
       const result = await checkEligibilityStatus(phoneNumber, signal);
-      setSavedValues(getSavedEligibilityValues(result.data));
-      return result.showSuccess;
+      const existingValues = getSavedEligibilityValues(result.data);
+      setSavedValues(existingValues);
+      return result.showSuccess && !existingValues;
     },
     []
   );
