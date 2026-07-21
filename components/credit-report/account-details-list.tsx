@@ -35,7 +35,7 @@ export function AccountDetailsList({ accounts }: AccountDetailsListProps): React
     desktopTable = mobileList;
   } else {
     mobileList = (
-      <ul className="mt-3 space-y-3 lg:hidden">
+      <ul className="mt-3 min-w-0 max-w-full space-y-3 lg:hidden">
         {accounts.map((account) => {
           const statusTone = getAccountStatusTone(account.status);
           const subtitle = formatAccountLimitLabel({
@@ -47,16 +47,20 @@ export function AccountDetailsList({ accounts }: AccountDetailsListProps): React
           return (
             <li
               key={account.id}
-              className="rounded-xl border border-black/[0.06] bg-white px-4 py-3.5"
+              className="min-w-0 max-w-full rounded-xl border border-black/[0.06] bg-white px-4 py-3.5"
             >
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-bold text-[#1F2937]">{account.lenderName}</p>
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <p className="min-w-0 break-words text-sm font-bold text-[#1F2937] [overflow-wrap:anywhere]">
+                  {account.lenderName}
+                </p>
                 <p className={`shrink-0 text-xs font-semibold uppercase ${statusTone.textClassName}`}>
                   • {account.status}
                 </p>
               </div>
               <div className="mt-2 flex items-end justify-between gap-3">
-                <p className="min-w-0 text-xs leading-5 text-gray-500">{subtitle}</p>
+                <p className="min-w-0 break-words text-xs leading-5 text-gray-500 [overflow-wrap:anywhere]">
+                  {subtitle}
+                </p>
                 <div className="shrink-0 text-right">
                   <p className="text-[10px] uppercase tracking-wide text-gray-400">o/s</p>
                   <p className="text-sm font-bold text-[#1F2937]">
@@ -71,7 +75,7 @@ export function AccountDetailsList({ accounts }: AccountDetailsListProps): React
     );
 
     desktopTable = (
-      <div className="mt-4 hidden overflow-x-auto lg:block">
+      <div className="mt-4 hidden min-w-0 max-w-full overflow-x-auto lg:block">
         <table className="w-full min-w-[640px] border-collapse text-left">
           <thead>
             <tr className="border-b border-[#E7ECF3] text-[11px] font-medium uppercase tracking-wide text-gray-400">
@@ -92,7 +96,7 @@ export function AccountDetailsList({ accounts }: AccountDetailsListProps): React
               }
               return (
                 <tr key={account.id} className="border-b border-[#F0F3F7] last:border-b-0">
-                  <td className="py-3.5 pr-4 text-sm font-semibold text-[#1F2937]">
+                  <td className="break-words py-3.5 pr-4 text-sm font-semibold text-[#1F2937] [overflow-wrap:anywhere]">
                     {account.lenderName}
                   </td>
                   <td className="py-3.5 pr-4 text-sm text-gray-500">{account.accountType}</td>
@@ -118,7 +122,7 @@ export function AccountDetailsList({ accounts }: AccountDetailsListProps): React
   }
 
   return (
-    <section>
+    <section className="min-w-0 max-w-full">
       <h2 className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#8B1E2D]">
         Account details
       </h2>

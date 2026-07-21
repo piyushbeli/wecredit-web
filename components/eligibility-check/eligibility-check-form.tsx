@@ -8,6 +8,7 @@ import EligibilityCheckFields from './eligibility-check-fields';
 import { useEligibilityCheckForm } from './use-eligibility-check-form';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import type { EligibilityCheckFormValues } from './eligibility-check-form.config';
 
 const CREDIT_SCORE_BENEFITS = [
   '100% Free, always',
@@ -21,11 +22,13 @@ interface EligibilityCheckFormProps {
   isModal?: boolean;
   /** Called after validation to open the bureau processing screen. */
   onProcessing?: () => void;
+  initialValues?: EligibilityCheckFormValues | null;
 }
 
 const EligibilityCheckForm = ({
   onClose,
   isModal = false,
+  initialValues,
   onProcessing,
 }: EligibilityCheckFormProps): React.ReactNode => {
   const {
@@ -35,7 +38,7 @@ const EligibilityCheckForm = ({
     handleSubmit,
     isSubmitting,
     canSubmit,
-  } = useEligibilityCheckForm({ onProcessing });
+  } = useEligibilityCheckForm({ initialValues, onProcessing });
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithPhone } = useAuth();
 

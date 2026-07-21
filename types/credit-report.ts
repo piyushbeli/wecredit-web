@@ -264,7 +264,8 @@ export interface BureauReportData {
 }
 
 export interface BureauReportApiResponse {
-  readonly success: boolean;
+  readonly success?: boolean;
+  readonly status?: number;
   readonly message?: string | null;
   readonly pdfUrl?: string | null;
   readonly data?: BureauReportData | null;
@@ -278,3 +279,8 @@ export interface CreditReportProgressStep {
 
 /** @deprecated Prefer CreditReportStatus-driven views via useCreditReportPage */
 export type CreditReportPageStatus = 'loading' | 'ready' | 'error';
+
+
+export interface CreditReportPageProps {
+  readonly bureauResponse?: BureauReportApiResponse;
+}
