@@ -9,7 +9,9 @@ const BLOG_HOME_DESTINATION = 'https://blog.wecredit.co.in/';
 
 const resolveBlogRoute = createCachedSheetRouteResolver({
   cacheTtlMs: GOOGLE_SHEET_ROUTES.CACHE_TTL_MS,
-  fetchRoutes: fetchBlogRoutesFromSheet,
+  fetchRoutes: () => fetchBlogRoutesFromSheet({
+    requestTimeoutMs: GOOGLE_SHEET_ROUTES.PROXY_REQUEST_TIMEOUT_MS,
+  }),
 });
 
 /**

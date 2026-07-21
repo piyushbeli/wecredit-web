@@ -6,7 +6,9 @@ import { createCachedSheetRouteResolver } from '@/lib/sitemap/create-cached-shee
 
 const resolveLoanRoute = createCachedSheetRouteResolver({
   cacheTtlMs: GOOGLE_SHEET_ROUTES.CACHE_TTL_MS,
-  fetchRoutes: fetchLoanRoutesFromSheet,
+  fetchRoutes: () => fetchLoanRoutesFromSheet({
+    requestTimeoutMs: GOOGLE_SHEET_ROUTES.PROXY_REQUEST_TIMEOUT_MS,
+  }),
 });
 
 /**
