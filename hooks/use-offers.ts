@@ -15,6 +15,7 @@ import { categorizeOffers } from '@/lib/utils/offer-categorization';
 import { UseOffersReturn } from '@/types/offer';
 import { deploymentFeatures } from '@/lib/env-features';
 import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
+import { useAuthStore } from '@/stores/auth-store';
 
 export const newPLEnabled = deploymentFeatures.enableNewPL;
 /** Polling constants */
@@ -67,8 +68,12 @@ export function useOffers(): UseOffersReturn {
   const [isInitializing, setIsInitializing] = useState(true);
 
   const searchParams = useSearchParams();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const isNewLead = searchParams?.get('newLead') === 'true';
+  const hasPendingPreAuth = Boolean(
+    searchParams?.get('pre_auth') && searchParams?.get('mn')
+  );
   const lenderNameParam = searchParams?.get('lenderName') ??searchParams?.get('lendername') ?? '';
   const pathname = usePathname();
   const shouldSkipRehit = Boolean(lenderNameParam.trim());
@@ -254,6 +259,7 @@ export function useOffers(): UseOffersReturn {
 
   useEffect(() => {
     if (didInitRef.current) return;
+    if (hasPendingPreAuth && !isAuthenticated) return;
     didInitRef.current = true;
 
     const init = async () => {
@@ -341,7 +347,7 @@ export function useOffers(): UseOffersReturn {
     };
 
     init();
-  }, [isNewLead, shouldSkipRehit]);
+  }, [hasPendingPreAuth, isAuthenticated, isNewLead, shouldSkipRehit]);
 
   /* -------------------------------------------------- */
   /* ---------------- STOP CONDITIONS ----------------- */
