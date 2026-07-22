@@ -15,7 +15,6 @@ const HEADER_EXCLUDED_ROUTES = [
   '/home-loan',
   '/primepl-lead',
   '/instant-personal-loan',
-  '/credit-score',
   '/bureau-report',
 ] as const;
 

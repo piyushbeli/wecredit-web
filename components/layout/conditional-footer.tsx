@@ -22,7 +22,6 @@ const FOOTER_EXCLUDED_ROUTES: string[] = [
   '/login',
   '/otp-confirmation',
   '/offers',
-  '/credit-score',
   '/bureau-report',
 ];
 
