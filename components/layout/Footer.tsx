@@ -173,7 +173,7 @@ const Footer = () => {
         <div className="mt-8 border-t border-stone-300 pt-6 md:mt-24 md:flex md:items-center md:justify-between">
           {/* Copyright */}
           <p className="text-center text-sm font-normal leading-5 text-zinc-500 sm:text-base sm:leading-6 md:text-left md:text-base md:leading-6">
-            © 2026 Quantum X Global Private Limited. All Rights Reserved.
+            © 2026 QuantumX Global Private Limited. All Rights Reserved.
           </p>
 
           {/* Social Links - tablet and desktop */}
