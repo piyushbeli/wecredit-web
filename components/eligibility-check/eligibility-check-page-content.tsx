@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { STORAGE_CREDIT_SCORE_FETCH_PENDING } from '@/lib/constants/api-keys';
-import { CREDIT_REPORT_PATH } from '@/lib/constants/credit-report-routes';
+import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 import EligibilityCheckFormModal from './eligibility-check-form-modal';
 
 const EligibilityCheckPageContent = (): React.ReactNode => {
@@ -17,7 +17,7 @@ const EligibilityCheckPageContent = (): React.ReactNode => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(STORAGE_CREDIT_SCORE_FETCH_PENDING, '1');
     }
-    router.replace(CREDIT_REPORT_PATH);
+    router.replace(CREDIT_SCORE_PATH);
   }, [router]);
 
   return (

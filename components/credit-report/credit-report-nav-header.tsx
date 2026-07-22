@@ -15,19 +15,13 @@ export function CreditReportNavHeader({
   title = 'Credit Score',
   onBack,
 }: CreditReportNavHeaderProps): ReactNode {
-
-  const handleBack = () => {
-
-    window.history.back();
-
-  };
   return (
     <header className="border-b border-black/[0.06] bg-white px-4 py-3">
       <div className="flex items-center gap-3">
         {onBack ? (
           <button
             type="button"
-            onClick={handleBack}
+            onClick={onBack}
             aria-label="Go back"
             className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-[#1F2937] transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
           >
