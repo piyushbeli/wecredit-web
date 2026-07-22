@@ -18,6 +18,10 @@ import {
   TIMEOUT_DEVELOPMENT,
   TIMEOUT_PRODUCTION,
   STORAGE_AUTH_TOKEN,
+  STORAGE_BUREAU_PDF_URL,
+  STORAGE_BUREAU_RESPONSE,
+  STORAGE_CREDIT_SCORE_FETCH_PENDING,
+  STORAGE_CREDIT_SCORE_READY,
   STORAGE_MOBILE,
   AUTH_COOKIE_OPTIONS,
 } from '@/lib/constants/api-keys';
@@ -97,6 +101,10 @@ export function clearAuthData(): void {
 
   if (typeof window !== 'undefined') {
     // Keep all auth cleanup in one place so every logout path behaves identically.
+    sessionStorage.removeItem(STORAGE_BUREAU_RESPONSE);
+    sessionStorage.removeItem(STORAGE_BUREAU_PDF_URL);
+    sessionStorage.removeItem(STORAGE_CREDIT_SCORE_READY);
+    sessionStorage.removeItem(STORAGE_CREDIT_SCORE_FETCH_PENDING);
     sessionStorage.removeItem('pre_auth_handled');
     sessionStorage.removeItem('pre_auth_token');
     sessionStorage.removeItem('pre_auth_mobile');

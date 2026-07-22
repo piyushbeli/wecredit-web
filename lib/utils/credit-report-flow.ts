@@ -181,19 +181,3 @@ export function getPaymentStatusTone(status: CreditReportPaymentStatus): Payment
   }
   return { cellClassName: 'bg-[#E7ECF3]', label: 'No data' };
 }
-
-/**
- * Opens a PDF URL in a new tab.
- */
-export function openCreditReportPdf(pdfUrl: string): boolean {
-  if (!pdfUrl.trim()) {
-    return false;
-  }
-  const openedWindow = window.open('', '_blank');
-  if (!openedWindow) {
-    return false;
-  }
-  openedWindow.opener = null;
-  openedWindow.location.href = pdfUrl;
-  return true;
-}

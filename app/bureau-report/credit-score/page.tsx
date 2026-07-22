@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   },
 };
 
-const BureauCreditReportPage = (): React.ReactNode => {
+const BureauCreditScorePage = (): React.ReactNode => {
   return <CreditReportPage />;
 };
 
-export default BureauCreditReportPage;
+export default BureauCreditScorePage;

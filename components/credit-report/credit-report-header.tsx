@@ -4,6 +4,7 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface CreditReportHeaderProps {
   readonly onTalkToUs?: () => void;
@@ -27,6 +28,7 @@ export function CreditReportHeader({
       )}
     >
       <div className="flex items-center justify-between">
+      <Link href="/" aria-label="Go to home page">
         <Image
           src={IMAGES.LOGOS.TRANSPARENT}
           alt="WeCredit"
@@ -35,6 +37,7 @@ export function CreditReportHeader({
           className="h-6 w-auto object-contain"
           priority
         />
+        </Link>
         {showTalkToUs ? (
           <p className="hidden text-sm text-gray-500 lg:block">
             Need help?{' '}

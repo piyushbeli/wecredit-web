@@ -1,5 +1,3 @@
-/**
- * Credit report dashboard route (nested under bureau-report flow).
- * Trailing slash matches next.config trailingSlash: true.
- */
-export const CREDIT_REPORT_PATH = '/bureau-report/' as const;
+export const CREDIT_SCORE_PATH = '/bureau-report/credit-score/' as const;
+export const VIEW_REPORT_PATH = '/bureau-report/credit-score/view-report/' as const;
+export const BUREAU_PDF_DOWNLOAD_PATH = '/api/bureau-report/download' as const;

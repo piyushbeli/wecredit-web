@@ -24,7 +24,7 @@ export function FetchingCreditScore({
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 py-10 lg:min-h-[calc(100vh-5rem)] lg:px-6">
       <div className="w-full max-w-md text-center lg:rounded-2xl lg:border lg:border-black/[0.04] lg:bg-white lg:px-10 lg:py-12 lg:shadow-[0_12px_40px_rgba(16,24,40,0.08)]">
-        <div className="lg:hidden">
+        <div className="flex justify-center lg:hidden">
           <CreditReportLoader label="Fetching credit score" />
         </div>
         <div className="hidden lg:block">
