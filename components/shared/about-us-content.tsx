@@ -136,13 +136,13 @@ const AboutUsContent = (): React.ReactNode => {
         </div> */}
 
         {/* Timeline */}
-        <div className="mb-6 mt-8">
+        {/* <div className="mb-6 mt-8">
           <h2 className=" font-medium text-base leading-[1] tracking-normal text-black">
             Our Journey
           </h2>
-        </div>
+        </div> */}
 
-        <div className="relative w-full">
+        {/* <div className="relative w-full">
           <div className="absolute left-[42px] top-0 bottom-0 w-[2px] bg-[#D9D9D9]" />
 
           <div className="space-y-10">
@@ -200,7 +200,7 @@ const AboutUsContent = (): React.ReactNode => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Achievements */}
         <div className="mb-6 mt-8">
