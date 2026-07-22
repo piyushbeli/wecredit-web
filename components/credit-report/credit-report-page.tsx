@@ -173,7 +173,9 @@ export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {})
   }
 
   let header: ReactNode;
-  if (isBootstrapped && isFlowView) {
+  if (isBootstrapped && view === 'processing') {
+    header = null;
+  } else if (isBootstrapped && isFlowView) {
     const canGoBack = view !== 'processing';
 
     const handleBack = () => {

@@ -13,12 +13,14 @@ import {
 } from '@/lib/api/eligibility-check-service';
 import {
   getCreditReportDashboard,
+  getFullCreditReport,
   pollCreditScoreStatus,
   pollFullCreditReportStatus,
 } from '@/lib/api/credit-report-service';
 import {
   STORAGE_CREDIT_SCORE_FETCH_PENDING,
   STORAGE_CREDIT_SCORE_READY,
+  STORAGE_FULL_CREDIT_REPORT_READY,
 } from '@/lib/constants/api-keys';
 import { getStoredBureauResponse } from '@/lib/utils/bureau-pdf';
 import {
@@ -83,6 +85,7 @@ function markCreditScoreReady(): void {
 function clearCreditScoreSessionFlags(): void {
   writeSessionFlag(STORAGE_CREDIT_SCORE_READY, false);
   writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
+  writeSessionFlag(STORAGE_FULL_CREDIT_REPORT_READY, false);
 }
 
 /**
@@ -97,13 +100,15 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
     }
     return adaptBureauReport(bureauResponse);
   }, [bureauResponse]);
+  const shouldRestoreFullReport = initialReport !== null
+    && readSessionFlag(STORAGE_FULL_CREDIT_REPORT_READY);
   const scoreAbortRef = useRef<AbortController | null>(null);
   const fullReportAbortRef = useRef<AbortController | null>(null);
   const unlockInFlightRef = useRef(false);
   const isPdfOpeningRef = useRef(false);
   const [isBootstrapped, setIsBootstrapped] = useState(initialReport !== null);
   const [status, setStatus] = useState<CreditReportStatus>(
-    initialReport ? 'score_ready' : 'idle'
+    shouldRestoreFullReport ? 'full_report_ready' : initialReport ? 'score_ready' : 'idle'
   );
   const [data, setData] = useState<CreditReportDashboard | null>(
     initialReport?.dashboard ?? null
@@ -137,7 +142,13 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
     try {
       const dashboard = await getCreditReportDashboard();
       setData(dashboard);
-      setStatus('score_ready');
+      if (readSessionFlag(STORAGE_FULL_CREDIT_REPORT_READY)) {
+        const report = await getFullCreditReport();
+        setFullReport(report);
+        setStatus('full_report_ready');
+      } else {
+        setStatus('score_ready');
+      }
       setFailurePhase(null);
       markCreditScoreReady();
     } catch {
@@ -149,6 +160,7 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
 
   const startScoreFetch = useCallback((): void => {
     abortFullReportFetch();
+    writeSessionFlag(STORAGE_FULL_CREDIT_REPORT_READY, false);
     unlockInFlightRef.current = false;
     setIsUnlockPending(false);
     setFullReport(null);
@@ -321,6 +333,7 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
         }
         setFullReport(report);
         setStatus('full_report_ready');
+        writeSessionFlag(STORAGE_FULL_CREDIT_REPORT_READY, true);
         unlockInFlightRef.current = false;
         setIsUnlockPending(false);
       } catch {
@@ -434,6 +447,7 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
       unlockInFlightRef.current = false;
       setIsUnlockPending(false);
       setFullReport(null);
+      writeSessionFlag(STORAGE_FULL_CREDIT_REPORT_READY, false);
       setFailurePhase(null);
       setStatus('score_ready');
       return;
