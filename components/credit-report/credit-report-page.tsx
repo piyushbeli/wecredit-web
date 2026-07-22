@@ -83,7 +83,13 @@ export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {})
   } else if (view === 'processing') {
     body = <ProcessingFullReport />;
   } else if (view === 'full_report' && fullReport) {
-    body = <FullCreditReport report={fullReport} onDownloadPdf={handleDownloadPdf} />;
+    body = (
+      <FullCreditReport
+        report={fullReport}
+        onDownloadPdf={handleDownloadPdf}
+        onBack={handleBack}
+      />
+    );
   } else if (view === 'error') {
     let errorTitle: string = CREDIT_REPORT_ERROR_COPY.scoreTitle;
     let errorDescription: string = CREDIT_REPORT_ERROR_COPY.scoreDescription;
@@ -176,19 +182,10 @@ export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {})
   if (isBootstrapped && view === 'processing') {
     header = null;
   } else if (isBootstrapped && isFlowView) {
-    const canGoBack = view !== 'processing';
-
-    const handleBack = () => {
-      if (canGoBack) {
-        handleBack();
-      } else {
-        window.history.back();
-      }
-    };
     header = (
       <>
         <div className="lg:hidden">
-          <CreditReportNavHeader onBack={canGoBack ? handleBack : undefined} />
+          <CreditReportNavHeader onBack={handleBack} />
         </div>
         <div className="hidden lg:block">
           <CreditReportHeader

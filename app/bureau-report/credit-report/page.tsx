@@ -1,17 +1,8 @@
-import type { Metadata } from 'next';
-import { CreditReportPage } from '@/components/credit-report';
+import { redirect } from 'next/navigation';
+import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 
-export const metadata: Metadata = {
-  title: 'Your Credit Report | WeCredit',
-  description: 'View your Equifax credit score, factors, summary, and personalized loan offers.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
-const BureauCreditReportPage = (): React.ReactNode => {
-  return <CreditReportPage />;
+const BureauCreditReportPage = (): never => {
+  redirect(CREDIT_SCORE_PATH);
 };
 
 export default BureauCreditReportPage;

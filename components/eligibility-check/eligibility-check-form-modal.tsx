@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useLoanModalState } from '@/hooks/use-loan-modal-state';
@@ -13,6 +14,11 @@ import {
   checkEligibilityStatus,
   getSavedEligibilityValues,
 } from '@/lib/api/eligibility-check-service';
+import {
+  STORAGE_CREDIT_SCORE_FETCH_PENDING,
+  STORAGE_CREDIT_SCORE_READY,
+} from '@/lib/constants/api-keys';
+import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 import type { EligibilityCheckFormValues } from './eligibility-check-form.config';
 import EligibilityCheckForm from './eligibility-check-form';
 import { LoadingScreen } from '../shared/loading-screen';
@@ -25,6 +31,7 @@ const EligibilityCheckFormModal = ({
   onSuccess,
   onProcessing,
 }: EligibilityCheckFormModalProps): React.ReactNode => {
+  const router = useRouter();
   const { isAuthenticated, user } = useAuth();
   const [savedValues, setSavedValues] = useState<EligibilityCheckFormValues | null>(null);
   const [bureauResponse, setBureauResponse] = useState<unknown | null>(null);
@@ -36,10 +43,15 @@ const EligibilityCheckFormModal = ({
       const existingValues = getSavedEligibilityValues(result.data);
       setSavedValues(existingValues);
       const hasReport = result.showSuccess && isUsableBureauReportResponse(result.data);
+      if (hasReport) {
+        sessionStorage.removeItem(STORAGE_CREDIT_SCORE_FETCH_PENDING);
+        sessionStorage.setItem(STORAGE_CREDIT_SCORE_READY, '1');
+        router.replace(CREDIT_SCORE_PATH);
+      }
       setBureauResponse(hasReport ? result.data : null);
       return hasReport;
     },
-    []
+    [router]
   );
 
   const isReady = isAuthenticated && !!user?.phoneNumber;

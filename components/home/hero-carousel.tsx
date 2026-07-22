@@ -16,7 +16,7 @@ import {
   STORAGE_MOBILE,
 } from '@/lib/constants/api-keys';
 import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
-import { CREDIT_REPORT_PATH } from '@/lib/constants/credit-report-routes';
+import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
 import type { MouseEvent } from 'react';
 
@@ -83,7 +83,7 @@ const HeroCarousel = (): JSX.Element => {
         if (result.showSuccess && isUsableBureauReportResponse(result.data)) {
           sessionStorage.removeItem(STORAGE_CREDIT_SCORE_FETCH_PENDING);
           sessionStorage.setItem(STORAGE_CREDIT_SCORE_READY, '1');
-          router.push(CREDIT_REPORT_PATH);
+          router.push(CREDIT_SCORE_PATH);
           return;
         }
         router.push('/bureau-report/');

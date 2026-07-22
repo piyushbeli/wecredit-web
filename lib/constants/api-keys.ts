@@ -28,9 +28,6 @@ export const STORAGE_CREDIT_SCORE_READY = 'credit_score_ready';
 /** SessionStorage: force score-fetch screen after bureau form submit */
 export const STORAGE_CREDIT_SCORE_FETCH_PENDING = 'credit_score_fetch_pending';
 
-/** SessionStorage: keep the generated full report open after refresh */
-export const STORAGE_FULL_CREDIT_REPORT_READY = 'full_credit_report_ready';
-
 /** Auth cookie configuration (7 days) shared across all auth flows */
 export const AUTH_COOKIE_OPTIONS = {
   maxAge: 60 * 60 * 24 * 7,

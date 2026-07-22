@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
-import { CREDIT_REPORT_PATH } from '@/lib/constants/credit-report-routes';
+import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 
 /**
- * Legacy route — credit report UI now lives under /bureau-report/credit-report/.
+ * Legacy route — credit score UI now lives under /bureau-report/credit-score/.
  */
 const LegacyCreditReportPage = (): never => {
-  redirect(CREDIT_REPORT_PATH);
+  redirect(CREDIT_SCORE_PATH);
 };
 
 export default LegacyCreditReportPage;
