@@ -18,7 +18,7 @@ const tools: Tool[] = [
     title: 'Personal Loan calculator',
     description: 'Calculate personal loan EMI',
     href: '/calculator/personal-loan',
-    imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
+    imagePath: IMAGES.TOOLS_AND_CALCULATORS_ILLUSTRATIONS.TC_PERSONAL_LOAN,
     fallbackIcon: Calculator,
   },
   {
@@ -26,7 +26,7 @@ const tools: Tool[] = [
     title: 'EMI calculator',
     description: 'Calculate personal loan EMI',
     href: '/calculator/emi',
-    imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
+    imagePath: IMAGES.TOOLS_AND_CALCULATORS_ILLUSTRATIONS.TC_EMI_CALC,
     fallbackIcon: PieChart,
   },
   {
@@ -34,7 +34,7 @@ const tools: Tool[] = [
     title: 'Business Loan calculator',
     description: 'Calculate business loan EMI',
     href: '/calculator/business-loan',
-    imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
+    imagePath: IMAGES.TOOLS_AND_CALCULATORS_ILLUSTRATIONS.TC_BUSINESS_LOAN_CALC,
     fallbackIcon: Briefcase,
   },
   {
@@ -42,7 +42,7 @@ const tools: Tool[] = [
     title: 'Check Credit Score',
     description: 'Check your credit score for free',
     href: '/bureau-report/',
-    imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
+    imagePath: IMAGES.TOOLS_AND_CALCULATORS_ILLUSTRATIONS.TC_CREDIT_SCORE,
     fallbackIcon: Gauge,
   },
 ];
