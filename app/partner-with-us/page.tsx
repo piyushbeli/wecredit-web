@@ -9,6 +9,11 @@ import { ActionButton } from '@/components/shared';
 import { partnerWithUs } from '@/lib/api/partner-service';
 import { useAuth } from '@/hooks/use-auth';
 import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper';
+import { sanitizeFormTextInput } from '@/lib/utils/form-helpers';
+import {
+  getEmailTextValidationError,
+  getPlainTextFieldValidationError,
+} from '@/lib/utils/validators';
 /**
  * Partner with Us page component
  * Displays a form for partnership inquiries
@@ -45,7 +50,12 @@ const PartnerWithUsPage = (): React.ReactNode => {
    * This provides immediate feedback by removing error messages as user corrects input
    */
   const handleChange = (field: string, value: string): void => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    const nextValue = field === 'email'
+      ? sanitizeFormTextInput(value, 'email')
+      : field === 'phoneNumber'
+        ? value
+        : sanitizeFormTextInput(value, 'plain');
+    setFormData((prev) => ({ ...prev, [field]: nextValue }));
     // Clear error when user starts typing to provide immediate feedback
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
@@ -63,13 +73,23 @@ const PartnerWithUsPage = (): React.ReactNode => {
     // Validate full name - required field
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
+    } else {
+      const fullNameTextError = getPlainTextFieldValidationError(formData.fullName);
+      if (fullNameTextError) {
+        newErrors.fullName = fullNameTextError;
+      }
     }
 
     // Validate email - required and must match email pattern
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    } else {
+      const emailTextError = getEmailTextValidationError(formData.email);
+      if (emailTextError) {
+        newErrors.email = emailTextError;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = 'Please enter a valid email address';
+      }
     }
 
     // Validate phone number - required and must be exactly 10 digits
@@ -83,6 +103,11 @@ const PartnerWithUsPage = (): React.ReactNode => {
     // Validate message - required field
     if (!formData.message.trim()) {
       newErrors.message = 'Message is required';
+    } else {
+      const messageTextError = getPlainTextFieldValidationError(formData.message);
+      if (messageTextError) {
+        newErrors.message = messageTextError;
+      }
     }
 
     setErrors(newErrors);

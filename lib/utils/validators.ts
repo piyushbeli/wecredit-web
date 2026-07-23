@@ -3,6 +3,23 @@
  * Validation functions for lead creation form fields
  */
 
+import {
+  getTextInputValidationError,
+  type FormTextInputMode,
+} from '@/lib/utils/form-helpers';
+
+export { getTextInputValidationError, type FormTextInputMode };
+
+/** Returns a validation error for plain-text fields, or an empty string when valid. */
+export function getPlainTextFieldValidationError(value: string): string {
+  return getTextInputValidationError(value, 'plain');
+}
+
+/** Returns a validation error for email fields (emoji-only check), or an empty string when valid. */
+export function getEmailTextValidationError(value: string): string {
+  return getTextInputValidationError(value, 'email');
+}
+
 /** PAN Card validation regex (ABCDE1234F format) */
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 

@@ -9,6 +9,7 @@ import {
   formatDobForDisplay,
   getDobMaxDate,
   normalizeDobTextInput,
+  sanitizeFormTextInput,
   sanitizeNumericInput,
   sanitizePanInput,
 } from '@/lib/utils/form-helpers';
@@ -158,6 +159,14 @@ function isIOSDevice(): boolean {
   return isAppleMobile || isIpadOs;
 }
 
+/** Free-text fields that allow letters, digits, and spaces only. */
+const PLAIN_TEXT_FIELDS: FormFieldKey[] = [
+  'name',
+  'companyName',
+  'permanentAddress',
+  'companyAddress',
+];
+
 /**
  * Normalizes user input for fields that need strict formatting.
  */
@@ -168,7 +177,13 @@ function normalizeFieldValue(key: FormFieldKey, value: string): string {
   if (NUMERIC_FIELDS.includes(key)) {
     return sanitizeNumericInput(value, getMaxLength(key));
   }
-  return value;
+  if (EMAIL_FIELDS.includes(key)) {
+    return sanitizeFormTextInput(value, 'email');
+  }
+  if (PLAIN_TEXT_FIELDS.includes(key)) {
+    return sanitizeFormTextInput(value, 'plain');
+  }
+  return sanitizeFormTextInput(value, 'plain');
 }
 
 const DynamicField = ({

@@ -8,6 +8,10 @@ import {
   isValidDobFormat,
   normalizePan,
 } from '@/lib/utils/form-helpers';
+import {
+  getEmailTextValidationError,
+  getPlainTextFieldValidationError,
+} from '@/lib/utils/validators';
 
 export { formatDobForApi, dobToNativeFormat };
 export type GenderOption = 'Male' | 'Female' | 'Other';
@@ -72,15 +76,32 @@ export function validateEligibilityCheckForm(
   const firstNameTrim = values.firstName.trim();
   if (!firstNameTrim) {
     errors.firstName = 'First name is required';
-  } else if (firstNameTrim.length < 2 || firstNameTrim.length > 50) {
-    errors.firstName = 'First name must be between 2 and 50 characters';
+  } else {
+    const firstNameTextError = getPlainTextFieldValidationError(values.firstName);
+    if (firstNameTextError) {
+      errors.firstName = firstNameTextError;
+    } else if (firstNameTrim.length < 2 || firstNameTrim.length > 50) {
+      errors.firstName = 'First name must be between 2 and 50 characters';
+    }
   }
 
   const lastNameTrim = values.lastName.trim();
   if (!lastNameTrim) {
     errors.lastName = 'Last name is required';
-  } else if (lastNameTrim.length < 2 || lastNameTrim.length > 50) {
-    errors.lastName = 'Last name must be between 2 and 50 characters';
+  } else {
+    const lastNameTextError = getPlainTextFieldValidationError(values.lastName);
+    if (lastNameTextError) {
+      errors.lastName = lastNameTextError;
+    } else if (lastNameTrim.length < 2 || lastNameTrim.length > 50) {
+      errors.lastName = 'Last name must be between 2 and 50 characters';
+    }
+  }
+
+  if (values.middleName.trim()) {
+    const middleNameTextError = getPlainTextFieldValidationError(values.middleName);
+    if (middleNameTextError) {
+      errors.middleName = middleNameTextError;
+    }
   }
 
   if (!values.gender.trim()) {
@@ -118,8 +139,13 @@ export function validateEligibilityCheckForm(
     errors.pincode = 'Enter a valid 6-digit pin code';
   }
 
-  if (!isValidEmail(values.email)) {
-    errors.email = 'Enter a valid email address';
+  if (values.email.trim()) {
+    const emailTextError = getEmailTextValidationError(values.email);
+    if (emailTextError) {
+      errors.email = emailTextError;
+    } else if (!isValidEmail(values.email)) {
+      errors.email = 'Enter a valid email address';
+    }
   }
 
   return errors;
