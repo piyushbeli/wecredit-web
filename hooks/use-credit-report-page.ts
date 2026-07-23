@@ -52,7 +52,6 @@ interface UseCreditReportPageReturn {
   readonly handleRetry: () => void;
   readonly handleRefresh: () => void;
   readonly handleStartOver: () => void;
-  readonly handleApplyLoan: () => void;
   readonly handleUnlockReport: () => void;
   readonly handleDownloadPdf: () => void;
   readonly handleTalkToUs: () => void;
@@ -388,11 +387,6 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
     router.push('/bureau-report/');
   };
 
-  const handleApplyLoan = (): void => {
-    // TODO: Navigate using offerId from backend when offer deep-link is available.
-    router.push('/personal-loan/');
-  };
-
   const handleUnlockReport = (): void => {
     if (unlockInFlightRef.current || isUnlockPending || status === 'generating_full_report') {
       return;
@@ -467,7 +461,6 @@ export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPa
     handleRetry,
     handleRefresh,
     handleStartOver,
-    handleApplyLoan,
     handleUnlockReport,
     handleDownloadPdf,
     handleTalkToUs,

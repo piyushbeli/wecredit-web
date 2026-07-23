@@ -1,9 +1,12 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
+import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-content';
 import { useCreditReportPage } from '@/hooks/use-credit-report-page';
 import { CREDIT_REPORT_ERROR_COPY } from '@/lib/constants/credit-report-flow';
+import { CREDIT_SCORE_ROUTE_PREFIX } from '@/lib/constants/credit-report-routes';
 import { formatGetFullReportCta } from '@/lib/utils/credit-report-formatters';
 import { CreditReportHeader } from './credit-report-header';
 import { CreditReportNavHeader } from './credit-report-nav-header';
@@ -32,6 +35,7 @@ const FullCreditReport = dynamic(
  * Credit-report flow: fetching → summary → processing → full report.
  */
 export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {}): ReactNode {
+  const pathname = usePathname();
   const {
     isBootstrapped,
     view,
@@ -43,7 +47,6 @@ export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {})
     handleRetry,
     handleRefresh,
     handleStartOver,
-    handleApplyLoan,
     handleUnlockReport,
     handleDownloadPdf,
     handleTalkToUs,
@@ -128,7 +131,7 @@ export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {})
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,32%)_minmax(0,68%)] lg:gap-5">
             <CreditScoreCard creditScore={data.creditScore} onRefresh={handleRefresh} />
             {canShowLoanOffer ? (
-              <LoanOfferCard offer={loanOffer} onApply={handleApplyLoan} />
+              <LoanOfferCard offer={loanOffer} />
             ) : null}
           </div>
           {canShowFullReport ? (
@@ -200,12 +203,20 @@ export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {})
     header = <CreditReportHeader onTalkToUs={handleTalkToUs} />;
   }
 
+  let applyFlowContent: ReactNode = null;
+  if (pathname.startsWith(CREDIT_SCORE_ROUTE_PREFIX)) {
+    applyFlowContent = <PersonalLoanContent />;
+  }
+
   return (
-    <div className={shellClassName}>
-      <div className={panelClassName}>
-        {header}
-        <main className={mainClassName}>{body}</main>
+    <>
+      <div className={shellClassName}>
+        <div className={panelClassName}>
+          {header}
+          <main className={mainClassName}>{body}</main>
+        </div>
       </div>
-    </div>
+      {applyFlowContent}
+    </>
   );
 }

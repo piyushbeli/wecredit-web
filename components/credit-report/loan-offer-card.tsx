@@ -2,22 +2,19 @@
 
 import { ArrowRight } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { LoanOfferInfo } from '@/types/credit-report';
+import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import {
   formatInrAmount,
   formatLoanOfferDesktopSubtitle,
   formatLoanOfferMobileSubtitle,
 } from '@/lib/utils/credit-report-formatters';
-
-interface LoanOfferCardProps {
-  readonly offer: LoanOfferInfo;
-  readonly onApply: () => void;
-}
+import type { LoanOfferCardProps } from './loan-offer-card.types';
 
 /**
  * Pre-approved personal loan offer card.
  */
-export function LoanOfferCard({ offer, onApply }: LoanOfferCardProps): ReactNode {
+export function LoanOfferCard({ offer }: LoanOfferCardProps): ReactNode {
+  const { triggerApplyFlow } = useLoanApplicationStore();
   const amountLabel = formatInrAmount(offer.maximumAmount);
   const mobileSubtitle = formatLoanOfferMobileSubtitle(
     offer.minimumInterestRate,
@@ -29,6 +26,10 @@ export function LoanOfferCard({ offer, onApply }: LoanOfferCardProps): ReactNode
     collateralRequired: offer.collateralRequired,
   });
   const showNoImpactNote = !offer.creditScoreImpact;
+
+  const handleApply = (): void => {
+    triggerApplyFlow();
+  };
 
   return (
     <section className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-[#2F6BFF] to-[#1E4FD6] p-5 text-white shadow-[0_12px_28px_rgba(30,79,214,0.28)] lg:p-7">
@@ -56,7 +57,7 @@ export function LoanOfferCard({ offer, onApply }: LoanOfferCardProps): ReactNode
       <div className="mt-5 flex flex-col gap-3 lg:mt-auto lg:flex-row lg:items-center lg:gap-5 lg:pt-6">
         <button
           type="button"
-          onClick={onApply}
+          onClick={handleApply}
           className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white text-base font-semibold text-[#1E4FD6] transition-opacity hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:w-auto lg:px-8"
         >
           {offer.ctaText}
