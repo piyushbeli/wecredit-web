@@ -8,8 +8,8 @@ import {
 } from '@/lib/sitemap/sitemap-utils';
 import { shouldAllowSitemap } from '@/lib/utils/seo-utils';
 
-/** Revalidate posts sitemap daily */
-export const revalidate = 60; // every 1 minute
+/** Revalidate posts sitemap every five minutes (matches the sheet cache). */
+export const revalidate = 300;
 
 /**
  * Blog posts sitemap at /sitemap-posts/sitemap.xml.
