@@ -88,6 +88,7 @@ export function useLoanModalState(
 
       try {
         const hasExistingLead = await checkStatus(phoneNumber, controller.signal);
+        if (controller.signal.aborted) return;
         setState(hasExistingLead ? 'success' : 'form');
       } catch (error) {
         if (isAbortError(error)) {

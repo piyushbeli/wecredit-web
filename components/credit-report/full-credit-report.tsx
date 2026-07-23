@@ -1,6 +1,6 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { CreditReportData } from '@/types/credit-report';
 import {
@@ -17,6 +17,7 @@ import { RecentEnquiries } from './recent-enquiries';
 interface FullCreditReportProps {
   readonly report: CreditReportData;
   readonly onDownloadPdf: () => void;
+  readonly onBack: () => void;
 }
 
 /**
@@ -25,6 +26,7 @@ interface FullCreditReportProps {
 export function FullCreditReport({
   report,
   onDownloadPdf,
+  onBack,
 }: FullCreditReportProps): ReactNode {
   const generatedDateMobile = formatReportGeneratedDate(report.generatedAt);
   const generatedDateDesktop = formatReportGeneratedDateDesktop(report.generatedAt);
@@ -38,7 +40,15 @@ export function FullCreditReport({
   const enquiries = report.enquiries ?? [];
 
   return (
-    <div className="flex flex-col gap-5 pb-4 lg:gap-6">
+    <div className="flex min-w-0 max-w-full flex-col gap-5 pb-4 lg:gap-6">
+      <button
+        type="button"
+        onClick={onBack}
+        className="hidden w-fit cursor-pointer items-center gap-2 text-sm font-semibold text-[#1F2937] hover:text-brand-primary lg:inline-flex"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Back to credit score
+      </button>
       <section className="rounded-2xl bg-[#8B1E2D] p-4 text-white sm:p-5 lg:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -66,11 +76,11 @@ export function FullCreditReport({
         </p>
       </section>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,0.6fr)] lg:gap-6">
-        <div className="order-2 rounded-2xl border border-black/[0.04] bg-white p-4 shadow-[0_8px_24px_rgba(16,24,40,0.06)] sm:p-5 lg:order-1 lg:p-6">
+      <div className="grid min-w-0 max-w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,0.6fr)] lg:gap-6">
+        <div className="order-2 min-w-0 max-w-full rounded-2xl border border-black/[0.04] bg-white p-4 shadow-[0_8px_24px_rgba(16,24,40,0.06)] sm:p-5 lg:order-1 lg:p-6">
           <ConsumerInformation consumer={report.consumer} />
         </div>
-        <section className="order-1 rounded-2xl border border-black/[0.04] bg-white p-4 shadow-[0_8px_24px_rgba(16,24,40,0.06)] sm:p-5 lg:order-2 lg:p-5">
+        <section className="order-1 min-w-0 max-w-full rounded-2xl border border-black/[0.04] bg-white p-4 shadow-[0_8px_24px_rgba(16,24,40,0.06)] sm:p-5 lg:order-2 lg:p-5">
           <CreditScoreGauge
             score={report.score.value}
             minimumScore={report.score.min}
@@ -87,7 +97,7 @@ export function FullCreditReport({
         </section>
       </div>
 
-      <div className="rounded-2xl border border-black/[0.04] bg-white p-4 shadow-[0_8px_24px_rgba(16,24,40,0.06)] sm:p-5 lg:p-6">
+      <div className="min-w-0 max-w-full rounded-2xl border border-black/[0.04] bg-white p-4 shadow-[0_8px_24px_rgba(16,24,40,0.06)] sm:p-5 lg:p-6">
         <AccountDetailsList accounts={report.accounts} />
       </div>
 

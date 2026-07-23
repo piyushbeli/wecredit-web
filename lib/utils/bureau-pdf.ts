@@ -1,4 +1,5 @@
 import { STORAGE_BUREAU_PDF_URL, STORAGE_BUREAU_RESPONSE } from '@/lib/constants/api-keys';
+import { BUREAU_PDF_DOWNLOAD_PATH } from '@/lib/constants/credit-report-routes';
 
 const SCORE_KEY_CANDIDATES = [
   'score',
@@ -93,18 +94,14 @@ export function extractBureauCreditScore(data: unknown, depth = 0): number | und
  * Extracts a PDF URL from bureau API response shapes.
  */
 export function extractBureauPdfUrl(data: unknown): string | undefined {
-  if (typeof data !== 'object' || !data) {
-    return undefined;
-  }
-  const record = data as Record<string, unknown>;
-  if (typeof record.pdfUrl === 'string' && record.pdfUrl.trim()) {
-    return record.pdfUrl.trim();
-  }
-  if (typeof record.url === 'string' && record.url.trim().toLowerCase().includes('.pdf')) {
-    return record.url.trim();
-  }
-  if (typeof record.data === 'object' && record.data) {
-    return extractBureauPdfUrl(record.data);
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    'pdfUrl' in data &&
+    typeof data.pdfUrl === 'string' &&
+    data.pdfUrl.length > 0
+  ) {
+    return data.pdfUrl;
   }
   return undefined;
 }
@@ -166,13 +163,27 @@ export function getStoredBureauPdfUrl(): string | null {
 }
 
 /**
- * Opens the stored bureau PDF in a new tab.
+ * Downloads the PDF through the same-origin attachment endpoint.
  */
-export function openStoredBureauPdfReport(): boolean {
-  const pdfUrl = getStoredBureauPdfUrl();
-  if (!pdfUrl) {
+export function downloadBureauPdfReport(
+  pdfUrl: string,
+  fileName = 'wecredit-credit-report.pdf'
+): boolean {
+  if (!pdfUrl.trim()) {
     return false;
   }
-  window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-  return true;
+  let link: HTMLAnchorElement | null = null;
+  try {
+    link = document.createElement('a');
+    link.href = `${BUREAU_PDF_DOWNLOAD_PATH}?url=${encodeURIComponent(pdfUrl)}`;
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    return true;
+  } catch {
+    return false;
+  } finally {
+    link?.remove();
+  }
 }

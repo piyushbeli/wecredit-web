@@ -271,7 +271,8 @@ export async function updateUtmClicked(
   }
   const requestBody: { endpoint: string; partnerCode: string } = {
     endpoint: ENDPOINTS.PUBLIC.UPDATE_UTM_CLICKED,
-    partnerCode: lenderName,
+    // partnerCode: lenderName,   // Check by Ketan and Shyamal
+    partnerCode: getEffectivePartnerCode(),
   };
   const headers: Record<string, string> = buildUtmClickedHeaders(mobile, lenderName, authorization);
   try {

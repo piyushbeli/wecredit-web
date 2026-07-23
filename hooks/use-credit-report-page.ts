@@ -1,17 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import {
   checkEligibilityStatus,
   clearQueuedEligibilityCheck,
+  fetchFreshBureauPdfUrl,
   hasQueuedEligibilityCheck,
   runQueuedEligibilityCheck,
 } from '@/lib/api/eligibility-check-service';
 import {
   getCreditReportDashboard,
+  getFullCreditReport,
   pollCreditScoreStatus,
   pollFullCreditReportStatus,
 } from '@/lib/api/credit-report-service';
@@ -19,12 +21,15 @@ import {
   STORAGE_CREDIT_SCORE_FETCH_PENDING,
   STORAGE_CREDIT_SCORE_READY,
 } from '@/lib/constants/api-keys';
-import { getStoredBureauPdfUrl, getStoredBureauResponse } from '@/lib/utils/bureau-pdf';
-import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
+import { CREDIT_SCORE_PATH, VIEW_REPORT_PATH } from '@/lib/constants/credit-report-routes';
+import { downloadBureauPdfReport, getStoredBureauResponse } from '@/lib/utils/bureau-pdf';
+import {
+  adaptBureauReport,
+  isUsableBureauReportResponse,
+} from '@/lib/utils/credit-report-adapter';
 import {
   buildCreditScoreProgressSteps,
   getCreditReportView,
-  openCreditReportPdf,
 } from '@/lib/utils/credit-report-flow';
 import type {
   CreditReportDashboard,
@@ -82,34 +87,34 @@ function clearCreditScoreSessionFlags(): void {
   writeSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING, false);
 }
 
-function resolveCreditReportPdfUrl(fullReportPdfUrl: string | null | undefined): string {
-  const storedPdfUrl = getStoredBureauPdfUrl()?.trim() ?? '';
-  if (storedPdfUrl) {
-    return storedPdfUrl;
-  }
-  const reportPdfUrl = fullReportPdfUrl?.trim() ?? '';
-  const isPlaceholderPdf =
-    reportPdfUrl.includes('dummy.pdf') || reportPdfUrl.includes('w3.org/WAI');
-  if (reportPdfUrl && !isPlaceholderPdf) {
-    return reportPdfUrl;
-  }
-  return '';
-}
-
 /**
  * Single state controller for score-fetch → summary → full-report flow.
  */
-export function useCreditReportPage(): UseCreditReportPageReturn {
+export function useCreditReportPage(bureauResponse?: unknown): UseCreditReportPageReturn {
   const router = useRouter();
+  const pathname = usePathname();
+  const isViewReportRoute = pathname.startsWith(VIEW_REPORT_PATH.replace(/\/$/, ''));
   const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
+  const initialReport = useMemo(() => {
+    if (!bureauResponse || !isUsableBureauReportResponse(bureauResponse)) {
+      return null;
+    }
+    return adaptBureauReport(bureauResponse);
+  }, [bureauResponse]);
   const scoreAbortRef = useRef<AbortController | null>(null);
   const fullReportAbortRef = useRef<AbortController | null>(null);
   const unlockInFlightRef = useRef(false);
-  const isPdfOpeningRef = useRef(false);
-  const [isBootstrapped, setIsBootstrapped] = useState(false);
-  const [status, setStatus] = useState<CreditReportStatus>('idle');
-  const [data, setData] = useState<CreditReportDashboard | null>(null);
-  const [fullReport, setFullReport] = useState<CreditReportData | null>(null);
+  const isPdfDownloadingRef = useRef(false);
+  const [isBootstrapped, setIsBootstrapped] = useState(initialReport !== null);
+  const [status, setStatus] = useState<CreditReportStatus>(
+    initialReport && isViewReportRoute ? 'full_report_ready' : initialReport ? 'score_ready' : 'idle'
+  );
+  const [data, setData] = useState<CreditReportDashboard | null>(
+    initialReport?.dashboard ?? null
+  );
+  const [fullReport, setFullReport] = useState<CreditReportData | null>(
+    initialReport?.report ?? null
+  );
   const [failurePhase, setFailurePhase] = useState<CreditReportFailurePhase | null>(null);
   const [isUnlockPending, setIsUnlockPending] = useState(false);
   const [scoreFetchKey, setScoreFetchKey] = useState(0);
@@ -136,7 +141,13 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     try {
       const dashboard = await getCreditReportDashboard();
       setData(dashboard);
-      setStatus('score_ready');
+      if (isViewReportRoute) {
+        const report = await getFullCreditReport();
+        setFullReport(report);
+        setStatus('full_report_ready');
+      } else {
+        setStatus('score_ready');
+      }
       setFailurePhase(null);
       markCreditScoreReady();
     } catch {
@@ -144,7 +155,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
       setStatus('failed');
       toast.error('Could not load credit report');
     }
-  }, []);
+  }, [isViewReportRoute]);
 
   const startScoreFetch = useCallback((): void => {
     abortFullReportFetch();
@@ -171,6 +182,9 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
   }, []);
 
   useEffect(() => {
+    if (bureauResponse) {
+      return;
+    }
     if (isAuthLoading) {
       return;
     }
@@ -206,7 +220,10 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
 
       const isFetchPending = readSessionFlag(STORAGE_CREDIT_SCORE_FETCH_PENDING);
       const isScoreReady = readSessionFlag(STORAGE_CREDIT_SCORE_READY);
-      if (isFetchPending || !isScoreReady) {
+      if (isViewReportRoute) {
+        setShouldFetchScore(false);
+        await loadReadyDashboard();
+      } else if (isFetchPending || !isScoreReady) {
         setStatus('verifying_identity');
         setShouldFetchScore(true);
         setScoreFetchKey((previous) => previous + 1);
@@ -222,7 +239,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     return () => {
       controller.abort();
     };
-  }, [isAuthLoading, isAuthenticated, loadReadyDashboard, router, user?.phoneNumber]);
+  }, [bureauResponse, isAuthLoading, isAuthenticated, isViewReportRoute, loadReadyDashboard, router, user?.phoneNumber]);
 
   useEffect(() => {
     if (!hasPendingEligibilitySubmission) {
@@ -317,6 +334,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
         }
         setFullReport(report);
         setStatus('full_report_ready');
+        router.push(VIEW_REPORT_PATH);
         unlockInFlightRef.current = false;
         setIsUnlockPending(false);
       } catch {
@@ -333,7 +351,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     return () => {
       controller.abort();
     };
-  }, [abortFullReportFetch, fullReportFetchKey]);
+  }, [abortFullReportFetch, fullReportFetchKey, router]);
 
   useEffect(() => {
     return () => {
@@ -383,28 +401,36 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
     startFullReportFetch();
   };
 
-  const handleDownloadPdf = (): void => {
-    if (isPdfOpeningRef.current) {
+  const handleDownloadPdf = async (): Promise<void> => {
+    if (isPdfDownloadingRef.current) {
       return;
     }
-    const pdfUrl = resolveCreditReportPdfUrl(fullReport?.pdfUrl);
-    if (!pdfUrl) {
-      toast.message('PDF download unavailable', {
-        description:
-          'Equifax PDF opens from the bureau pdfUrl. Submit the credit form first, or wait for the full-report API to return pdfUrl.',
-      });
-      return;
-    }
-    isPdfOpeningRef.current = true;
-    window.requestAnimationFrame(() => {
-      const didOpen = openCreditReportPdf(pdfUrl);
-      isPdfOpeningRef.current = false;
-      if (!didOpen) {
-        toast.error('Could not open the PDF report', {
-          description: 'The link may have expired or the browser blocked the new tab.',
+    isPdfDownloadingRef.current = true;
+    try {
+      let pdfUrl: string | undefined;
+      try {
+        if (user?.phoneNumber) {
+          pdfUrl = await fetchFreshBureauPdfUrl(user.phoneNumber);
+        }
+      } catch {
+        pdfUrl = undefined;
+      }
+
+      if (!pdfUrl) {
+        toast.message('PDF download unavailable', {
+          description: 'Could not get a fresh PDF link. Please try again.',
+        });
+        return;
+      }
+
+      if (!downloadBureauPdfReport(pdfUrl)) {
+        toast.error('Could not download the PDF report', {
+          description: 'Please try again.',
         });
       }
-    });
+    } finally {
+      isPdfDownloadingRef.current = false;
+    }
   };
 
   const handleTalkToUs = (): void => {
@@ -419,6 +445,7 @@ export function useCreditReportPage(): UseCreditReportPageReturn {
       setFullReport(null);
       setFailurePhase(null);
       setStatus('score_ready');
+      router.push(CREDIT_SCORE_PATH);
       return;
     }
     if (view === 'processing') {

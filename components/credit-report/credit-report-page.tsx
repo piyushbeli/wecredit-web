@@ -18,6 +18,7 @@ import { LoanOfferCard } from './loan-offer-card';
 import { ProcessingFullReport } from './processing-full-report';
 import { ReportErrorState } from './report-error-state';
 import { ScoreFactorsCard } from './score-factors-card';
+import type { CreditReportPageProps } from '@/types/credit-report';
 
 const FullCreditReport = dynamic(
   () => import('./full-credit-report').then((module) => module.FullCreditReport),
@@ -30,7 +31,7 @@ const FullCreditReport = dynamic(
 /**
  * Credit-report flow: fetching → summary → processing → full report.
  */
-export function CreditReportPage(): ReactNode {
+export function CreditReportPage({ bureauResponse }: CreditReportPageProps = {}): ReactNode {
   const {
     isBootstrapped,
     view,
@@ -47,7 +48,7 @@ export function CreditReportPage(): ReactNode {
     handleDownloadPdf,
     handleTalkToUs,
     handleBack,
-  } = useCreditReportPage();
+  } = useCreditReportPage(bureauResponse);
 
   // Prefetch screen 4 while summary/processing is visible so unlock does not flash skeleton.
   useEffect(() => {
@@ -82,7 +83,13 @@ export function CreditReportPage(): ReactNode {
   } else if (view === 'processing') {
     body = <ProcessingFullReport />;
   } else if (view === 'full_report' && fullReport) {
-    body = <FullCreditReport report={fullReport} onDownloadPdf={handleDownloadPdf} />;
+    body = (
+      <FullCreditReport
+        report={fullReport}
+        onDownloadPdf={handleDownloadPdf}
+        onBack={handleBack}
+      />
+    );
   } else if (view === 'error') {
     let errorTitle: string = CREDIT_REPORT_ERROR_COPY.scoreTitle;
     let errorDescription: string = CREDIT_REPORT_ERROR_COPY.scoreDescription;
@@ -172,12 +179,13 @@ export function CreditReportPage(): ReactNode {
   }
 
   let header: ReactNode;
-  if (isBootstrapped && isFlowView) {
-    const canGoBack = view !== 'processing';
+  if (isBootstrapped && view === 'processing') {
+    header = null;
+  } else if (isBootstrapped && isFlowView) {
     header = (
       <>
         <div className="lg:hidden">
-          <CreditReportNavHeader onBack={canGoBack ? handleBack : undefined} />
+          <CreditReportNavHeader onBack={handleBack} />
         </div>
         <div className="hidden lg:block">
           <CreditReportHeader

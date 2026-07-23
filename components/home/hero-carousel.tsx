@@ -1,14 +1,23 @@
 'use client';
 
-import { JSX } from 'react';
+import { JSX, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { getCookie } from 'cookies-next';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
 import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/components/ui/carousel';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
+import { checkEligibilityStatus } from '@/lib/api/eligibility-check-service';
+import {
+  STORAGE_CREDIT_SCORE_FETCH_PENDING,
+  STORAGE_CREDIT_SCORE_READY,
+  STORAGE_MOBILE,
+} from '@/lib/constants/api-keys';
 import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
+import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
+import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
 import type { MouseEvent } from 'react';
 
 /** Slide content configuration */
@@ -27,15 +36,62 @@ export interface SlideContent {
  */
 const HeroCarousel = (): JSX.Element => {
   const pathname = usePathname();
+  const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
+  const [isCheckingCreditReport, setIsCheckingCreditReport] = useState(false);
+  const creditReportRequestRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      creditReportRequestRef.current?.abort();
+    };
+  }, []);
 
   const renderCtaElement = (slide: SlideContent) => {
     const isPersonalLoan = slide.ctaLink === '/personal-loan';
+    const isBureauReport = slide.ctaLink === '/bureau-report';
 
-    const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    const handleClick = async (e: MouseEvent<HTMLAnchorElement>): Promise<void> => {
       if (isPersonalLoan) {
         e.preventDefault();
         triggerApplyFlow();
+        return;
+      }
+      if (!isBureauReport) {
+        return;
+      }
+      e.preventDefault();
+      if (creditReportRequestRef.current) {
+        return;
+      }
+
+      const mobile = getCookie(STORAGE_MOBILE);
+      if (typeof mobile !== 'string' || !mobile.trim()) {
+        router.push('/bureau-report/');
+        return;
+      }
+
+      const controller = new AbortController();
+      creditReportRequestRef.current = controller;
+      setIsCheckingCreditReport(true);
+
+      try {
+        const result = await checkEligibilityStatus(mobile, controller.signal);
+        if (controller.signal.aborted) {
+          return;
+        }
+        if (result.showSuccess && isUsableBureauReportResponse(result.data)) {
+          sessionStorage.removeItem(STORAGE_CREDIT_SCORE_FETCH_PENDING);
+          sessionStorage.setItem(STORAGE_CREDIT_SCORE_READY, '1');
+          router.push(CREDIT_SCORE_PATH);
+          return;
+        }
+        router.push('/bureau-report/');
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsCheckingCreditReport(false);
+        }
+        creditReportRequestRef.current = null;
       }
     };
 
@@ -43,6 +99,7 @@ const HeroCarousel = (): JSX.Element => {
       <Link
         href={slide.ctaLink}
         onClick={handleClick}
+        aria-disabled={isBureauReport && isCheckingCreditReport}
         className="inline-flex items-center justify-center px-8 py-3.5 bg-wc-blue-500 hover:bg-wc-blue-600 text-white text-base font-semibold rounded-lg transition-all duration-300 active:scale-95"
       >
         {slide.ctaText}

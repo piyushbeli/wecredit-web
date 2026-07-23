@@ -20,35 +20,35 @@ interface BlogPost {
 const blogPosts: BlogPost[] = [
 	{
 		id: 'blog-1',
-		title: 'How to Automate Your Bank Savings Like a Pro',
-		description: 'Learn practical steps to automate your savings and grow your wealth effortlessly.',
+		title: '7-Day Loan Apps: Quick Access to Short-Term Cash',
+		description: 'Explore top short-term loan apps offering quick approval and 7-day repayment.',
 		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
 		readTime: 4,
-		href: 'https://wecredit.co.in/blog/how-to-automate-your-bank-savings-like-a-pro/',
+		href: 'https://wecredit.co.in/blog/7-day-loan-apps-quick-and-easy-access-to-short-term-loans/',
 	},
 	{
 		id: 'blog-2',
-		title: 'Secure Your Emergency Fund With These Options',
-		description: 'Explore the best options to keep your emergency fund safe and accessible.',
+		title: '15-Day Loan Apps for Instant Cash When Needed',
+		description: 'Compare loan apps offering flexible 15-day repayment for urgent expenses.',
 		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
 		readTime: 4,
-		href: 'https://wecredit.co.in/blog/secure-your-emergency-fund-with-these-options/',
+		href: 'https://wecredit.co.in/blog/14-day-loan-apps-in-india-instant-cash/',
 	},
 	{
 		id: 'blog-3',
-		title: 'India’s 5 Best Apps to Track and Save Money Easily',
-		description: 'Discover top apps for tracking expenses and boosting your savings in India.',
+		title: 'Get ₹10,000 Loan Without a CIBIL Score',
+		description: 'Discover how lenders approve urgent loans based on income, not your credit score.',
 		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
 		readTime: 4,
-		href: 'https://wecredit.co.in/blog/india-s-5-best-apps-to-track-and-save-money-easily/',
+		href: 'https://wecredit.co.in/blog/10000-loan-without-cibil/',
 	},
 	{
 		id: 'blog-4',
-		title: 'SIP vs RD: What’s Best for Your Money Goals?',
-		description: 'Compare SIP and RD to choose the right investment for your financial goals.',
+		title: 'Quick ₹5,000 Loan for Students — No Credit Score Needed',
+		description: 'See how students can get fast, no-CIBIL loans for urgent college expenses.',
 		imagePath: IMAGES.ILLUSTRATIONS.BUSINESS_LOAN_CALC,
 		readTime: 4,
-		href: 'https://wecredit.co.in/blog/sip-vs-rd-what-s-best-for-your-money-goals/',
+		href: 'https://wecredit.co.in/blog/quick-rs-5000-loan-for-students-no-credit-score/',
 	},
 ];
 
@@ -81,7 +81,7 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 						src={post.imagePath}
 						alt={post.title}
 						fill
-						className="object-cover group-hover:scale-105 transition-transform duration-300"
+						className="object-contain group-hover:scale-105 transition-transform duration-300"
 						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
 					/>
 				</div>
@@ -94,9 +94,9 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 					<p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mb-2">
 						{post.description}
 					</p>
-					<span className="text-xs font-medium text-blue-600">
+					{/* <span className="text-xs font-medium text-blue-600">
 						{post.readTime} Mins Read
-					</span>
+					</span> */}
 				</div>
 			</Link>
 		</motion.div>
@@ -138,6 +138,14 @@ const BlogSection = (): React.ReactNode => {
 								<BlogCard post={post} index={index} />
 							</div>
 						))}
+					</div>
+					<div className="mt-6 flex items-center justify-center">
+						<Link
+							href="/blog/"
+							className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:bg-blue-800"
+						>
+							Read More
+						</Link>
 					</div>
 				</div>
 			</div>
