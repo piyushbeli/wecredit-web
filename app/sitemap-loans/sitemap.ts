@@ -8,8 +8,8 @@ import {
 } from '@/lib/sitemap/sitemap-utils';
 import { shouldAllowSitemap } from '@/lib/utils/seo-utils';
 
-/** Revalidate loans sitemap every minute (matches posts sitemap cadence) */
-export const revalidate = 60;
+/** Revalidate loans sitemap every five minutes (matches the sheet cache). */
+export const revalidate = 300;
 
 /**
  * Loan pages sitemap at /sitemap-loans/sitemap.xml.

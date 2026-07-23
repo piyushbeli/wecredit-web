@@ -108,7 +108,7 @@ export async function fetchRoutesFromSheet(
 
   try {
     const response = await fetch(getSheetExportUrl(gid), {
-      cache: 'no-store',
+      next: { revalidate: 300 },
       signal: controller?.signal,
     });
 
