@@ -193,3 +193,67 @@ export function isMultiLenderCreditCardSectionComplete(
   }
   return true;
 }
+
+/** Input sanitization mode for free-text form fields. */
+export type FormTextInputMode = 'plain' | 'email';
+
+const EMOJI_REGEX = /\p{Extended_Pictographic}/gu;
+const PLAIN_TEXT_CHAR_REGEX = /[^a-zA-Z0-9\s]/g;
+
+export const FORM_TEXT_VALIDATION_MESSAGES = {
+  emoji: 'Emojis are not allowed',
+  specialCharacters: 'Special characters are not allowed',
+} as const;
+
+/** Returns true when the value contains emoji characters. */
+export function containsEmoji(value: string): boolean {
+  EMOJI_REGEX.lastIndex = 0;
+  return EMOJI_REGEX.test(value);
+}
+
+/** Removes emoji characters from any input value. */
+export function stripEmojis(value: string): string {
+  return value.replace(EMOJI_REGEX, '');
+}
+
+/** Keeps letters, digits, and spaces only. */
+export function sanitizePlainTextInput(value: string): string {
+  return stripEmojis(value).replace(PLAIN_TEXT_CHAR_REGEX, '');
+}
+
+/** Strips emojis only; preserves standard email characters. */
+export function sanitizeEmailTextInput(value: string): string {
+  return stripEmojis(value);
+}
+
+/** Sanitizes user input based on the target field mode. */
+export function sanitizeFormTextInput(value: string, mode: FormTextInputMode): string {
+  if (mode === 'email') {
+    return sanitizeEmailTextInput(value);
+  }
+  return sanitizePlainTextInput(value);
+}
+
+/** Returns true when non-email text contains disallowed characters. */
+export function containsDisallowedSpecialChars(value: string, mode: FormTextInputMode): boolean {
+  if (!value) return false;
+  if (mode === 'email') {
+    return false;
+  }
+  return PLAIN_TEXT_CHAR_REGEX.test(stripEmojis(value));
+}
+
+/**
+ * Submit-time validation for free-text fields.
+ * Returns an error message or an empty string when valid.
+ */
+export function getTextInputValidationError(value: string, mode: FormTextInputMode): string {
+  if (!value) return '';
+  if (containsEmoji(value)) {
+    return FORM_TEXT_VALIDATION_MESSAGES.emoji;
+  }
+  if (mode === 'plain' && containsDisallowedSpecialChars(value, mode)) {
+    return FORM_TEXT_VALIDATION_MESSAGES.specialCharacters;
+  }
+  return '';
+}

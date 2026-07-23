@@ -5,6 +5,7 @@
 
 import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
 import { isValidMobile } from '@/lib/utils/common-helper';
+import { getPlainTextFieldValidationError } from '@/lib/utils/validators';
 
 export { sanitizeNumericInput };
 
@@ -67,6 +68,11 @@ export const validatePrimeplLeadForm = (
 
   if (!values.name.trim()) {
     nextErrors.name = 'Name is required';
+  } else {
+    const nameTextError = getPlainTextFieldValidationError(values.name);
+    if (nameTextError) {
+      nextErrors.name = nameTextError;
+    }
   }
 
   const mobileDigits = values.mobile.replace(/\D/g, '');
@@ -79,6 +85,11 @@ export const validatePrimeplLeadForm = (
 
   if (!values.address.trim()) {
     nextErrors.address = 'Address is required';
+  } else {
+    const addressTextError = getPlainTextFieldValidationError(values.address);
+    if (addressTextError) {
+      nextErrors.address = addressTextError;
+    }
   }
 
   const pinDigits = values.areaPincode.replace(/\D/g, '');

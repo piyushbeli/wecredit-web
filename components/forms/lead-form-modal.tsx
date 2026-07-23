@@ -22,6 +22,7 @@ import { PARTNER_CODE } from '@/lib/constants/api-keys';
 import { fetchUserIp } from '@/lib/api/lead-service';
 import {
   isMultiLenderCreditCardSectionComplete,
+  sanitizePlainTextInput,
 } from '@/lib/utils/form-helpers';
 import {
   MULTI_LENDER_PARTNER_CONSENT_KEY,
@@ -486,7 +487,7 @@ const LeadFormModal = ({
           <input
             type="text"
             value={lntCompanyName}
-            onChange={(event) => setLntCompanyName(event.target.value)}
+            onChange={(event) => setLntCompanyName(sanitizePlainTextInput(event.target.value))}
             placeholder="Enter company name"
             className="w-full px-4 py-3 rounded-lg border text-base border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
