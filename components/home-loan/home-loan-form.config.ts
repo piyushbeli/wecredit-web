@@ -9,6 +9,7 @@ import {
   isValidDobFormat,
   normalizePan,
 } from '@/lib/utils/form-helpers';
+import { getPlainTextFieldValidationError } from '@/lib/utils/validators';
 
 export { sanitizeNumericInput };
 
@@ -55,10 +56,20 @@ export const validateHomeLoanForm = (
 
   if (!values.firstName.trim()) {
     nextErrors.firstName = 'First name is required';
+  } else {
+    const firstNameTextError = getPlainTextFieldValidationError(values.firstName);
+    if (firstNameTextError) {
+      nextErrors.firstName = firstNameTextError;
+    }
   }
 
   if (!values.lastName.trim()) {
     nextErrors.lastName = 'Last name is required';
+  } else {
+    const lastNameTextError = getPlainTextFieldValidationError(values.lastName);
+    if (lastNameTextError) {
+      nextErrors.lastName = lastNameTextError;
+    }
   }
 
   const mobileDigits = values.mobile.replace(/\D/g, '');

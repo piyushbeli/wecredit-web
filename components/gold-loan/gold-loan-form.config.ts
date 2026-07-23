@@ -10,6 +10,7 @@ import {
   isValidDobFormat,
   normalizePan,
 } from '@/lib/utils/form-helpers';
+import { getPlainTextFieldValidationError } from '@/lib/utils/validators';
 
 export { sanitizeNumericInput, formatDobForApi, dobToNativeFormat };
 export interface GoldLoanFormState {
@@ -46,10 +47,20 @@ export const validateGoldLoanForm = (
 
   if (!values.firstName.trim()) {
     nextErrors.firstName = 'First name is required';
+  } else {
+    const firstNameTextError = getPlainTextFieldValidationError(values.firstName);
+    if (firstNameTextError) {
+      nextErrors.firstName = firstNameTextError;
+    }
   }
 
   if (!values.lastName.trim()) {
     nextErrors.lastName = 'Last name is required';
+  } else {
+    const lastNameTextError = getPlainTextFieldValidationError(values.lastName);
+    if (lastNameTextError) {
+      nextErrors.lastName = lastNameTextError;
+    }
   }
 
   const mobileDigits = values.mobile.replace(/\D/g, '');
@@ -76,10 +87,20 @@ export const validateGoldLoanForm = (
 
   if (!values.state.trim()) {
     nextErrors.state = 'State is required';
+  } else {
+    const stateTextError = getPlainTextFieldValidationError(values.state);
+    if (stateTextError) {
+      nextErrors.state = stateTextError;
+    }
   }
 
   if (!values.city.trim()) {
     nextErrors.city = 'City is required';
+  } else {
+    const cityTextError = getPlainTextFieldValidationError(values.city);
+    if (cityTextError) {
+      nextErrors.city = cityTextError;
+    }
   }
 
   if (!values.loanAmount.trim()) {

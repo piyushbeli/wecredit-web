@@ -4,6 +4,10 @@
  */
 
 import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
+import {
+  getEmailTextValidationError,
+  getPlainTextFieldValidationError,
+} from '@/lib/utils/validators';
 
 export { sanitizeNumericInput };
 export type CarLoanGender = 'Male' | 'Female';
@@ -51,10 +55,20 @@ export const validateCarLoanForm = (
 
   if (!values.firstName.trim()) {
     nextErrors.firstName = 'First name is required';
+  } else {
+    const firstNameTextError = getPlainTextFieldValidationError(values.firstName);
+    if (firstNameTextError) {
+      nextErrors.firstName = firstNameTextError;
+    }
   }
 
   if (!values.lastName.trim()) {
     nextErrors.lastName = 'Last name is required';
+  } else {
+    const lastNameTextError = getPlainTextFieldValidationError(values.lastName);
+    if (lastNameTextError) {
+      nextErrors.lastName = lastNameTextError;
+    }
   }
 
   const mobileDigits = values.mobile.replace(/\D/g, '');
@@ -66,8 +80,13 @@ export const validateCarLoanForm = (
 
   if (!values.email.trim()) {
     nextErrors.email = 'Email is required';
-  } else if (!EMAIL_REGEX.test(values.email.trim())) {
-    nextErrors.email = 'Enter a valid email address';
+  } else {
+    const emailTextError = getEmailTextValidationError(values.email);
+    if (emailTextError) {
+      nextErrors.email = emailTextError;
+    } else if (!EMAIL_REGEX.test(values.email.trim())) {
+      nextErrors.email = 'Enter a valid email address';
+    }
   }
 
   if (!values.gender) {
@@ -76,6 +95,11 @@ export const validateCarLoanForm = (
 
   if (!values.state.trim()) {
     nextErrors.state = 'State is required';
+  } else {
+    const stateTextError = getPlainTextFieldValidationError(values.state);
+    if (stateTextError) {
+      nextErrors.state = stateTextError;
+    }
   }
 
   const pincodeDigits = values.pincode.replace(/\D/g, '');
@@ -91,6 +115,11 @@ export const validateCarLoanForm = (
 
   if (!values.carModel.trim()) {
     nextErrors.carModel = 'Car model is required';
+  } else {
+    const carModelTextError = getPlainTextFieldValidationError(values.carModel);
+    if (carModelTextError) {
+      nextErrors.carModel = carModelTextError;
+    }
   }
 
   if (!values.consent) {

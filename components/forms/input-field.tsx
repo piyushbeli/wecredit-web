@@ -4,6 +4,7 @@
  */
 
 import { cn } from '@/lib/utils';
+import { sanitizeFormTextInput, type FormTextInputMode } from '@/lib/utils/form-helpers';
 
 interface InputFieldProps {
   label: string;
@@ -46,6 +47,24 @@ const InputField = ({
 }: InputFieldProps) => {
   const errorId = id ? `${id}-error` : undefined;
 
+  const resolveTextInputMode = (): FormTextInputMode | null => {
+    if (type === 'email' || inputMode === 'email') {
+      return 'email';
+    }
+    if (type === 'tel' || inputMode === 'numeric' || inputMode === 'tel') {
+      return null;
+    }
+    return 'plain';
+  };
+
+  const handleChange = (rawValue: string): void => {
+    const textInputMode = resolveTextInputMode();
+    const nextValue = textInputMode
+      ? sanitizeFormTextInput(rawValue, textInputMode)
+      : rawValue;
+    onChange(nextValue);
+  };
+
   return (
     <div className="space-y-2">
       {/* <label className="block text-sm font-medium text-gray-900">
@@ -58,7 +77,7 @@ const InputField = ({
         type={type}
         inputMode={inputMode}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         onBlur={onBlur}
         disabled={disabled}
         readOnly={readOnly}

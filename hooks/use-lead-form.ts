@@ -11,8 +11,10 @@ import { getCookie } from 'cookies-next';
 import { STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import {
   isValidCreditCardMaxAmountInput,
+  sanitizeFormTextInput,
   sanitizeNumericInput,
   sanitizePanInput,
+  getTextInputValidationError,
 } from '@/lib/utils/form-helpers';
 
 interface WizardStep {
@@ -49,14 +51,23 @@ const DOB_NATIVE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DOB_DASH_PATTERN = /^\d{2}-\d{2}-\d{4}$/;
 const MINIMUM_AGE_YEARS = 18;
 
+/** Free-text fields validated for emoji and special-character rules. */
+const PLAIN_TEXT_FIELDS: FormFieldKey[] = [
+  'name',
+  'companyName',
+  'permanentAddress',
+  'companyAddress',
+];
+
 /**
  * Normalize values that must stay numeric or uppercased even on prefill.
  */
 const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
-  if (fieldKey === 'name') {
-    // Strip digits and collapse runs of spaces. Do not trim() — that removes the trailing
-    // space while the user is typing between words (e.g. "asb " before "jain").
-    return value.replace(/[0-9]/g, '').replace(/\s+/g, ' ');
+  if (fieldKey === 'name' || PLAIN_TEXT_FIELDS.includes(fieldKey as FormFieldKey)) {
+    return sanitizeFormTextInput(value, 'plain').replace(/\s+/g, ' ');
+  }
+  if (fieldKey === 'email') {
+    return sanitizeFormTextInput(value, 'email');
   }
   if (fieldKey === 'pan') {
     return sanitizePanInput(value);
@@ -259,6 +270,20 @@ export const useLeadForm = (
    * Get format validation error for a field
    */
   const getFieldFormatError = useCallback((fieldKey: string, value: string): string => {
+    if (fieldKey === 'email') {
+      const textError = getTextInputValidationError(value, 'email');
+      if (textError) {
+        return textError;
+      }
+    }
+
+    if (fieldKey === 'name' || PLAIN_TEXT_FIELDS.includes(fieldKey as FormFieldKey)) {
+      const textError = getTextInputValidationError(value, 'plain');
+      if (textError) {
+        return textError;
+      }
+    }
+
     if (fieldKey === 'creditCardLimit') {
       const resolvedHasCreditCard = formValues.hasCreditCard;
       if (resolvedHasCreditCard !== 'true') {
