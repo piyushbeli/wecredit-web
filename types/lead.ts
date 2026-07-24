@@ -10,6 +10,8 @@
 /** All possible field keys returned by the API */
 export type FormFieldKey =
   | 'name'
+  | 'firstName'
+  | 'lastName'
   | 'mobile'
   | 'phone'
   | 'dob'
@@ -130,8 +132,12 @@ export type MaritalStatus = 'Single' | 'Married';
 export interface CreateLeadRequest {
   /** 10-digit mobile number */
   mobile: string;
-  /** Full name (First + Last) */
-  name: string;
+  /** Full name when returned by the dynamic form API */
+  name?: string;
+  /** First name when returned by the dynamic form API */
+  firstName?: string;
+  /** Last name when returned by the dynamic form API */
+  lastName?: string;
   /** PAN card number (UPPERCASE) */
   pan: string;
   /** Employment type: salaried or selfEmployed */
@@ -200,6 +206,10 @@ export interface CreateLeadResponse {
 export interface LeadFormData {
   /** Full name */
   name: string;
+  /** First name when supplied as a separate dynamic field */
+  firstName?: string;
+  /** Last name when supplied as a separate dynamic field */
+  lastName?: string;
   /** Mobile number */
   mobile: string;
   /** Phone number (alternative to mobile) */
