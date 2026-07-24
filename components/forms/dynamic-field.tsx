@@ -162,6 +162,8 @@ function isIOSDevice(): boolean {
 /** Free-text fields that allow letters, digits, and spaces only. */
 const PLAIN_TEXT_FIELDS: FormFieldKey[] = [
   'name',
+  'firstName',
+  'lastName',
   'companyName',
   'permanentAddress',
   'companyAddress',

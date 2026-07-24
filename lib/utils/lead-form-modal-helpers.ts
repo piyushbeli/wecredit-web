@@ -214,6 +214,8 @@ export function buildLeadFormData({
 
   return {
     name: (formValues.name || '').trim(),
+    firstName: formValues.firstName || '',
+    lastName: formValues.lastName || '',
     mobile: formValues.mobile || '',
     phone: formValues.phone || '',
     dob: formatDobForApi(formValues.dob || ''),
