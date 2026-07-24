@@ -16,6 +16,7 @@ import {
   sanitizePanInput,
   getTextInputValidationError,
 } from '@/lib/utils/form-helpers';
+import { orderLeadFormFields } from '@/lib/utils/lead-form-modal-helpers';
 
 interface WizardStep {
   stepNumber: number;
@@ -28,7 +29,7 @@ interface WizardStep {
  * API-driven fields are filtered by these keys; flow-level gating (e.g. credit card) lives in the modal.
  */
 const STEP_FIELD_MAPPING: Record<number, FormFieldKey[]> = {
-  1: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
+  1: ['name', 'firstName', 'lastName', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   2: ['addressType', 'permanentAddress', 'pincode'],
   3: ['employmentType', 'salary', 'monthlyIncome', 'declaredIncome', 'loanAmount', 'requiredLoanAmount', 'modeOfSalary', 'companyName', 'companyAddress', 'companyPincode'],
   4: ['pan', 'hasCreditCard', 'creditCardLimit', 'consent'],
@@ -54,6 +55,8 @@ const MINIMUM_AGE_YEARS = 18;
 /** Free-text fields validated for emoji and special-character rules. */
 const PLAIN_TEXT_FIELDS: FormFieldKey[] = [
   'name',
+  'firstName',
+  'lastName',
   'companyName',
   'permanentAddress',
   'companyAddress',
@@ -63,7 +66,7 @@ const PLAIN_TEXT_FIELDS: FormFieldKey[] = [
  * Normalize values that must stay numeric or uppercased even on prefill.
  */
 const normalizeLeadFieldValue = (fieldKey: string, value: string): string => {
-  if (fieldKey === 'name' || PLAIN_TEXT_FIELDS.includes(fieldKey as FormFieldKey)) {
+  if (PLAIN_TEXT_FIELDS.includes(fieldKey as FormFieldKey)) {
     return sanitizeFormTextInput(value, 'plain').replace(/\s+/g, ' ');
   }
   if (fieldKey === 'email') {
@@ -109,6 +112,7 @@ interface UseLeadFormReturn {
 
 interface UseLeadFormOptions {
   singlePage?: boolean;
+  consecutiveNameFields?: boolean;
 }
 
 const STEP_TITLES: Record<number, string> = {
@@ -124,7 +128,7 @@ export const useLeadForm = (
   fields: FormField[],
   options: UseLeadFormOptions = {}
 ): UseLeadFormReturn => {
-  const { singlePage = false } = options;
+  const { singlePage = false, consecutiveNameFields = false } = options;
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -170,12 +174,15 @@ export const useLeadForm = (
    */
   const getCurrentStepFields = useCallback((): FormField[] => {
     const step = getCurrentStepConfig();
-    const stepFields = fields
-      .filter(f => step.fieldKeys.includes(f.key) && !HIDDEN_FIELDS.includes(f.key))
-      .sort((a, b) => a.order - b.order);
+    const visibleStepFields = fields.filter(
+      f => step.fieldKeys.includes(f.key) && !HIDDEN_FIELDS.includes(f.key),
+    );
+    const stepFields = consecutiveNameFields
+      ? orderLeadFormFields(visibleStepFields)
+      : visibleStepFields.sort((a, b) => a.order - b.order);
     
     return stepFields;
-  }, [fields, getCurrentStepConfig]);
+  }, [consecutiveNameFields, fields, getCurrentStepConfig]);
 
   /**
    * Handle field value change
@@ -500,14 +507,13 @@ export const useLeadForm = (
 
       if (
         field.key === 'pan'
-        || field.key === 'name'
+        || PLAIN_TEXT_FIELDS.includes(field.key)
         || field.key === 'pincode'
         || field.key === 'companyPincode'
       ) {
         // Keep PAN and pincode values normalized even when the API pre-fills them.
         const normalized = normalizeLeadFieldValue(field.key, rawValue);
-        // Prefill name once so API whitespace does not linger; live typing no longer trims (see normalizeLeadFieldValue).
-        initialValues[field.key] = field.key === 'name' ? normalized.trim() : normalized;
+        initialValues[field.key] = PLAIN_TEXT_FIELDS.includes(field.key) ? normalized.trim() : normalized;
         return;
       }
 

@@ -334,7 +334,9 @@ async function createLead(
     // Transform form data to API format
     const requestBody: CreateLeadRequest = {
       mobile: mobile,
-      name: formData.name.trim(),
+      ...(formData.name.trim() && { name: formData.name.trim() }),
+      ...(formData.firstName?.trim() && { firstName: formData.firstName.trim() }),
+      ...(formData.lastName?.trim() && { lastName: formData.lastName.trim() }),
       pan: formData.pan.toUpperCase(),
       employmentType: formData.employmentType as EmploymentTypeValue,
       salary: parseFloat(formData.salary.replace(/,/g, '')),

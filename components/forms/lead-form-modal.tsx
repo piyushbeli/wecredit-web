@@ -76,7 +76,7 @@ const getReadableTextColor = (backgroundColor?: string | null): string => {
 const STEP_SECTIONS: Array<{ title: string; fieldKeys: FormFieldKey[] }> = [
   {
     title: 'Personal Information',
-    fieldKeys: ['name', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
+    fieldKeys: ['name', 'firstName', 'lastName', 'mobile', 'dob', 'email', 'gender', 'maritalStatus'],
   },
   {
     title: 'Address Information',
@@ -105,7 +105,7 @@ const LeadFormModal = ({
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  const { partner, originSubLender } = useUrlParamsStore();
+  const { partner, originSubLender, lendername: storedLenderName } = useUrlParamsStore();
   const lenderUniqueId = useUrlParamsStore.getState().lenderUniqueId ?? '';
   const {
     fields,
@@ -130,7 +130,10 @@ const LeadFormModal = ({
 
   // Use partner from URL if available and not yet consumed, otherwise use prop or default
   const effectivePartnerCode = partner ? partner : partnerCode;
-  const isUnitySingleLender = lenderName?.toLowerCase() === 'unity' && !isAllLenders;
+  const lenderNameFromQuery = searchParams.get('lendername') || searchParams.get('lenderName');
+  const normalizedLenderName = (lenderName || lenderNameFromQuery || storedLenderName || '').trim().toLowerCase();
+  const isBasicHomeLoanLender = normalizedLenderName === 'basichomeloan';
+  const isUnitySingleLender = normalizedLenderName === 'unity' && !isAllLenders;
   const consentTitle = isUnitySingleLender ? UNITY_CONSENT : 'Consent';
   const isLntLenderOrUpswignLntLender = lenderName?.toLowerCase() === 'lnt' || lenderName?.toLowerCase() === 'upswing_lnt';
   const isSingleLenderFlow = !isAllLenders;
@@ -163,7 +166,7 @@ const LeadFormModal = ({
     validateField,
     initializeFormValues,
     isSinglePage,
-  } = useLeadForm(fields, { singlePage: true });
+  } = useLeadForm(fields, { singlePage: true, consecutiveNameFields: true });
 
   /** UI stores Yes/No as 'true' | 'false' strings — never use Boolean(string) here. */
   const creditCardAnswer = formValues.hasCreditCard;
@@ -755,7 +758,7 @@ const LeadFormModal = ({
   };
 
   const renderModalheadingLabel = () => {
-    if (lenderName === 'basichomeloan') {
+    if (isBasicHomeLoanLender) {
       return `Home loan (${currentStep}/4)`;
     }
     // if (isAllLenders) {
@@ -765,6 +768,11 @@ const LeadFormModal = ({
   };
 
   if (!isOpen) return null;
+
+  let lenderHero: React.ReactNode = null;
+  if (isSingleLenderFlow && !isBasicHomeLoanLender) {
+    lenderHero = <MoneyViewHero backgroundColor={lenderThemeColor} />;
+  }
 
   return (
     <AnimatePresence>
@@ -809,9 +817,7 @@ const LeadFormModal = ({
                 showBackButton={showBackHeader && !isAffiliate}
                 onBackClick={handleHeaderBackClick}
               />
-              <MoneyViewHero
-                backgroundColor={lenderThemeColor}
-              />
+              {lenderHero}
             </>
           )}
           {renderModalBody()}
