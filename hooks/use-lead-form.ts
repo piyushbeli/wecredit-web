@@ -16,6 +16,7 @@ import {
   sanitizePanInput,
   getTextInputValidationError,
 } from '@/lib/utils/form-helpers';
+import { orderLeadFormFields } from '@/lib/utils/lead-form-modal-helpers';
 
 interface WizardStep {
   stepNumber: number;
@@ -111,6 +112,7 @@ interface UseLeadFormReturn {
 
 interface UseLeadFormOptions {
   singlePage?: boolean;
+  consecutiveNameFields?: boolean;
 }
 
 const STEP_TITLES: Record<number, string> = {
@@ -126,7 +128,7 @@ export const useLeadForm = (
   fields: FormField[],
   options: UseLeadFormOptions = {}
 ): UseLeadFormReturn => {
-  const { singlePage = false } = options;
+  const { singlePage = false, consecutiveNameFields = false } = options;
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -172,12 +174,15 @@ export const useLeadForm = (
    */
   const getCurrentStepFields = useCallback((): FormField[] => {
     const step = getCurrentStepConfig();
-    const stepFields = fields
-      .filter(f => step.fieldKeys.includes(f.key) && !HIDDEN_FIELDS.includes(f.key))
-      .sort((a, b) => a.order - b.order);
+    const visibleStepFields = fields.filter(
+      f => step.fieldKeys.includes(f.key) && !HIDDEN_FIELDS.includes(f.key),
+    );
+    const stepFields = consecutiveNameFields
+      ? orderLeadFormFields(visibleStepFields)
+      : visibleStepFields.sort((a, b) => a.order - b.order);
     
     return stepFields;
-  }, [fields, getCurrentStepConfig]);
+  }, [consecutiveNameFields, fields, getCurrentStepConfig]);
 
   /**
    * Handle field value change

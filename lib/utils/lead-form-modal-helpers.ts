@@ -11,6 +11,30 @@ import type { FormField, FormFieldKey, LeadFormData } from '@/types/lead';
 
 export const MULTI_LENDER_PARTNER_CONSENT_KEY: FormFieldKey = 'consentPartnerTerms';
 
+/**
+ * Keeps the API order, except separate first/last-name fields always render together.
+ */
+export function orderLeadFormFields(fields: FormField[]): FormField[] {
+  const orderedFields = [...fields].sort((a, b) => a.order - b.order);
+  const firstNameField = orderedFields.find((field) => field.key === 'firstName');
+  const lastNameField = orderedFields.find((field) => field.key === 'lastName');
+
+  if (!firstNameField || !lastNameField) {
+    return orderedFields;
+  }
+
+  const nameInsertionIndex = Math.min(
+    orderedFields.indexOf(firstNameField),
+    orderedFields.indexOf(lastNameField),
+  );
+  const fieldsWithoutSeparateNames = orderedFields.filter(
+    (field) => field.key !== 'firstName' && field.key !== 'lastName',
+  );
+
+  fieldsWithoutSeparateNames.splice(nameInsertionIndex, 0, firstNameField, lastNameField);
+  return fieldsWithoutSeparateNames;
+}
+
 /* LNT CONSENTS */
 export const LNT_CONSENTS = [
   {

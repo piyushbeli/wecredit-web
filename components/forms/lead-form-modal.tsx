@@ -166,7 +166,7 @@ const LeadFormModal = ({
     validateField,
     initializeFormValues,
     isSinglePage,
-  } = useLeadForm(fields, { singlePage: true });
+  } = useLeadForm(fields, { singlePage: true, consecutiveNameFields: true });
 
   /** UI stores Yes/No as 'true' | 'false' strings — never use Boolean(string) here. */
   const creditCardAnswer = formValues.hasCreditCard;
