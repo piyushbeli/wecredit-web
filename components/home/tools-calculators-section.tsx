@@ -1,18 +1,8 @@
 import { Calculator, PieChart, Briefcase, Gauge } from 'lucide-react';
-import ToolCard from './tool-card';
+import ToolCard, { type ToolCardProps } from './tool-card';
 import { IMAGES } from '@/lib/constants/images';
-import type { LucideIcon } from 'lucide-react';
 
-interface Tool {
-  id: string;
-  title: string;
-  description: string;
-  href: string;
-  imagePath?: string;
-  fallbackIcon: LucideIcon;
-}
-
-const tools: Tool[] = [
+const tools: ToolCardProps[] = [
   {
     id: 'personal-loan-calculator',
     title: 'Personal Loan calculator',
@@ -48,17 +38,17 @@ const tools: Tool[] = [
 ];
 
 const ToolsCalculatorsSection = (): React.ReactNode => {
+  const visibleTools = tools.filter((tool) => tool.id !== 'business-loan-calculator');
+
   return (
-    <section className="bg-white py-8 lg:py-10">
-      <div className="mx-auto max-w-7xl xl:px-0 px-4">
-        <h2
-          className="text-xl font-semibold text-gray-900 text-center mb-8"
-        >
+    <section className="bg-white py-8 lg:py-20">
+      <div className="mx-auto max-w-6xl px-4 xl:px-0">
+        <h2 className="mb-16 hidden text-center text-3xl font-medium text-gray-700 lg:block">
           Tools & Calculators
         </h2>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {tools.map((tool) => (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-4">
+          {visibleTools.map((tool) => (
             <ToolCard
               key={tool.id}
               id={tool.id}
