@@ -50,13 +50,13 @@ const ToolCard = ({
             <span className="mr-1.5 size-2 rounded-full bg-wc-green" />
             NEW • JUST LAUNCHED
           </div>
-          <h3 className="mt-2 max-w-[58%] text-xl font-semibold leading-tight sm:text-2xl lg:max-w-[55%]">
+          <h3 className="mt-1 md:mt-2 max-w-[58%] text-xl font-semibold leading-tight lg:max-w-[55%]">
             Know your Credit Score
           </h3>
-          <p className="mt-1.5 max-w-[58%] text-xs leading-snug text-white/95 sm:text-sm lg:max-w-[56%]">
+          <p className="mt-2 md:mt-1.5 max-w-[58%] text-xs leading-snug text-white/95 sm:text-sm lg:max-w-[56%]">
             Check your full credit report in seconds. <strong>Free &amp; Instant</strong> and it never impacts your score.
           </p>
-          <span className="mt-auto inline-flex h-9 min-w-44 items-center justify-center gap-3 rounded-lg bg-white px-5 text-sm font-semibold text-brand-primary sm:h-10 lg:min-w-38 lg:text-xs">
+          <span className="mt-2 md:mt-auto inline-flex h-9 min-w-44 items-center justify-center gap-3 rounded-lg bg-white px-5 text-sm font-semibold text-brand-primary sm:h-10 lg:min-w-38 lg:text-xs">
             Check Now
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </span>
