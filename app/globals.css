@@ -283,6 +283,38 @@
   background-clip: text;
 }
 
+/* Shared uniform vertical spacing for landing-page sections (py-10 → py-14 at lg). */
+.wc-section-gap {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .wc-section-gap {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* Shared landing-page section heading (Figma: Poppins 500 / 40px / 100% / center).
+   Font-size scales down on small screens and caps at the 40px spec on desktop. */
+.wc-section-heading {
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.375rem, 1rem + 1.1vw, 1.75rem);
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  /* Uniform gap between the section heading and its content. */
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .wc-section-heading {
+    margin-bottom: 2.5rem;
+  }
+}
+
 /* Product Card Hover Effect */
 .wc-product-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -400,11 +432,11 @@
 
 /* Marquee container */
 .animate-marquee {
-  animation: marquee 40s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 .animate-marquee-reverse {
-  animation: marquee-reverse 40s linear infinite;
+  animation: marquee-reverse 20s linear infinite;
 }
 
 /* Pause animation on hover for better UX */

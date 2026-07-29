@@ -3,13 +3,15 @@
 import { JSX, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { getCookie } from 'cookies-next';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
 import { Carousel, CarouselContent, CarouselSlide, CarouselDots } from '@/components/ui/carousel';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { checkEligibilityStatus } from '@/lib/api/eligibility-check-service';
+import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
 import {
   STORAGE_CREDIT_SCORE_FETCH_PENDING,
   STORAGE_CREDIT_SCORE_READY,
@@ -19,11 +21,12 @@ import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
 import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
 import type { MouseEvent } from 'react';
+import type { StaticImageData } from 'next/image';
 
 /** Slide content configuration */
 export interface SlideContent {
   id: string;
-  image: string;
+  image: string | StaticImageData;
   titleWhite: string;
   titleGradient: string;
   description: string;
@@ -38,6 +41,8 @@ const HeroCarousel = (): JSX.Element => {
   const pathname = usePathname();
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
+  const { isAuthenticated, openModalWithPendingAction } = useAuthStore();
+  const searchParams = useSearchParams();
   const [isCheckingCreditReport, setIsCheckingCreditReport] = useState(false);
   const creditReportRequestRef = useRef<AbortController | null>(null);
 
@@ -50,11 +55,25 @@ const HeroCarousel = (): JSX.Element => {
   const renderCtaElement = (slide: SlideContent) => {
     const isPersonalLoan = slide.ctaLink === '/personal-loan';
     const isBureauReport = slide.ctaLink === '/bureau-report';
+    const isOffersPage = slide.ctaLink === '/offers';
 
     const handleClick = async (e: MouseEvent<HTMLAnchorElement>): Promise<void> => {
       if (isPersonalLoan) {
         e.preventDefault();
         triggerApplyFlow();
+        return;
+      }
+      if (isOffersPage) {
+        e.preventDefault();
+        const offersHref = buildOffersPathWithQuery('/offers', searchParams);
+        if (!isAuthenticated) {
+          openModalWithPendingAction({
+            type: 'navigate_to_offer',
+            href: offersHref,
+          });
+          return;
+        }
+        router.push(offersHref);
         return;
       }
       if (!isBureauReport) {
@@ -109,8 +128,6 @@ const HeroCarousel = (): JSX.Element => {
 
   return (
     <section className="wc-hero-bg min-h-[480px] lg:min-h-[520px] relative pt-20 lg:pt-24 pb-4">
-
-      <h1 className="sr-only">Compare Loans & Credit Offers Online</h1>
       <Carousel
         key={pathname}
         options={{ loop: true, align: 'center' }}
@@ -133,15 +150,22 @@ const HeroCarousel = (): JSX.Element => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
-                      {slide.titleWhite}
-                    </h2>
-                    <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
-                      {slide.titleGradient}
-                    </p>
+                    {index === 0 ?
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                        {slide.titleWhite} {" "}
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
+                          {slide.titleGradient}
+                        </p>
+                      </h1> : <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                        {slide.titleWhite}
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
+                          {slide.titleGradient}
+                        </p>
+                      </h2>}
                     <p className="text-sm hidden md:block sm:text-base text-gray-600 max-w-md mb-6 leading-relaxed">
                       {slide.description}
                     </p>
+
                     {ctaElement}
                   </motion.div>
 

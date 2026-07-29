@@ -109,11 +109,11 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
  */
 const BlogSection = (): React.ReactNode => {
 	return (
-		<section className="bg-white py-8 lg:py-10">
+		<section className="bg-white wc-section-gap">
 			<div className="mx-auto max-w-7xl xl:px-0 px-8">
 				{/* Section Title */}
 				<motion.h2
-					className="text-xl font-semibold text-gray-900 text-center mb-8"
+					className="wc-section-heading text-gray-900"
 					initial={{ opacity: 0, y: 10 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}

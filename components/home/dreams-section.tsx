@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
  */
 const DreamsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white px-5 py-12 sm:px-8 sm:py-16 md:px-12 md:py-20 lg:px-4 lg:py-24">
+    <section className="wc-section-gap bg-white px-5 sm:px-8 md:px-12 lg:px-4">
       <motion.div
         className="mx-auto max-w-7xl text-left lg:text-center"
         initial={{ opacity: 0, y: 20 }}
