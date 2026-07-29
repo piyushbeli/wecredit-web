@@ -22,7 +22,9 @@ export default async function sitemapPage(): Promise<MetadataRoute.Sitemap> {
   if (!baseUrl) return [];
 
   const pageRoutes = await fetchPagesRoutesFromSheet();
-  const pagePaths = pageRoutes.map((route) => route.source);
+  const pagePaths = pageRoutes
+    .filter((route) => route.showInSitemap === true)
+    .map((route) => route.source);
 
   return dedupeSitemapEntries(
     buildPathSitemapEntries(baseUrl, pagePaths, {
