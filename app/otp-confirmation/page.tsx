@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import OtpInput from 'react-otp-input';
 import StandaloneAuthLayout from '@/components/auth/standalone-auth-layout';
 import { authService, setAuthToken, setMobile } from '@/lib/api';
+import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
 import { useAuthStore } from '@/stores/auth-store';
 
 const RESEND_SECONDS = 30;
@@ -54,7 +55,7 @@ const OtpConfirmationPage = (): React.ReactNode => {
   }, [canResend]);
 
   const handleOtpChange = (value: string): void => {
-    setOtp(value);
+    setOtp(sanitizeNumericInput(value, 6));
     setError(null);
   };
 
@@ -127,12 +128,14 @@ const OtpConfirmationPage = (): React.ReactNode => {
             value={otp}
             onChange={handleOtpChange}
             numInputs={6}
+            inputType="tel"
             renderInput={(props) => {
               const restProps = { ...props, style: undefined };
               return (
                 <input
                   {...restProps}
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   disabled={isLoading}
                   className="h-14 w-14 rounded border-b-2 border-brand-primary bg-[#045CCF]/15 text-center text-2xl font-semibold text-gray-900 outline-none disabled:opacity-60 md:h-16 md:w-16"
                 />

@@ -9,6 +9,7 @@ import { GradientHeader } from '@/components/shared';
 import { useAppHeight } from '@/hooks/use-app-height';
 import { IMAGES } from '@/lib/constants/images';
 import { cn } from '@/lib/utils';
+import { sanitizeNumericInput } from '@/lib/utils/form-helpers';
 import type { HeaderHeightPreset, OTPStepScreenProps } from '../types';
 
 const RESEND_SECONDS = 30;
@@ -81,6 +82,10 @@ export const OTPStepScreen = ({
     void onVerify(otpValue);
   };
 
+  const handleOtpChange = (value: string): void => {
+    onOtpChange(sanitizeNumericInput(value, 6));
+  };
+
   const handleResend = (): void => {
     if (!canResend || isLoading) return;
     setResendTimer(RESEND_SECONDS);
@@ -141,7 +146,7 @@ export const OTPStepScreen = ({
             <div className="mx-auto w-full">
               <OTPInput
                 value={otpValue}
-                onChange={onOtpChange}
+                onChange={handleOtpChange}
                 onResend={onResend}
                 onChangeNumber={onBack}
                 error={error || undefined}
@@ -208,14 +213,16 @@ export const OTPStepScreen = ({
           <div className="mt-7">
             <OtpInput
               value={otpValue}
-              onChange={onOtpChange}
+              onChange={handleOtpChange}
               numInputs={6}
+              inputType="tel"
               renderInput={(props) => {
                 const restProps = { ...props, style: undefined };
                 return (
                   <input
                     {...restProps}
                     inputMode="numeric"
+                    pattern="[0-9]*"
                     disabled={isLoading}
                     className={cn(
                       'h-12 w-12 border-b-2 bg-[#045CCF]/15 text-center text-xl font-semibold text-gray-900 outline-none disabled:opacity-60 sm:h-14 sm:w-14 md:h-16 md:w-16 md:text-2xl',
