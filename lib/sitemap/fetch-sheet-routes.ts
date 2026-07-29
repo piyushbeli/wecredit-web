@@ -3,6 +3,7 @@ import { GOOGLE_SHEET_ROUTES } from '@/lib/constants/google-sheet-routes';
 export interface SheetRouteMapping {
   destination: string;
   source: string;
+  showInSitemap?: boolean;
 }
 
 export interface SheetRoutesRequestOptions {
@@ -70,6 +71,7 @@ function parseRoutesFromCsv(
   const headers = parseCsvLine(lines[0]);
   const destinationIndex = findColumnIndex(headers, 'destination');
   const sourceIndex = findColumnIndex(headers, 'source');
+  const showInSitemapIndex = findColumnIndex(headers, 'showInSitemap');
 
   if (destinationIndex === -1 || sourceIndex === -1) {
     console.warn(`[${logLabel}] Missing Destination or source column in sheet`);
@@ -80,6 +82,11 @@ function parseRoutesFromCsv(
 
   for (let i = 1; i < lines.length; i += 1) {
     const columns = parseCsvLine(lines[i]);
+    // Missing column → include all rows; blank/non-true → exclude
+    if (showInSitemapIndex !== -1 && columns[showInSitemapIndex].toLowerCase() !== 'true') {
+      continue;
+    }
+
     const destination = columns[destinationIndex]?.trim() ?? '';
     const source = normalizeSheetSourcePath(columns[sourceIndex] ?? '');
 
