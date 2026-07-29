@@ -41,9 +41,9 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
   const visibleTools = tools.filter((tool) => tool.id !== 'business-loan-calculator');
 
   return (
-    <section className="bg-white py-8 lg:py-20">
+    <section className="bg-white wc-section-gap">
       <div className="mx-auto max-w-6xl px-4 xl:px-0">
-        <h2 className="mb-16 hidden text-center text-3xl font-medium text-gray-700 lg:block">
+        <h2 className="wc-section-heading hidden text-gray-900 lg:block">
           Tools & Calculators
         </h2>
 

@@ -4,29 +4,17 @@ import { Partner } from '@/types/wecredit';
 import { PARTNERS } from '@/lib/constants/common';
 import PartnerCard from './partner-card';
 import { motion } from 'framer-motion';
-
-/**
- * Grid settings for partners layout.
- */
-const PARTNER_GRID_COLUMNS = 5;
-const PARTNER_GRID_ROWS = 6;
-const PARTNER_GRID_ITEMS = PARTNER_GRID_COLUMNS * PARTNER_GRID_ROWS;
-type PartnerGridItem = Partner | null;
-
-/**
- * Our Partners section with a static 5x5 grid.
- */
 const PartnersSection = (): React.ReactNode => {
-	const gridPartners = PARTNERS.slice(0, PARTNER_GRID_ITEMS);
-	const placeholderCount = PARTNER_GRID_ITEMS - gridPartners.length;
-	const placeholders = Array.from({ length: Math.max(0, placeholderCount) }, (): PartnerGridItem => null);
-	const partnerGridItems = [...gridPartners, ...placeholders];
+	const halfIndex = Math.ceil(PARTNERS.length / 2);
+	const row1Partners: Partner[] = PARTNERS.slice(0, halfIndex);
+	const row2Partners: Partner[] = PARTNERS.slice(halfIndex);
+	const row1Doubled: Partner[] = [...row1Partners, ...row1Partners];
+	const row2Doubled: Partner[] = [...row2Partners, ...row2Partners];
+
 	return (
-		<section className="bg-white py-4 sm:mt-5 md:py-5 overflow-hidden">
-			{/* Container with blue left border accent */}
-			{/* Section Title */}
+		<section className="bg-white wc-section-gap overflow-hidden">
 			<motion.h2
-				className="text-xl font-semibold text-gray-900 text-center mb-8"
+				className="wc-section-heading text-gray-900"
 				initial={{ opacity: 0, y: 10 }}
 				whileInView={{ opacity: 1, y: 0 }}
 				viewport={{ once: true }}
@@ -34,20 +22,30 @@ const PartnersSection = (): React.ReactNode => {
 			>
 				Our Partners
 			</motion.h2>
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-4 lg:px-0">
-				<div className="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4 justify-items-center">
-					{partnerGridItems.map((partner, index) => (
-						<div key={`partner-grid-${index}`} className="flex justify-center">
-							{partner ? (
+
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-4 lg:px-0 space-y-4">
+				{/* Row 1: Left -> Right */}
+				<div className="marquee-container overflow-hidden">
+					<div className="flex animate-marquee gap-6">
+						{row1Doubled.map((partner, index) => (
+							<div key={`partners-row1-${index}`} className="shrink-0 w-28 sm:w-32 lg:w-36">
 								<PartnerCard partner={partner} />
-							) : (
-								<div className="w-14 h-10 sm:w-20 sm:h-12 md:w-28 md:h-16 lg:w-32 lg:h-20" />
-							)}
-						</div>
-					))}
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* Row 2: Right -> Left */}
+				<div className="marquee-container overflow-hidden">
+					<div className="flex animate-marquee-reverse gap-6">
+						{row2Doubled.map((partner, index) => (
+							<div key={`partners-row2-${index}`} className="shrink-0 w-28 sm:w-32 lg:w-36">
+								<PartnerCard partner={partner} />
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
-
 		</section>
 	);
 };

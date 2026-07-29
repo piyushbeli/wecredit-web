@@ -59,11 +59,9 @@ const products: Product[] = [
 
 const ProductsSection = (): React.ReactNode => {
   return (
-    <section className="bg-white lg:py-10">
+    <section className="bg-white wc-section-gap">
       <div className="mx-auto max-w-7xl xl:px-0 px-4">
-        <h2
-          className="text-xl font-semibold text-gray-900 text-center mb-8"
-        >
+        <h2 className="wc-section-heading text-gray-900">
           Our Products
         </h2>
 

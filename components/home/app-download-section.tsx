@@ -1,76 +1,89 @@
 import React from 'react';
 import Image from 'next/image';
-import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IMAGES } from '@/lib/constants/images';
 import { EXTERNAL_LINKS } from '@/lib/constants/links';
 
 /**
  * AppDownloadSection Component
- * 
- * Displays a call-to-action for downloading the WeCredit mobile app.
- * Features a gradient background, responsive text, app store badges,
- * and a phone mockup positioned at the bottom-right.
+ *
+ * Call-to-action banner for downloading the WeCredit mobile app.
+ * White-to-blue gradient, centered logo/heading/CTA, and a phone mockup
+ * bleeding off the right edge.
  */
 const AppDownloadSection = (): React.ReactNode => {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-8 sm:px-6 md:py-10 lg:px-4 lg:py-16 xl:px-0 xl:py-24">
+    <section className="wc-section-gap mx-auto max-w-7xl px-6 sm:px-6 lg:px-4 xl:px-0">
       <div
         className={cn(
-          'relative min-h-[430px] overflow-hidden rounded-[24px] bg-white shadow-[0_8px_28px_rgba(15,23,42,0.14)] sm:min-h-[520px] md:min-h-[560px] md:rounded-[36px] lg:min-h-0 lg:shadow-none',
-          'px-5 py-8 sm:px-10 sm:py-12 md:px-10 md:py-10 lg:px-12 lg:py-14 xl:px-20 xl:py-20',
-          'flex flex-col items-start lg:flex-row lg:items-center'
+          'relative flex items-center overflow-hidden rounded-[24px] md:rounded-[36px]',
+          'min-h-[360px] sm:min-h-[380px] md:min-h-[400px] lg:min-h-[400px] xl:min-h-[440px]',
+          'px-6 py-10 sm:px-10 sm:py-12 lg:px-12 lg:py-14 xl:px-20'
         )}
       >
-        {/* Gradient glow behind mock */}
-        <div className="absolute bottom-0 right-0 h-[54%] w-[74%] pointer-events-none sm:h-[58%] sm:w-[76%] md:top-auto md:h-[58%] md:w-[76%] lg:top-0 lg:h-full lg:w-[44%] xl:w-[48%]">
-          <div className="w-full h-full bg-gradient-to-bl from-[#5EA1FF] via-[#EAF4FF] to-white opacity-95 blur-[20px] rounded-tr-[28px]" />
+        {/* Light → royal-blue gradient background (stops matched to the phone artwork so it blends seamlessly) */}
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,#F6FAFF_0%,#F0F7FD_8%,#E4EEFA_16%,#D3E4F8_24%,#BCD4F6_31%,#A1C3F3_39%,#88B2EE_47%,#6FA1E6_55%,#5A91E4_62%,#4485E1_74%,#3B7CE2_86%,#3474DA_100%)]" />
+
+        {/* Phone mockup (background keyed to transparency) bleeding off the bottom-right */}
+        <div className="pointer-events-none absolute bottom-0 right-0 z-0 hidden select-none md:block md:h-[64%] md:w-[48%] lg:inset-y-0 lg:h-full lg:w-[50%]">
+          <Image
+            src={IMAGES.APP.PHONE_MOCKUP}
+            alt="WeCredit app on a smartphone home screen"
+            fill
+            className="object-contain object-right-bottom"
+            sizes="(min-width: 1024px) 50vw, 58vw"
+            priority
+          />
         </div>
 
-        {/* Left column: heading, subtitle, badges */}
-        <div className="relative z-20 w-full lg:w-2/3">
-          <h2 className="max-w-[680px] text-[24px] font-semibold leading-[1.18] text-gray-900 sm:text-4xl md:text-[34px] lg:text-4xl xl:text-5xl">
-            No more Waiting.
+        {/* Centered content */}
+        <div className="relative z-10 flex w-full gap-2 flex-col items-center text-center lg:w-[58%]">
+          <div className="mb-4 flex items-center justify-center sm:mb-5">
+            <Image
+              src={IMAGES.LOGOS.DEFAULT}
+              alt="WeCredit"
+              width={160}
+              height={44}
+              className="h-7 w-auto sm:h-8"
+              priority
+            />
+          </div>
+
+          <h2 className="text-[30px] font-semibold leading-[1.05] text-[#141414] sm:text-4xl md:text-[44px] lg:text-5xl">
+            Download Our
             <br />
-            Get up to <span className="text-brand-primary">₹3 Lakh</span> in Minutes
+            Mobile App
           </h2>
 
-          <p className="mt-7 flex items-center gap-2 text-[19px] leading-tight text-gray-700 sm:text-2xl md:mt-5 md:gap-2 md:text-xl lg:text-2xl lg:gap-3 xl:text-3xl">
-            <span>Download The WeCredit App Now</span>
-            <ArrowDown className="h-7 w-7 shrink-0 md:h-6 md:w-6" />
-          </p>
-
-          <div className="mt-8 flex flex-col items-start gap-5 md:mt-7 lg:mt-7 lg:flex-row lg:gap-6 xl:mt-8">
-            {/* Badges stacked */}
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <a href={EXTERNAL_LINKS.PLAY_STORE} target="_blank" rel="noreferrer" className="inline-block">
-                <Image src={IMAGES.APP.GOOGLE_PLAY} alt="Get it on Google Play" width={260} height={64} className="h-10 w-auto rounded-md shadow-sm sm:h-14 md:h-11 lg:h-12 xl:h-14" />
-              </a>
-              {/* {IMAGES.APP.APP_STORE && (
-                <a href={EXTERNAL_LINKS.APP_STORE || '#'} target="_blank" rel="noreferrer" className="inline-block lg:hidden">
-                  <Image src={IMAGES.APP.APP_STORE} alt="Download on the App Store" width={260} height={64} className="h-12 w-auto rounded-md shadow-sm sm:h-14 md:h-11 lg:h-12 xl:h-14" />
-                </a>
-              )} */}
-            </div>
-
-            {/* QR block - hidden on small devices */}
-            <div className="flex items-center justify-center">
-              <Image src={IMAGES.APP.QR} alt="QR code" width={140} height={140} className="h-28 w-28 object-contain sm:h-32 sm:w-32 lg:h-28 lg:w-28 xl:h-36 xl:w-36" />
-            </div>
+          {/* "today!" layered sticker pill — overlaps up under the heading */}
+          <div
+            className={cn(
+              'relative rotate-351 top-4 z-[-4] -mt-2 inline-flex items-center rounded-full px-8 py-2 sm:-mt-3 sm:px-8 sm:py-3.5',
+              'bg-gradient-to-r from-[#689AE4] to-[#091C39]',
+            )}
+            
+          >
+            <span className="text-[55px] font-extrabold  leading-none text-white sm:text-[60px]x">
+              today!
+            </span>
           </div>
-        </div>
 
-        {/* Right column: phone mockup covering right area (less cropped, aligned bottom-right) */}
-        <div className="absolute bottom-0 right-0 h-[52%] w-[64%] pointer-events-none select-none z-10 sm:h-[56%] sm:w-[70%] md:h-[52%] md:w-[64%] lg:inset-y-0 lg:h-full lg:w-[44%] xl:w-[50%]">
-          <div className="relative h-full w-full rounded-r-2xl overflow-hidden">
-            <Image
-              src={IMAGES.APP.MOCKUP}
-              alt="WeCredit App Mockup"
-              fill
-              className="object-contain w-full h-full"
-              style={{ objectPosition: 'right bottom' }}
-              sizes="(min-width: 1280px) 640px, (min-width: 1024px) 44vw, 76vw"
-            />
+          <div className="mt-8 flex items-center justify-center sm:mt-10">
+            <a
+              href={EXTERNAL_LINKS.PLAY_STORE}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Get WeCredit on Google Play"
+              className="inline-block"
+            >
+              <Image
+                src={IMAGES.APP.GOOGLE_PLAY}
+                alt="Get it on Google Play"
+                width={220}
+                height={66}
+                className="h-14 w-auto rounded-lg shadow-md sm:h-16"
+              />
+            </a>
           </div>
         </div>
       </div>
