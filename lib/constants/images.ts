@@ -4,6 +4,8 @@
  * and make path changes easier.
  */
 import XIcon from '@/public/assets/images/XIcon.png';
+import comparePersonalLoanIllustration from '@/public/assets/images/compare-personal-loan-illustration.png';
+import appPhoneMockup from '@/public/assets/images/wecredit-app-phone-mockup.png';
 
 const BUCKET_IMAGE_URL = 'https://wecredit-main-website-assets.s3.ap-south-1.amazonaws.com';
 
@@ -18,6 +20,7 @@ export const IMAGES = {
     SLIDE_1: `${BUCKET_IMAGE_URL}/carousel-one.png`,
     SLIDE_2: `${BUCKET_IMAGE_URL}/carousel-two.png`,
     SLIDE_3: `${BUCKET_IMAGE_URL}/carousel-three.png`,
+    COMPARE_PERSONAL_LOAN_ILLUSTRATION: comparePersonalLoanIllustration,
   },
   CERTIFICATIONS: {
     ISO_BADGE_1: `${BUCKET_IMAGE_URL}/certifications/iso-badge-1.png`,
@@ -29,6 +32,7 @@ export const IMAGES = {
     APP_STORE: `${BUCKET_IMAGE_URL}/app-store-badge.png`,
     QR: `${BUCKET_IMAGE_URL}/QR.png`,
     MOCKUP: `${BUCKET_IMAGE_URL}/wecredit-app-mock.png`,
+    PHONE_MOCKUP: appPhoneMockup,
   },
   ILLUSTRATIONS: {
     EMI_CALC: `${BUCKET_IMAGE_URL}/emi-calculator-illustration.png`,

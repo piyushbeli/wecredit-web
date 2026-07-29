@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TrendingOfferCard from './trending-offer-card';
 import type { ActiveLender } from '@/lib/utils/lenders';
 import {
   Carousel,
   CarouselContent,
   CarouselSlide,
+  CarouselDots,
+  useCarousel,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
 import { formatToTwoDecimals } from '@/lib/utils/common-helper';
@@ -18,7 +21,7 @@ interface TrendingOffersSectionProps {
   heading?: string;
 }
 
-/** Group items into columns of 3 */
+/** Group items into columns of 2 */
 function groupIntoColumns<T>(items: T[], itemsPerColumn: number): T[][] {
   const columns: T[][] = [];
   for (let i = 0; i < items.length; i += itemsPerColumn) {
@@ -38,10 +41,42 @@ function getCarouselSlideClassName(totalColumns: number): string {
   return cn(
     isSingle
       ? 'basis-full'
-      : 'basis-[85%] sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4',
+      : 'basis-[85%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/4',
     'px-2'
   );
 }
+
+const TrendingCarouselControls = (): React.ReactNode => {
+  const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarousel();
+
+  return (
+    <div className="mt-4 flex items-center justify-center gap-4">
+      <button
+        type="button"
+        aria-label="Previous trending offers"
+        onClick={scrollPrev}
+        disabled={!canScrollPrev}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="h-4 w-4 text-gray-700" />
+      </button>
+      <CarouselDots
+        className="mt-0"
+        dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
+        activeDotClassName="bg-wc-blue-500"
+      />
+      <button
+        type="button"
+        aria-label="Next trending offers"
+        onClick={scrollNext}
+        disabled={!canScrollNext}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronRight className="h-4 w-4 text-gray-700" />
+      </button>
+    </div>
+  );
+};
 
 const TrendingOffersSection = ({
   activeLenders,
@@ -50,7 +85,7 @@ const TrendingOffersSection = ({
   const pathname = usePathname();
   const [skipAnimation, setSkipAnimation] = useState(false);
 
-  const lenderColumns = groupIntoColumns(activeLenders, 3);
+  const lenderColumns = groupIntoColumns(activeLenders, 2);
 
   useEffect(() => {
     const timeout = setTimeout(() => setSkipAnimation(true), 800);
@@ -60,10 +95,10 @@ const TrendingOffersSection = ({
   if (activeLenders.length === 0) return null;
 
   return (
-    <section className="bg-white py-8 lg:py-10 w-full justify-center flex">
+    <section className="bg-white wc-section-gap w-full justify-center flex">
       <div className="w-full max-w-7xl">
         <motion.h2
-          className="text-xl font-semibold text-gray-900 text-center mb-8"
+          className="wc-section-heading text-gray-900"
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -92,7 +127,7 @@ const TrendingOffersSection = ({
               >
                 <div className="flex flex-col gap-2">
                   {column.map(({ id, lender }, rowIndex) => (
-                    <TrendingOfferCard
+          <TrendingOfferCard
                       key={id}
                       id={id}
                       lenderName={lender.Name || id}
@@ -104,7 +139,7 @@ const TrendingOffersSection = ({
                       }
                       tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
                       href={lender.utmLink || `/offers/${id}`}
-                      index={colIndex * 3 + rowIndex}
+                      index={colIndex * 2 + rowIndex}
                       skipAnimation={skipAnimation}
                       lenderType={lender?.lenderType || null}
                     />
@@ -113,11 +148,7 @@ const TrendingOffersSection = ({
               </CarouselSlide>
             ))}
           </CarouselContent>
-          { /* <CarouselDots
-          className="mt-4"
-          dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
-          activeDotClassName="bg-wc-blue-500"
-        /> */}
+          <TrendingCarouselControls />
         </Carousel>
       </div >
     </section >

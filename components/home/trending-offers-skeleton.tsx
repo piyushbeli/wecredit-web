@@ -1,10 +1,12 @@
 import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Carousel,
   CarouselContent,
   CarouselSlide,
   CarouselDots,
+  useCarousel,
 } from '@/components/ui/carousel';
 
 /**
@@ -60,7 +62,39 @@ const TrendingOfferCardSkeleton = (): React.ReactNode => {
 const TrendingOffersSkeleton = (): React.ReactNode => {
   // Create skeleton columns (2-3 columns to show carousel structure)
   const skeletonColumns = 3;
-  const cardsPerColumn = 3;
+  const cardsPerColumn = 2;
+
+  const TrendingCarouselArrowsSkeleton = (): React.ReactNode => {
+    const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarousel();
+
+    return (
+      <div className="mt-4 flex items-center justify-center gap-4">
+        <button
+          type="button"
+          aria-label="Previous trending offers"
+          onClick={scrollPrev}
+          disabled={!canScrollPrev}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="h-4 w-4 text-gray-700" />
+        </button>
+        <CarouselDots
+          className="mt-0"
+          dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
+          activeDotClassName="bg-gray-400"
+        />
+        <button
+          type="button"
+          aria-label="Next trending offers"
+          onClick={scrollNext}
+          disabled={!canScrollNext}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronRight className="h-4 w-4 text-gray-700" />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <section className="bg-white py-8">
@@ -76,9 +110,9 @@ const TrendingOffersSkeleton = (): React.ReactNode => {
             <CarouselSlide
               key={colIndex}
               index={colIndex}
-              className="basis-4/5 pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+              className="basis-4/5 pl-3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/4"
             >
-              {/* 3-row vertical stack */}
+              {/* 2-row vertical stack */}
               <div className="flex flex-col gap-3">
                 {Array.from({ length: cardsPerColumn }).map((_, rowIndex) => (
                   <TrendingOfferCardSkeleton key={rowIndex} />
@@ -87,13 +121,7 @@ const TrendingOffersSkeleton = (): React.ReactNode => {
             </CarouselSlide>
           ))}
         </CarouselContent>
-
-        {/* Dot Indicators Skeleton */}
-        <CarouselDots
-          className="mt-4"
-          dotClassName="w-2 h-2 rounded-full transition-colors bg-gray-300"
-          activeDotClassName="bg-gray-400"
-        />
+        <TrendingCarouselArrowsSkeleton />
       </Carousel>
     </section>
   );
