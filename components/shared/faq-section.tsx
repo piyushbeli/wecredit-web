@@ -94,11 +94,11 @@ const FaqSection = ({
 	};
 
 	return (
-		<section className={cn('bg-white py-4 sm:py-10 md:py-12 px-4', className)}>
+		<section className={cn('bg-white wc-section-gap px-4', className)}>
 			{/* Section Title */}
 			{showTitle && (
 				<motion.h2
-					className="text-xl font-semibold text-gray-900 text-center mb-8"
+					className="wc-section-heading text-gray-900"
 					initial={{ opacity: 0, y: 10 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}

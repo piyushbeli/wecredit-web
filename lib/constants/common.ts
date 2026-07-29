@@ -77,6 +77,16 @@ export const ROW_3_PARTNERS = PARTNERS.slice(14, 21);
 /** Carousel slides data */
 export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
   {
+    id: 'slide-2',
+    image: IMAGES.CAROUSEL.COMPARE_PERSONAL_LOAN_ILLUSTRATION,
+    titleWhite: 'Compare Personal Loan',
+    titleGradient: 'from 25+ Lenders',
+    description:
+      'Find the right loan offer based on your profile, interest rate, eligibility, and repayment needs - all in one place.',
+    ctaText: 'Compare Offers',
+    ctaLink: '/offers',
+  },
+  {
     id: "slide-1",
     image: IMAGES.CAROUSEL.SLIDE_1,
     titleWhite: "More Savings",
@@ -86,6 +96,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     ctaText: "Apply For Loan",
     ctaLink: "/personal-loan",
   },
+
   // {
   //   id: "slide-2",
   //   image: IMAGES.CAROUSEL.SLIDE_2,

@@ -10,6 +10,7 @@ import { UserButton } from './mobile-header-components/user-button';
 import { MenuButton } from './mobile-header-components/menu-button';
 import { MobileMenuDrawer } from './mobile-header-components/mobile-menu-drawer';
 import { DesktopNavLinks } from './mobile-header-components/desktop-nav-links';
+import { UserMenuDropdown } from './mobile-header-components/user-menu-dropdown';
 
 /** Scroll threshold in pixels to trigger header style change */
 const SCROLL_THRESHOLD = 50;
@@ -91,13 +92,25 @@ const MobileHeader = ({ siteName }: MobileHeaderProps): JSX.Element => {
           <DesktopNavLinks headerLinks={visibleHeaderLinks} />
 
           <div className="flex items-center justify-end gap-2">
-            <UserButton
-              isAuthenticated={isAuthenticated}
-              user={user}
-              showSolidHeader={showSolidHeader}
-              toggleMenu={toggleMenu}
-              openAuthModal={openAuthModal}
-            />
+            {/* Desktop: authenticated user gets a hover dropdown */}
+            {isAuthenticated ? (
+              <UserMenuDropdown
+                phoneNumber={user?.phoneNumber}
+                logout={logout}
+                className="hidden lg:block"
+              />
+            ) : null}
+
+            {/* Mobile drawer trigger (all sizes when logged out, mobile-only when logged in) */}
+            <div className={cn(isAuthenticated && 'lg:hidden')}>
+              <UserButton
+                isAuthenticated={isAuthenticated}
+                user={user}
+                showSolidHeader={showSolidHeader}
+                toggleMenu={toggleMenu}
+                openAuthModal={openAuthModal}
+              />
+            </div>
 
             <div className="lg:hidden">
               <MenuButton toggleMenu={toggleMenu} showSolidHeader={showSolidHeader} />

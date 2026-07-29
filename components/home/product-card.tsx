@@ -17,7 +17,7 @@ const ProductCard = ({ label, href, icon: Icon, imagePath }: ProductCardProps): 
     >
       <Link
         href={href}
-        className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl md:border md:border-gray-100 bg-white hover:border-gray-200 transition-colors"
+        className="wc-product-card flex flex-col items-center justify-center gap-3 p-4 h-full rounded-xl md:border md:border-gray-100 bg-white hover:border-gray-200 hover:shadow-lg transition-colors transition-shadow duration-300"
       >
         <div
           className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-wc-blue-50 flex items-center justify-center"
