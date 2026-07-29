@@ -147,12 +147,14 @@ const OTPInput = ({
           value={currentOtp}
           onChange={handleOtpChange}
           numInputs={OTP_LENGTH}
+          inputType="tel"
           renderInput={(props) => {
             const restProps = { ...props, style: undefined };
             return (
               <input
                 {...restProps}
                 inputMode="numeric"
+                pattern="[0-9]*"
                 className={getInputClass()}
                 disabled={disabled}
               />
