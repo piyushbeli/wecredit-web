@@ -82,19 +82,18 @@ function parseRoutesFromCsv(
 
   for (let i = 1; i < lines.length; i += 1) {
     const columns = parseCsvLine(lines[i]);
-    // Missing column → include all rows; blank/non-true → exclude
-    if (showInSitemapIndex !== -1 && columns[showInSitemapIndex].toLowerCase() !== 'true') {
-      continue;
-    }
-
     const destination = columns[destinationIndex]?.trim() ?? '';
     const source = normalizeSheetSourcePath(columns[sourceIndex] ?? '');
+    const showInSitemap =
+      showInSitemapIndex === -1
+        ? true
+        : (columns[showInSitemapIndex] ?? '').trim().toLowerCase() === 'true';
 
     if (!destination || !source || !source.startsWith(sourcePathPrefix)) {
       continue;
     }
 
-    mappings.push({ destination, source });
+    mappings.push({ destination, source, showInSitemap });
   }
 
   return mappings;
