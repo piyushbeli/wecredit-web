@@ -43,7 +43,7 @@ const ToolsCalculatorsSection = (): React.ReactNode => {
   return (
     <section className="bg-white wc-section-gap">
       <div className="mx-auto max-w-6xl px-4 xl:px-0">
-        <h2 className="wc-section-heading hidden text-gray-900 lg:block">
+        <h2 className="wc-section-heading text-gray-900 lg:block">
           Tools & Calculators
         </h2>
 

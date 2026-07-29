@@ -22,7 +22,9 @@ export default async function sitemapLoans(): Promise<MetadataRoute.Sitemap> {
   if (!baseUrl) return [];
 
   const loanRoutes = await fetchLoanRoutesFromSheet();
-  const loanPaths = loanRoutes.map((route) => route.source);
+  const loanPaths = loanRoutes
+    .filter((route) => route.showInSitemap === true)
+    .map((route) => route.source);
 
   return dedupeSitemapEntries(
     buildPathSitemapEntries(baseUrl, loanPaths, {
