@@ -348,7 +348,8 @@ const TrendingOfferCard = ({
                   alt={lenderName}
                   width={80}
                   height={30}
-                  className="max-h-[30px] w-auto object-contain"
+                  draggable={false}
+                  className="max-h-[30px] w-auto object-contain pointer-events-none"
                 />
               ) : (
                 <span className="font-medium text-sm text-gray-700 truncate w-full">  {lenderName}</span>
