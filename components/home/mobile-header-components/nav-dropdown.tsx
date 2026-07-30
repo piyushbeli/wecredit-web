@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import type { FocusEvent } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { NavigationLink } from '@/types/navigation';
 import { cn } from '@/lib/utils';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 
 /** Shared card styling for hover dropdowns — blue top border, white rounded card, soft shadow. */
 export const DROPDOWN_CARD_CLASS =
@@ -24,18 +27,35 @@ interface NavDropdownProps {
 
 /**
  * Desktop navbar item with a hover dropdown of child links (e.g. Loans, Tools).
+ * Locks main page scroll while the menu is open.
  */
 export const NavDropdown = ({ link }: NavDropdownProps) => {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  useBodyScrollLock(isOpen);
+
   const isActive = link.children.some((child) =>
     pathname.startsWith(child.url.replace(/\/$/, ''))
   );
 
+  const handleBlur = (event: FocusEvent<HTMLDivElement>): void => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setIsOpen(false);
+    }
+  };
+
   return (
-    <div className="group relative">
+    <div
+      className="group relative"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+      onFocus={() => setIsOpen(true)}
+      onBlur={handleBlur}
+    >
       <button
         type="button"
         aria-haspopup="true"
+        aria-expanded={isOpen}
         className={cn(
           'flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200',
           isActive ? 'text-wc-blue-600' : 'text-gray-700 group-hover:text-wc-blue-600'
