@@ -2,6 +2,14 @@ import type { NavigationLink } from '@/types/navigation';
 
 export const SITE_NAME = 'WeCredit';
 
+export const LOAN_STATUS_LINK: NavigationLink = {
+  id: 2,
+  label: 'Loan Status',
+  url: '/offers',
+  openInNewTab: false,
+  children: [],
+};
+
 export const LOANS_LINK: NavigationLink = {
   id: 5,
   label: 'Loans',
@@ -37,6 +45,10 @@ export const HEADER_LINKS: NavigationLink[] = [
   { id: 4, label: 'About Us', url: '/about-us/', openInNewTab: false, children: [] },
 ];
 
-export function getVisibleHeaderLinks(_isAuthenticated: boolean): NavigationLink[] {
-  return HEADER_LINKS;
+export function getVisibleHeaderLinks(isAuthenticated: boolean): NavigationLink[] {
+  if (!isAuthenticated) {
+    return HEADER_LINKS;
+  }
+  const [home, ...rest] = HEADER_LINKS;
+  return [home, LOAN_STATUS_LINK, ...rest];
 }

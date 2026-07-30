@@ -22,7 +22,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-1',
 		title: '7-Day Loan Apps: Quick Access to Short-Term Cash',
 		description: 'Explore top short-term loan apps offering quick approval and 7-day repayment.',
-		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
+		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
 		readTime: 4,
 		href: 'https://wecredit.co.in/blog/7-day-loan-apps-quick-and-easy-access-to-short-term-loans/',
 	},
@@ -30,7 +30,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-2',
 		title: '15-Day Loan Apps for Instant Cash When Needed',
 		description: 'Compare loan apps offering flexible 15-day repayment for urgent expenses.',
-		imagePath: IMAGES.ILLUSTRATIONS.PERSONAL_LOAN,
+		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
 		readTime: 4,
 		href: 'https://wecredit.co.in/blog/14-day-loan-apps-in-india-instant-cash/',
 	},
@@ -38,7 +38,7 @@ const blogPosts: BlogPost[] = [
 		id: 'blog-3',
 		title: 'Get ₹10,000 Loan Without a CIBIL Score',
 		description: 'Discover how lenders approve urgent loans based on income, not your credit score.',
-		imagePath: IMAGES.ILLUSTRATIONS.CREDIT_SCORE,
+		imagePath: IMAGES.ILLUSTRATIONS.EMI_CALC,
 		readTime: 4,
 		href: 'https://wecredit.co.in/blog/10000-loan-without-cibil/',
 	},
@@ -76,7 +76,7 @@ const BlogCard = ({ post, index }: BlogCardProps): React.ReactNode => {
 				className="group block bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300"
 			>
 				{/* Image Container */}
-				<div className="relative aspect-4/3 w-full overflow-hidden bg-gray-100">
+				<div className="relative aspect-4/3 w-full overflow-hidden bg-brand-primary/10">
 					<Image
 						src={post.imagePath}
 						alt={post.title}
