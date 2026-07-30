@@ -98,7 +98,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
       "Experience the next generation of financial freedom. We connect you with top-tier lenders using AI-driven precision for the lowest possible rates.",
    
     ctaText: 'Compare Offers',
-    ctaLink: '/offers',
+    ctaLink: '/personal-loan',
   },
   {
     id: "slide-3",
