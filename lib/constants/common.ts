@@ -64,49 +64,42 @@ export const PARTNERS: Partner[] = [
   { name: "TezCredit", logo: `${IMAGES.PARTNERS.BASE_PATH}/tezcredit.png` },
   { name: "Cashvia", logo: `${IMAGES.PARTNERS.BASE_PATH}/cashvia.png` },
   { name: "Branch", logo: `${IMAGES.PARTNERS.BASE_PATH}/branch.png` },
+  { name: "Vivifi", logo: `${IMAGES.PARTNERS.BASE_PATH}/vivifi-logo.png` },
 ];
 
 
 /**
  * Split partners into rows for the marquee display
  */
-export const ROW_1_PARTNERS = PARTNERS.slice(0, 7);
-export const ROW_2_PARTNERS = PARTNERS.slice(7, 14);
-export const ROW_3_PARTNERS = PARTNERS.slice(14, 21);
+const PARTNERS_PER_ROW = Math.ceil(PARTNERS.length / 3);
+export const ROW_1_PARTNERS = PARTNERS.slice(0, PARTNERS_PER_ROW);
+export const ROW_2_PARTNERS = PARTNERS.slice(PARTNERS_PER_ROW, PARTNERS_PER_ROW * 2);
+export const ROW_3_PARTNERS = PARTNERS.slice(PARTNERS_PER_ROW * 2);
 
 /** Carousel slides data */
 export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
   {
     id: 'slide-2',
-    image: IMAGES.CAROUSEL.COMPARE_PERSONAL_LOAN_ILLUSTRATION,
+    image: IMAGES.CAROUSEL.SLIDE_1,
     titleWhite: 'Compare Personal Loan',
     titleGradient: 'from 25+ Lenders',
     description:
       'Find the right loan offer based on your profile, interest rate, eligibility, and repayment needs - all in one place.',
-    ctaText: 'Compare Offers',
-    ctaLink: '/offers',
+      ctaText: "Apply For Loan",
+      ctaLink: "/personal-loan",
   },
   {
     id: "slide-1",
-    image: IMAGES.CAROUSEL.SLIDE_1,
+    image: IMAGES.CAROUSEL.COMPARE_PERSONAL_LOAN_ILLUSTRATION,
+
     titleWhite: "More Savings",
     titleGradient: "on Every Loan",
     description:
       "Experience the next generation of financial freedom. We connect you with top-tier lenders using AI-driven precision for the lowest possible rates.",
-    ctaText: "Apply For Loan",
-    ctaLink: "/personal-loan",
+   
+    ctaText: 'Compare Offers',
+    ctaLink: '/offers',
   },
-
-  // {
-  //   id: "slide-2",
-  //   image: IMAGES.CAROUSEL.SLIDE_2,
-  //   titleWhite: "Find the Card",
-  //   titleGradient: "That Fits You",
-  //   description:
-  //     "Discover credit cards tailored to your lifestyle. Compare rewards, benefits, and eligibility across India's top banks in one place.",
-  //   ctaText: "Get Your Card",
-  //   ctaLink: "/credit-cards",
-  // },
   {
     id: "slide-3",
     image: IMAGES.CAROUSEL.SLIDE_3,
@@ -117,6 +110,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     ctaText: "Check Eligibility",
     ctaLink: "/bureau-report",
   },
+
 ];
 
 

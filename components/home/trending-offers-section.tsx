@@ -139,7 +139,7 @@ const TrendingOffersSection = ({
           aria-label="Previous trending offers"
           onClick={handleScrollPrev}
           disabled={!canScrollPrev}
-          className=" cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="hidden sm:inline-flex cursor-pointer h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="h-4 w-4 text-gray-700" />
         </button>
@@ -165,7 +165,7 @@ const TrendingOffersSection = ({
           aria-label="Next trending offers"
           onClick={handleScrollNext}
           disabled={!canScrollNext}
-          className=" cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="hidden sm:inline-flex cursor-pointer h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronRight className="h-4 w-4 text-gray-700" />
         </button>
