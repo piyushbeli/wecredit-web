@@ -4,6 +4,7 @@
  * Now a Server Component that handles initial authentication check.
  */
 
+import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { OffersView } from '@/components/offers';
@@ -17,6 +18,11 @@ import {
 interface PageProps {
   searchParams: Promise<AppRouterSearchParams>;
 }
+
+// Transactional, auth-gated page — keep it out of the index.
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 /**
  * Offers Page Server Component

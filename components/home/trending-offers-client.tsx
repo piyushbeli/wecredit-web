@@ -20,10 +20,18 @@ import { useAuthCookies } from '@/hooks/use-auth-cookies';
  * 
  * Completely independent component - handles all lender fetching internally
  */
-const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: string }): React.ReactNode => {
+const TrendingOffersClient = ({
+  heading = 'Trending Offers',
+  initialLenders = [],
+}: {
+  heading?: string;
+  /** Generic lenders fetched on the server for the initial (SSR) paint. */
+  initialLenders?: ActiveLender[];
+}): React.ReactNode => {
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuthStore();
   const [isHydrated, setIsHydrated] = useState(false);
+  const hasInitialLenders = initialLenders.length > 0;
 
   // PDF Step 3: Fetch user-specific lenders when logged in
   const [userLenders, setUserLenders] = useState<ActiveLender[] | null>(null);
@@ -53,10 +61,10 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
     };
   }, [isHydrated, mobileCookie, user?.phoneNumber, hasAuthCookies, isAuthenticated]);
 
-  // PDF Step 2: Fetch generic lenders (always fetched as fallback)
-  // Only fetch generic if user is not authenticated, and only after hydration
+  // PDF Step 2: Fetch generic lenders (fallback). Only after hydration, when the
+  // user is not authenticated, and only if the server didn't already provide them.
   const { activeLenders: genericLenders, isLoading: isLoadingGeneric } = useFilteredActiveLenders({
-    fetchOnMount: isHydrated && !authState.isAuthenticated,
+    fetchOnMount: isHydrated && !authState.isAuthenticated && !hasInitialLenders,
   });
 
   /**
@@ -91,7 +99,6 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
 
       try {
         const response = await fetchActiveLendersForUser(authState.mobile);
-        console.log('[response] user lenders: ', response);
         const filteredLenders = filterActiveLenders(response);
         setUserLenders(filteredLenders);
         hasFetchedForUser.current = authState.mobile;
@@ -106,17 +113,23 @@ const TrendingOffersClient = ({ heading = 'Trending Offers' }: { heading?: strin
     fetchUserLenders();
   }, [isHydrated, authState.isAuthenticated, authState.mobile]);
 
+  // Generic display prefers freshly-fetched client data, falling back to the
+  // server-rendered initial lenders (present on first paint, avoids a skeleton).
+  const genericDisplay = genericLenders.length > 0 ? genericLenders : initialLenders;
+
   // Determine which lenders to display
   // Priority: User-specific lenders (if logged in and fetched) > Generic lenders
   const displayLenders = authState.isAuthenticated && userLenders !== null
     ? userLenders
-    : genericLenders;
+    : genericDisplay;
 
   // Show loading state if either generic or user-specific lenders are loading
   const isAnyLoading = isLoadingGeneric || (isLoadingUserLenders && authState.isAuthenticated);
 
+  // With server-provided lenders we always have content, so never show the
+  // skeleton (also keeps server and first-client render identical → no mismatch).
   const showSkeleton =
-    !isHydrated || (displayLenders.length === 0 && isAnyLoading);
+    !hasInitialLenders && (!isHydrated || (displayLenders.length === 0 && isAnyLoading));
 
   // Single stable root keyed by route so back/forward never reuses an Embla instance
   // from a different page (home vs personal-loan both mount this component).

@@ -6,6 +6,8 @@
 import type { Metadata } from 'next';
 import React, { Suspense } from 'react';
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
+import { WEB_SEO_ROUTES } from '@/lib/seo/static-page-seo';
+import PageStructuredData from '@/components/seo/page-structured-data';
 import HeroSection from '@/components/instant-personal-loan/hero-section';
 import InstantLoanStatsSection from '@/components/instant-personal-loan/stats-section';
 import HowItWorksSection from '@/components/instant-personal-loan/how-it-works-section';
@@ -25,6 +27,7 @@ export const metadata: Metadata = buildPageMetadata('/instant-personal-loan/');
 const InstantPersonalLoanPage = (): React.ReactNode => {
   return (
     <div className="min-h-screen pb-28">
+      <PageStructuredData path={WEB_SEO_ROUTES.INSTANT_PERSONAL_LOAN} breadcrumb product />
       <HeroSection />
       <InstantLoanStatsSection />
       <HowItWorksSection />
