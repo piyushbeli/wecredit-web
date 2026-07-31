@@ -6,6 +6,8 @@
 
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
+import { WEB_SEO_ROUTES } from '@/lib/seo/static-page-seo';
+import PageStructuredData from '@/components/seo/page-structured-data';
 import React from 'react';
 
 export const metadata: Metadata = buildPageMetadata('/personal-loan/');
@@ -28,14 +30,19 @@ import StickyApplyButton from '@/components/personal-loan/sticky-apply-button';
 import TestimonialsSection from '@/components/home/testimonials-section';
 import PartnersSection from '@/components/home/partners-section';
 import { TrendingOffersClient } from '@/components/home';
+import { getInitialActiveLenders } from '@/lib/api/get-initial-active-lenders';
 
 /**
  * Personal Loan Page - Server Component
  * Renders all sections, delegates interactivity to PersonalLoanContent
  */
-const PersonalLoanPage = (): React.ReactNode => {
+const PersonalLoanPage = async (): Promise<React.ReactNode> => {
+  const initialLenders = await getInitialActiveLenders();
+
   return (
     <div className="min-h-screen">
+      <PageStructuredData path={WEB_SEO_ROUTES.PERSONAL_LOAN} faq breadcrumb product />
+
       {/* Hero Section with gradient background */}
       <HeroSection />
 
@@ -44,7 +51,7 @@ const PersonalLoanPage = (): React.ReactNode => {
         <EmiCalculator title="Personal Loan EMI Calculator" />
       </div>
 
-      <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
+      <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" initialLenders={initialLenders} />
 
       {/* Video Section */}
       {/* <VideoSection /> */}

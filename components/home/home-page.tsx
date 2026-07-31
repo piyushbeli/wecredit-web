@@ -12,6 +12,7 @@ import BlogSection from './blog-section';
 import AppDownloadSection from './app-download-section';
 import DreamsSection from './dreams-section';
 import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-content';
+import { getInitialActiveLenders } from '@/lib/api/get-initial-active-lenders';
 
 /**
  * Main home page component that composes all sections
@@ -22,7 +23,11 @@ import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-co
  * - Step 2: Generic lenders (client-side)
  * - Step 3: User-specific lenders when logged in (client-side)
  */
-const HomePage = (): React.ReactNode => {
+const HomePage = async (): Promise<React.ReactNode> => {
+  // Generic lenders rendered server-side for the initial (crawlable) paint;
+  // TrendingOffersClient still personalizes for logged-in users on the client.
+  const initialLenders = await getInitialActiveLenders();
+
   return (
     <div className="min-h-screen">
       {/* Gradient wrapper for Hero + Stats for seamless transition */}
@@ -42,7 +47,7 @@ const HomePage = (): React.ReactNode => {
       {/* Trending Offers Section
           - Fetches generic lenders as fallback (PDF Step 2) - client-side
           - Fetches user-specific lenders when logged in (PDF Step 3) */}
-      <TrendingOffersClient />
+      <TrendingOffersClient initialLenders={initialLenders} />
 
       {/* Certifications Section */}
       <CertificationsSection />

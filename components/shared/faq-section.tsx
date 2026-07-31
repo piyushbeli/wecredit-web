@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { STANDARD_FAQS, type FaqItem } from '@/lib/constants/faqs';
 import { cn } from '@/lib/utils';
@@ -57,23 +57,20 @@ const FaqAccordionItem = ({
 						}`}
 				/>
 			</button>
-			<AnimatePresence initial={false}>
-				{isExpanded && (
-					<motion.div
-						initial={{ height: 0, opacity: 0 }}
-						animate={{ height: 'auto', opacity: 1 }}
-						exit={{ height: 0, opacity: 0 }}
-						transition={{ duration: 0.3, ease: 'easeInOut' }}
-						className="overflow-hidden"
-					>
-						<div className="px-4 sm:px-5 pb-4 pt-1">
-							<p className="text-sm text-black-600 leading-relaxed whitespace-pre-line">
-								{item.answer}
-							</p>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+			{/* Answer stays mounted (crawlable) and animates open/closed via height */}
+			<motion.div
+				initial={false}
+				animate={{ height: isExpanded ? 'auto' : 0, opacity: isExpanded ? 1 : 0 }}
+				transition={{ duration: 0.3, ease: 'easeInOut' }}
+				className="overflow-hidden"
+				aria-hidden={!isExpanded}
+			>
+				<div className="px-4 sm:px-5 pb-4 pt-1">
+					<p className="text-sm text-black-600 leading-relaxed whitespace-pre-line">
+						{item.answer}
+					</p>
+				</div>
+			</motion.div>
 		</motion.div>
 	);
 };

@@ -1,9 +1,9 @@
 /**
  * SEO Utility Functions
- * 
- * CHANGE: Added environment-based detection to prevent staging from being indexed.
- * This prevents search engines from indexing staging.eauctiondekho.com which was
- * competing with the production site.
+ *
+ * Environment-based detection prevents non-production (staging) deployments from
+ * being indexed, so staging URLs never compete with the production site in search.
+ * Controlled by NEXT_PUBLIC_ENVIRONMENT.
  */
 
 

@@ -32,6 +32,8 @@ export interface SlideContent {
   description: string;
   ctaText: string;
   ctaLink: string;
+  /** Descriptive alt text for the slide illustration; falls back to the title. */
+  alt?: string;
 }
 
 /**
@@ -150,18 +152,12 @@ const HeroCarousel = (): JSX.Element => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    {index === 0 ?
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
-                        {slide.titleWhite} {" "}
-                        <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
-                          {slide.titleGradient}
-                        </p>
-                      </h1> : <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
-                        {slide.titleWhite}
-                        <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
-                          {slide.titleGradient}
-                        </p>
-                      </h2>}
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                      {slide.titleWhite}
+                      <span className="block text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
+                        {slide.titleGradient}
+                      </span>
+                    </h2>
                     <p className="text-sm hidden md:block sm:text-base text-gray-600 max-w-md mb-6 leading-relaxed">
                       {slide.description}
                     </p>
@@ -177,7 +173,7 @@ const HeroCarousel = (): JSX.Element => {
                   >
                     <Image
                       src={slide.image}
-                      alt="WeCredit Hero"
+                      alt={slide.alt ?? `${slide.titleWhite} ${slide.titleGradient}`}
                       fill
                       className="object-contain"
                       sizes="(min-width: 1024px) 50vw, 100vw"
