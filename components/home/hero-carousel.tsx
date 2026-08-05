@@ -139,6 +139,7 @@ const HeroCarouselInner = (): JSX.Element => {
         <CarouselContent className="flex-1">
           {HERO_CAROUSEL_SLIDES.map((slide, index) => {
             const ctaElement = renderCtaElement(slide);
+            const TitleTag = index === 0 ? 'h1' : 'h2';
 
             return (
               <CarouselSlide
@@ -152,12 +153,12 @@ const HeroCarouselInner = (): JSX.Element => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                    <TitleTag className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
                       {slide.titleWhite}
                       <span className="block text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
                         {slide.titleGradient}
                       </span>
-                    </h2>
+                    </TitleTag>
                     <p className="text-sm hidden md:block sm:text-base text-gray-600 max-w-md mb-6 leading-relaxed">
                       {slide.description}
                     </p>
