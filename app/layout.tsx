@@ -11,6 +11,8 @@ import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { SITE_NAME } from '@/lib/config/site-navigation';
 import { buildAbsoluteSiteUrl, getWebsiteBaseUrl, OG_IMAGE_URL } from '@/lib/seo/site-metadata';
+import { buildOrganizationJsonLd } from '@/lib/seo/structured-data';
+import JsonLd from '@/components/seo/JsonLd';
 import Script from 'next/script';
 
 const geistSans = Geist({
@@ -114,49 +116,21 @@ export default async function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        <Script id="wecredit-org-jsonld" type="application/ld+json" strategy="afterInteractive">
-          {`{
-            "@context": "https://schema.org",
-            "@type": "FinancialService",
-            "@id": "https://wecredit.co.in/#organization",
-            "name": "WeCredit",
-            "url": "https://wecredit.co.in/",
-            "logo": "https://wecredit.co.in/wp-content/uploads/logo.png",
-            "image": "https://wecredit.co.in/wp-content/uploads/logo.png",
-            "description": "WeCredit is an online loan and credit marketplace in India, helping users compare personal loans, business loans, home loans, gold loans, car loans and credit cards from multiple lenders and apply online.",
-            "areaServed": {
-              "@type": "Country",
-              "name": "India"
-            },
-            "sameAs": [
-              "https://x.com/Wecredit136650",
-              "https://www.linkedin.com/company/we-credit",
-              "https://www.facebook.com/people/Wecredit/61550321134539/",
-              "https://www.youtube.com/@WeCredit",
-              "https://www.instagram.com/we_credit/"
-            ],
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "contactType": "customer support",
-              "email": "care@wecredit.co.in",
-              "telephone": "+91-9240259585",
-              "areaServed": "IN"
-            }
-          }`}
-        </Script>
+        {/* Organization schema — server-rendered so it lands in the initial HTML */}
+        <JsonLd data={buildOrganizationJsonLd()} />
         {/* FeatureFlagProvider must wrap everything for dev tools */}
         <FeatureFlagProvider>
-          {/* AuthProvider validates token on mount (PDF Step 1) */}
+          {/* Suspense only around AuthProvider (useSearchParams) — not the page body */}
           <Suspense fallback={null}>
             <AuthProvider>
               <ToastProvider />
-              <ConditionalMobileHeader siteName={SITE_NAME} />
-              <main className="flex-1">{children}</main>
-              <ConditionalFooter />
               <AuthModal />
               <LoadingScreen />
             </AuthProvider>
           </Suspense>
+          <ConditionalMobileHeader siteName={SITE_NAME} />
+          <main className="flex-1">{children}</main>
+          <ConditionalFooter />
         </FeatureFlagProvider>
       </body>
     </html>

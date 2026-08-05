@@ -28,6 +28,11 @@ export interface WeCreditOptions {
   mobile?: string;
   authorization?: string;
   headers?: Record<string, string>;
+  /**
+   * When set, the request uses ISR caching (`next.revalidate`) instead of the
+   * default `cache: 'no-store'`. Used for server-side (SSR) initial fetches.
+   */
+  revalidateSeconds?: number;
 }
 
 /** Result type for update utm clicked operation */
@@ -99,7 +104,10 @@ export async function fetchActiveLenders(
         method: 'POST',
         headers: buildHeaders(options),
         body: JSON.stringify(requestBody),
-        cache: 'no-store',
+        // SSR callers opt into ISR; client calls keep the original no-store behavior.
+        ...(options.revalidateSeconds != null
+          ? { next: { revalidate: options.revalidateSeconds } }
+          : { cache: 'no-store' }),
       }),
       {
         method: 'POST',
@@ -112,8 +120,8 @@ export async function fetchActiveLenders(
     );
     return data;
   } catch (error) {
-    const errorMessage = error instanceof Error 
-      ? error.message 
+    const errorMessage = error instanceof Error
+      ? error.message
       : 'Unable to fetch lenders. Please try again later.';
     // toast.error(errorMessage);
     return DEFAULT_LENDERS_RESPONSE;

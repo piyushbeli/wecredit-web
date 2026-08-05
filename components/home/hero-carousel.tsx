@@ -1,6 +1,6 @@
 'use client';
 
-import { JSX, useEffect, useRef, useState } from 'react';
+import { JSX, Suspense, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -20,7 +20,8 @@ import {
 import { HERO_CAROUSEL_SLIDES } from '@/lib/constants/common';
 import { CREDIT_SCORE_PATH } from '@/lib/constants/credit-report-routes';
 import { isUsableBureauReportResponse } from '@/lib/utils/credit-report-adapter';
-import type { MouseEvent } from 'react';
+import { PageHeading } from '@/components/shared';
+import type { MouseEvent, ReactNode } from 'react';
 import type { StaticImageData } from 'next/image';
 
 /** Slide content configuration */
@@ -32,12 +33,14 @@ export interface SlideContent {
   description: string;
   ctaText: string;
   ctaLink: string;
+  /** Descriptive alt text for the slide illustration; falls back to the title. */
+  alt?: string;
 }
 
 /**
  * Hero carousel section with gradient background, 3D illustration, and swipeable slides
  */
-const HeroCarousel = (): JSX.Element => {
+const HeroCarouselInner = (): JSX.Element => {
   const pathname = usePathname();
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
@@ -137,6 +140,28 @@ const HeroCarousel = (): JSX.Element => {
         <CarouselContent className="flex-1">
           {HERO_CAROUSEL_SLIDES.map((slide, index) => {
             const ctaElement = renderCtaElement(slide);
+            const titleContent = (
+              <>
+                {slide.titleWhite}
+                <span className="block text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
+                  {slide.titleGradient}
+                </span>
+              </>
+            );
+            let heading: ReactNode;
+            if (index === 0) {
+              heading = (
+                <PageHeading className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                  {titleContent}
+                </PageHeading>
+              );
+            } else {
+              heading = (
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+                  {titleContent}
+                </h2>
+              );
+            }
 
             return (
               <CarouselSlide
@@ -150,18 +175,7 @@ const HeroCarousel = (): JSX.Element => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    {index === 0 ?
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
-                        {slide.titleWhite} {" "}
-                        <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
-                          {slide.titleGradient}
-                        </p>
-                      </h1> : <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
-                        {slide.titleWhite}
-                        <p className="text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
-                          {slide.titleGradient}
-                        </p>
-                      </h2>}
+                    {heading}
                     <p className="text-sm hidden md:block sm:text-base text-gray-600 max-w-md mb-6 leading-relaxed">
                       {slide.description}
                     </p>
@@ -177,7 +191,7 @@ const HeroCarousel = (): JSX.Element => {
                   >
                     <Image
                       src={slide.image}
-                      alt="WeCredit Hero"
+                      alt={slide.alt ?? `${slide.titleWhite} ${slide.titleGradient}`}
                       fill
                       className="object-contain"
                       sizes="(min-width: 1024px) 50vw, 100vw"
@@ -195,5 +209,27 @@ const HeroCarousel = (): JSX.Element => {
     </section>
   );
 };
+
+const firstSlide = HERO_CAROUSEL_SLIDES[0];
+const heroFallback = (
+  <section className="wc-hero-bg min-h-[480px] lg:min-h-[520px] relative pt-20 lg:pt-24 pb-4">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="flex min-h-[360px] flex-col items-center justify-center text-center lg:min-h-[400px] lg:items-start lg:text-left">
+        <PageHeading className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-1">
+          {firstSlide.titleWhite}
+          <span className="block text-3xl sm:text-4xl lg:text-5xl font-semibold wc-gradient-text leading-tight mb-4">
+            {firstSlide.titleGradient}
+          </span>
+        </PageHeading>
+      </div>
+    </div>
+  </section>
+);
+
+const HeroCarousel = (): JSX.Element => (
+  <Suspense fallback={heroFallback}>
+    <HeroCarouselInner />
+  </Suspense>
+);
 
 export default HeroCarousel;

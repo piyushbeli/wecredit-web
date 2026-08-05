@@ -1,6 +1,8 @@
 
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
+import { WEB_SEO_ROUTES } from '@/lib/seo/static-page-seo';
+import PageStructuredData from '@/components/seo/page-structured-data';
 import { HomePage } from '@/components/home';
 
 export const metadata: Metadata = buildPageMetadata('/');
@@ -13,7 +15,12 @@ export const metadata: Metadata = buildPageMetadata('/');
  * - Step 3: User-specific lenders fetched in TrendingOffersClient (client-side)
  */
 const Home = (): React.ReactNode => {
-  return <HomePage />;
+  return (
+    <>
+      <PageStructuredData path={WEB_SEO_ROUTES.HOME} faq breadcrumb product />
+      <HomePage />
+    </>
+  );
 };
 
 export default Home;

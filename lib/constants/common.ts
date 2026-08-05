@@ -1,4 +1,4 @@
-import { SlideContent } from "@/components/home/hero-carousel";
+import type { SlideContent } from "@/components/home/hero-carousel";
 import { Partner } from "@/types/wecredit";
 import { IMAGES } from "./images";
 import { Testimonial } from "@/components/home/testimonials-section";
@@ -77,6 +77,8 @@ export const ROW_2_PARTNERS = PARTNERS.slice(PARTNERS_PER_ROW, PARTNERS_PER_ROW 
 export const ROW_3_PARTNERS = PARTNERS.slice(PARTNERS_PER_ROW * 2);
 
 /** Carousel slides data */
+export const HOME_PAGE_H1 = 'Compare Personal Loans from 25+ Lenders';
+
 export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
   {
     id: 'slide-2',
@@ -87,6 +89,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
       'Find the right loan offer based on your profile, interest rate, eligibility, and repayment needs - all in one place.',
       ctaText: "Apply For Loan",
       ctaLink: "/personal-loan",
+      alt: 'Compare personal loan offers from 25+ lenders on WeCredit',
   },
   {
     id: "slide-1",
@@ -96,9 +99,10 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
     titleGradient: "on Every Loan",
     description:
       "Experience the next generation of financial freedom. We connect you with top-tier lenders using AI-driven precision for the lowest possible rates.",
-   
+
     ctaText: 'Compare Offers',
     ctaLink: '/personal-loan',
+    alt: 'Save more on every loan by comparing lender offers on WeCredit',
   },
   {
     id: "slide-3",
@@ -109,6 +113,7 @@ export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
       "Check your credit score and unlock personalized loan offers from trusted lenders. Fast, secure, and completely free.",
     ctaText: "Check Eligibility",
     ctaLink: "/bureau-report",
+    alt: 'Check your credit score and unlock better loan deals on WeCredit',
   },
 
 ];

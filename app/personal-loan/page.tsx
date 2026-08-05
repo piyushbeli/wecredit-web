@@ -6,6 +6,8 @@
 
 import type { Metadata } from 'next';
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata';
+import { WEB_SEO_ROUTES } from '@/lib/seo/static-page-seo';
+import PageStructuredData from '@/components/seo/page-structured-data';
 import React from 'react';
 
 export const metadata: Metadata = buildPageMetadata('/personal-loan/');
@@ -33,9 +35,12 @@ import { TrendingOffersClient } from '@/components/home';
  * Personal Loan Page - Server Component
  * Renders all sections, delegates interactivity to PersonalLoanContent
  */
-const PersonalLoanPage = (): React.ReactNode => {
+const PersonalLoanPage = async (): Promise<React.ReactNode> => {
+
   return (
     <div className="min-h-screen">
+      <PageStructuredData path={WEB_SEO_ROUTES.PERSONAL_LOAN} faq breadcrumb product />
+
       {/* Hero Section with gradient background */}
       <HeroSection />
 

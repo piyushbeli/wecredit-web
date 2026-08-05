@@ -22,7 +22,10 @@ import { PersonalLoanContent } from '@/components/personal-loan/personal-loan-co
  * - Step 2: Generic lenders (client-side)
  * - Step 3: User-specific lenders when logged in (client-side)
  */
-const HomePage = (): React.ReactNode => {
+const HomePage = async (): Promise<React.ReactNode> => {
+  // Generic lenders rendered server-side for the initial (crawlable) paint;
+  // TrendingOffersClient still personalizes for logged-in users on the client.
+
   return (
     <div className="min-h-screen">
       {/* Gradient wrapper for Hero + Stats for seamless transition */}

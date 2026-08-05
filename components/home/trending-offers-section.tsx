@@ -13,7 +13,9 @@ interface TrendingOffersSectionProps {
   heading?: string;
 }
 
-/** Group items into columns of 2 */
+const LENDERS_PER_COLUMN = 3;
+
+/** Group items into columns */
 function groupIntoColumns<T>(items: T[], itemsPerColumn: number): T[][] {
   const columns: T[][] = [];
   for (let i = 0; i < items.length; i += itemsPerColumn) {
@@ -55,7 +57,7 @@ const TrendingOffersSection = ({
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
-  const lenderColumns = groupIntoColumns(activeLenders, 2);
+  const lenderColumns = groupIntoColumns(activeLenders, LENDERS_PER_COLUMN);
 
   const updateScrollState = useCallback((): void => {
     const container = scrollRef.current;
@@ -210,7 +212,7 @@ const TrendingOffersSection = ({
                       }
                       tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
                       href={lender.utmLink || `/offers/${id}`}
-                      index={colIndex * 2 + rowIndex}
+                      index={colIndex * LENDERS_PER_COLUMN + rowIndex}
                       skipAnimation={skipAnimation}
                       lenderType={lender?.lenderType || null}
                     />

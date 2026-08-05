@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
-import { FaqSection } from '@/components/shared';
+import { FaqSection, PageHeading } from '@/components/shared';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
 
 const FaqWrapper = (): ReactNode => {
@@ -14,7 +14,7 @@ const FaqWrapper = (): ReactNode => {
       }}
       contentClassName="px-4"
     >
-      <h1 className="sr-only">WeCredit FAQs</h1>
+      <PageHeading className="sr-only">WeCredit FAQs</PageHeading>
       <FaqSection
         showTitle={false}
         className="px-0 py-0 sm:py-0 md:py-0"

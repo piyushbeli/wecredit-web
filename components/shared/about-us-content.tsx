@@ -3,6 +3,7 @@ import React from 'react';
 import { BackToHomeButton } from './back-to-home-button';
 import { ACHIEVEMENTS, BRANDS } from '@/lib/constants/common';
 import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
+import PageHeading from './page-heading';
 
 interface InfoCardProps {
   image: string;
@@ -85,9 +86,9 @@ const AboutUsContent = (): React.ReactNode => {
           </div>
         )}
 
-        <h1 className=" font-medium text-2xl leading-none tracking-normal text-zinc-800">
+        <PageHeading className=" font-medium text-2xl leading-none tracking-normal text-zinc-800">
           About WeCredit
-        </h1>
+        </PageHeading>
 
         <div className="h-4" />
 
