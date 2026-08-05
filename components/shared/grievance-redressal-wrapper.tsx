@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import GrievanceContactContent from './grievance-contact-content';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
+import PageHeading from './page-heading';
 
 const GrievanceRedressalWrapper = (): ReactNode => {
   return (
@@ -14,7 +15,7 @@ const GrievanceRedressalWrapper = (): ReactNode => {
       }}
       contentClassName="px-4"
     >
-      <h1 className="sr-only">WeCredit Grievance Redressal</h1>
+      <PageHeading className="sr-only">WeCredit Grievance Redressal</PageHeading>
       <GrievanceContactContent />
     </FooterLinkPageWrapper>
   );

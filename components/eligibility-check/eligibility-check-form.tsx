@@ -106,9 +106,9 @@ const EligibilityCheckForm = ({
             />
             <div className="relative flex h-full flex-col">
               <div>
-                <h1 className="max-w-xs text-2xl font-bold leading-tight tracking-tight lg:text-[34px]">
+                <h2 className="max-w-xs text-2xl font-bold leading-tight tracking-tight lg:text-[34px]">
                   Check your Credit Score
-                </h1>
+                </h2>
                 <p className="mt-2 text-sm font-medium text-white/90 lg:hidden">
                   Free · Instant · Won&apos;t affect your score
                 </p>

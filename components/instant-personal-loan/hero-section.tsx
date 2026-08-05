@@ -12,6 +12,7 @@ import { IMAGES } from '@/lib/constants/images';
 import { HERO_BENEFITS, HERO_HEADLINE, HERO_TAGLINE, type HeroBenefit } from './constants';
 import LeadCaptureForm from './lead-capture-form';
 import PageHeader from './page-header';
+import { PageHeading } from '@/components/shared';
 
 const BENEFIT_ICON_MAP = {
   rupee: IndianRupee,
@@ -45,9 +46,9 @@ const HeroSection = (): JSX.Element => {
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex-1 min-w-0">
             <p className="text-base text-white mb-1">{HERO_TAGLINE}</p>
-            <h1 className="md:text-4xl text-3xl font-medium text-black leading-tight">
+            <PageHeading className="md:text-4xl text-3xl font-medium text-black leading-tight">
               {HERO_HEADLINE}
-            </h1>
+            </PageHeading>
           </div>
           <div className="relative w-28 h-28 shrink-0">
             <Image

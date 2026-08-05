@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import GrievanceContactContent from './grievance-contact-content';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
+import PageHeading from './page-heading';
 
 const ContactUsWrapper = (): ReactNode => {
   return (
@@ -15,7 +16,7 @@ const ContactUsWrapper = (): ReactNode => {
       }}
       contentClassName="px-4"
     >
-      <h1 className="sr-only">Contact WeCredit Support</h1>
+      <PageHeading className="sr-only">Contact WeCredit Support</PageHeading>
       <GrievanceContactContent />
     </FooterLinkPageWrapper>
   );

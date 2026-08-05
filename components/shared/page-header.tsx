@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useIsMobilePlatform } from '@/hooks/use-is-mobile-platform';
+import PageHeading from './page-heading';
 
 interface PageHeaderProps {
   /** Title displayed in the header */
@@ -56,9 +57,9 @@ const PageHeader = ({ title, onBack, isOfferStatus = false }: PageHeaderProps): 
       <div className="px-4 py-4">
         <div className="flex items-center gap-4">
           {renderBackButton()}
-          <h1 className=" font-normal text-sm leading-7 tracking-normal text-gray-900">
+          <PageHeading className=" font-normal text-sm leading-7 tracking-normal text-gray-900">
             {title}
-          </h1>
+          </PageHeading>
         </div>
       </div>
     </header>

@@ -5,6 +5,7 @@ import PageStructuredData from '@/components/seo/page-structured-data';
 import React, { Suspense } from 'react';
 import HomeLoanPageContent from '@/components/home-loan/home-loan-page-content';
 import { PageLoader } from '@/components/shared/page-loader';
+import { PageHeading } from '@/components/shared';
 
 export const metadata: Metadata = buildPageMetadata('/home-loan/');
 
@@ -13,7 +14,7 @@ const HomeLoanPage = (): React.ReactNode => {
     <Suspense fallback={<PageLoader />}>
       <>
         {/* sr-only H1 for SEO; the form modal renders its own heading */}
-        <h1 className="sr-only">Home Loan Offers & EMI Planning</h1>
+        <PageHeading className="sr-only">Home Loan Offers &amp; EMI Planning</PageHeading>
         <PageStructuredData path={WEB_SEO_ROUTES.HOME_LOAN} breadcrumb product />
         <HomeLoanPageContent />
       </>
