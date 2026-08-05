@@ -1,15 +1,21 @@
-import { useSearchParams } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 /**
  * True when the URL contains `?platform=mobile` (e.g. mobile app webview).
+ * Reads the query on the client only so callers do not need a Suspense boundary
+ * (unlike `useSearchParams()`, which breaks static prerender when unwrapped).
  */
 export const useIsMobilePlatform = (): boolean => {
-  const searchParams = useSearchParams();
-  const platformParam = searchParams?.get('platform');
+  const pathname = usePathname();
+  const [isMobilePlatform, setIsMobilePlatform] = useState(false);
 
-  if (!platformParam) {
-    return false;
-  }
+  useEffect(() => {
+    const platformParam = new URLSearchParams(window.location.search).get('platform');
+    setIsMobilePlatform(platformParam?.trim().toLowerCase() === 'mobile');
+  }, [pathname]);
 
-  return platformParam.trim().toLowerCase() === 'mobile';
+  return isMobilePlatform;
 };

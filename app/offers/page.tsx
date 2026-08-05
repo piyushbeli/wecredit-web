@@ -5,9 +5,11 @@
  */
 
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { OffersView } from '@/components/offers';
+import { PageLoader } from '@/components/shared/page-loader';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import {
   buildPathWithQuery,
@@ -36,7 +38,11 @@ const OffersPage = async ({ searchParams }: PageProps) => {
     const queryString = serializeAppRouterSearchParams(resolvedSearchParams);
     redirect(buildPathWithQuery('/personal-loan', queryString));
   }
-  return <OffersView />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <OffersView />
+    </Suspense>
+  );
 };
 
 export default OffersPage;

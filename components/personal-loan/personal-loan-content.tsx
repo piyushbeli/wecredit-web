@@ -6,7 +6,7 @@
  * Triggered by Apply Now and Start Loan Application buttons via store
  */
 
-import { JSX, useCallback, useEffect, useRef, useState } from 'react';
+import { JSX, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCookie } from 'cookies-next';
 import { CheckCircle2, Loader2 } from 'lucide-react';
@@ -29,7 +29,7 @@ type UseCheckDedupeResult = ReturnType<typeof useCheckDedupe>;
  * Handles modal and auth/dedupe flow logic
  * Triggered by Apply Now and Start Loan Application buttons
  */
-export const PersonalLoanContent = (): JSX.Element => {
+const PersonalLoanContentInner = (): JSX.Element => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isOpen: isLeadFormModalOpen, openModal: openLeadFormModal, closeModal: closeLeadFormModal } = useModal();
@@ -266,3 +266,10 @@ export const PersonalLoanContent = (): JSX.Element => {
     </>
   );
 };
+
+/** Suspense boundary required for useSearchParams (static prerender / CSR bailout). */
+export const PersonalLoanContent = (): JSX.Element => (
+  <Suspense fallback={null}>
+    <PersonalLoanContentInner />
+  </Suspense>
+);

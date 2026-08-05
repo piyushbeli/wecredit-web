@@ -1,6 +1,6 @@
 'use client';
 
-import { JSX, useEffect, useRef, useState } from 'react';
+import { JSX, Suspense, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -39,7 +39,7 @@ export interface SlideContent {
 /**
  * Hero carousel section with gradient background, 3D illustration, and swipeable slides
  */
-const HeroCarousel = (): JSX.Element => {
+const HeroCarouselInner = (): JSX.Element => {
   const pathname = usePathname();
   const router = useRouter();
   const { triggerApplyFlow } = useLoanApplicationStore();
@@ -191,5 +191,11 @@ const HeroCarousel = (): JSX.Element => {
     </section>
   );
 };
+
+const HeroCarousel = (): JSX.Element => (
+  <Suspense fallback={null}>
+    <HeroCarouselInner />
+  </Suspense>
+);
 
 export default HeroCarousel;
