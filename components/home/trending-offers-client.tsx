@@ -22,16 +22,12 @@ import { useAuthCookies } from '@/hooks/use-auth-cookies';
  */
 const TrendingOffersClient = ({
   heading = 'Trending Offers',
-  initialLenders = [],
 }: {
   heading?: string;
-  /** Generic lenders fetched on the server for the initial (SSR) paint. */
-  initialLenders?: ActiveLender[];
 }): React.ReactNode => {
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuthStore();
   const [isHydrated, setIsHydrated] = useState(false);
-  const hasInitialLenders = initialLenders.length > 0;
 
   // PDF Step 3: Fetch user-specific lenders when logged in
   const [userLenders, setUserLenders] = useState<ActiveLender[] | null>(null);
@@ -64,7 +60,7 @@ const TrendingOffersClient = ({
   // PDF Step 2: Fetch generic lenders (fallback). Only after hydration, when the
   // user is not authenticated, and only if the server didn't already provide them.
   const { activeLenders: genericLenders, isLoading: isLoadingGeneric } = useFilteredActiveLenders({
-    fetchOnMount: isHydrated && !authState.isAuthenticated && !hasInitialLenders,
+    fetchOnMount: isHydrated && !authState.isAuthenticated,
   });
 
   /**
@@ -115,7 +111,7 @@ const TrendingOffersClient = ({
 
   // Generic display prefers freshly-fetched client data, falling back to the
   // server-rendered initial lenders (present on first paint, avoids a skeleton).
-  const genericDisplay = genericLenders.length > 0 ? genericLenders : initialLenders;
+  const genericDisplay = genericLenders.length > 0 ? genericLenders : [];
 
   // Determine which lenders to display
   // Priority: User-specific lenders (if logged in and fetched) > Generic lenders
@@ -129,7 +125,7 @@ const TrendingOffersClient = ({
   // With server-provided lenders we always have content, so never show the
   // skeleton (also keeps server and first-client render identical → no mismatch).
   const showSkeleton =
-    !hasInitialLenders && (!isHydrated || (displayLenders.length === 0 && isAnyLoading));
+    (!isHydrated || (displayLenders.length === 0 && isAnyLoading));
 
   // Single stable root keyed by route so back/forward never reuses an Embla instance
   // from a different page (home vs personal-loan both mount this component).

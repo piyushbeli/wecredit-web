@@ -30,14 +30,12 @@ import StickyApplyButton from '@/components/personal-loan/sticky-apply-button';
 import TestimonialsSection from '@/components/home/testimonials-section';
 import PartnersSection from '@/components/home/partners-section';
 import { TrendingOffersClient } from '@/components/home';
-import { getInitialActiveLenders } from '@/lib/api/get-initial-active-lenders';
 
 /**
  * Personal Loan Page - Server Component
  * Renders all sections, delegates interactivity to PersonalLoanContent
  */
 const PersonalLoanPage = async (): Promise<React.ReactNode> => {
-  const initialLenders = await getInitialActiveLenders();
 
   return (
     <div className="min-h-screen">
@@ -51,7 +49,7 @@ const PersonalLoanPage = async (): Promise<React.ReactNode> => {
         <EmiCalculator title="Personal Loan EMI Calculator" />
       </div>
 
-      <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" initialLenders={initialLenders} />
+      <TrendingOffersClient heading="Personal Loan Offers & Interest Rates" />
 
       {/* Video Section */}
       {/* <VideoSection /> */}
