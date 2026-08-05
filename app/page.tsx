@@ -17,6 +17,7 @@ export const metadata: Metadata = buildPageMetadata('/');
 const Home = (): React.ReactNode => {
   return (
     <>
+      <PageStructuredData path={WEB_SEO_ROUTES.HOME} faq breadcrumb product />
       <HomePage />
     </>
   );
