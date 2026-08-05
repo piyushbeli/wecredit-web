@@ -1,4 +1,4 @@
-import { SlideContent } from "@/components/home/hero-carousel";
+import type { SlideContent } from "@/components/home/hero-carousel";
 import { Partner } from "@/types/wecredit";
 import { IMAGES } from "./images";
 import { Testimonial } from "@/components/home/testimonials-section";
@@ -77,6 +77,8 @@ export const ROW_2_PARTNERS = PARTNERS.slice(PARTNERS_PER_ROW, PARTNERS_PER_ROW 
 export const ROW_3_PARTNERS = PARTNERS.slice(PARTNERS_PER_ROW * 2);
 
 /** Carousel slides data */
+export const HOME_PAGE_H1 = 'Compare Personal Loans from 25+ Lenders';
+
 export const HERO_CAROUSEL_SLIDES: SlideContent[] = [
   {
     id: 'slide-2',

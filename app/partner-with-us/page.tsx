@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { IMAGES } from '@/lib/constants/images';
 import InputField from '@/components/forms/input-field';
 import Image from 'next/image';
-import { ActionButton } from '@/components/shared';
+import { ActionButton, PageHeading } from '@/components/shared';
 import { partnerWithUs } from '@/lib/api/partner-service';
 import { useAuth } from '@/hooks/use-auth';
 import { FooterLinkPageWrapper } from '@/components/shared/footer-link-page-wrapper';
@@ -273,7 +273,7 @@ const PartnerWithUsPage = (): React.ReactNode => {
           }}
           contentClassName="px-4"
         >
-          <h1 className="sr-only">Partner With WeCredit</h1>
+          <PageHeading className="sr-only">Partner With WeCredit</PageHeading>
 
           {/* Partner Form */}
           <div className="w-full">

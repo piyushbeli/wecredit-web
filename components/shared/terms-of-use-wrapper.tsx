@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
+import PageHeading from './page-heading';
 
 type TermsOfUseWrapperProps = {
   htmlContent: string;
@@ -17,7 +18,7 @@ const TermsOfUseWrapper = ({ htmlContent }: TermsOfUseWrapperProps): ReactNode =
       }}
       contentClassName='px-4'
     >
-      <h1 className="sr-only">Terms of Service</h1>
+      <PageHeading className="sr-only">Terms of Service</PageHeading>
       <div
         className="wc-static-content max-w-none"
         dangerouslySetInnerHTML={{ __html: htmlContent }}

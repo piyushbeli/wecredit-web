@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import DeleteAccountContent from './delete-account-content';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
+import PageHeading from './page-heading';
 
 const DeleteAccountWrapper = (): ReactNode => {
   return (
@@ -15,7 +16,7 @@ const DeleteAccountWrapper = (): ReactNode => {
       }}
       contentClassName="px-4"
     >
-      <h1 className="sr-only">Delete Your WeCredit Account</h1>
+      <PageHeading className="sr-only">Delete Your WeCredit Account</PageHeading>
       <DeleteAccountContent />
     </FooterLinkPageWrapper>
   );

@@ -6,12 +6,20 @@
  */
 
 import { JSX, Suspense, useCallback } from 'react';
-import { ActionButton } from '../shared';
+import { ActionButton, PageHeading } from '../shared';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
+
+const HeroHeading = (): JSX.Element => (
+	<PageHeading className="text-[26px] font-semibold leading-[1.18] tracking-[-0.02em] text-[#1f232b] md:text-[46px] md:leading-[1.08] lg:text-[52px]">
+		Apply Personal Loan
+		<br />
+		<span className="text-brand-primary">at WeCredit</span>
+	</PageHeading>
+);
 
 /**
  * Hero Section for Personal Loan Page
@@ -40,11 +48,7 @@ const HeroSectionInner = (): JSX.Element => {
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-0">
 				<div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-2">
 					<div className="flex flex-col items-center justify-center text-center lg:items-start lg:text-left">
-						<h1 className="text-[26px] font-semibold leading-[1.18] tracking-[-0.02em] text-[#1f232b] md:text-[46px] md:leading-[1.08] lg:text-[52px]">
-							Apply Personal Loan
-							<br />
-							<span className="text-brand-primary">at WeCredit</span>
-						</h1>
+						<HeroHeading />
 
 						<p className="mt-3 max-w-2xl text-base leading-6 text-[#777] md:mt-5 md:text-2xl md:leading-9">
 							Compare personal loan offers, interest rates,
@@ -99,8 +103,18 @@ const HeroSectionInner = (): JSX.Element => {
 	);
 };
 
+const heroFallback = (
+	<section className="overflow-hidden bg-white pt-24 pb-7 md:pt-28 md:pb-24 lg:pt-32">
+		<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-0">
+			<div className="mx-auto max-w-6xl text-center lg:text-left">
+				<HeroHeading />
+			</div>
+		</div>
+	</section>
+);
+
 const HeroSection = (): JSX.Element => (
-	<Suspense fallback={null}>
+	<Suspense fallback={heroFallback}>
 		<HeroSectionInner />
 	</Suspense>
 );

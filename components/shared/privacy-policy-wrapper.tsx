@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { IMAGES } from '@/lib/constants/images';
 import { FooterLinkPageWrapper } from './footer-link-page-wrapper';
+import PageHeading from './page-heading';
 
 type PrivacyPolicyWrapperProps = {
   htmlContent: string;
@@ -20,7 +21,7 @@ const PrivacyPolicyWrapper = ({
       }}
       contentClassName='px-4'
     >
-      <h1 className="sr-only">Privacy Policy</h1>
+      <PageHeading className="sr-only">Privacy Policy</PageHeading>
       <div
         className="wc-static-content max-w-none"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
