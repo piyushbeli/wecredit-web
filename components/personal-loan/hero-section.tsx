@@ -5,7 +5,7 @@
  * Gradient background with title, subtitle, and benefit cards
  */
 
-import { JSX, useCallback } from 'react';
+import { JSX, Suspense, useCallback } from 'react';
 import { ActionButton } from '../shared';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -17,7 +17,7 @@ import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
  * Hero Section for Personal Loan Page
  * Displays gradient background, headline, benefits, and stats
  */
-const HeroSection = (): JSX.Element => {
+const HeroSectionInner = (): JSX.Element => {
 	const { triggerApplyFlow, isApplyLoading } = useLoanApplicationStore();
 	const { isAuthenticated, openModalWithPendingAction } = useAuthStore();
 	const router = useRouter();
@@ -98,5 +98,11 @@ const HeroSection = (): JSX.Element => {
 		</section>
 	);
 };
+
+const HeroSection = (): JSX.Element => (
+	<Suspense fallback={null}>
+		<HeroSectionInner />
+	</Suspense>
+);
 
 export default HeroSection;

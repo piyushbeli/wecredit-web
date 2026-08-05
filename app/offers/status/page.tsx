@@ -3,9 +3,11 @@
  * Displays loan status for UTM clicked offers.
  */
 
+import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { OffersStatusView } from '@/components/offers';
+import { PageLoader } from '@/components/shared/page-loader';
 import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import {
   buildPathWithQuery,
@@ -28,7 +30,11 @@ const OffersStatusPage = async ({ searchParams }: PageProps) => {
     const queryString = serializeAppRouterSearchParams(resolvedSearchParams);
     redirect(buildPathWithQuery('/personal-loan', queryString));
   }
-  return <OffersStatusView />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <OffersStatusView />
+    </Suspense>
+  );
 };
 
 export default OffersStatusPage;
