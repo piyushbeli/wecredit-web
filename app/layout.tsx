@@ -120,17 +120,17 @@ export default async function RootLayout({
         <JsonLd data={buildOrganizationJsonLd()} />
         {/* FeatureFlagProvider must wrap everything for dev tools */}
         <FeatureFlagProvider>
-          {/* AuthProvider validates token on mount (PDF Step 1) */}
+          {/* Suspense only around AuthProvider (useSearchParams) — not the page body */}
           <Suspense fallback={null}>
             <AuthProvider>
               <ToastProvider />
-              <ConditionalMobileHeader siteName={SITE_NAME} />
-              <main className="flex-1">{children}</main>
-              <ConditionalFooter />
               <AuthModal />
               <LoadingScreen />
             </AuthProvider>
           </Suspense>
+          <ConditionalMobileHeader siteName={SITE_NAME} />
+          <main className="flex-1">{children}</main>
+          <ConditionalFooter />
         </FeatureFlagProvider>
       </body>
     </html>
