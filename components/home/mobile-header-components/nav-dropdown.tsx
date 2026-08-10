@@ -2,20 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 import type { FocusEvent } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { NavigationLink } from '@/types/navigation';
 import { cn } from '@/lib/utils';
-import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 
 /** Shared card styling for hover dropdowns — blue top border, white rounded card, soft shadow. */
 export const DROPDOWN_CARD_CLASS =
-  'overflow-hidden rounded-b-2xl rounded-t-lg border-t-[3px] border-wc-blue-500 bg-white shadow-[0_20px_45px_-15px_rgba(16,42,100,0.28)]';
+  'max-h-[calc(100vh-5rem)] overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-b-2xl rounded-t-lg border-t-[3px] border-wc-blue-500 bg-white shadow-[0_20px_45px_-15px_rgba(16,42,100,0.28)]';
 
 /** Wrapper that toggles the panel on hover/focus, with a top padding acting as a hover bridge. */
 export const DROPDOWN_PANEL_CLASS =
-  'invisible pointer-events-none absolute top-full z-50 translate-y-1 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100';
+  'invisible pointer-events-none absolute top-full z-50 translate-y-1 pt-3 opacity-0 transition-all duration-200';
 
 /** Shared item styling for dropdown links/buttons. */
 export const DROPDOWN_ITEM_CLASS =
@@ -23,16 +21,16 @@ export const DROPDOWN_ITEM_CLASS =
 
 interface NavDropdownProps {
   link: NavigationLink;
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 }
 
 /**
  * Desktop navbar item with a hover dropdown of child links (e.g. Loans, Tools).
- * Locks main page scroll while the menu is open.
  */
-export const NavDropdown = ({ link }: NavDropdownProps) => {
+export const NavDropdown = ({ link, isOpen, onOpen, onClose }: NavDropdownProps) => {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  useBodyScrollLock(isOpen);
 
   const isActive = link.children.some((child) =>
     pathname.startsWith(child.url.replace(/\/$/, ''))
@@ -40,16 +38,16 @@ export const NavDropdown = ({ link }: NavDropdownProps) => {
 
   const handleBlur = (event: FocusEvent<HTMLDivElement>): void => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-      setIsOpen(false);
+      onClose();
     }
   };
 
   return (
     <div
       className="group relative"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-      onFocus={() => setIsOpen(true)}
+      onMouseEnter={onOpen}
+      onMouseLeave={onClose}
+      onFocus={onOpen}
       onBlur={handleBlur}
     >
       <button
@@ -65,7 +63,13 @@ export const NavDropdown = ({ link }: NavDropdownProps) => {
         <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
       </button>
 
-      <div className={cn(DROPDOWN_PANEL_CLASS, 'left-1/2 -translate-x-1/2 group-hover:-translate-x-1/2')}>
+      <div
+        className={cn(
+          DROPDOWN_PANEL_CLASS,
+          'left-1/2 -translate-x-1/2',
+          isOpen && 'visible pointer-events-auto translate-y-0 opacity-100'
+        )}
+      >
         <ul className={cn(DROPDOWN_CARD_CLASS, 'min-w-[240px] py-2')}>
           {link.children.map((child) => (
             <li key={child.id}>

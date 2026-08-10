@@ -5,7 +5,6 @@ import type { FocusEvent } from 'react';
 import Link from 'next/link';
 import { User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import {
   DROPDOWN_CARD_CLASS,
   DROPDOWN_ITEM_CLASS,
@@ -21,11 +20,9 @@ interface UserMenuDropdownProps {
 /**
  * Desktop authenticated user menu — icon trigger with a hover dropdown
  * (profile + logout). Mobile keeps the slide-out drawer instead.
- * Locks main page scroll while the menu is open.
  */
 export const UserMenuDropdown = ({ phoneNumber, logout, className }: UserMenuDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  useBodyScrollLock(isOpen);
 
   const handleBlur = (event: FocusEvent<HTMLDivElement>): void => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -51,7 +48,12 @@ export const UserMenuDropdown = ({ phoneNumber, logout, className }: UserMenuDro
         <User className="h-5 w-5" />
       </button>
 
-      <div className={cn(DROPDOWN_PANEL_CLASS, 'right-0')}>
+      <div
+        className={cn(
+          DROPDOWN_PANEL_CLASS,
+          'right-0 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100'
+        )}
+      >
         <div className={cn(DROPDOWN_CARD_CLASS, 'min-w-[220px] py-2')}>
           {phoneNumber ? (
             <p className="px-5 pb-2 pt-1 text-xs text-gray-400">+91 {phoneNumber}</p>
