@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import type { NavigationLink } from '@/types/navigation';
 import { cn } from '@/lib/utils';
 import { NavDropdown } from './nav-dropdown';
@@ -12,6 +13,7 @@ interface DesktopNavLinksProps {
 
 export const DesktopNavLinks = ({ headerLinks }: DesktopNavLinksProps) => {
   const pathname = usePathname();
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 
   const isActive = (url: string): boolean => {
     if (url === '/') return pathname === '/';
@@ -20,7 +22,17 @@ export const DesktopNavLinks = ({ headerLinks }: DesktopNavLinksProps) => {
 
   const renderLink = (link: NavigationLink) => {
     if (link.children && link.children.length > 0) {
-      return <NavDropdown key={link.id} link={link} />;
+      return (
+        <NavDropdown
+          key={link.id}
+          link={link}
+          isOpen={openDropdownId === link.id}
+          onOpen={() => setOpenDropdownId(link.id)}
+          onClose={() => {
+            setOpenDropdownId((currentId) => (currentId === link.id ? null : currentId));
+          }}
+        />
+      );
     }
 
     return (
