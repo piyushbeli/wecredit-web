@@ -7,6 +7,7 @@ import TrendingOfferCard from './trending-offer-card';
 import type { ActiveLender } from '@/lib/utils/lenders';
 import { cn } from '@/lib/utils';
 import { formatToTwoDecimals } from '@/lib/utils/common-helper';
+import { formatTrendingOfferTenure } from '@/lib/lender-display';
 
 interface TrendingOffersSectionProps {
   activeLenders: ActiveLender[];
@@ -210,7 +211,7 @@ const TrendingOffersSection = ({
                       interestRate={
                         lender.IntRate ? `${formatToTwoDecimals(lender.IntRate)}%` : 'N/A'
                       }
-                      tenure={lender.Tenure ? `${lender.Tenure} m` : 'N/A'}
+                      tenure={formatTrendingOfferTenure(lender.Tenure, lender.isPayday)}
                       href={lender.utmLink || `/offers/${id}`}
                       index={colIndex * LENDERS_PER_COLUMN + rowIndex}
                       skipAnimation={skipAnimation}
