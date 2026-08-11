@@ -31,6 +31,7 @@ function renderBannerBackdrop(
           alt=""
           className="absolute inset-0 h-full w-full object-cover opacity-100"
         />
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-white via-white/70 to-transparent" />
       </div>
     );
   }
@@ -72,7 +73,7 @@ const LoanProductSplitLayout = ({
             'relative flex w-full shrink-0 flex-col overflow-hidden px-4 pb-4 pt-3 sm:px-6 md:h-full md:px-8 md:pb-6 md:pt-6 lg:px-10',
             isGold
               ? 'bg-gradient-to-b from-yellow-400 via-amber-300 to-amber-50 text-gray-900'
-              : 'bg-gradient-to-b from-blue-600 via-blue-400 to-blue-50 text-white'
+              : 'bg-gradient-to-b from-blue-700 via-blue-100 to-white text-white'
           )}
         >
           {renderBannerBackdrop(bannerPattern, bannerPatternSrc)}
