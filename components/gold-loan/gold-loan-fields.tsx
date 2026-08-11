@@ -3,21 +3,13 @@
 import InputField from '@/components/forms/input-field';
 import ConsentCheckbox from '@/components/forms/consent-checkbox';
 import DateOfBirthField from '@/components/forms/date-of-birth-field';
-import {
-  sanitizeNumericInput,
-  type GoldLoanFormState,
-} from './gold-loan-form.config';
+import { sanitizeNumericInput } from './gold-loan-form.config';
 import { useAuth } from '@/hooks/use-auth';
+import type { GoldLoanFieldsProps } from './gold-loan-fields.types';
 
 const PAN_HINT = 'As per PAN card';
 const DOB_HINT = 'Enter your Date of Birth As Per PAN Card';
-
-interface GoldLoanFieldsProps {
-  formValues: GoldLoanFormState;
-  formErrors: Record<string, string>;
-  handleFieldChange: (key: keyof GoldLoanFormState, value: string | boolean) => void;
-  handleFieldBlur: (key: keyof GoldLoanFormState) => void;
-}
+const GOLD_LOAN_INPUT_CLASS_NAME = 'py-2 text-xs md:py-3 md:text-base';
 
 const GoldLoanFields = ({
   formValues,
@@ -31,7 +23,7 @@ const GoldLoanFields = ({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         <div>
           <label className="lead-form-label">
             First Name <span className="text-red-500">*</span>
@@ -45,6 +37,7 @@ const GoldLoanFields = ({
             error={formErrors.firstName}
             required
             autoComplete="given-name"
+            className={GOLD_LOAN_INPUT_CLASS_NAME}
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
@@ -61,6 +54,7 @@ const GoldLoanFields = ({
             error={formErrors.lastName}
             required
             autoComplete="family-name"
+            className={GOLD_LOAN_INPUT_CLASS_NAME}
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
@@ -83,6 +77,7 @@ const GoldLoanFields = ({
           required
           disabled={isAuthenticated}
           autoComplete="tel"
+          className={GOLD_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -114,6 +109,7 @@ const GoldLoanFields = ({
           maxLength={10}
           required
           autoComplete="off"
+          className={GOLD_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -129,6 +125,7 @@ const GoldLoanFields = ({
           placeholder="Enter State"
           error={formErrors.state}
           required
+          className={GOLD_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -144,6 +141,7 @@ const GoldLoanFields = ({
           placeholder="Enter City"
           error={formErrors.city}
           required
+          className={GOLD_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -161,6 +159,7 @@ const GoldLoanFields = ({
           type="text"
           inputMode="numeric"
           required
+          className={GOLD_LOAN_INPUT_CLASS_NAME}
         />
       </div>
       <ConsentCheckbox
