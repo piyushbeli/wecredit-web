@@ -14,6 +14,8 @@ export interface Lender {
   ImageUrl: string | null;
   IntRate: number | null;
   Tenure: number | null;
+  /** 1 when tenure is expressed in days; 0 when expressed in months. */
+  isPayday?: number | null;
   UptoAmount: string | null;
   utmLink: string | null;
   Description: string | null;
