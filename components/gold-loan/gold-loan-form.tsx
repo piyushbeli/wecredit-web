@@ -1,19 +1,29 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
-import { ActionButton } from '@/components/shared';
+import { LoanProductSplitLayout, type LoanFeatureItem } from '@/components/shared';
 import GoldLoanFields from './gold-loan-fields';
 import { useGoldLoanForm } from './use-gold-loan-form';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import type { GoldLoanFormProps } from './gold-loan-form.types';
 
-interface GoldLoanFormProps {
-  onClose?: () => void;
-  /** When true, form is embedded in modal; root uses flex-1 min-h-0 and back calls onClose */
-  isModal?: boolean;
-  /** Called when the API submit succeeds so the parent can show success state. */
-  onSuccess?: () => void;
-}
+const GOLD_LOAN_FEATURES: readonly LoanFeatureItem[] = [
+  {
+    title: 'Safe & Insured',
+    description: 'Your gold stays protected',
+    icon: 'zap',
+  },
+  {
+    title: 'Fair Valuation',
+    description: 'Maximum loan against your gold',
+    icon: 'coins',
+  },
+  {
+    title: 'Quick Approval',
+    description: 'Apply today, get money fast',
+    icon: 'calendar',
+  },
+];
 
 const GoldLoanForm = ({
   onClose,
@@ -33,7 +43,7 @@ const GoldLoanForm = ({
   const router = useRouter();
   const { isAuthenticated, openAuthModalWithPhoneAndAction } = useAuth();
 
-  const handleHeaderBackClick = (): void => {
+  const handleBack = (): void => {
     if (onClose) {
       onClose();
     } else {
@@ -41,8 +51,8 @@ const GoldLoanForm = ({
     }
   };
 
-  const onFormSubmit = (e: React.FormEvent): void => {
-    e.preventDefault();
+  const onFormSubmit = (event: React.FormEvent): void => {
+    event.preventDefault();
     if (!isAuthenticated) {
       const payload = getValidatedPayload();
       // Validation errors are already surfaced by the hook; avoid opening OTP if invalid.
@@ -58,49 +68,35 @@ const GoldLoanForm = ({
     handleSubmit();
   };
 
-  const rootClassName = isModal
-    ? 'flex flex-col flex-1 min-h-0 bg-white'
-    : 'bg-white h-screen flex flex-col';
-
   return (
-    <div className={rootClassName}>
-      <div className="bg-white border-b px-4 py-4 flex items-center gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={handleHeaderBackClick}
-          className="p-1 text-gray-700 hover:text-gray-900"
-          aria-label="Back"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <h2 className="text-base font-medium text-gray-900">Gold Loan</h2>
-      </div>
-
-      <form onSubmit={onFormSubmit} className="flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto w-full p-6 space-y-6">
-            <GoldLoanFields
-              formValues={formValues}
-              formErrors={formErrors}
-              handleFieldChange={handleFieldChange}
-              handleFieldBlur={handleFieldBlur}
-            />
-          </div>
-        </div>
-
-        <div className="border-t bg-white p-4 shrink-0">
-          <ActionButton
-            type="submit"
-            disabled={!canSubmit}
-            isLoading={isSubmitting}
-            fullWidth
-            className="h-14 text-base"
-          >
-            Submit
-          </ActionButton>
-        </div>
-      </form>
-    </div>
+    <LoanProductSplitLayout
+      isModal={isModal}
+      accent="gold"
+      title="Gold Loan"
+      headline="Let your gold support your financial needs."
+      subheadline="Rates from 8.75% p.a., tenures up to 7 years, and approval in minutes — all online."
+      formTitle="Turn Your Gold into Financial Support"
+      hero={{
+        src: '/assets/images/gold-loan.png',
+        alt: 'Stack of gold bars',
+        width: 683,
+        height: 283,
+        size: 'large',
+        className: 'mix-blend-screen',
+      }}
+      features={GOLD_LOAN_FEATURES}
+      canSubmit={canSubmit}
+      isSubmitting={isSubmitting}
+      onBack={handleBack}
+      onSubmit={onFormSubmit}
+    >
+      <GoldLoanFields
+        formValues={formValues}
+        formErrors={formErrors}
+        handleFieldChange={handleFieldChange}
+        handleFieldBlur={handleFieldBlur}
+      />
+    </LoanProductSplitLayout>
   );
 };
 
