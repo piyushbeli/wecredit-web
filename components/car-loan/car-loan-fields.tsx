@@ -12,6 +12,8 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 
 const PAN_HINT = 'As per PAN card';
+const CAR_LOAN_INPUT_CLASS_NAME = 'py-2 text-xs md:py-3 md:text-base';
+const CAR_LOAN_OPTION_CLASS_NAME = 'py-2 text-xs md:py-3 md:text-sm';
 
 const genderOptions = CAR_LOAN_GENDER_OPTIONS.map((option) => ({
   value: option,
@@ -42,7 +44,7 @@ const CarLoanFields = ({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         <div>
           <label className="lead-form-label">
             First Name <span className="text-red-500">*</span>
@@ -56,6 +58,7 @@ const CarLoanFields = ({
             error={formErrors.firstName}
             required
             autoComplete="given-name"
+            className={CAR_LOAN_INPUT_CLASS_NAME}
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
@@ -72,6 +75,7 @@ const CarLoanFields = ({
             error={formErrors.lastName}
             required
             autoComplete="family-name"
+            className={CAR_LOAN_INPUT_CLASS_NAME}
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
@@ -94,6 +98,7 @@ const CarLoanFields = ({
           required
           disabled={isAuthenticated}
           autoComplete="tel"
+          className={CAR_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -112,6 +117,7 @@ const CarLoanFields = ({
           inputMode="email"
           required
           autoComplete="email"
+          className={CAR_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -124,6 +130,7 @@ const CarLoanFields = ({
           value={formValues.gender}
           onChange={(value) => handleFieldChange('gender', value as CarLoanFormState['gender'])}
           error={formErrors.gender}
+          buttonClassName={CAR_LOAN_OPTION_CLASS_NAME}
         />
       </div>
 
@@ -139,6 +146,7 @@ const CarLoanFields = ({
           placeholder="Enter State"
           error={formErrors.state}
           required
+          className={CAR_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -157,6 +165,7 @@ const CarLoanFields = ({
           inputMode="numeric"
           maxLength={6}
           required
+          className={CAR_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -171,6 +180,7 @@ const CarLoanFields = ({
             handleFieldChange('employmentType', value as CarLoanFormState['employmentType'])
           }
           error={formErrors.employmentType}
+          buttonClassName={CAR_LOAN_OPTION_CLASS_NAME}
         />
       </div>
 
@@ -186,6 +196,7 @@ const CarLoanFields = ({
           placeholder="Enter Car Model"
           error={formErrors.carModel}
           required
+          className={CAR_LOAN_INPUT_CLASS_NAME}
         />
       </div>
       <ConsentCheckbox

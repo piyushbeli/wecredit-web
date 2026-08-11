@@ -25,6 +25,7 @@ interface InputFieldProps {
   maxLength?: number;
   required?: boolean;
   autoComplete?: string;
+  className?: string;
 }
 
 const InputField = ({
@@ -44,6 +45,7 @@ const InputField = ({
   maxLength,
   required,
   autoComplete,
+  className,
 }: InputFieldProps) => {
   const errorId = id ? `${id}-error` : undefined;
 
@@ -92,7 +94,8 @@ const InputField = ({
           // Hide number input spinners
           '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
           error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white',
-          (disabled || readOnly) && 'opacity-50'
+          (disabled || readOnly) && 'opacity-50',
+          className
         )}
       />
 
