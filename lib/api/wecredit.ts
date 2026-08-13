@@ -156,7 +156,7 @@ async function executeHtmlRedirectRequest(
     }
     const response = await fetch(url, fetchOptions);
     const text = await response.text();
-    debugger;
+    
     try {
       const json = JSON.parse(text);
       const jsonError = parseRedirectJsonError(json);

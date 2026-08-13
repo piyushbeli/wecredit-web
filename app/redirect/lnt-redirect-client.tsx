@@ -11,28 +11,16 @@ import {
 } from '@/lib/constants/api-keys';
 import { getCookie } from 'cookies-next';
 import { getLenderNameFromUrl, isValidMobile } from '@/lib/utils/common-helper';
-import { useAuthStore } from '@/stores/auth-store';
 
 const LntRedirectClient = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthInitialized, isAuthenticated } = useAuthStore();
   const mobileParam = searchParams.get(PARAM_LNT_REDIRECT_PHONE);
   const lenderNameParam = getLenderNameFromUrl(searchParams) || LNT_LENDER_NAME;
 
   useEffect(() => {
-    if (!isAuthInitialized) {
-      return;
-    }
-
-    // Logged-in users go to the single-lender campaign form (e.g. /personal-loan/lender/lnt).
-    if (isAuthenticated) {
-      router.replace(`/personal-loan/lender/${encodeURIComponent(lenderNameParam)}`);
-      return;
-    }
-
     if (!isValidMobile(mobileParam)) {
       const message =
         'A valid 10-digit mobile number starting with 6–9 is required to continue.';
@@ -66,15 +54,9 @@ const LntRedirectClient = () => {
     };
 
     void runRedirect();
-  }, [
-    isAuthInitialized,
-    isAuthenticated,
-    mobileParam,
-    lenderNameParam,
-    router,
-  ]);
+  }, [mobileParam, lenderNameParam]);
 
-  if (!isAuthInitialized || isLoading) {
+  if (isLoading) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center px-4">
         <h1 className="mb-2 text-xl font-semibold">Redirecting you to your offer...</h1>
