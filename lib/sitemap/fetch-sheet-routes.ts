@@ -4,6 +4,7 @@ export interface SheetRouteMapping {
   destination: string;
   source: string;
   showInSitemap?: boolean;
+  modifiedDate?: string;
 }
 
 export interface SheetRoutesRequestOptions {
@@ -72,6 +73,7 @@ function parseRoutesFromCsv(
   const destinationIndex = findColumnIndex(headers, 'destination');
   const sourceIndex = findColumnIndex(headers, 'source');
   const showInSitemapIndex = findColumnIndex(headers, 'showInSitemap');
+  const modifiedDateIndex = findColumnIndex(headers, 'modifiedDate');
 
   if (destinationIndex === -1 || sourceIndex === -1) {
     console.warn(`[${logLabel}] Missing Destination or source column in sheet`);
@@ -88,12 +90,16 @@ function parseRoutesFromCsv(
       showInSitemapIndex === -1
         ? true
         : (columns[showInSitemapIndex] ?? '').trim().toLowerCase() === 'true';
+    const modifiedDate =
+      modifiedDateIndex === -1
+        ? undefined
+        : (columns[modifiedDateIndex] ?? '').trim() || undefined;
 
     if (!destination || !source || !source.startsWith(sourcePathPrefix)) {
       continue;
     }
 
-    mappings.push({ destination, source, showInSitemap });
+    mappings.push({ destination, source, showInSitemap, modifiedDate });
   }
 
   return mappings;
