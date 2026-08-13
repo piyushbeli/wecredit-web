@@ -8,6 +8,11 @@ export const HEADER_CONTENT_TYPE = 'Content-Type';
 export const HEADER_AUTHORIZATION = 'Authorization';
 export const HEADER_AGENT_HOST = 'X-Agent-Host';
 export const HEADER_MOBILE = 'mobile';
+/** CamelCase lender header expected by upswing-redirect-by-phone (distinct from lowercase `lendername`). */
+export const HEADER_LENDER_NAME = 'lenderName';
+
+/** Lender code for LNT redirect-by-phone deep link */
+export const LNT_LENDER_NAME = 'lnt';
 
 /** Content type values */
 export const CONTENT_TYPE_JSON = 'application/json';
@@ -40,6 +45,8 @@ export const AUTH_COOKIE_OPTIONS = {
 export const PARAM_SOURCE = 'source';
 export const PARAM_AGENT_ID = 'agentId';
 export const PARAM_PHONE_NUMBER = 'phoneNumber';
+/** Unique query param for LNT public-API redirect (`/redirect?phone=`) — not `mn` or `mobile`. */
+export const PARAM_LNT_REDIRECT_PHONE = 'phone';
 export const PARAM_FIRST_NAME = 'firstName';
 export const PARAM_MIDDLE_NAME = 'middleName';
 export const PARAM_LAST_NAME = 'lastName';
@@ -89,7 +96,11 @@ export const ENDPOINTS = {
     CLICKS_COUNTER: 'clicks_counter',
 
     UPSWING_NAVIGATION_EVENT: 'upswing-navigation-event',
+
+    /** LNT deep-link redirect by phone (HTML auto-submit form response) */
+    UPSWING_REDIRECT_BY_PHONE: 'upswing-redirect-by-phone',
   },
+
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',
     VERIFY_OTP: '/api/auth/verify-otp',

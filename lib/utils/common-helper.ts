@@ -53,7 +53,7 @@ export function hasMatchingStatusLender(lenders: LenderOfferStatus[], lenderName
 }
 
 export const getLenderNameFromUrl = (searchParams: ReadonlyURLSearchParams, lendernameFromStore?: string): string => {
-    return (searchParams?.get('lendername') ?? searchParams?.get('lender_name') ?? lendernameFromStore ?? '')
+    return (searchParams?.get('lenderName') ?? searchParams?.get('lendername') ?? searchParams?.get('lender_name') ?? lendernameFromStore ?? '')
     .trim()
     .toLowerCase()
 }

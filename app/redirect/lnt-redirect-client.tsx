@@ -1,0 +1,109 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { forwardLntRedirectByPhone } from '@/lib/api/wecredit';
+import { toast } from 'sonner';
+import {
+  LNT_LENDER_NAME,
+  PARAM_LNT_REDIRECT_PHONE,
+  STORAGE_AUTH_TOKEN,
+} from '@/lib/constants/api-keys';
+import { getCookie } from 'cookies-next';
+import { getLenderNameFromUrl, isValidMobile } from '@/lib/utils/common-helper';
+import { useAuthStore } from '@/stores/auth-store';
+
+const LntRedirectClient = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAuthInitialized, isAuthenticated } = useAuthStore();
+  const mobileParam = searchParams.get(PARAM_LNT_REDIRECT_PHONE);
+  const lenderNameParam = getLenderNameFromUrl(searchParams) || LNT_LENDER_NAME;
+
+  useEffect(() => {
+    if (!isAuthInitialized) {
+      return;
+    }
+
+    // Logged-in users go to the single-lender campaign form (e.g. /personal-loan/lender/lnt).
+    if (isAuthenticated) {
+      router.replace(`/personal-loan/lender/${encodeURIComponent(lenderNameParam)}`);
+      return;
+    }
+
+    if (!isValidMobile(mobileParam)) {
+      const message =
+        'A valid 10-digit mobile number starting with 6–9 is required to continue.';
+      setError(message);
+      setIsLoading(false);
+      toast.error(message);
+      return;
+    }
+
+    setIsLoading(true);
+
+    const runRedirect = async () => {
+      try {
+        const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
+        const result = await forwardLntRedirectByPhone(mobileParam, token, lenderNameParam);
+        if (!result.success) {
+          const message = result.error || 'Unable to start L&T journey. Please try again.';
+          setError(message);
+          setIsLoading(false);
+          toast.error(message);
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong while processing your request.';
+        setError(message);
+        setIsLoading(false);
+        toast.error(message);
+      }
+    };
+
+    void runRedirect();
+  }, [
+    isAuthInitialized,
+    isAuthenticated,
+    mobileParam,
+    lenderNameParam,
+    router,
+  ]);
+
+  if (!isAuthInitialized || isLoading) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center px-4">
+        <h1 className="mb-2 text-xl font-semibold">Redirecting you to your offer...</h1>
+        <p className="text-sm text-muted-foreground">
+          Please wait while we securely connect you to the L&T journey.
+        </p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center px-4">
+        <h1 className="mb-2 text-xl font-semibold">We could not start your journey</h1>
+        <p className="mb-4 max-w-md text-center text-sm text-muted-foreground">
+          {error}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push('/')}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+        >
+          Go to homepage
+        </button>
+      </main>
+    );
+  }
+
+  return null;
+};
+
+export default LntRedirectClient;
