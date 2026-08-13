@@ -62,6 +62,16 @@ function findColumnIndex(headers: string[], name: string): number {
   return headers.findIndex((header) => header.toLowerCase() === normalized);
 }
 
+function findColumnIndexFromNames(headers: string[], names: string[]): number {
+  for (const name of names) {
+    const index = findColumnIndex(headers, name);
+    if (index !== -1) {
+      return index;
+    }
+  }
+  return -1;
+}
+
 function parseRoutesFromCsv(
   csvText: string,
   { sourcePathPrefix, logLabel }: Pick<FetchSheetRoutesOptions, 'sourcePathPrefix' | 'logLabel'>
@@ -73,7 +83,10 @@ function parseRoutesFromCsv(
   const destinationIndex = findColumnIndex(headers, 'destination');
   const sourceIndex = findColumnIndex(headers, 'source');
   const showInSitemapIndex = findColumnIndex(headers, 'showInSitemap');
-  const modifiedDateIndex = findColumnIndex(headers, 'modifiedDate');
+  const modifiedDateIndex = findColumnIndexFromNames(headers, [
+    'modifiedDate',
+    'modfiedDate',
+  ]);
 
   if (destinationIndex === -1 || sourceIndex === -1) {
     console.warn(`[${logLabel}] Missing Destination or source column in sheet`);
