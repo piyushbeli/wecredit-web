@@ -24,12 +24,10 @@ export default async function sitemapLoans(): Promise<MetadataRoute.Sitemap> {
   const loanRoutes = await fetchLoanRoutesFromSheet();
   const loanPaths = loanRoutes
     .filter((route) => route.showInSitemap === true)
-    .map((route) => route.source);
+    .map((route) => ({
+      path: route.source,
+      lastModified: route.modifiedDate,
+    }));
 
-  return dedupeSitemapEntries(
-    buildPathSitemapEntries(baseUrl, loanPaths, {
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    })
-  );
+  return dedupeSitemapEntries(buildPathSitemapEntries(baseUrl, loanPaths));
 }

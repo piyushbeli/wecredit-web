@@ -24,12 +24,10 @@ export default async function sitemapPosts(): Promise<MetadataRoute.Sitemap> {
   const blogRoutes = await fetchBlogRoutesFromSheet();
   const blogPaths = blogRoutes
     .filter((route) => route.showInSitemap === true)
-    .map((route) => route.source);
+    .map((route) => ({
+      path: route.source,
+      lastModified: route.modifiedDate,
+    }));
 
-  return dedupeSitemapEntries(
-    buildPathSitemapEntries(baseUrl, blogPaths, {
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    })
-  );
+  return dedupeSitemapEntries(buildPathSitemapEntries(baseUrl, blogPaths));
 }
