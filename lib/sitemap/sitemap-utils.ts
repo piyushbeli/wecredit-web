@@ -27,11 +27,6 @@ export interface PathWithLastModified {
   lastModified?: string | Date;
 }
 
-interface PathSitemapOptions {
-  changeFrequency?: MetadataRoute.Sitemap[number]['changeFrequency'];
-  priority?: number;
-}
-
 type SitemapPathInput = string | PathWithLastModified;
 
 function formatSitemapDateOnly(date: Date): string {
@@ -65,12 +60,8 @@ function isPathWithLastModified(item: SitemapPathInput): item is PathWithLastMod
 /** Builds sitemap entries from relative paths, with optional per-path lastModified. */
 export const buildPathSitemapEntries = (
   baseUrl: string,
-  paths: SitemapPathInput[],
-  options?: PathSitemapOptions
+  paths: SitemapPathInput[]
 ): MetadataRoute.Sitemap => {
-  const changeFrequency = options?.changeFrequency ?? 'weekly';
-  const priority = options?.priority ?? 0.7;
-
   return paths.map((item) => {
     const path = isPathWithLastModified(item) ? item.path : item;
     const lastModified = isPathWithLastModified(item)
@@ -80,8 +71,6 @@ export const buildPathSitemapEntries = (
     return {
       url: toSitemapUrl(baseUrl, path),
       lastModified,
-      changeFrequency,
-      priority,
     };
   });
 };
