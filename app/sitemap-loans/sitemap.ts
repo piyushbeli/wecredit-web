@@ -13,7 +13,7 @@ export const revalidate = 300;
 
 /**
  * Loan pages sitemap at /sitemap-loans/sitemap.xml.
- * Contains only loan source paths from the "Loan Pages" tab in Google Sheet.
+ * Contains all source paths from the "Loan Pages" tab in Google Sheet.
  */
 export default async function sitemapLoans(): Promise<MetadataRoute.Sitemap> {
   if (!shouldAllowSitemap()) return [];
@@ -24,12 +24,10 @@ export default async function sitemapLoans(): Promise<MetadataRoute.Sitemap> {
   const loanRoutes = await fetchLoanRoutesFromSheet();
   const loanPaths = loanRoutes
     .filter((route) => route.showInSitemap === true)
-    .map((route) => route.source);
+    .map((route) => ({
+      path: route.source,
+      lastModified: route.modifiedDate,
+    }));
 
-  return dedupeSitemapEntries(
-    buildPathSitemapEntries(baseUrl, loanPaths, {
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    })
-  );
+  return dedupeSitemapEntries(buildPathSitemapEntries(baseUrl, loanPaths));
 }

@@ -13,7 +13,7 @@ export const revalidate = 300;
 
 /**
  * Blog posts sitemap at /sitemap-posts/sitemap.xml.
- * Contains only blog source paths from Google Sheet.
+ * Contains all source paths from the "Blog Pages" tab in Google Sheet.
  */
 export default async function sitemapPosts(): Promise<MetadataRoute.Sitemap> {
   if (!shouldAllowSitemap()) return [];
@@ -24,12 +24,10 @@ export default async function sitemapPosts(): Promise<MetadataRoute.Sitemap> {
   const blogRoutes = await fetchBlogRoutesFromSheet();
   const blogPaths = blogRoutes
     .filter((route) => route.showInSitemap === true)
-    .map((route) => route.source);
+    .map((route) => ({
+      path: route.source,
+      lastModified: route.modifiedDate,
+    }));
 
-  return dedupeSitemapEntries(
-    buildPathSitemapEntries(baseUrl, blogPaths, {
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    })
-  );
+  return dedupeSitemapEntries(buildPathSitemapEntries(baseUrl, blogPaths));
 }

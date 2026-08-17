@@ -4,6 +4,7 @@ export interface SheetRouteMapping {
   destination: string;
   source: string;
   showInSitemap?: boolean;
+  modifiedDate?: string;
 }
 
 export interface SheetRoutesRequestOptions {
@@ -12,7 +13,8 @@ export interface SheetRoutesRequestOptions {
 
 interface FetchSheetRoutesOptions {
   gid: string;
-  sourcePathPrefix: string;
+  /** When set, only rows whose source starts with this prefix are included. */
+  sourcePathPrefix?: string;
   logLabel: string;
   requestTimeoutMs?: number;
 }
@@ -61,6 +63,16 @@ function findColumnIndex(headers: string[], name: string): number {
   return headers.findIndex((header) => header.toLowerCase() === normalized);
 }
 
+function findColumnIndexFromNames(headers: string[], names: string[]): number {
+  for (const name of names) {
+    const index = findColumnIndex(headers, name);
+    if (index !== -1) {
+      return index;
+    }
+  }
+  return -1;
+}
+
 function parseRoutesFromCsv(
   csvText: string,
   { sourcePathPrefix, logLabel }: Pick<FetchSheetRoutesOptions, 'sourcePathPrefix' | 'logLabel'>
@@ -72,6 +84,10 @@ function parseRoutesFromCsv(
   const destinationIndex = findColumnIndex(headers, 'destination');
   const sourceIndex = findColumnIndex(headers, 'source');
   const showInSitemapIndex = findColumnIndex(headers, 'showInSitemap');
+  const modifiedDateIndex = findColumnIndexFromNames(headers, [
+    'modifiedDate',
+    'modfiedDate',
+  ]);
 
   if (destinationIndex === -1 || sourceIndex === -1) {
     console.warn(`[${logLabel}] Missing Destination or source column in sheet`);
@@ -88,12 +104,19 @@ function parseRoutesFromCsv(
       showInSitemapIndex === -1
         ? true
         : (columns[showInSitemapIndex] ?? '').trim().toLowerCase() === 'true';
+    const modifiedDate =
+      modifiedDateIndex === -1
+        ? undefined
+        : (columns[modifiedDateIndex] ?? '').trim() || undefined;
 
-    if (!destination || !source || !source.startsWith(sourcePathPrefix)) {
+    if (!destination || !source) {
+      continue;
+    }
+    if (sourcePathPrefix && !source.startsWith(sourcePathPrefix)) {
       continue;
     }
 
-    mappings.push({ destination, source, showInSitemap });
+    mappings.push({ destination, source, showInSitemap, modifiedDate });
   }
 
   return mappings;
