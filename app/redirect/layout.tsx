@@ -7,6 +7,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function LntRedirectLayout({ children }: { children: ReactNode }) {
+export default function LenderRedirectLayout({ children }: { children: ReactNode }) {
   return children;
 }

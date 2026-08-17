@@ -1,16 +1,17 @@
 import { Suspense } from 'react';
 import { PageLoader } from '@/components/shared/page-loader';
-import LntRedirectClient from './lnt-redirect-client';
+import LenderRedirectClient from './lender-redirect-client';
 
 /**
- * LNT redirect entry — Suspense required for useSearchParams in the client page.
+ * Lender redirect entry — Suspense required for useSearchParams in the client page.
+ * Expects `phone` and `lenderName` query params.
  */
-const LntRedirectPage = (): React.ReactNode => {
+const LenderRedirectPage = (): React.ReactNode => {
   return (
     <Suspense fallback={<PageLoader />}>
-      <LntRedirectClient />
+      <LenderRedirectClient />
     </Suspense>
   );
 };
 
-export default LntRedirectPage;
+export default LenderRedirectPage;

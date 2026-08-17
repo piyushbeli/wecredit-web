@@ -45,7 +45,7 @@ export const AUTH_COOKIE_OPTIONS = {
 export const PARAM_SOURCE = 'source';
 export const PARAM_AGENT_ID = 'agentId';
 export const PARAM_PHONE_NUMBER = 'phoneNumber';
-/** Unique query param for LNT public-API redirect (`/redirect?phone=`) — not `mn` or `mobile`. */
+/** Unique query param for lender public-API redirect (`/redirect?phone=`) — not `mn` or `mobile`. */
 export const PARAM_LNT_REDIRECT_PHONE = 'phone';
 export const PARAM_FIRST_NAME = 'firstName';
 export const PARAM_MIDDLE_NAME = 'middleName';
@@ -97,8 +97,8 @@ export const ENDPOINTS = {
 
     UPSWING_NAVIGATION_EVENT: 'upswing-navigation-event',
 
-    /** LNT deep-link redirect by phone (HTML auto-submit form response) */
-    UPSWING_REDIRECT_BY_PHONE: 'upswing-redirect-by-phone',
+    /** Lender redirect by phone — HTML auto-submit form or JSON with utmLink */
+    LENDER_REDIRECTION: 'lender-redirection',
   },
 
   AUTH: {
