@@ -14,7 +14,6 @@ export const normalizePagesSourcePath = normalizeSheetSourcePath;
 export async function fetchPagesRoutesFromSheet(): Promise<PagesRouteMapping[]> {
     return fetchRoutesFromSheet({
         gid: GOOGLE_SHEET_ROUTES.PAGES_GID,
-        sourcePathPrefix: '/',
         logLabel: 'fetchPagesRoutesFromSheet',
     });
 }
