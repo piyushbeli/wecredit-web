@@ -17,5 +17,7 @@ export interface SitemapBlogEntry {
  */
 export async function getAllBlogPaths(): Promise<string[]> {
   const routes = await fetchBlogRoutesFromSheet();
-  return routes.map((route) => route.source);
+  return routes
+    .map((route) => route.source)
+    .filter((source) => source.startsWith('/blog'));
 }

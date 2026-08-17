@@ -13,7 +13,7 @@ export const revalidate = 300;
 
 /**
  * Loan pages sitemap at /sitemap-loans/sitemap.xml.
- * Contains only loan source paths from the "Loan Pages" tab in Google Sheet.
+ * Contains all source paths from the "Loan Pages" tab in Google Sheet.
  */
 export default async function sitemapLoans(): Promise<MetadataRoute.Sitemap> {
   if (!shouldAllowSitemap()) return [];

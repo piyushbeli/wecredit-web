@@ -17,7 +17,6 @@ export async function fetchBlogRoutesFromSheet(
 ): Promise<BlogRouteMapping[]> {
   return fetchRoutesFromSheet({
     gid: GOOGLE_SHEET_ROUTES.BLOG_GID,
-    sourcePathPrefix: '/blog',
     logLabel: 'fetchBlogRoutesFromSheet',
     requestTimeoutMs: options.requestTimeoutMs,
   });
