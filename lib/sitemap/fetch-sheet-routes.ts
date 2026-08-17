@@ -13,7 +13,8 @@ export interface SheetRoutesRequestOptions {
 
 interface FetchSheetRoutesOptions {
   gid: string;
-  sourcePathPrefix: string;
+  /** When set, only rows whose source starts with this prefix are included. */
+  sourcePathPrefix?: string;
   logLabel: string;
   requestTimeoutMs?: number;
 }
@@ -108,7 +109,10 @@ function parseRoutesFromCsv(
         ? undefined
         : (columns[modifiedDateIndex] ?? '').trim() || undefined;
 
-    if (!destination || !source || !source.startsWith(sourcePathPrefix)) {
+    if (!destination || !source) {
+      continue;
+    }
+    if (sourcePathPrefix && !source.startsWith(sourcePathPrefix)) {
       continue;
     }
 

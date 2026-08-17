@@ -17,7 +17,6 @@ export async function fetchLoanRoutesFromSheet(
 ): Promise<LoanRouteMapping[]> {
   return fetchRoutesFromSheet({
     gid: GOOGLE_SHEET_ROUTES.LOANS_GID,
-    sourcePathPrefix: '/loans',
     logLabel: 'fetchLoanRoutesFromSheet',
     requestTimeoutMs: options.requestTimeoutMs,
   });
