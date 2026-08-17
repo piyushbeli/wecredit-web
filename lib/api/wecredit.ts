@@ -13,7 +13,6 @@ import {
   ENDPOINTS,
   HEADER_LENDER_NAME,
   HEADER_MOBILE,
-  LNT_LENDER_NAME,
 } from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
 import { toast } from 'sonner';
@@ -92,11 +91,21 @@ type RedirectApiResult = {
   error?: string;
 };
 
-function parseRedirectJsonError(json: {
+function parseRedirectJsonResponse(json: {
   statusCode?: number | string;
   statusMessage?: string;
+  utmLink?: string;
 }): RedirectApiResult | null {
-  if (json?.statusCode === 2006) {
+  const statusCodeNum =
+    typeof json.statusCode === 'string'
+      ? Number.parseInt(json.statusCode, 10)
+      : json.statusCode;
+  if (statusCodeNum === 200 && json.utmLink) {
+    window.history.replaceState(null, '', '/');
+    window.location.href = json.utmLink;
+    return { success: true };
+  }
+  if (statusCodeNum === 2006) {
     toast.error(json.statusMessage, {
       description: 'Unable to start journey.',
     });
@@ -105,11 +114,15 @@ function parseRedirectJsonError(json: {
       error: json.statusMessage,
     };
   }
-  if (json?.statusMessage) {
-    toast.error(json.statusMessage);
+  const isErrorStatus = statusCodeNum !== undefined && statusCodeNum !== 200;
+  const isErrorMessage =
+    Boolean(json.statusMessage) && json.statusMessage!.toLowerCase() !== 'success';
+  if (isErrorStatus || isErrorMessage) {
+    const message = json.statusMessage ?? 'Unable to process redirect. Please try again.';
+    toast.error(message);
     return {
       success: false,
-      error: json.statusMessage,
+      error: message,
     };
   }
   return null;
@@ -159,9 +172,9 @@ async function executeHtmlRedirectRequest(
     
     try {
       const json = JSON.parse(text);
-      const jsonError = parseRedirectJsonError(json);
-      if (jsonError) {
-        return jsonError;
+      const jsonResult = parseRedirectJsonResponse(json);
+      if (jsonResult) {
+        return jsonResult;
       }
     } catch {
       if (onBeforeHtmlNavigate) {
@@ -459,13 +472,13 @@ export async function forwardUpswingRedirect(
 }
 
 /**
- * LNT deep-link redirect via `/api/public` (`upswing-redirect-by-phone`).
- * HTML responses navigate via Blob URL (same pattern as Upswing forward redirect).
+ * Lender redirect via `/api/public` (`lender-redirection`).
+ * HTML responses navigate via Blob URL; JSON responses with `utmLink` navigate directly.
  */
-export async function forwardLntRedirectByPhone(
+export async function forwardLenderRedirectByPhone(
   mobile: string,
+  lenderName: string,
   authorization?: string,
-  lenderName: string = LNT_LENDER_NAME,
   signal?: AbortSignal,
 ): Promise<RedirectApiResult> {
   if (!mobile) {
@@ -474,11 +487,17 @@ export async function forwardLntRedirectByPhone(
       error: 'Mobile number required',
     };
   }
-  const resolvedLenderName = lenderName.trim() || LNT_LENDER_NAME;
+  const resolvedLenderName = lenderName.trim();
+  if (!resolvedLenderName) {
+    return {
+      success: false,
+      error: 'Lender name is required to continue.',
+    };
+  }
   return executeHtmlRedirectRequest({
     url: wecreditConfig.gatewayUrl,
     requestBody: {
-      endpoint: ENDPOINTS.PUBLIC.UPSWING_REDIRECT_BY_PHONE,
+      endpoint: ENDPOINTS.PUBLIC.LENDER_REDIRECTION,
       partnerCode: getEffectivePartnerCode(),
     },
     headers: buildHeaders({

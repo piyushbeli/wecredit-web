@@ -2,23 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { forwardLntRedirectByPhone } from '@/lib/api/wecredit';
+import { forwardLenderRedirectByPhone } from '@/lib/api/wecredit';
 import { toast } from 'sonner';
 import {
-  LNT_LENDER_NAME,
   PARAM_LNT_REDIRECT_PHONE,
   STORAGE_AUTH_TOKEN,
 } from '@/lib/constants/api-keys';
 import { getCookie } from 'cookies-next';
 import { getLenderNameFromUrl, isValidMobile } from '@/lib/utils/common-helper';
 
-const LntRedirectClient = () => {
+const LenderRedirectClient = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const mobileParam = searchParams.get(PARAM_LNT_REDIRECT_PHONE);
-  const lenderNameParam = getLenderNameFromUrl(searchParams) || LNT_LENDER_NAME;
+  const lenderNameParam = getLenderNameFromUrl(searchParams);
 
   useEffect(() => {
     if (!isValidMobile(mobileParam)) {
@@ -30,14 +29,22 @@ const LntRedirectClient = () => {
       return;
     }
 
+    if (!lenderNameParam) {
+      const message = 'A lender name is required in the URL to continue.';
+      setError(message);
+      setIsLoading(false);
+      toast.error(message);
+      return;
+    }
+
     setIsLoading(true);
 
     const runRedirect = async () => {
       try {
         const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
-        const result = await forwardLntRedirectByPhone(mobileParam, token, lenderNameParam);
+        const result = await forwardLenderRedirectByPhone(mobileParam, lenderNameParam, token);
         if (!result.success) {
-          const message = result.error || 'Unable to start L&T journey. Please try again.';
+          const message = result.error || 'Unable to start your journey. Please try again.';
           setError(message);
           setIsLoading(false);
           toast.error(message);
@@ -61,7 +68,7 @@ const LntRedirectClient = () => {
       <main className="flex min-h-screen flex-col items-center justify-center px-4">
         <h1 className="mb-2 text-xl font-semibold">Redirecting you to your offer...</h1>
         <p className="text-sm text-muted-foreground">
-          Please wait while we securely connect you to the L&T journey.
+          Please wait while we securely connect you to your lender.
         </p>
       </main>
     );
@@ -88,4 +95,4 @@ const LntRedirectClient = () => {
   return null;
 };
 
-export default LntRedirectClient;
+export default LenderRedirectClient;
