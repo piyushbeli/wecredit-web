@@ -16,7 +16,10 @@ import { STORAGE_AUTH_TOKEN } from '@/lib/constants/api-keys';
 import { toast } from 'sonner';
 import { requiresMultiLenderLeadForm } from '@/lib/utils/wecredit-lead-data';
 import { getLenderNameFromUrl, hasMatchingStatusLender } from '@/lib/utils/common-helper';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
+import { useOfferStore } from '@/stores/offer-store';
+import { useUrlParamsStore } from '@/stores/url-params-store';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 /**
  * Return type for useCheckDedupe hook
@@ -65,6 +68,7 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [needsForm, setNeedsForm] = useState(false);
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const [response, setResponse] = useState<CheckDedupeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -112,12 +116,22 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
       return false; // STOP
     }
 
-    // Check if lender name is in the URL
-    const lenderName = getLenderNameFromUrl(searchParams);
+    // Skip check-dedupe when this URL/store lender already has a check-status-all row.
+    // /offers may have just fetched that payload into the offer store; calling check-dedupe
+    // again would reopen the lead form (1003) even though the offer is already present.
+    // Read lendername from the store as well so a stale searchParams closure cannot miss it.
+    const lenderName = getLenderNameFromUrl(
+      searchParams,
+      useUrlParamsStore.getState().lendername ?? ''
+    );
     if (lenderName) {
-      const foundInOffersData = await checkSingleLenderStatusBeforeForm(mobile, token, { statusBeforeFormLenderName: lenderName });
+      const cachedOffers = useOfferStore.getState().offers;
+      const foundInCache = hasMatchingStatusLender(cachedOffers, lenderName);
+      const foundInOffersData = foundInCache
+        || (await checkSingleLenderStatusBeforeForm(mobile, token, { statusBeforeFormLenderName: lenderName }));
       if (foundInOffersData) {
-        router.push(`/offers?lendername=${lenderName}`);
+        setNeedsForm(false);
+        router.push(buildOffersPathWithQuery('/offers', searchParams));
         return true;
       }
     }
@@ -150,6 +164,11 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
       }
       
       setResponse(result.data);
+
+      if (result.data.isPrimePlLead === true) {
+        setNeedsForm(false);
+        return true;
+      }
 
       // Get status code and isWecreditWebsiteData from response
       const statusCode = result.data.statusCode;
@@ -207,7 +226,7 @@ export function useCheckDedupe(): UseCheckDedupeReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [bypassDedupeCheck]);
+  }, [bypassDedupeCheck, pathname, router, searchParams]);
 
   /**
    * Reset all state to initial values
