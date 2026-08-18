@@ -28,16 +28,7 @@ const UpswingRedirectPage = () => {
       lastMobileParam.current = mobileParam;
     }
 
-    if (!isAuthInitialized) {
-      return;
-    }
-
-    if (!isValidMobile(mobileParam)) {
-      const message =
-        'A valid 10-digit mobile number starting with 6–9 is required to continue.';
-      setError(message);
-      setIsLoading(false);
-      toast.error(message);
+    if (!isAuthInitialized || !mobileParam) {
       return;
     }
 

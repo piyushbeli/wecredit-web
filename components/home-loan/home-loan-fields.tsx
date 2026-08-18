@@ -11,16 +11,12 @@ import {
   type HomeLoanFormState,
 } from './home-loan-form.config';
 import { useAuth } from '@/hooks/use-auth';
+import type { HomeLoanFieldsProps } from './home-loan-fields.types';
 
 const PAN_HINT = 'As per PAN card';
 const DOB_HINT = 'As per PAN card';
-
-interface HomeLoanFieldsProps {
-  formValues: HomeLoanFormState;
-  formErrors: Record<string, string>;
-  handleFieldChange: (key: keyof HomeLoanFormState, value: string | boolean) => void;
-  handleFieldBlur: (key: keyof HomeLoanFormState) => void;
-}
+const HOME_LOAN_INPUT_CLASS_NAME = 'py-2 text-xs md:py-3 md:text-base';
+const HOME_LOAN_OPTION_CLASS_NAME = 'py-2 text-xs md:py-3 md:text-sm';
 
 const incomeSourceOptions = HOME_LOAN_INCOME_SOURCE_OPTIONS.map((option) => ({
   value: option,
@@ -39,7 +35,7 @@ const HomeLoanFields = ({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         <div>
           <label className="lead-form-label">
             First Name <span className="text-red-500">*</span>
@@ -53,6 +49,7 @@ const HomeLoanFields = ({
             error={formErrors.firstName}
             required
             autoComplete="given-name"
+            className={HOME_LOAN_INPUT_CLASS_NAME}
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
@@ -69,6 +66,7 @@ const HomeLoanFields = ({
             error={formErrors.lastName}
             required
             autoComplete="family-name"
+            className={HOME_LOAN_INPUT_CLASS_NAME}
           />
           <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
         </div>
@@ -89,6 +87,7 @@ const HomeLoanFields = ({
           maxLength={10}
           required
           autoComplete="off"
+          className={HOME_LOAN_INPUT_CLASS_NAME}
         />
         <p className="text-xs text-gray-500 mt-1">{PAN_HINT}</p>
       </div>
@@ -121,6 +120,7 @@ const HomeLoanFields = ({
           required
           disabled={isAuthenticated}
           autoComplete="tel"
+          className={HOME_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -141,6 +141,7 @@ const HomeLoanFields = ({
           inputMode="numeric"
           maxLength={6}
           required
+          className={HOME_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -161,6 +162,7 @@ const HomeLoanFields = ({
           inputMode="numeric"
           maxLength={6}
           required
+          className={HOME_LOAN_INPUT_CLASS_NAME}
         />
       </div>
 
@@ -175,6 +177,7 @@ const HomeLoanFields = ({
             handleFieldChange('incomeSource', value as HomeLoanFormState['incomeSource'])
           }
           error={formErrors.incomeSource}
+          buttonClassName={HOME_LOAN_OPTION_CLASS_NAME}
         />
       </div>
 
@@ -192,6 +195,7 @@ const HomeLoanFields = ({
           type="text"
           inputMode="numeric"
           required
+          className={HOME_LOAN_INPUT_CLASS_NAME}
         />
       </div>
       <ConsentCheckbox

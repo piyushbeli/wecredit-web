@@ -9,7 +9,11 @@
  */
 
 import { wecreditConfig } from '@/lib/config';
-import { ENDPOINTS, HEADER_MOBILE } from '@/lib/constants/api-keys';
+import {
+  ENDPOINTS,
+  HEADER_LENDER_NAME,
+  HEADER_MOBILE,
+} from '@/lib/constants/api-keys';
 import { withApiLogging } from '@/lib/utils/api-logger';
 import { toast } from 'sonner';
 import { buildUpswingForwardRequestUrl, notifyForwardNavigationEvent } from './upswing-navigation-event';
@@ -33,6 +37,10 @@ export interface WeCreditOptions {
    * default `cache: 'no-store'`. Used for server-side (SSR) initial fetches.
    */
   revalidateSeconds?: number;
+  /**
+   * When true, omit URL-derived `lendername` so an explicit `lenderName` header is not duplicated.
+   */
+  omitLender?: boolean;
 }
 
 /** Result type for update utm clicked operation */
@@ -56,14 +64,133 @@ const DEFAULT_CHECK_STATUS_RESPONSE: CheckStatusAllResponse = {
  * Includes environment-specific headers (X-Agent-Host in dev/staging)
  */
 export function buildHeaders(options: WeCreditOptions): Record<string, string> {
-  const { mobile, authorization, headers = {} } = options;
+  const { mobile, authorization, headers = {}, omitLender } = options;
   return {
     ...wecreditConfig.headers,
     ...(mobile && { [HEADER_MOBILE]: mobile }),
     ...(authorization && { Authorization: `Bearer ${authorization}` }),
     ...headers,
-    ...getAttributionHeadersCommon(),
+    ...getAttributionHeadersCommon(omitLender ? { omitLender: true } : undefined),
   };
+}
+
+/**
+ * Navigates the browser to an HTML redirect body via a Blob URL.
+ * Clears the interstitial path so back navigation does not re-trigger the deep link.
+ */
+function navigateWithHtmlRedirectBlob(html: string): void {
+  window.history.replaceState(null, '', '/');
+  const blob = new Blob([html], { type: 'text/html' });
+  const redirectUrl = URL.createObjectURL(blob);
+  window.location.href = redirectUrl;
+}
+
+type RedirectApiResult = {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+};
+
+function parseRedirectJsonResponse(json: {
+  statusCode?: number | string;
+  statusMessage?: string;
+  utmLink?: string;
+}): RedirectApiResult | null {
+  const statusCodeNum =
+    typeof json.statusCode === 'string'
+      ? Number.parseInt(json.statusCode, 10)
+      : json.statusCode;
+  if (statusCodeNum === 200 && json.utmLink) {
+    window.history.replaceState(null, '', '/');
+    window.location.href = json.utmLink;
+    return { success: true };
+  }
+  if (statusCodeNum === 2006) {
+    toast.error(json.statusMessage, {
+      description: 'Unable to start journey.',
+    });
+    return {
+      success: false,
+      error: json.statusMessage,
+    };
+  }
+  const isErrorStatus = statusCodeNum !== undefined && statusCodeNum !== 200;
+  const isErrorMessage =
+    Boolean(json.statusMessage) && json.statusMessage!.toLowerCase() !== 'success';
+  if (isErrorStatus || isErrorMessage) {
+    const message = json.statusMessage ?? 'Unable to process redirect. Please try again.';
+    toast.error(message);
+    return {
+      success: false,
+      error: message,
+    };
+  }
+  return null;
+}
+
+function toRedirectCatchResult(error: unknown): RedirectApiResult {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return {
+      success: false,
+      error: 'Request timed out',
+    };
+  }
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : 'Unable to process redirect. Please try again.';
+  return {
+    success: false,
+    error: errorMessage,
+  };
+}
+
+interface ExecuteHtmlRedirectRequestParams {
+  url: string;
+  requestBody: Record<string, unknown>;
+  headers: Record<string, string>;
+  signal?: AbortSignal;
+  onBeforeHtmlNavigate?: () => Promise<void>;
+}
+
+async function executeHtmlRedirectRequest(
+  params: ExecuteHtmlRedirectRequestParams,
+): Promise<RedirectApiResult> {
+  const { url, requestBody, headers, signal, onBeforeHtmlNavigate } = params;
+  try {
+    const fetchOptions: RequestInit = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody),
+      cache: 'no-store',
+    };
+    if (signal instanceof AbortSignal) {
+      fetchOptions.signal = signal;
+    }
+    const response = await fetch(url, fetchOptions);
+    const text = await response.text();
+    
+    try {
+      const json = JSON.parse(text);
+      const jsonResult = parseRedirectJsonResponse(json);
+      if (jsonResult) {
+        return jsonResult;
+      }
+    } catch {
+      if (onBeforeHtmlNavigate) {
+        await onBeforeHtmlNavigate();
+      }
+      navigateWithHtmlRedirectBlob(text);
+      return {
+        success: true,
+      };
+    }
+    return {
+      success: false,
+    };
+  } catch (error) {
+    return toRedirectCatchResult(error);
+  }
 }
 
 /**
@@ -322,107 +449,65 @@ export async function forwardUpswingRedirect(
   authorization?: string,
   utmLink?: string,
   signal?: AbortSignal,
-): Promise<{ success: boolean; data?: unknown; error?: string }> {
-
+): Promise<RedirectApiResult> {
   if (!mobile) {
     return {
       success: false,
       error: 'Mobile number required',
     };
   }
+  return executeHtmlRedirectRequest({
+    url: buildUpswingForwardRequestUrl(mobile),
+    requestBody: {
+      endpoint: 'upswing-redirect',
+      partnerCode: getEffectivePartnerCode(),
+    },
+    headers: buildHeaders({ mobile, authorization }),
+    signal,
+    // Await analytics so Blob navigation does not abort the event request.
+    onBeforeHtmlNavigate: utmLink
+      ? () => notifyForwardNavigationEvent(mobile, utmLink)
+      : undefined,
+  });
+}
 
-  const requestBody = {
-    endpoint: 'upswing-redirect',
-    partnerCode: getEffectivePartnerCode(),
-  };
-
-  const url = buildUpswingForwardRequestUrl(mobile);
-
-  try {
-
-    const fetchOptions: RequestInit = {
-      method: 'POST',
-      headers: buildHeaders({ mobile, authorization }),
-      body: JSON.stringify(requestBody),
-      cache: 'no-store',
-    };
-
-    if (signal instanceof AbortSignal) {
-      fetchOptions.signal = signal;
-    }
-
-    const response = await fetch(url, fetchOptions);
-
-    const text = await response.text();
-
-    try {
-
-      const json = JSON.parse(text);
-
-
-      if (json?.statusCode === 2006) {
-
-
-        toast.error(json.statusMessage, {
-          description: "Unable to start journey.",
-        });
-
-        return {
-          success: false,
-          error: json.statusMessage,
-        };
-      }
-
-      if (json?.statusMessage) {
-
-        toast.error(json.statusMessage);
-
-        return {
-          success: false,
-          error: json.statusMessage,
-        };
-      }
-
-    } catch {
-      // Non-JSON body: treat as HTML redirect. Await analytics so navigation does not abort the event request.
-      if (utmLink) {
-        await notifyForwardNavigationEvent(mobile, utmLink);
-      }
-      window.history.replaceState(null, "", "/");
-
-      const blob = new Blob([text], { type: "text/html" });
-      const redirectUrl = URL.createObjectURL(blob);
-
-      window.location.href = redirectUrl;
-
-      return {
-        success: true,
-      };
-    }
-
+/**
+ * Lender redirect via `/api/public` (`lender-redirection`).
+ * HTML responses navigate via Blob URL; JSON responses with `utmLink` navigate directly.
+ */
+export async function forwardLenderRedirectByPhone(
+  mobile: string,
+  lenderName: string,
+  authorization?: string,
+  signal?: AbortSignal,
+): Promise<RedirectApiResult> {
+  if (!mobile) {
     return {
       success: false,
-    };
-
-  } catch (error) {
-
-    if (error instanceof Error && error.name === 'AbortError') {
-      return {
-        success: false,
-        error: 'Request timed out',
-      };
-    }
-
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : 'Unable to process redirect. Please try again.';
-
-    return {
-      success: false,
-      error: errorMessage,
+      error: 'Mobile number required',
     };
   }
+  const resolvedLenderName = lenderName.trim();
+  if (!resolvedLenderName) {
+    return {
+      success: false,
+      error: 'Lender name is required to continue.',
+    };
+  }
+  return executeHtmlRedirectRequest({
+    url: wecreditConfig.gatewayUrl,
+    requestBody: {
+      endpoint: ENDPOINTS.PUBLIC.LENDER_REDIRECTION,
+      partnerCode: getEffectivePartnerCode(),
+    },
+    headers: buildHeaders({
+      mobile,
+      authorization,
+      omitLender: true,
+      headers: { [HEADER_LENDER_NAME]: resolvedLenderName },
+    }),
+    signal,
+  });
 }
 /**
  * PDF Step 7: Clicked Lender Handling
