@@ -207,6 +207,7 @@ const TrendingOffersSection = ({
                       lenderName={lender.Name || id}
                       logoPath={lender.logo || undefined}
                       badge="Fast Disbursal"
+                      topColour={lender.topColour}
                       amount={lender.UptoAmount || 'N/A'}
                       interestRate={
                         lender.IntRate ? `${formatToTwoDecimals(lender.IntRate)}%` : 'N/A'
