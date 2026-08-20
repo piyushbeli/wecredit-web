@@ -25,6 +25,8 @@ interface TrendingOfferCardProps {
   logoPath?: string;
   /** Badge text (e.g., "Fast Disbursal") */
   badge?: string;
+  /** Lender-specific badge background color */
+  topColour?: string | null;
   /** Maximum loan amount */
   amount: string;
   /** Interest rate */
@@ -54,6 +56,7 @@ const TrendingOfferCard = ({
   lenderName,
   logoPath,
   badge,
+  topColour,
   amount,
   interestRate,
   tenure,
@@ -356,7 +359,7 @@ const TrendingOfferCard = ({
               )}
             </div>
 
-            {badge && <ArrowBadge text={badge} />}
+            {badge && <ArrowBadge text={badge} backgroundColor={topColour} />}
           </div>
 
 

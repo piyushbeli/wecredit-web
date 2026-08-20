@@ -193,6 +193,11 @@ const OTPInput = ({
           transition={{ delay: 0.4 }}
           className="text-center space-y-2"
         >
+          {canResend && (
+            <p className="text-xs font-medium text-gray-400">
+              Please check your SMS inbox and spam folder.
+            </p>
+          )}
           <div className={cn(
             'flex flex-wrap justify-center items-center gap-1 text-sm',
             variant === 'blue' ? 'text-white/90' : 'text-gray-600'
