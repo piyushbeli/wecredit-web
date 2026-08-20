@@ -166,9 +166,11 @@ const OtpConfirmationPage = (): React.ReactNode => {
             </button>
           </p>
 
-          <p className="flex items-center gap-2 text-gray-500">
-            <Clock className="h-4 w-4" />
-            {canResend ? 'You can resend now' : `Resend in 00:${String(resendTimer).padStart(2, '0')}`}
+          <p className={canResend ? 'flex items-center gap-2 text-xs font-medium text-gray-400' : 'flex items-center gap-2 text-gray-500'}>
+            {!canResend && <Clock className="h-4 w-4" />}
+            {canResend
+              ? 'Please check your SMS inbox and spam folder.'
+              : `Resend in 00:${String(resendTimer).padStart(2, '0')}`}
           </p>
         </div>
 

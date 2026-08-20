@@ -68,6 +68,26 @@ const LoanProductSplitLayout = ({
         onSubmit={onSubmit}
         className="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto md:grid md:h-full md:grid-cols-[40%_60%] md:overflow-hidden"
       >
+        <div
+          className={cn(
+            'sticky top-0 z-30 flex w-full shrink-0 items-center justify-center px-4 py-3 md:hidden',
+            isGold ? 'bg-yellow-400 text-gray-900' : 'bg-blue-700 text-white'
+          )}
+        >
+          <button
+            type="button"
+            onClick={onBack}
+            className={cn(
+              'absolute left-4 rounded-full p-1 transition-colors',
+              isGold ? 'hover:bg-black/5' : 'hover:bg-white/10'
+            )}
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="min-w-0 text-lg font-semibold">{title}</h1>
+        </div>
+
         <section
           className={cn(
             'relative flex w-full shrink-0 flex-col overflow-hidden px-4 pb-4 pt-3 sm:px-6 md:h-full md:px-8 md:pb-6 md:pt-6 lg:px-10',
@@ -77,7 +97,7 @@ const LoanProductSplitLayout = ({
           )}
         >
           {renderBannerBackdrop(bannerPattern, bannerPatternSrc)}
-          <div className="relative z-10 flex w-full min-w-0 items-center justify-center md:justify-start md:gap-3">
+          <div className="relative z-10 hidden w-full min-w-0 items-center md:flex md:justify-start md:gap-3">
             <button
               type="button"
               onClick={onBack}
@@ -128,7 +148,7 @@ const LoanProductSplitLayout = ({
             <div className="w-full">
               <h2 className="mb-4 text-base font-medium text-gray-900 md:mb-5">{formTitle}</h2>
               <div className="space-y-4 md:space-y-5">{children}</div>
-              <div className="mt-6">
+              <div className="sticky bottom-0 z-20 -mx-4 mt-6 bg-white px-4 pb-4 pt-3 shadow-[0_-8px_16px_rgba(255,255,255,0.95)] md:-mx-12 md:px-12 md:pb-0">
                 <ActionButton
                   type="submit"
                   disabled={!canSubmit}
