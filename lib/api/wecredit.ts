@@ -75,14 +75,15 @@ export function buildHeaders(options: WeCreditOptions): Record<string, string> {
 }
 
 /**
- * Navigates the browser to an HTML redirect body via a Blob URL.
- * Clears the interstitial path so back navigation does not re-trigger the deep link.
+ * Leaves the SPA by replacing the current document with the lender HTML
+ * (typically an auto-submit form).
+ * Blob URLs are blocked in WhatsApp / RCS in-app WebViews, and replaceState('/')
+ * can race Next.js back onto the homepage — write the HTML in place instead.
  */
-function navigateWithHtmlRedirectBlob(html: string): void {
-  window.history.replaceState(null, '', '/');
-  const blob = new Blob([html], { type: 'text/html' });
-  const redirectUrl = URL.createObjectURL(blob);
-  window.location.href = redirectUrl;
+function navigateWithHtmlRedirect(html: string): void {
+  document.open();
+  document.write(html);
+  document.close();
 }
 
 type RedirectApiResult = {
@@ -101,8 +102,7 @@ function parseRedirectJsonResponse(json: {
       ? Number.parseInt(json.statusCode, 10)
       : json.statusCode;
   if (statusCodeNum === 200 && json.utmLink) {
-    window.history.replaceState(null, '', '/');
-    window.location.href = json.utmLink;
+    window.location.replace(json.utmLink);
     return { success: true };
   }
   if (statusCodeNum === 2006) {
@@ -180,7 +180,7 @@ async function executeHtmlRedirectRequest(
       if (onBeforeHtmlNavigate) {
         await onBeforeHtmlNavigate();
       }
-      navigateWithHtmlRedirectBlob(text);
+      navigateWithHtmlRedirect(text);
       return {
         success: true,
       };

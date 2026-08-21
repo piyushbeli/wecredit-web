@@ -9,7 +9,7 @@ import {
   STORAGE_AUTH_TOKEN,
 } from '@/lib/constants/api-keys';
 import { getCookie } from 'cookies-next';
-import { getLenderNameFromUrl, isValidMobile } from '@/lib/utils/common-helper';
+import { getLenderNameFromUrl } from '@/lib/utils/common-helper';
 
 const LenderRedirectClient = () => {
   const searchParams = useSearchParams();
@@ -22,6 +22,10 @@ const LenderRedirectClient = () => {
   useEffect(() => {
 
     if (!mobileParam) {
+      const message = 'A mobile number is required in the URL to continue.';
+      setError(message);
+      setIsLoading(false);
+      toast.error(message);
       return;
     }
 
