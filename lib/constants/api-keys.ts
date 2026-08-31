@@ -101,6 +101,11 @@ export const ENDPOINTS = {
     LENDER_REDIRECTION: 'lender-redirection',
   },
 
+  FORWARD: {
+    /** Federal Bank redirect via /api/forward — HTML auto-submit form or JSON with utmLink */
+    FEDERALBANK_REDIRECT: 'federalbank-redirect',
+  },
+
   AUTH: {
     SEND_OTP: '/api/auth/send-otp',
     VERIFY_OTP: '/api/auth/verify-otp',
@@ -123,3 +128,8 @@ export const PARTNER_CODE = 'WC001';
 /** Default timeout values (in milliseconds) */
 export const TIMEOUT_DEVELOPMENT = 15000;
 export const TIMEOUT_PRODUCTION = 30000;
+
+/** Federal Bank redirect polling — keep polling at least 30s until utmLink is returned */
+export const FEDERALBANK_REDIRECT_MIN_POLL_MS = 30_000;
+export const FEDERALBANK_REDIRECT_POLL_INTERVAL_MS = 3_000;
+export const FEDERALBANK_REDIRECT_MAX_POLL_MS = 120_000;
