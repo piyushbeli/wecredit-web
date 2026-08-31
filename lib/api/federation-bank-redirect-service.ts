@@ -11,6 +11,7 @@ import {
 import { buildHeaders } from '@/lib/api/wecredit';
 import { buildUpswingForwardRequestUrl } from '@/lib/api/upswing-navigation-event';
 import { getEffectivePartnerCode } from '@/lib/utils/effective-partner-code';
+import { isAbortError } from '@/lib/utils/error-helpers';
 import type { FederationBankRedirectResponse } from '@/types/wecredit';
 
 export interface FederationBankRedirectResult {
@@ -23,31 +24,16 @@ type FederationBankPollAttemptResult =
   | { type: 'pending' }
   | { type: 'error'; error: string };
 
-function parseStatusCode(statusCode: FederationBankRedirectResponse['statusCode']): number | undefined {
-  if (typeof statusCode === 'number') {
-    return statusCode;
-  }
-  if (typeof statusCode === 'string') {
-    const parsed = Number.parseInt(statusCode, 10);
-    return Number.isNaN(parsed) ? undefined : parsed;
-  }
-  return undefined;
-}
-
 function parseFederationBankRedirectResponse(
   json: FederationBankRedirectResponse,
 ): FederationBankPollAttemptResult {
-  const statusCodeNum = parseStatusCode(json.statusCode);
+  const statusCodeNum =
+    typeof json.statusCode === 'string'
+      ? Number.parseInt(json.statusCode, 10)
+      : json.statusCode;
 
   if (statusCodeNum === 200 && json.utmLink) {
     return { type: 'success', utmLink: json.utmLink };
-  }
-
-  if (statusCodeNum === 2006) {
-    return {
-      type: 'error',
-      error: json.statusMessage ?? 'Unable to start Federal Bank journey.',
-    };
   }
 
   return { type: 'pending' };
@@ -102,9 +88,6 @@ async function fetchFederationBankRedirectAttempt(
   }
 }
 
-/**
- * Polls Federal Bank redirect until `statusCode: 200` with `utmLink`, for at least 30 seconds.
- */
 export async function pollFederationBankRedirect(
   mobile: string,
   authorization?: string,
@@ -131,7 +114,7 @@ export async function pollFederationBankRedirect(
     try {
       attempt = await fetchFederationBankRedirectAttempt(mobile, authorization, signal);
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (isAbortError(error)) {
         return {
           success: false,
           error: 'Request cancelled',
@@ -153,8 +136,7 @@ export async function pollFederationBankRedirect(
     }
 
     const elapsedMs = Date.now() - startedAt;
-    const hasReachedMinPollDuration = elapsedMs >= FEDERALBANK_REDIRECT_MIN_POLL_MS;
-    if (hasReachedMinPollDuration && elapsedMs >= FEDERALBANK_REDIRECT_MAX_POLL_MS) {
+    if (elapsedMs >= FEDERALBANK_REDIRECT_MIN_POLL_MS && elapsedMs >= FEDERALBANK_REDIRECT_MAX_POLL_MS) {
       return {
         success: false,
         error: 'Federal Bank redirect is taking longer than expected. Please try again.',
@@ -170,7 +152,7 @@ export async function pollFederationBankRedirect(
     try {
       await waitForPollInterval(intervalMs, signal);
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (isAbortError(error)) {
         return {
           success: false,
           error: 'Request cancelled',
