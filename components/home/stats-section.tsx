@@ -8,13 +8,13 @@ interface StatItem {
 const stats: StatItem[] = [
   {
     id: 'users',
-    value: '180K',
+    value: '500K',
     suffix: ' +',
     label: 'Satisfied Users',
   },
   {
     id: 'disbursal',
-    value: '1000 Cr',
+    value: '2500 Cr',
     suffix: '+',
     label: 'Total Disbursal',
   },
