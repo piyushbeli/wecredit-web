@@ -82,4 +82,9 @@ export const IMAGES = {
   PARTNERS: {
     BASE_PATH: `${BUCKET_IMAGE_URL}/partners`,
   },
+  FEDERATION_BANK_REDIRECT: {
+    WECREDIT_LOGO: '/assets/images/offers/wecredit-icon.png',
+    FEDERAL_BANK_LOGO: '/assets/images/offers/federation-bank-redirect-federal-bank-logo.png',
+    PROGRESS: '/assets/images/offers/federation-bank-redirect-progress.svg',
+  },
 } as const;

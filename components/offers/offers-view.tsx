@@ -25,11 +25,13 @@ import { STORAGE_AUTH_TOKEN, STORAGE_MOBILE } from '@/lib/constants/api-keys';
 import { ActionButton, PageHeader } from '@/components/shared';
 import { useOfferStore } from '@/stores/offer-store';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
-import { isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
+import { isFederationBank, isUpswingRedirectAllowed, mapingLenderNameToLenderCode, parseAmountToNumber } from '@/lib/utils/common-helper';
 import { useInfoSearchParams } from '@/hooks/use-info-search-params';
 import { useUrlParamsStore } from '@/stores/url-params-store';
 import { pushOfferpageEvent } from '@/lib/gtm';
 import { cn } from '@/lib/utils';
+import { useFederationBankRedirect } from '@/hooks/use-federation-bank-redirect';
+import { FederationBankRedirectOverlay } from '@/components/offers/federation-bank-redirect-overlay';
 
 const OFFER_CONTENT_STATUS = {
   ALL_OFFERS: 'all-offers',
@@ -66,6 +68,12 @@ const resolveOfferContentStatus = (
 
 export const OffersView = () => {
   const router = useRouter();
+  const {
+    redirectState,
+    errorMessage,
+    handleFederationBankRedirect,
+    dismissFederationBankRedirect,
+  } = useFederationBankRedirect();
   const { triggerApplyFlow } = useLoanApplicationStore();
   const reset = useOfferStore((state) => state.reset);
   const declaredSalary = useOfferStore((state) => state.declaredSalary);
@@ -179,6 +187,7 @@ export const OffersView = () => {
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const offerLenderName = offer.lenderName?.toLowerCase();
     const isUpswingRedirectAllowedLender = isUpswingRedirectAllowed(offerLenderName);
+    const isFederationBankLender = isFederationBank(offerLenderName);
     // For non-INITIATED offers in explore screen, navigate to status page
     if (offer.wcStatus !== 'INITIATED') {
       router.push(buildOffersPathWithQuery('/offers/status', searchParams));
@@ -190,6 +199,11 @@ export const OffersView = () => {
     const token: string | undefined = getCookie(STORAGE_AUTH_TOKEN) as string | undefined;
 
     if (!mobile) {
+      return;
+    }
+
+    if (isFederationBankLender) {
+      void handleFederationBankRedirect();
       return;
     }
 
@@ -459,6 +473,11 @@ export const OffersView = () => {
 
   return (
     <div className="min-h-screen ">
+      <FederationBankRedirectOverlay
+        state={redirectState}
+        errorMessage={errorMessage}
+        onDismiss={dismissFederationBankRedirect}
+      />
       <PageHeader title="Offers for you" onBack={handleGoBack} />
 
       {/* Recently Clicked Offers Carousel - At the top */}

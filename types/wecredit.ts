@@ -175,3 +175,11 @@ export type LenderHandlingResult =
   | { type: 'existing'; offer: LenderOfferStatus }     // wcStatus != INITIATED
   | { type: 'not_found'; lenderName: string }          // Lender not in offer list
   | { type: 'no_offers' };                             // No offers exist
+
+/** Federal Bank redirect forward API success payload */
+export interface FederationBankRedirectResponse {
+  statusCode?: number | string;
+  statusMessage?: string;
+  leadId?: string;
+  utmLink?: string;
+}
