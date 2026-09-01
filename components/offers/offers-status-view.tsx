@@ -20,6 +20,9 @@ import { useSearchParams } from 'next/navigation';
 import { useLoanApplicationStore } from '@/stores/loan-application-store';
 import { buildOffersPathClearingLenderFilter, buildOffersPathWithQuery } from '@/lib/utils/offers-navigation';
 import { useUrlParamsStore } from '@/stores/url-params-store';
+import { isFederationBank } from '@/lib/utils/common-helper';
+import { useFederationBankRedirect } from '@/hooks/use-federation-bank-redirect';
+import { FederationBankRedirectOverlay } from '@/components/offers/federation-bank-redirect-overlay';
 
 
 /**
@@ -28,6 +31,12 @@ import { useUrlParamsStore } from '@/stores/url-params-store';
  */
 export const OffersStatusView = () => {
   const router = useRouter();
+  const {
+    redirectState,
+    errorMessage,
+    handleFederationBankRedirect,
+    dismissFederationBankRedirect,
+  } = useFederationBankRedirect();
 const {partner} = useUrlParamsStore()
   const searchParams = useSearchParams();
   const { statusOffers, isLoading, error, fetchOffers, shouldTriggerApply, reHitLenders, isReHitting } = useOffers();
@@ -50,6 +59,7 @@ useEffect(() => {
   const handleOfferClick = (offer: LenderOfferStatus): void => {
     const utmLink: string | undefined = offer.utmLink;
     const offerLenderName = offer.lenderName?.toLowerCase();
+    const isFederationBankLender = isFederationBank(offerLenderName || '');
     const isLntOffer = offerLenderName === 'lnt' || offerLenderName === 'upswing_lnt';
     if (!utmLink) {
       return;
@@ -65,6 +75,11 @@ useEffect(() => {
 
     if (mobile && isLntOffer) {
       void notifyForwardNavigationEvent(mobile, utmLink);
+    }
+
+    if (isFederationBankLender) {
+      void handleFederationBankRedirect();
+      return;
     }
     window.open(utmLink, '_blank'); 
 
@@ -131,6 +146,11 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen">
+      <FederationBankRedirectOverlay
+        state={redirectState}
+        errorMessage={errorMessage}
+        onDismiss={dismissFederationBankRedirect}
+      />
       <PageHeader title="Loan Status"  isOfferStatus={true} onBack={handleGoBack} />
       {hasStatusOffers && <OffersHero eligibleAmount="₹1,00,000" offerCount={statusOffers.length} />}
 

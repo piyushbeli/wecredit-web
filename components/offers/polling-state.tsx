@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PollingLoader } from "@/components/offers/polling-loader";
 
 export const PollingState = ({ message }: { message?: string }) => {
   const defaultMessage = "Searching for best offers";
@@ -32,19 +33,7 @@ export const PollingState = ({ message }: { message?: string }) => {
 
   return (
     <div className="px-4 py-12 text-center">
-      <div className="relative w-24 h-24 mx-auto mb-12">
-        <div className="absolute inset-0 rounded-full border-4 border-blue-100 animate-ping" />
-
-        <div className="relative w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
-          {/* ✅ Show search icon only when NO custom message */}
-          {!hasCustomMessage && (
-            <span className="text-5xl animate-bounce">🔍</span>
-          )}
-          {hasCustomMessage && (
-             <div className="rounded-full w-10 h-10 border-4 border-blue-400 animate-ping" />
-          )}
-        </div>
-      </div>
+      <PollingLoader className="mb-12" showSearchIcon={!hasCustomMessage} />
       <p className="mb-4"></p>
       <h2 className="text-xl font-bold text-gray-900 mb-2">
         {message || defaultMessage}

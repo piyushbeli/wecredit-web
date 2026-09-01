@@ -43,6 +43,10 @@ export const isUpswingRedirectAllowed = (lenderName: string): boolean => {
     return lenderName.toLowerCase() === 'lnt' || lenderName.toLowerCase() === 'upswing_lnt' || lenderName.toLowerCase() === 'upswing_dmi';
 };
 
+export const isFederationBank = (lenderName: string): boolean => {
+    return lenderName.toLowerCase() === 'federalbank';
+};
+
 export function hasMatchingStatusLender(lenders: LenderOfferStatus[], lenderName: string): boolean {
     const normalizedLenderName = normalizeLenderNameForMatch(lenderName);
     if (!normalizedLenderName) {
