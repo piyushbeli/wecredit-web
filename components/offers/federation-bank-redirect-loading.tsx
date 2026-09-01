@@ -31,6 +31,8 @@ export const FederationBankRedirectLoading = (): ReactNode => {
               width={75}
               height={75}
               className="object-contain"
+              // i want to load image quickly by loading image in the background
+              loading="lazy"
             />
           </div>
 
@@ -50,6 +52,7 @@ export const FederationBankRedirectLoading = (): ReactNode => {
               width={75}
               height={75}
               className="object-contain"
+              loading="lazy"
             />
           </div>
         </div>
