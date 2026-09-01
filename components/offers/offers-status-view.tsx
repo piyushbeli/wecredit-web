@@ -147,7 +147,8 @@ useEffect(() => {
   return (
     <div className="min-h-screen">
       <FederationBankRedirectOverlay
-        state={redirectState}
+        // state={redirectState}
+        state="loading"
         errorMessage={errorMessage}
         onDismiss={dismissFederationBankRedirect}
       />

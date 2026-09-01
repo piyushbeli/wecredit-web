@@ -1,8 +1,9 @@
 'use client';
 
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
-import { PollingState } from '@/components/offers/polling-state';
 import { ActionButton } from '@/components/shared';
+import { FederationBankRedirectLoading } from '@/components/offers/federation-bank-redirect-loading';
+import { FEDERATION_BANK_REDIRECT_COPY } from '@/lib/constants/federation-bank-redirect';
 import type { FederationBankRedirectOverlayProps } from '@/components/offers/federation-bank-redirect-overlay.types';
 
 export const FederationBankRedirectOverlay = ({
@@ -18,12 +19,11 @@ export const FederationBankRedirectOverlay = ({
   }
 
   if (state === 'loading') {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50">
-        <PollingState message="Connecting you to Federal Bank. This may take up to 30 seconds..." />
-      </div>
-    );
+    return <FederationBankRedirectLoading />;
   }
+
+  const { ERROR_TITLE, ERROR_FALLBACK_MESSAGE, DISMISS_LABEL } = FEDERATION_BANK_REDIRECT_COPY;
+  const resolvedErrorMessage = errorMessage ?? ERROR_FALLBACK_MESSAGE;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50 px-4">
@@ -31,12 +31,10 @@ export const FederationBankRedirectOverlay = ({
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
           <span className="text-4xl">⚠️</span>
         </div>
-        <h2 className="mb-2 text-xl font-bold text-gray-900">Unable to redirect</h2>
-        <p className="mb-6 text-gray-600">
-          {errorMessage ?? 'Something went wrong. Please try again.'}
-        </p>
+        <h2 className="mb-2 text-xl font-bold text-gray-900">{ERROR_TITLE}</h2>
+        <p className="mb-6 text-gray-600">{resolvedErrorMessage}</p>
         <ActionButton type="button" onClick={onDismiss} className="mx-auto w-full max-w-xs">
-          Close
+          {DISMISS_LABEL}
         </ActionButton>
       </div>
     </div>
