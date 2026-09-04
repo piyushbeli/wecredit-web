@@ -5,7 +5,17 @@ import { fetchPagesRoutesFromSheet } from '@/lib/sitemap/fetch-pages-routes-from
 import type { SheetRouteMapping } from '@/lib/sitemap/fetch-sheet-routes';
 import { normalizeSheetSourcePath } from '@/lib/sitemap/fetch-sheet-routes';
 
-/** Merges Pages + Blog + Loan tab rows into one map; Loan tab wins on duplicate sources. */
+const BLOG_DESTINATION_ORIGIN = 'https://blog.wecredit.co.in';
+
+function isBlogDestination(destination: string): boolean {
+  try {
+    return new URL(destination).origin === BLOG_DESTINATION_ORIGIN;
+  } catch {
+    return false;
+  }
+}
+
+/** Merges Blog + Loan rows, plus Pages rows that point to the blog origin. */
 export async function fetchProxySheetRoutes(): Promise<SheetRouteMapping[]> {
   const requestOptions = {
     requestTimeoutMs: GOOGLE_SHEET_ROUTES.PROXY_REQUEST_TIMEOUT_MS,
@@ -18,7 +28,7 @@ export async function fetchProxySheetRoutes(): Promise<SheetRouteMapping[]> {
   const routesBySource = new Map<string, SheetRouteMapping>();
   for (const route of pagesRoutes) {
     const source = normalizeSheetSourcePath(route.source);
-    if (source && route.destination) {
+    if (source && isBlogDestination(route.destination)) {
       routesBySource.set(source, route);
     }
   }
