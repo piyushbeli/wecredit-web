@@ -24,11 +24,20 @@ export const getSheetExportUrl = (gid: string): string => {
   return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ROUTES.SHEET_ID}/export?format=csv&gid=${gid}`;
 };
 
+function extractSourcePath(value: string): string {
+  try {
+    const url = new URL(value);
+    return url.pathname;
+  } catch {
+    return value;
+  }
+}
+
 /**
  * Ensures path has leading and trailing slashes (matches next.config trailingSlash: true).
  */
 export const normalizeSheetSourcePath = (path: string): string => {
-  const trimmed = path.trim();
+  const trimmed = extractSourcePath(path.trim());
   if (!trimmed) return '';
   const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   if (withLeadingSlash === '/') return '/';
